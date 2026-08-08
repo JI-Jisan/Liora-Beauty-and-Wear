@@ -1,0 +1,23 @@
+Project Name: Jisan Trends
+
+Frontend:
+- Next.js
+- Customer website
+- Category filter
+- More dropdown
+- Cart
+- Checkout without login
+
+Backend:
+- Node.js
+- Express.js
+- MongoDB
+
+Admin Panel:
+- Admin login
+- Add/edit/delete category
+- Add/edit/delete product
+- Upload product image
+- Update moving offer text
+- Manage branding
+- View orders

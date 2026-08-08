@@ -1,0 +1,17 @@
+Main Features
+
+1. Big branding
+2. Logo image
+3. Subtitle
+4. Moving offer text
+5. Category with More dropdown
+6. Product upload
+7. Real price and offer price
+8. Discount badge
+9. Stock status
+10. Cart system
+11. Checkout without login
+12. Delivery charge option
+13. Order management
+14. Admin login
+15. Category management
