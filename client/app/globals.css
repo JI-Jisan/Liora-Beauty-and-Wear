@@ -1202,15 +1202,19 @@ button {
   display: none;
   background: #ffffff;
   border-top: 1px solid #f1f5f9;
-  padding: 8px 12px;
+  padding: 10px 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .jt-mobile-nav-inner {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  padding-bottom: 4px;
 }
 
 .jt-mobile-nav-inner::-webkit-scrollbar {
@@ -1221,12 +1225,13 @@ button {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   color: #0f172a;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
   text-decoration: none;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
@@ -1238,13 +1243,27 @@ button {
     display: block !important;
   }
 
+  .jt-header-main-row {
+    padding: 10px 14px !important;
+  }
+
+  .jt-header-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
   .jt-logo-corner img {
-    height: 38px !important;
+    height: 54px !important;
   }
 
   .jt-cart-top-btn {
-    padding: 8px 14px !important;
-    font-size: 12px !important;
+    margin-left: auto !important;
+    padding: 10px 18px !important;
+    font-size: 13px !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
   }
 }
 

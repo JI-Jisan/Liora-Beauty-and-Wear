@@ -7,7 +7,7 @@ export default function LioraLogo({ className = "", style = {} }) {
       alt="LIORA Beauty & Wear Logo"
       className={`jt-liora-logo-img ${className}`}
       style={{
-        height: "65px",
+        height: "58px",
         width: "auto",
         objectFit: "contain",
         display: "block",

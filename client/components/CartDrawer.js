@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CartDrawer({
@@ -11,6 +12,22 @@ export default function CartDrawer({
   onRemove,
 }) {
   const router = useRouter();
+
+  // Android Hardware Back Button Handling
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.history.pushState({ cartOpen: true }, "");
+
+    const handlePopState = () => {
+      onClose();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [isOpen, onClose]);
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.offerPrice * item.quantity,
@@ -40,7 +57,7 @@ export default function CartDrawer({
               <div className="jt-cart-item-info">
                 <h4>{item.name}</h4>
                 <p>{item.offerPrice} Tk</p>
-                <p>Category: {item.category?.name || "No Category"}</p>
+                <p>Category: {typeof item.category === "object" ? item.category?.name : (item.category || "Beauty & Wear")}</p>
               </div>
 
               <div className="jt-cart-actions">
@@ -63,17 +80,16 @@ export default function CartDrawer({
       </div>
 
       <div className="jt-cart-footer">
-        <h4>Total: {total} Tk</h4>
+        <p className="jt-total">
+          Total: <span>{total} Tk</span>
+        </p>
+
         <button
           className="jt-checkout-btn"
           onClick={goToCheckout}
           disabled={cartItems.length === 0}
-          style={{
-            opacity: cartItems.length === 0 ? 0.6 : 1,
-            cursor: cartItems.length === 0 ? "not-allowed" : "pointer",
-          }}
         >
-          Go to Checkout
+          Proceed to Checkout
         </button>
       </div>
     </div>
