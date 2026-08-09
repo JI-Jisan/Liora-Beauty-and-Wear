@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import MarqueeBar from "../components/MarqueeBar";
 import Hero from "../components/Hero";
+import FeaturedCategories from "../components/FeaturedCategories";
 import ProductGrid from "../components/ProductGrid";
 import CartDrawer from "../components/CartDrawer";
 import WhatsAppButton from "../components/WhatsAppButton";
@@ -77,58 +78,42 @@ export default function HomePage() {
   const addToCart = (product) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item._id === product._id);
-
-      let updatedCart;
-
       if (existing) {
-        updatedCart = prev.map((item) =>
+        return prev.map((item) =>
           item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
-      } else {
-        updatedCart = [...prev, { ...product, quantity: 1 }];
       }
-
-      localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-      return updatedCart;
+      return [...prev, { ...product, quantity: 1 }];
     });
-
-    setIsCartOpen(true);
   };
 
   const increaseQty = (id) => {
-    setCartItems((prev) => {
-      const updatedCart = prev.map((item) =>
+    setCartItems((prev) =>
+      prev.map((item) =>
         item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-      );
-
-      localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-      return updatedCart;
-    });
+      )
+    );
   };
 
   const decreaseQty = (id) => {
-    setCartItems((prev) => {
-      const updatedCart = prev
+    setCartItems((prev) =>
+      prev
         .map((item) =>
           item._id === id ? { ...item, quantity: item.quantity - 1 } : item
         )
-        .filter((item) => item.quantity > 0);
-
-      localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-      return updatedCart;
-    });
+        .filter((item) => item.quantity > 0)
+    );
   };
 
   const removeItem = (id) => {
-    setCartItems((prev) => {
-      const updatedCart = prev.filter((item) => item._id !== id);
-
-      localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-      return updatedCart;
-    });
+    setCartItems((prev) => prev.filter((item) => item._id !== id));
   };
+
+  useEffect(() => {
+    localStorage.setItem("jt_cart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -162,12 +147,15 @@ export default function HomePage() {
       <PromoBanner promoSlides={siteSettings.promoSlides} />
       
       <FlashSale
-  flashTitle={siteSettings.flashTitle}
-  flashSubtitle={siteSettings.flashSubtitle}
-  flashButtonText={siteSettings.flashButtonText}
-  flashButtonLink={siteSettings.flashButtonLink}
-  flashDurationHours={siteSettings.flashDurationHours}
+        flashTitle={siteSettings.flashTitle}
+        flashSubtitle={siteSettings.flashSubtitle}
+        flashButtonText={siteSettings.flashButtonText}
+        flashButtonLink={siteSettings.flashButtonLink}
+        flashDurationHours={siteSettings.flashDurationHours}
       />
+
+      {/* Featured Circle Category Showcase (Nirnita Style) */}
+      <FeaturedCategories />
 
       <section id="shop-products">
         <ProductGrid
