@@ -170,7 +170,7 @@ export default function Header({
               <span className="jt-search-icon">🔍</span>
               <input
                 type="text"
-                placeholder="Search cosmetics, perfumes, watches & fashion..."
+                placeholder="Search products, perfumes, watches..."
                 value={currentSearchValue}
                 onFocus={() => setIsSearchOpen(true)}
                 onChange={(e) => {

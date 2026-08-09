@@ -1164,9 +1164,11 @@ button {
   background: #ffffff;
   border: 2px solid #ff4d6d;
   border-radius: 999px;
-  padding: 4px 6px 4px 18px;
+  padding: 3px 3px 3px 14px;
   box-shadow: 0 4px 16px rgba(255, 77, 109, 0.12);
   transition: all 0.25s ease;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .jt-search-input-wrapper:focus-within,
@@ -1177,28 +1179,33 @@ button {
 
 .jt-search-icon {
   font-size: 15px;
-  margin-right: 8px;
+  margin-right: 6px;
   color: #64748b;
+  flex-shrink: 0;
 }
 
 .jt-search-input-wrapper input {
   flex: 1;
+  min-width: 0;
   border: none;
   outline: none;
-  font-size: 14px;
+  font-size: 13px;
   color: #0f172a;
   background: transparent;
+  padding: 6px 4px;
 }
 
 .jt-search-submit-btn {
+  flex-shrink: 0;
   border: none;
   background: #0f172a;
   color: #ffffff;
-  padding: 8px 18px;
+  padding: 8px 16px;
   border-radius: 999px;
   font-weight: 800;
   font-size: 13px;
   cursor: pointer;
+  white-space: nowrap;
   transition: background 0.2s ease;
 }
 
