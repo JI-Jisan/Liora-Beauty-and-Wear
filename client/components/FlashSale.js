@@ -17,15 +17,26 @@ export default function FlashSale({
   });
 
   useEffect(() => {
-    const targetTime = new Date();
-    targetTime.setHours(targetTime.getHours() + flashDurationHours);
+    let targetTimestamp;
+    try {
+      const storedTime = localStorage.getItem("jt_flash_end_timestamp");
+      const now = Date.now();
 
-    const interval = setInterval(() => {
-      const now = new Date();
-      const difference = targetTime - now;
+      if (storedTime && Number(storedTime) > now) {
+        targetTimestamp = Number(storedTime);
+      } else {
+        targetTimestamp = now + flashDurationHours * 60 * 60 * 1000;
+        localStorage.setItem("jt_flash_end_timestamp", String(targetTimestamp));
+      }
+    } catch (e) {
+      targetTimestamp = Date.now() + flashDurationHours * 60 * 60 * 1000;
+    }
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const difference = targetTimestamp - now;
 
       if (difference <= 0) {
-        clearInterval(interval);
         setTimeLeft({
           hours: "00",
           minutes: "00",
@@ -47,7 +58,10 @@ export default function FlashSale({
       ).padStart(2, "0");
 
       setTimeLeft({ hours, minutes, seconds });
-    }, 1000);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
   }, [flashDurationHours]);

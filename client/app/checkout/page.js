@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const [cartItems, setCartItems] = useState([]);
   const [deliveryCharge, setDeliveryCharge] = useState(65);
   const [message, setMessage] = useState("");
@@ -65,7 +68,7 @@ export default function CheckoutPage() {
   console.log("Sending order:", orderData);
 
   try {
-    const res = await fetch("http://localhost:5001/api/orders", {
+    const res = await fetch(`${API_BASE_URL}/api/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -80,16 +83,11 @@ export default function CheckoutPage() {
       throw new Error(result.message || "Order failed");
     }
 
-    setMessage("Order placed successfully");
     localStorage.removeItem("jt_cart");
     setCartItems([]);
 
-    setFormData({
-      customerName: "",
-      phone: "",
-      address: "",
-      note: "",
-    });
+    const redirectId = result.orderNumber || result._id;
+    router.push(`/order-success/${redirectId}`);
   } catch (error) {
     console.error("Order submit error:", error);
     setMessage(error.message || "Something went wrong");

@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import AdminOrders from "@/components/AdminOrders";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function AdminPage() {
 
   const loadCategories = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/categories");
+      const res = await fetch(`${API_BASE_URL}/api/categories`);
       const data = await res.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -64,7 +64,7 @@ export default function AdminPage() {
 
   const loadProducts = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/products");
+      const res = await fetch(`${API_BASE_URL}/api/products`);
       const data = await res.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -74,7 +74,7 @@ export default function AdminPage() {
 
   const loadSettings = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/settings");
+      const res = await fetch(`${API_BASE_URL}/api/settings`);
       const data = await res.json();
 
       setSettings({
@@ -153,11 +153,9 @@ export default function AdminPage() {
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5001/api/categories", {
+      const res = await fetch(`${API_BASE_URL}/api/categories`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(categoryForm),
       });
 
@@ -217,11 +215,9 @@ export default function AdminPage() {
 
   const savePromoSlides = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/settings", {
+      const res = await fetch(`${API_BASE_URL}/api/settings`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(settings),
       });
 
@@ -249,8 +245,9 @@ export default function AdminPage() {
         const imageData = new FormData();
         imageData.append("image", imageFile);
 
-        const uploadRes = await fetch("http://localhost:5001/api/products/upload", {
+        const uploadRes = await fetch(`${API_BASE_URL}/api/products/upload`, {
           method: "POST",
+          headers: getAuthHeaders(true),
           body: imageData,
         });
 
@@ -271,16 +268,14 @@ export default function AdminPage() {
       };
 
       const url = editingId
-        ? `http://localhost:5001/api/products/${editingId}`
-        : "http://localhost:5001/api/products";
+        ? `${API_BASE_URL}/api/products/${editingId}`
+        : `${API_BASE_URL}/api/products`;
 
       const method = editingId ? "PUT" : "POST";
 
       const productRes = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(finalProduct),
       });
 
@@ -303,8 +298,9 @@ export default function AdminPage() {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/products/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
       });
 
       const result = await res.json();
@@ -342,7 +338,7 @@ export default function AdminPage() {
   return (
     <main id="top" className="jt-admin-dashboard">
       <aside className="jt-admin-sidebar">
-        <h2>Jisan Trends</h2>
+        <h2>LIORA Beauty & Wear</h2>
         <ul>
           <li onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })}>
             Dashboard
@@ -552,7 +548,7 @@ export default function AdminPage() {
                     ? product.image.startsWith("http")
                       ? product.image
                       : product.image.startsWith("/uploads")
-                      ? `http://localhost:5001${product.image}`
+                      ? `${API_BASE_URL}${product.image}`
                       : `/images/${product.image}`
                     : null;
 

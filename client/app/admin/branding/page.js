@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
 
 export default function BrandingPage() {
   const [settings, setSettings] = useState({
@@ -13,7 +14,7 @@ export default function BrandingPage() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/settings")
+    fetch(`${API_BASE_URL}/api/settings`)
       .then((res) => res.json())
       .then((data) =>
         setSettings({
@@ -73,11 +74,9 @@ export default function BrandingPage() {
 
   const saveSettings = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/settings", {
+      const res = await fetch(`${API_BASE_URL}/api/settings`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(settings),
       });
 

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import CartDrawer from "@/components/CartDrawer";
+import { API_BASE_URL } from "@/lib/api";
 
 const DEMO_PRODUCTS = [
   {
@@ -85,37 +86,40 @@ export default function ProductDetailsPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const [siteSettings, setSiteSettings] = useState({
-    brandName: "Jisan Trends",
-    brandSubtitle:
-      "Trusted store for perfume, watches, fan light and trendy products",
+    brandName: "LIORA Beauty & Wear",
+    brandSubtitle: "Beauty. Style. You.",
   });
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/settings")
+    fetch(`${API_BASE_URL}/api/settings`)
       .then((res) => res.json())
       .then((data) =>
         setSiteSettings({
-          brandName: data.brandName || "Jisan Trends",
-          brandSubtitle:
-            data.brandSubtitle ||
-            "Trusted store for perfume, watches, fan light and trendy products",
+          brandName: data.brandName || "LIORA Beauty & Wear",
+          brandSubtitle: data.brandSubtitle || "Beauty. Style. You.",
         })
       )
       .catch((err) => console.error(err));
   }, []);
 
   useEffect(() => {
-  const savedCart = JSON.parse(localStorage.getItem("jt_cart")) || [];
-  setCartItems(savedCart);
+    Promise.resolve().then(() => {
+      try {
+        const savedCart = JSON.parse(localStorage.getItem("jt_cart")) || [];
+        setCartItems(savedCart);
 
-  const totalCount = savedCart.reduce((sum, item) => sum + item.quantity, 0);
-  setCartCount(totalCount);
-}, []);
+        const totalCount = savedCart.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(totalCount);
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!params?.id) return;
 
-    fetch("http://localhost:5001/api/products")
+    fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
         const productList = Array.isArray(data) && data.length > 0 ? data : DEMO_PRODUCTS;
@@ -170,8 +174,22 @@ export default function ProductDetailsPage() {
 };
 
 const handleBuyNow = () => {
-  const buyNowCart = [{ ...product, quantity: 1 }];
-  localStorage.setItem("jt_cart", JSON.stringify(buyNowCart));
+  const existingCart = JSON.parse(localStorage.getItem("jt_cart")) || [];
+  const existingItem = existingCart.find((item) => item._id === product._id);
+
+  let updatedCart;
+  if (existingItem) {
+    updatedCart = existingCart.map((item) =>
+      item._id === product._id
+        ? { ...item, quantity: item.quantity + 1 }
+        : item
+    );
+  } else {
+    updatedCart = [...existingCart, { ...product, quantity: 1 }];
+  }
+
+  localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
+  setCartItems(updatedCart);
   router.push("/checkout");
 };
 
@@ -231,7 +249,7 @@ const removeItem = (id) => {
     ? product.image.startsWith("http")
       ? product.image
       : product.image.startsWith("/uploads")
-      ? `http://localhost:5001${product.image}`
+      ? `${API_BASE_URL}${product.image}`
       : `/images/${product.image}`
     : null;
 
@@ -252,7 +270,7 @@ const removeItem = (id) => {
         onClose={() => setIsCartOpen(false)}
         onIncrease={increaseQty}
         onDecrease={decreaseQty}
-  o     nRemove={removeItem}
+        onRemove={removeItem}
      />
 
       <section className="jt-details-top">
@@ -368,8 +386,10 @@ const removeItem = (id) => {
             ) : (
               relatedProducts.map((item) => {
                 const relatedImage = item.image
-                  ? item.image.startsWith("/uploads")
-                    ? `http://localhost:5001${item.image}`
+                  ? item.image.startsWith("http")
+                    ? item.image
+                    : item.image.startsWith("/uploads")
+                    ? `${API_BASE_URL}${item.image}`
                     : `/images/${item.image}`
                   : null;
 

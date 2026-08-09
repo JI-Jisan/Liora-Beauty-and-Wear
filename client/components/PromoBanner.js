@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function PromoBanner({ promoSlides = [] }) {
   const slides =
@@ -33,8 +34,10 @@ export default function PromoBanner({ promoSlides = [] }) {
   const currentSlide = slides[activeIndex];
 
   const imageSrc = currentSlide.image
-    ? currentSlide.image.startsWith("/uploads")
-      ? `http://localhost:5001${currentSlide.image}`
+    ? currentSlide.image.startsWith("http")
+      ? currentSlide.image
+      : currentSlide.image.startsWith("/uploads")
+      ? `${API_BASE_URL}${currentSlide.image}`
       : currentSlide.image
     : "";
 

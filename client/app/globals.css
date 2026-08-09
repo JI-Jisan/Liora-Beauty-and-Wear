@@ -6,9 +6,9 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f7fb;
-  color: #1e2e4a;
+  font-family: var(--font-geist-sans), "Outfit", "Segoe UI", sans-serif;
+  background: #faf7f5;
+  color: #1e293b;
 }
 
 a {
@@ -48,26 +48,31 @@ button {
   width: 72px;
   height: 72px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #1f9d67, #223a67);
+  background: linear-gradient(135deg, #ff4d6d, #e84a5f);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 20px rgba(255, 77, 109, 0.25);
 }
 
 .jt-logo-text {
   margin: 0;
-  font-size: 42px;
-  line-height: 1;
-  color: #223a67;
+  font-size: 34px;
+  line-height: 1.1;
+  color: #ff4d6d;
+  font-weight: 900;
+  font-family: var(--font-geist-sans), Georgia, serif;
 }
 
 .jt-subtitle {
-  margin: 6px 0 0;
-  font-size: 15px;
-  color: #5b6472;
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #64748b;
+  font-style: italic;
 }
 
 .jt-nav {
@@ -80,10 +85,11 @@ button {
 /* Marquee */
 .jt-marquee {
   overflow: hidden;
-  background: #223a67;
+  background: linear-gradient(90deg, #ff4d6d, #e84a5f);
   color: white;
   padding: 12px 0;
   white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(255, 77, 109, 0.15);
 }
 
 .jt-marquee-track {
@@ -110,8 +116,9 @@ button {
 /* Hero */
 .jt-hero {
   text-align: center;
-  padding: 60px 20px;
-  background: linear-gradient(to right, #e5f6ee, #f7fbff);
+  padding: 70px 20px;
+  background: linear-gradient(135deg, #fff0f3 0%, #fff7f8 50%, #faf7f5 100%);
+  border-bottom: 1px solid #ffe4e8;
 }
 
 .jt-hero-badge {
@@ -119,23 +126,26 @@ button {
   padding: 10px 22px;
   border-radius: 999px;
   background: white;
-  border: 2px solid #b8e3cb;
-  color: #1f9d67;
-  font-weight: 700;
+  border: 1px solid #ffccd5;
+  color: #ff4d6d;
+  font-weight: 800;
   margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(255, 77, 109, 0.1);
 }
 
 .jt-hero h2 {
   margin: 0;
-  font-size: 54px;
-  color: #223a67;
+  font-size: 48px;
+  color: #0f172a;
+  font-family: Georgia, serif;
 }
 
 .jt-hero p {
-  max-width: 700px;
+  max-width: 720px;
   margin: 18px auto 0;
   font-size: 18px;
-  color: #4e5968;
+  color: #475569;
+  line-height: 1.6;
 }
 
 .jt-hero-buttons {
@@ -148,17 +158,20 @@ button {
 
 .jt-hero-buttons button {
   border: none;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
-  padding: 14px 24px;
-  border-radius: 10px;
+  padding: 14px 26px;
+  border-radius: 12px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
+  box-shadow: 0 8px 20px rgba(255, 77, 109, 0.25);
+  transition: transform 0.2s ease;
 }
 
 .jt-hero-buttons .secondary-btn {
-  background: #223a67;
+  background: #0f172a;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
 }
 
 /* Category bar */
@@ -201,9 +214,9 @@ button {
 }
 
 .jt-cat-btn.active {
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
-  border-color: #1f9d67;
+  border-color: #ff4d6d;
 }
 
 /* Products */
@@ -221,7 +234,8 @@ button {
 .jt-section-head h3 {
   margin: 0;
   font-size: 38px;
-  color: #223a67;
+  color: #0f172a;
+  font-family: Georgia, serif;
 }
 
 .jt-section-head p {
@@ -258,7 +272,7 @@ button {
   position: absolute;
   top: 28px;
   right: 28px;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
   font-size: 12px;
   font-weight: 700;
@@ -269,14 +283,14 @@ button {
 .jt-product-card h4 {
   margin: 16px 0 8px;
   font-size: 22px;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-price {
   font-size: 26px;
   font-weight: 800;
   margin: 0;
-  color: #1f9d67;
+  color: #ff4d6d;
 }
 
 .jt-price span {
@@ -295,12 +309,13 @@ button {
 .jt-product-card button {
   width: 100%;
   border: none;
-  background: #223a67;
+  background: #ff4d6d;
   color: white;
   padding: 13px 16px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.2);
 }
 
 /* Responsive */
@@ -390,7 +405,7 @@ button {
 
 .jt-admin-form button {
   border: none;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
   padding: 14px 18px;
   border-radius: 10px;
@@ -413,7 +428,7 @@ button {
 
 .jt-admin-card h3 {
   margin-top: 0;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-admin-card p {
@@ -439,7 +454,7 @@ button {
   margin-top: 0;
   font-size: 38px;
   text-align: center;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-checkout-box p {
@@ -500,12 +515,12 @@ button {
 
 .jt-delivery-row strong {
   white-space: nowrap;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-checkout-form button {
   border: none;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
   padding: 15px 18px;
   border-radius: 10px;
@@ -534,11 +549,11 @@ button {
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: 100vh;
-  background: #f5f7fb;
+  background: #faf7f5;
 }
 
 .jt-admin-sidebar {
-  background: #223a67;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   color: white;
   padding: 30px 20px;
 }
@@ -570,7 +585,7 @@ button {
 .jt-admin-top h1 {
   margin: 0;
   font-size: 40px;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-admin-top p {
@@ -599,7 +614,7 @@ button {
 .jt-admin-panel h3 {
   margin-top: 0;
   margin-bottom: 16px;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-admin-panel-form {
@@ -625,7 +640,7 @@ button {
 
 .jt-admin-panel-form button {
   border: none;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
   padding: 14px 18px;
   border-radius: 10px;
@@ -716,19 +731,20 @@ button {
 }
   
 .jt-category-name {
-  color: #223a67;
+  color: #0f172a;
   font-weight: 700;
   margin: 8px 0 14px;
 }
 
 .jt-cart-top-btn {
   border: none;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
   padding: 10px 16px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.2);
 }
 
 .jt-cart-drawer {
@@ -760,7 +776,7 @@ button {
 
 .jt-cart-header h3 {
   margin: 0;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-cart-header button {
@@ -791,7 +807,7 @@ button {
 
 .jt-cart-item-info h4 {
   margin: 0 0 8px;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-cart-item-info p {
@@ -816,7 +832,7 @@ button {
   width: 32px;
   height: 32px;
   border: none;
-  background: #223a67;
+  background: #ff4d6d;
   color: white;
   border-radius: 8px;
   cursor: pointer;
@@ -838,18 +854,19 @@ button {
 
 .jt-cart-footer h4 {
   margin: 0 0 14px;
-  color: #223a67;
+  color: #0f172a;
 }
 
 .jt-checkout-btn {
   width: 100%;
   border: none;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
   padding: 14px 16px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.25);
 }
 
 .jt-header-right {
@@ -1097,21 +1114,23 @@ button {
   width: 72px;
   height: 72px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #1f9d67, #223a67);
+  background: linear-gradient(135deg, #ff4d6d, #e84a5f);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  font-weight: 800;
-  box-shadow: 0 10px 22px rgba(31, 157, 103, 0.18);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: 0 8px 20px rgba(255, 77, 109, 0.25);
 }
 
 .jt-logo-text {
   margin: 0;
   font-size: 28px;
   line-height: 1.1;
-  color: #223a67;
+  color: #ff4d6d;
+  font-weight: 900;
 }
 
 .jt-subtitle {
@@ -1139,7 +1158,7 @@ button {
 }
 
 .jt-search-box input:focus {
-  border-color: #1f9d67;
+  border-color: #ff4d6d;
 }
 
 .jt-nav {
@@ -1150,23 +1169,24 @@ button {
 }
 
 .jt-nav a {
-  color: #223a67;
+  color: #0f172a;
   text-decoration: none;
   font-weight: 700;
 }
 
 .jt-cart-top-btn {
   border: none;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
   padding: 10px 16px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.2);
 }
 
 .jt-hero {
-  background: linear-gradient(180deg, #eaf7f1 0%, #f7fbff 100%);
+  background: linear-gradient(180deg, #fff0f3 0%, #faf7f5 100%);
   padding: 70px 20px 78px;
 }
 
@@ -1181,18 +1201,20 @@ button {
   padding: 10px 22px;
   border-radius: 999px;
   background: white;
-  border: 2px solid #bfe7cf;
-  color: #1f9d67;
-  font-weight: 700;
+  border: 1px solid #ffccd5;
+  color: #ff4d6d;
+  font-weight: 800;
   margin-bottom: 22px;
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.1);
 }
 
 .jt-hero h2 {
   margin: 0;
   font-size: 64px;
   line-height: 1.08;
-  color: #223a67;
+  color: #0f172a;
   letter-spacing: -1px;
+  font-family: Georgia, serif;
 }
 
 .jt-hero p {
@@ -1213,19 +1235,19 @@ button {
 
 .jt-hero-buttons button {
   border: none;
-  background: #1f9d67;
+  background: #ff4d6d;
   color: white;
   padding: 14px 26px;
   border-radius: 12px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 10px 20px rgba(31, 157, 103, 0.14);
+  box-shadow: 0 10px 20px rgba(255, 77, 109, 0.25);
 }
 
 .jt-hero-buttons .secondary-btn {
-  background: #223a67;
-  box-shadow: 0 10px 20px rgba(34, 58, 103, 0.14);
+  background: #0f172a;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.14);
 }
 
 .jt-product-section {
@@ -2072,7 +2094,7 @@ button {
 .jt-promo-inner {
   max-width: 1400px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #223a67, #1f9d67);
+  background: linear-gradient(135deg, #ff4d6d, #e84a5f);
   color: white;
   border-radius: 24px;
   padding: 28px;
@@ -2080,13 +2102,13 @@ button {
   grid-template-columns: 1.2fr 0.8fr;
   gap: 24px;
   align-items: center;
-  box-shadow: 0 16px 34px rgba(34, 58, 103, 0.14);
+  box-shadow: 0 16px 34px rgba(255, 77, 109, 0.25);
 }
 
 .jt-promo-badge {
   display: inline-block;
   background: #fff;
-  color: #1f9d67;
+  color: #ff4d6d;
   padding: 8px 14px;
   border-radius: 999px;
   font-weight: 800;
@@ -2121,7 +2143,7 @@ button {
 .jt-promo-btn {
   display: inline-block;
   background: white;
-  color: #223a67;
+  color: #ff4d6d;
   text-decoration: none;
   padding: 14px 22px;
   border-radius: 12px;
@@ -2274,5 +2296,826 @@ button {
 
   .jt-time-box {
     min-width: 84px;
+  }
+}
+
+/* ==========================================================================
+   Global Root Layout & Sticky Footer Setup
+   ========================================================================== */
+.jt-root-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.jt-content-area {
+  flex: 1;
+}
+
+/* ==========================================================================
+   Footer Component Styling
+   ========================================================================== */
+.jt-footer {
+  background: #101828;
+  color: #eaecf0;
+  margin-top: 60px;
+  font-family: inherit;
+}
+
+.jt-footer-top {
+  padding: 60px 20px;
+  border-bottom: 1px solid #1d2939;
+}
+
+.jt-footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  gap: 40px;
+}
+
+.jt-footer-brand .jt-footer-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.jt-footer-logo-badge {
+  background: linear-gradient(135deg, #ff4d6d, #e84a5f);
+  color: white;
+  font-weight: 800;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.jt-footer-brand h3 {
+  margin: 0;
+  font-size: 24px;
+  color: white;
+}
+
+.jt-footer-desc {
+  color: #98a2b3;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.jt-footer-dbid {
+  display: inline-block;
+  background: rgba(255, 77, 109, 0.15);
+  border: 1px solid rgba(255, 77, 109, 0.4);
+  color: #ff4d6d;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.jt-footer-col h4 {
+  color: white;
+  font-size: 18px;
+  margin: 0 0 20px;
+  position: relative;
+}
+
+.jt-footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.jt-footer-col ul li {
+  margin-bottom: 12px;
+}
+
+.jt-footer-col ul li a {
+  color: #98a2b3;
+  text-decoration: none;
+  font-size: 15px;
+  transition: color 0.2s ease;
+}
+
+.jt-footer-col ul li a:hover {
+  color: #34d399;
+}
+
+.jt-footer-contact-info p {
+  color: #98a2b3;
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.jt-footer-contact-info strong {
+  color: #e4e7ec;
+}
+
+.jt-footer-bottom {
+  padding: 24px 20px;
+  background: #0c111d;
+}
+
+.jt-footer-bottom-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.jt-footer-copy {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.jt-footer-payments {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.jt-pay-pill {
+  background: #1d2939;
+  color: #ce7d;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #d0d5dd;
+}
+
+@media (max-width: 992px) {
+  .jt-footer-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .jt-footer-container {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .jt-footer-bottom-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* ==========================================================================
+   Policy & Legal Pages Styling
+   ========================================================================== */
+.jt-policy-wrapper {
+  padding: 40px 20px;
+  background: #f8fafc;
+  min-height: 70vh;
+}
+
+.jt-policy-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.jt-policy-breadcrumb {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.jt-policy-breadcrumb a {
+  color: #1f9d67;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.jt-policy-title {
+  font-size: 36px;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.jt-policy-subtitle {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0 0 24px;
+}
+
+.jt-policy-date {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0 0 30px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 16px;
+}
+
+.jt-policy-content section {
+  margin-bottom: 30px;
+}
+
+.jt-policy-content h2 {
+  font-size: 22px;
+  color: #1e293b;
+  margin: 0 0 12px;
+}
+
+.jt-policy-content p {
+  color: #334155;
+  line-height: 1.7;
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+
+.jt-policy-content ul {
+  padding-left: 20px;
+  color: #334155;
+  line-height: 1.7;
+}
+
+.jt-policy-content ul li {
+  margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   Contact Page Styling
+   ========================================================================== */
+.jt-contact-wrapper {
+  padding: 40px 20px;
+  background: #f8fafc;
+  min-height: 75vh;
+}
+
+.jt-contact-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.jt-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.jt-contact-card {
+  background: white;
+  padding: 34px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.jt-contact-card h3 {
+  font-size: 22px;
+  color: #0f172a;
+  margin: 0 0 24px;
+}
+
+.jt-contact-item {
+  margin-bottom: 20px;
+}
+
+.jt-contact-item strong {
+  display: block;
+  font-size: 15px;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.jt-contact-item p {
+  margin: 0;
+  font-size: 16px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.jt-contact-whatsapp-box {
+  margin-top: 30px;
+}
+
+.jt-whatsapp-direct-btn {
+  display: block;
+  background: #25d366;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.jt-whatsapp-direct-btn:hover {
+  background: #20ba5a;
+  transform: translateY(-2px);
+}
+
+.jt-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.jt-contact-form input,
+.jt-contact-form textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.jt-contact-form input:focus,
+.jt-contact-form textarea:focus {
+  outline: none;
+  border-color: #1f9d67;
+  box-shadow: 0 0 0 3px rgba(31, 157, 103, 0.15);
+}
+
+.jt-contact-submit-btn {
+  background: #1f9d67;
+  color: white;
+  border: none;
+  padding: 15px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.jt-contact-submit-btn:hover {
+  background: #178053;
+}
+
+.jt-contact-success {
+  text-align: center;
+  padding: 30px 10px;
+}
+
+.jt-contact-success h4 {
+  color: #1f9d67;
+  font-size: 22px;
+  margin: 0 0 10px;
+}
+
+.jt-contact-success p {
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.jt-contact-reset-btn {
+  background: #e2e8f0;
+  color: #334155;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 850px) {
+  .jt-contact-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .jt-policy-container {
+    padding: 24px;
+  }
+}
+
+/* ==========================================================================
+   Order Success & Order Tracking Styling
+   ========================================================================== */
+.jt-success-wrapper,
+.jt-tracking-wrapper {
+  padding: 40px 20px;
+  background: #f8fafc;
+  min-height: 80vh;
+}
+
+.jt-success-container,
+.jt-tracking-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.jt-success-loading,
+.jt-success-error {
+  background: white;
+  padding: 60px 20px;
+  border-radius: 16px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.jt-success-head {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.jt-success-icon-badge {
+  width: 70px;
+  height: 70px;
+  background: #1f9d67;
+  color: white;
+  font-size: 38px;
+  font-weight: 900;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 10px 25px rgba(31, 157, 103, 0.3);
+}
+
+.jt-success-head h1 {
+  font-size: 32px;
+  color: #0f172a;
+  margin: 0 0 10px;
+}
+
+.jt-success-subtitle {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0 0 20px;
+}
+
+.jt-order-number-pill {
+  display: inline-block;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.jt-order-number-pill span {
+  color: #1f9d67;
+}
+
+/* Status Tracker Bar */
+.jt-status-tracker {
+  background: white;
+  padding: 28px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.jt-status-tracker h3 {
+  margin: 0 0 20px;
+  font-size: 18px;
+  color: #334155;
+}
+
+.jt-status-name {
+  color: #1f9d67;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.jt-tracker-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.jt-tracker-steps::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 4px;
+  background: #e2e8f0;
+  z-index: 1;
+}
+
+.jt-tracker-step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.jt-step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid #cbd5e1;
+  color: #64748b;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.jt-tracker-step.completed .jt-step-circle {
+  background: #1f9d67;
+  border-color: #1f9d67;
+  color: white;
+}
+
+.jt-tracker-step.current .jt-step-circle {
+  border-color: #1f9d67;
+  color: #1f9d67;
+  box-shadow: 0 0 0 4px rgba(31, 157, 103, 0.2);
+}
+
+.jt-step-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.jt-tracker-step.completed .jt-step-label,
+.jt-tracker-step.current .jt-step-label {
+  color: #0f172a;
+}
+
+/* Success Grid Cards */
+.jt-success-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.jt-success-card {
+  background: white;
+  padding: 28px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.jt-success-card h3 {
+  margin: 0 0 20px;
+  font-size: 20px;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+.jt-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.jt-info-row span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.jt-info-row strong {
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.jt-summary-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.jt-summary-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.jt-summary-item-row p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.jt-summary-breakdown {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jt-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #475569;
+}
+
+.jt-breakdown-total {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  border-top: 1px solid #cbd5e1;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+.jt-breakdown-total strong {
+  color: #1f9d67;
+}
+
+/* Success Actions */
+.jt-success-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.jt-success-btn {
+  background: #1f9d67;
+  color: white;
+  text-decoration: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.jt-success-btn:hover {
+  background: #178053;
+}
+
+.jt-whatsapp-support-btn {
+  background: #25d366;
+  color: white;
+  text-decoration: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.jt-whatsapp-support-btn:hover {
+  background: #20ba5a;
+}
+
+/* Order Tracking Page Search & Results */
+.jt-tracking-search-card {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.jt-tracking-form {
+  display: flex;
+  gap: 14px;
+}
+
+.jt-tracking-form input {
+  flex: 1;
+  padding: 14px 18px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.jt-tracking-form button {
+  background: #1f9d67;
+  color: white;
+  border: none;
+  padding: 14px 26px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.jt-tracking-error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.jt-tracking-results h2 {
+  font-size: 24px;
+  color: #0f172a;
+  margin: 0 0 20px;
+}
+
+.jt-tracking-order-card {
+  background: white;
+  padding: 28px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.jt-tracking-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 14px;
+}
+
+.jt-tracking-card-header h3 {
+  margin: 0 0 4px;
+  color: #0f172a;
+}
+
+.jt-tracking-card-header p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.jt-status-badge {
+  background: rgba(31, 157, 103, 0.15);
+  color: #1f9d67;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.jt-tracking-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+  background: #f8fafc;
+  padding: 18px;
+  border-radius: 12px;
+}
+
+.jt-tracking-info-col h4 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: #334155;
+}
+
+.jt-tracking-info-col p {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #475569;
+}
+
+@media (max-width: 768px) {
+  .jt-success-grid,
+  .jt-tracking-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .jt-tracking-form {
+    flex-direction: column;
+  }
+
+  .jt-tracker-steps {
+    gap: 12px;
+  }
+
+  .jt-step-label {
+    font-size: 11px;
   }
 }

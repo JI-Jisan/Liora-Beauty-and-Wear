@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 const upload = require("../middleware/upload");
+const adminAuth = require("../middleware/adminAuth");
 
 const DEMO_PRODUCTS = [
   {
@@ -85,20 +86,55 @@ router.get("/", async (req, res) => {
 });
 
 // ADD new product
-router.post("/", async (req, res) => {
+router.post("/", adminAuth, async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const { name, originalPrice, offerPrice, category } = req.body;
+
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return res.status(400).json({ message: "Product name is required" });
+    }
+
+    if (isNaN(originalPrice) || isNaN(offerPrice) || Number(offerPrice) < 0 || Number(originalPrice) < 0) {
+      return res.status(400).json({ message: "Prices must be non-negative numbers" });
+    }
+
+    if (Number(offerPrice) > Number(originalPrice)) {
+      return res.status(400).json({ message: "Offer price cannot exceed original price" });
+    }
+
+    const product = new Product({
+      ...req.body,
+      name: name.trim(),
+      originalPrice: Number(originalPrice),
+      offerPrice: Number(offerPrice),
+      category: category || null,
+    });
+
     await product.save();
     const savedProduct = await Product.findById(product._id).populate("category");
-    res.json(savedProduct);
+    res.status(201).json(savedProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
 // UPDATE product
-router.put("/:id", async (req, res) => {
+router.put("/:id", adminAuth, async (req, res) => {
   try {
+    const { name, originalPrice, offerPrice } = req.body;
+
+    if (name !== undefined && (!name || typeof name !== "string" || !name.trim())) {
+      return res.status(400).json({ message: "Product name cannot be empty" });
+    }
+
+    if (originalPrice !== undefined && (isNaN(originalPrice) || Number(originalPrice) < 0)) {
+      return res.status(400).json({ message: "Original price must be non-negative" });
+    }
+
+    if (offerPrice !== undefined && (isNaN(offerPrice) || Number(offerPrice) < 0)) {
+      return res.status(400).json({ message: "Offer price must be non-negative" });
+    }
+
     const updated = await Product.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -116,7 +152,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE product
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const deleted = await Product.findByIdAndDelete(req.params.id);
 
@@ -131,7 +167,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 // UPLOAD product image
-router.post("/upload", upload.single("image"), (req, res) => {
+router.post("/upload", adminAuth, upload.single("image"), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No image uploaded" });

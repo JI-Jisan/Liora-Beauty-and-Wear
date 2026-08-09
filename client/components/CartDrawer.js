@@ -1,21 +1,27 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 export default function CartDrawer({
-  cartItems,
+  cartItems = [],
   isOpen,
   onClose,
   onIncrease,
   onDecrease,
   onRemove,
 }) {
+  const router = useRouter();
+
   const total = cartItems.reduce(
     (sum, item) => sum + item.offerPrice * item.quantity,
     0
   );
 
   const goToCheckout = () => {
+    if (cartItems.length === 0) return;
     localStorage.setItem("jt_cart", JSON.stringify(cartItems));
-    window.location.href = "/checkout";
+    onClose();
+    router.push("/checkout");
   };
 
   return (
@@ -58,7 +64,15 @@ export default function CartDrawer({
 
       <div className="jt-cart-footer">
         <h4>Total: {total} Tk</h4>
-        <button className="jt-checkout-btn" onClick={goToCheckout}>
+        <button
+          className="jt-checkout-btn"
+          onClick={goToCheckout}
+          disabled={cartItems.length === 0}
+          style={{
+            opacity: cartItems.length === 0 ? 0.6 : 1,
+            cursor: cartItems.length === 0 ? "not-allowed" : "pointer",
+          }}
+        >
           Go to Checkout
         </button>
       </div>

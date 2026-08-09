@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 200" width="500" height="200">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,600&amp;family=Montserrat:wght@600&amp;family=Great+Vibes&amp;display=swap');
+      .top-sub {
+        font-family: 'Montserrat', 'Helvetica Neue', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 7px;
+        fill: #1e293b;
+        text-anchor: middle;
+      }
+      .brand-main {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 68px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        fill: #ff4d6d;
+        text-anchor: middle;
+      }
+      .script-text {
+        font-family: 'Great Vibes', 'Playfair Display', cursive, serif;
+        font-size: 42px;
+        font-style: italic;
+        fill: #ff4d6d;
+        text-anchor: middle;
+      }
+    </style>
+  </defs>
+
+  <!-- Top Tracking Subtitle -->
+  <text x="250" y="55" class="top-sub">BEAUTY &amp; WEAR</text>
+
+  <!-- Main Brand Title -->
+  <text x="250" y="122" class="brand-main">LIORA</text>
+
+  <!-- Left Ornamental Line with Diamond -->
+  <path d="M 40 148 L 120 148" stroke="#ff4d6d" stroke-width="1.5" />
+  <polygon points="40,148 44,145 48,148 44,151" fill="#ff4d6d" />
+
+  <!-- Bottom Script Text -->
+  <text x="250" y="160" class="script-text">Beauty &amp; Wear</text>
+
+  <!-- Right Ornamental Line with Diamond -->
+  <path d="M 380 148 L 460 148" stroke="#ff4d6d" stroke-width="1.5" />
+  <polygon points="460,148 456,145 452,148 456,151" fill="#ff4d6d" />
+</svg>

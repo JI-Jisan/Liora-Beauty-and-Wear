@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import ProductGrid from "@/components/ProductGrid";
 import CartDrawer from "@/components/CartDrawer";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,31 +12,32 @@ export default function ProductsPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const [siteSettings, setSiteSettings] = useState({
-    brandName: "Jisan Trends",
-    brandSubtitle:
-      "Trusted store for perfume, watches, fan light and trendy products",
+    brandName: "LIORA Beauty & Wear",
+    brandSubtitle: "Beauty. Style. You.",
   });
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/settings")
+    fetch(`${API_BASE_URL}/api/settings`)
       .then((res) => res.json())
       .then((data) =>
         setSiteSettings({
-          brandName: data.brandName || "Jisan Trends",
-          brandSubtitle:
-            data.brandSubtitle ||
-            "Trusted store for perfume, watches, fan light and trendy products",
+          brandName: data.brandName || "LIORA Beauty & Wear",
+          brandSubtitle: data.brandSubtitle || "Beauty. Style. You.",
         })
       )
       .catch((err) => console.error(err));
   }, []);
 
   useEffect(() => {
-  const savedCart = localStorage.getItem("jt_cart");
-  if (savedCart) {
-    setCartItems(JSON.parse(savedCart));
-  }
-}, []);
+    Promise.resolve().then(() => {
+      const savedCart = localStorage.getItem("jt_cart");
+      if (savedCart) {
+        try {
+          setCartItems(JSON.parse(savedCart));
+        } catch (e) {}
+      }
+    });
+  }, []);
 
   const addToCart = (product) => {
   setCartItems((prev) => {

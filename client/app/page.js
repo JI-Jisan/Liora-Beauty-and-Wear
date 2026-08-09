@@ -9,6 +9,7 @@ import CartDrawer from "../components/CartDrawer";
 import WhatsAppButton from "../components/WhatsAppButton";
 import PromoBanner from "../components/PromoBanner";
 import FlashSale from "../components/FlashSale";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,59 +17,61 @@ export default function HomePage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const [siteSettings, setSiteSettings] = useState({
-    brandName: "Jisan Trends",
-    brandSubtitle:
-      "Trusted store for perfume, watches, fan light and trendy products",
-    heroTitle: "Big Deals, Trendy Products, Easy Order",
+    brandName: "LIORA Beauty & Wear",
+    brandSubtitle: "Beauty. Style. You.",
+    heroTitle: "Beauty That Inspires Confidence & Style That Speaks Elegance",
     heroText:
-      "Shop perfumes, ghori, fan light, beauty items and more without any login.",
+      "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
     offerText:
-      "🔥 Eid Offer 20% OFF on selected perfumes   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ⭐ New Arrival now live at Jisan Trends",
+      "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ✨ 100% Authentic Products",
     promoSlides: [],
 
     flashTitle: "Limited Time Special Offer",
-flashSubtitle:
-  "Grab selected trending products before the timer runs out.",
-flashButtonText: "Shop Flash Sale",
-flashButtonLink: "/products",
-flashDurationHours: 6,
+    flashSubtitle:
+      "Grab selected trending beauty & wear items before the timer runs out.",
+    flashButtonText: "Shop Flash Sale",
+    flashButtonLink: "/products",
+    flashDurationHours: 6,
   });
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/settings")
+    fetch(`${API_BASE_URL}/api/settings`)
       .then((res) => res.json())
       .then((data) =>
         setSiteSettings({
-          brandName: data.brandName || "Jisan Trends",
-          brandSubtitle:
-            data.brandSubtitle ||
-            "Trusted store for perfume, watches, fan light and trendy products",
-          heroTitle: data.heroTitle || "Big Deals, Trendy Products, Easy Order",
+          brandName: data.brandName || "LIORA Beauty & Wear",
+          brandSubtitle: data.brandSubtitle || "Beauty. Style. You.",
+          heroTitle:
+            data.heroTitle ||
+            "Beauty That Inspires Confidence & Style That Speaks Elegance",
           heroText:
             data.heroText ||
-            "Shop perfumes, ghori, fan light, beauty items and more without any login.",
+            "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
           offerText:
             data.offerText ||
-            "🔥 Eid Offer 20% OFF on selected perfumes   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ⭐ New Arrival now live at Jisan Trends",
+            "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ✨ 100% Authentic Products",
           promoSlides: data.promoSlides || [],
-
           flashTitle: data.flashTitle || "Limited Time Special Offer",
-flashSubtitle:
-  data.flashSubtitle ||
-  "Grab selected trending products before the timer runs out.",
-flashButtonText: data.flashButtonText || "Shop Flash Sale",
-flashButtonLink: data.flashButtonLink || "/products",
-flashDurationHours: data.flashDurationHours || 6,
+          flashSubtitle:
+            data.flashSubtitle ||
+            "Grab selected trending beauty & wear items before the timer runs out.",
+          flashButtonText: data.flashButtonText || "Shop Flash Sale",
+          flashButtonLink: data.flashButtonLink || "/products",
+          flashDurationHours: data.flashDurationHours || 6,
         })
       )
       .catch((err) => console.error(err));
   }, []);
 
   useEffect(() => {
-    const savedCart = localStorage.getItem("jt_cart");
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
+    Promise.resolve().then(() => {
+      const savedCart = localStorage.getItem("jt_cart");
+      if (savedCart) {
+        try {
+          setCartItems(JSON.parse(savedCart));
+        } catch (e) {}
+      }
+    });
   }, []);
 
   const addToCart = (product) => {

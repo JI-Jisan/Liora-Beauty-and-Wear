@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/orders");
+      const res = await fetch(`${API_BASE_URL}/api/orders`, {
+        headers: getAuthHeaders(),
+      });
       const data = await res.json();
       if (Array.isArray(data)) {
         setOrders(data);
@@ -21,16 +24,16 @@ export default function AdminOrders() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    Promise.resolve().then(() => {
+      fetchOrders();
+    });
   }, []);
 
   const updateStatus = async (id, status) => {
     try {
-      await fetch(`http://localhost:5001/api/orders/${id}/status`, {
+      await fetch(`${API_BASE_URL}/api/orders/${id}/status`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ status }),
       });
 
