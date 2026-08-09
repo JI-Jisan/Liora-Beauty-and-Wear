@@ -1103,6 +1103,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  width: 100%;
 }
 
 .jt-logo-corner img {
@@ -1130,10 +1131,11 @@ button {
 }
 
 .jt-cart-top-btn {
+  margin-left: auto;
   border: none;
   background: linear-gradient(135deg, #ff4d6d, #e84a5f);
   color: white;
-  padding: 9px 18px;
+  padding: 10px 22px;
   border-radius: 999px;
   font-weight: 800;
   font-size: 14px;
@@ -1146,7 +1148,7 @@ button {
 }
 
 .jt-header-search-row {
-  padding: 10px 16px;
+  padding: 10px 16px 14px;
   background: #faf7f5;
 }
 
@@ -1159,16 +1161,17 @@ button {
   display: flex;
   align-items: center;
   background: #ffffff;
-  border: 1.5px solid #e2e8f0;
+  border: 2px solid #ff4d6d;
   border-radius: 999px;
-  padding: 4px 6px 4px 16px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
+  padding: 4px 6px 4px 18px;
+  box-shadow: 0 4px 16px rgba(255, 77, 109, 0.12);
+  transition: all 0.25s ease;
 }
 
-.jt-search-input-wrapper:focus-within {
-  border-color: #ff4d6d;
-  box-shadow: 0 4px 18px rgba(255, 77, 109, 0.15);
+.jt-search-input-wrapper:focus-within,
+.jt-search-input-wrapper:hover {
+  border-color: #e84a5f;
+  box-shadow: 0 0 0 4px rgba(255, 77, 109, 0.2), 0 6px 22px rgba(255, 77, 109, 0.18);
 }
 
 .jt-search-icon {
