@@ -1247,7 +1247,9 @@ button {
   }
 
   .jt-header-main-row {
-    padding: 10px 8px 10px 12px !important;
+    padding: 8px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .jt-header-container {
@@ -1255,20 +1257,23 @@ button {
     align-items: center !important;
     justify-content: space-between !important;
     width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     padding: 0 !important;
   }
 
   .jt-logo-corner img {
-    height: 54px !important;
+    height: 64px !important;
   }
 
   .jt-cart-top-btn {
     margin-left: auto !important;
     margin-right: 0 !important;
-    padding: 9px 16px !important;
-    font-size: 13px !important;
+    padding: 7px 14px !important;
+    font-size: 12px !important;
     border-radius: 999px !important;
     white-space: nowrap !important;
+    box-shadow: 0 4px 12px rgba(255, 77, 109, 0.25) !important;
   }
 }
 
