@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CategoryBar from "./CategoryBar";
 import { API_BASE_URL } from "@/lib/api";
@@ -81,7 +81,7 @@ const getCategoryName = (category) => {
   return "Beauty & Wear";
 };
 
-export default function ProductGrid({
+function ProductGridContent({
   onAddToCart,
   searchTerm = "",
   type = "all",
@@ -342,5 +342,13 @@ export default function ProductGrid({
         </div>
       )}
     </section>
+  );
+}
+
+export default function ProductGrid(props) {
+  return (
+    <Suspense fallback={<div style={{ textAlign: "center", padding: "60px", color: "#64748B" }}>Loading products...</div>}>
+      <ProductGridContent {...props} />
+    </Suspense>
   );
 }
