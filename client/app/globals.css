@@ -1093,7 +1093,7 @@ button {
 
 .jt-header-main-row {
   border-bottom: 1px solid #f8fafc;
-  padding: 12px 20px;
+  padding: 10px 16px;
 }
 
 .jt-header-container {
@@ -1102,22 +1102,22 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
 }
 
 .jt-logo-corner img {
-  height: 52px;
+  height: 48px;
   width: auto;
   object-fit: contain;
 }
 
-.jt-nav {
+.jt-desktop-nav {
   display: flex;
   align-items: center;
   gap: 24px;
 }
 
-.jt-nav a {
+.jt-desktop-nav a {
   color: #0f172a;
   text-decoration: none;
   font-weight: 700;
@@ -1125,7 +1125,7 @@ button {
   transition: color 0.2s ease;
 }
 
-.jt-nav a:hover {
+.jt-desktop-nav a:hover {
   color: #ff4d6d;
 }
 
@@ -1133,7 +1133,7 @@ button {
   border: none;
   background: linear-gradient(135deg, #ff4d6d, #e84a5f);
   color: white;
-  padding: 10px 20px;
+  padding: 9px 18px;
   border-radius: 999px;
   font-weight: 800;
   font-size: 14px;
@@ -1146,7 +1146,7 @@ button {
 }
 
 .jt-header-search-row {
-  padding: 10px 20px 14px;
+  padding: 10px 16px;
   background: #faf7f5;
 }
 
@@ -1161,7 +1161,7 @@ button {
   background: #ffffff;
   border: 1.5px solid #e2e8f0;
   border-radius: 999px;
-  padding: 4px 6px 4px 18px;
+  padding: 4px 6px 4px 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
 }
@@ -1172,9 +1172,80 @@ button {
 }
 
 .jt-search-icon {
-  font-size: 16px;
-  margin-right: 10px;
+  font-size: 15px;
+  margin-right: 8px;
   color: #64748b;
+}
+
+.jt-search-input-wrapper input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #0f172a;
+  background: transparent;
+}
+
+.jt-search-submit-btn {
+  border: none;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.jt-mobile-nav-strip {
+  display: none;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+  padding: 8px 12px;
+}
+
+.jt-mobile-nav-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.jt-mobile-nav-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.jt-mobile-nav-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .jt-desktop-nav {
+    display: none !important;
+  }
+
+  .jt-mobile-nav-strip {
+    display: block !important;
+  }
+
+  .jt-logo-corner img {
+    height: 38px !important;
+  }
+
+  .jt-cart-top-btn {
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
 }
 
 .jt-search-input-wrapper input {

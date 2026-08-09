@@ -43,14 +43,14 @@ export default function Header({
 
   return (
     <header className="jt-header">
-      {/* ROW 1: Top Bar (Logo Corner Left, Nav Links Middle, Cart Right) */}
+      {/* ROW 1: Top Bar (Logo Left, Cart Button Right) */}
       <div className="jt-header-main-row">
         <div className="jt-header-container">
           <Link href="/" style={{ textDecoration: "none" }} className="jt-logo-corner">
             <LioraLogo />
           </Link>
 
-          <nav className="jt-nav">
+          <nav className="jt-nav jt-desktop-nav">
             <Link href="/">Home</Link>
             <Link href="/products">Products</Link>
             <Link href="/checkout">Checkout</Link>
@@ -72,7 +72,7 @@ export default function Header({
               <span className="jt-search-icon">🔍</span>
               <input
                 type="text"
-                placeholder="Search authentic cosmetics, perfumes, watches & fashion..."
+                placeholder="Search cosmetics, perfumes, watches & fashion..."
                 value={currentSearchValue}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -85,6 +85,17 @@ export default function Header({
               </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      {/* ROW 3: Sleek Mobile Quick Nav Strip */}
+      <div className="jt-mobile-nav-strip">
+        <div className="jt-mobile-nav-inner">
+          <Link href="/" className="jt-mobile-nav-item">Home</Link>
+          <Link href="/products" className="jt-mobile-nav-item">Products</Link>
+          <Link href="/checkout" className="jt-mobile-nav-item">Checkout</Link>
+          <Link href="/order-tracking" className="jt-mobile-nav-item">Track Order</Link>
+          <Link href="/admin" className="jt-mobile-nav-item">Admin</Link>
         </div>
       </div>
     </header>
