@@ -1107,7 +1107,7 @@ button {
 }
 
 .jt-logo-corner img {
-  height: 48px;
+  height: 72px;
   width: auto;
   object-fit: contain;
 }
@@ -1153,7 +1153,8 @@ button {
 }
 
 .jt-search-box-row {
-  max-width: 760px;
+  max-width: 800px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -1261,6 +1262,17 @@ button {
     box-sizing: border-box !important;
   }
 
+  .jt-search-box-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .jt-search-input-wrapper {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   .jt-header-container {
     display: flex !important;
     align-items: center !important;
@@ -1272,7 +1284,7 @@ button {
   }
 
   .jt-logo-corner img {
-    height: 60px !important;
+    height: 72px !important;
   }
 
   .jt-cart-top-btn {
