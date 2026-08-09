@@ -43,24 +43,12 @@ export default function Header({
 
   return (
     <header className="jt-header">
-      <div className="jt-header-inner">
-        <Link href="/" style={{ textDecoration: "none" }}>
-          <LioraLogo />
-        </Link>
-
-        <div className="jt-header-right">
-          <form className="jt-search-box" onSubmit={handleSearchSubmit}>
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={currentSearchValue}
-              onChange={(e) => {
-                const val = e.target.value;
-                setLocalSearch(val);
-                onSearchChange?.(val);
-              }}
-            />
-          </form>
+      {/* ROW 1: Top Bar (Logo Corner Left, Nav Links Middle, Cart Right) */}
+      <div className="jt-header-main-row">
+        <div className="jt-header-container">
+          <Link href="/" style={{ textDecoration: "none" }} className="jt-logo-corner">
+            <LioraLogo />
+          </Link>
 
           <nav className="jt-nav">
             <Link href="/">Home</Link>
@@ -68,11 +56,35 @@ export default function Header({
             <Link href="/checkout">Checkout</Link>
             <Link href="/order-tracking">Track Order</Link>
             <Link href="/admin">Admin</Link>
-
-            <button type="button" className="jt-cart-top-btn" onClick={handleOpenCart}>
-              Cart ({cartCount})
-            </button>
           </nav>
+
+          <button type="button" className="jt-cart-top-btn" onClick={handleOpenCart}>
+            🛒 Cart ({cartCount})
+          </button>
+        </div>
+      </div>
+
+      {/* ROW 2: Search Bar Below Top Bar */}
+      <div className="jt-header-search-row">
+        <div className="jt-header-container">
+          <form className="jt-search-box-row" onSubmit={handleSearchSubmit}>
+            <div className="jt-search-input-wrapper">
+              <span className="jt-search-icon">🔍</span>
+              <input
+                type="text"
+                placeholder="Search authentic cosmetics, perfumes, watches & fashion..."
+                value={currentSearchValue}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setLocalSearch(val);
+                  onSearchChange?.(val);
+                }}
+              />
+              <button type="submit" className="jt-search-submit-btn">
+                Search
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </header>
