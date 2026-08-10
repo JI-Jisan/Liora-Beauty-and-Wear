@@ -33,9 +33,6 @@ button {
   padding: 20px 32px;
   background: white;
   border-bottom: 1px solid #e5e7eb;
-  position: sticky;
-  top: 0;
-  z-index: 50;
 }
 
 .jt-logo-wrap {
@@ -179,10 +176,7 @@ button {
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px 20px 10px;
-  position: sticky;
-  top: 92px;
-  z-index: 40;
-  background: #f5f7fb;
+  background: transparent;
 }
 
 .jt-category-scroll {
@@ -1149,9 +1143,9 @@ button {
   top: 0;
   z-index: 100;
   padding: 10px 16px 14px;
-  background: #faf7f5;
+  background: #ffffff;
   border-bottom: 1px solid #f1f5f9;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 }
 
 .jt-search-box-row {
