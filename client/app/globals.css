@@ -1084,11 +1084,8 @@ button {
 
 .jt-header {
   background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  position: relative;
+  z-index: 90;
 }
 
 .jt-header-main-row {
@@ -1148,8 +1145,13 @@ button {
 }
 
 .jt-header-search-row {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   padding: 10px 16px 14px;
   background: #faf7f5;
+  border-bottom: 1px solid #f1f5f9;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
 }
 
 .jt-search-box-row {

@@ -157,7 +157,18 @@ export default function Header({
         </div>
       </div>
 
-      {/* ROW 2: Live Search Bar Below Top Bar */}
+      {/* ROW 2: Mobile Nav Strip */}
+      <div className="jt-mobile-nav-strip">
+        <div className="jt-mobile-nav-inner">
+          <Link href="/" className="jt-mobile-nav-item">Home</Link>
+          <Link href="/products" className="jt-mobile-nav-item">Products</Link>
+          <Link href="/checkout" className="jt-mobile-nav-item">Checkout</Link>
+          <Link href="/order-tracking" className="jt-mobile-nav-item">Track Order</Link>
+          <Link href="/admin" className="jt-mobile-nav-item">Admin</Link>
+        </div>
+      </div>
+
+      {/* ROW 3: Sticky Live Search Bar Below Mobile Nav */}
       <div className="jt-header-search-row">
         <div className="jt-header-container">
           <form
@@ -254,17 +265,6 @@ export default function Header({
               </div>
             )}
           </form>
-        </div>
-      </div>
-
-      {/* ROW 3: Sleek Mobile Quick Nav Strip */}
-      <div className="jt-mobile-nav-strip">
-        <div className="jt-mobile-nav-inner">
-          <Link href="/" className="jt-mobile-nav-item">Home</Link>
-          <Link href="/products" className="jt-mobile-nav-item">Products</Link>
-          <Link href="/checkout" className="jt-mobile-nav-item">Checkout</Link>
-          <Link href="/order-tracking" className="jt-mobile-nav-item">Track Order</Link>
-          <Link href="/admin" className="jt-mobile-nav-item">Admin</Link>
         </div>
       </div>
     </header>
