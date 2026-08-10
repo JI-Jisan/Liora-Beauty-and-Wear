@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
 
 export default function BrandingPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const [settings, setSettings] = useState({
     brandName: "",
     brandSubtitle: "",
@@ -12,6 +16,16 @@ export default function BrandingPage() {
     offerText: "",
     promoSlides: [],
   });
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("jt_admin_logged_in");
+    const token = localStorage.getItem("jt_admin_token");
+    if (isLoggedIn !== "true" || !token) {
+      router.push("/admin/login");
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/settings`)
@@ -37,13 +51,14 @@ export default function BrandingPage() {
   };
 
   const handleSlideChange = (index, field, value) => {
-    const updatedSlides = [...settings.promoSlides];
-    updatedSlides[index][field] = value;
+    const updatedSlides = settings.promoSlides.map((slide, i) =>
+      i === index ? { ...slide, [field]: value } : slide
+    );
 
-    setSettings({
-      ...settings,
+    setSettings((prev) => ({
+      ...prev,
       promoSlides: updatedSlides,
-    });
+    }));
   };
 
   const addSlide = () => {
@@ -89,6 +104,8 @@ export default function BrandingPage() {
       alert(error.message);
     }
   };
+
+  if (!isAuthenticated) return null;
 
   return (
     <div style={{ padding: "30px" }}>

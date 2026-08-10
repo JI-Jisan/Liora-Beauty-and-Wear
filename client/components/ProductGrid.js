@@ -136,12 +136,22 @@ function ProductGridContent({
     }
 
     if (selectedCategory !== "all") {
-      result = result.filter(
-        (product) =>
-          product.category?.name === selectedCategory ||
-          product.category?._id === selectedCategory ||
-          product.category === selectedCategory
-      );
+      const selectedLower = String(selectedCategory).trim().toLowerCase();
+      result = result.filter((product) => {
+        const catName =
+          typeof product.category === "object"
+            ? product.category?.name
+            : product.category;
+        const catId =
+          typeof product.category === "object"
+            ? product.category?._id
+            : product.category;
+
+        return (
+          catId === selectedCategory ||
+          (catName && String(catName).trim().toLowerCase() === selectedLower)
+        );
+      });
     }
 
     if (activeSearchTerm.trim()) {

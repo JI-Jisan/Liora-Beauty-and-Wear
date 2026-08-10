@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
+import { useCart } from "@/context/CartContext";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState([]);
+  const { cartItems, clearCart } = useCart();
   const [deliveryCharge, setDeliveryCharge] = useState(65);
   const [message, setMessage] = useState("");
 
@@ -16,13 +17,6 @@ export default function CheckoutPage() {
     address: "",
     note: "",
   });
-
-  useEffect(() => {
-    const storedCart = localStorage.getItem("jt_cart");
-    if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
-    }
-  }, []);
 
   const subtotal = useMemo(() => {
     return cartItems.reduce(
@@ -42,57 +36,56 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (cartItems.length === 0) {
-    setMessage("Cart is empty");
-    return;
-  }
-
-  const orderData = {
-    customerName: formData.customerName,
-    phone: formData.phone,
-    address: formData.address,
-    note: formData.note,
-    items: cartItems.map((item) => ({
-      productName: item.name,
-      quantity: item.quantity,
-      price: item.offerPrice,
-    })),
-    deliveryCharge,
-    subtotal,
-    total,
-    status: "Pending",
-  };
-
-  console.log("Sending order:", orderData);
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(orderData),
-    });
-
-    const result = await res.json();
-    console.log("Order response:", result);
-
-    if (!res.ok) {
-      throw new Error(result.message || "Order failed");
+    if (cartItems.length === 0) {
+      setMessage("Cart is empty");
+      return;
     }
 
-    localStorage.removeItem("jt_cart");
-    setCartItems([]);
+    const orderData = {
+      customerName: formData.customerName,
+      phone: formData.phone,
+      address: formData.address,
+      note: formData.note,
+      items: cartItems.map((item) => ({
+        productName: item.name,
+        quantity: item.quantity,
+        price: item.offerPrice,
+      })),
+      deliveryCharge,
+      subtotal,
+      total,
+      status: "Pending",
+    };
 
-    const redirectId = result.orderNumber || result._id;
-    router.push(`/order-success/${redirectId}`);
-  } catch (error) {
-    console.error("Order submit error:", error);
-    setMessage(error.message || "Something went wrong");
-  }
-};
+    console.log("Sending order:", orderData);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const result = await res.json();
+      console.log("Order response:", result);
+
+      if (!res.ok) {
+        throw new Error(result.message || "Order failed");
+      }
+
+      clearCart();
+
+      const redirectId = result.orderNumber || result._id;
+      router.push(`/order-success/${redirectId}`);
+    } catch (error) {
+      console.error("Order submit error:", error);
+      setMessage(error.message || "Something went wrong");
+    }
+  };
 
   return (
     <main className="jt-checkout-page">

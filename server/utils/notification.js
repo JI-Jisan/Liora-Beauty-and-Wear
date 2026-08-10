@@ -5,7 +5,7 @@
 
 const sendOrderPlacedNotification = async (order) => {
   try {
-    const smsMessage = `[LIORA Beauty & Wear] Order Placed! Dear ${order.customerName}, your order #${order.orderNumber} (Total: ${order.total} Tk) has been received. We will contact you soon for confirmation. Support: +8801700000000`;
+    const smsMessage = `[LIORA Beauty & Wear] Order Placed! Dear ${order.customerName}, your order #${order.orderNumber} (Total: ${order.total} Tk) has been received. We will contact you soon for confirmation. Support: +8801837223147`;
     
     console.log("\n📲 [SMS NOTIFICATION DISPATCHED]");
     console.log(`TO: ${order.phone}`);

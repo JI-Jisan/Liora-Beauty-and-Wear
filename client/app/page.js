@@ -6,16 +6,15 @@ import MarqueeBar from "../components/MarqueeBar";
 import Hero from "../components/Hero";
 import FeaturedCategories from "../components/FeaturedCategories";
 import ProductGrid from "../components/ProductGrid";
-import CartDrawer from "../components/CartDrawer";
 import WhatsAppButton from "../components/WhatsAppButton";
 import PromoBanner from "../components/PromoBanner";
 import FlashSale from "../components/FlashSale";
 import { API_BASE_URL } from "@/lib/api";
+import { useCart } from "@/context/CartContext";
 
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [cartItems, setCartItems] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { addToCart } = useCart();
 
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
@@ -64,77 +63,13 @@ export default function HomePage() {
       .catch((err) => console.error(err));
   }, []);
 
-  useEffect(() => {
-    Promise.resolve().then(() => {
-      const savedCart = localStorage.getItem("jt_cart");
-      if (savedCart) {
-        try {
-          setCartItems(JSON.parse(savedCart));
-        } catch (e) {}
-      }
-    });
-  }, []);
-
-  const addToCart = (product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item._id === product._id);
-      if (existing) {
-        return prev.map((item) =>
-          item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
-
-  const increaseQty = (id) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
-
-  const decreaseQty = (id) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) =>
-          item._id === id ? { ...item, quantity: item.quantity - 1 } : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const removeItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item._id !== id));
-  };
-
-  useEffect(() => {
-    localStorage.setItem("jt_cart", JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
   return (
     <main className="jt-page">
       <Header
-        cartCount={cartCount}
-        onOpenCart={() => setIsCartOpen(true)}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         brandName={siteSettings.brandName}
         brandSubtitle={siteSettings.brandSubtitle}
-      />
-
-      <CartDrawer
-        cartItems={cartItems}
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        onIncrease={increaseQty}
-        onDecrease={decreaseQty}
-        onRemove={removeItem}
       />
 
       <MarqueeBar offerText={siteSettings.offerText} />

@@ -28,7 +28,7 @@ export default function FlashSale({
         targetTimestamp = now + flashDurationHours * 60 * 60 * 1000;
         localStorage.setItem("jt_flash_end_timestamp", String(targetTimestamp));
       }
-    } catch (e) {
+    } catch {
       targetTimestamp = Date.now() + flashDurationHours * 60 * 60 * 1000;
     }
 

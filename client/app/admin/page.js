@@ -7,6 +7,7 @@ import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
 
 export default function AdminPage() {
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [imageFile, setImageFile] = useState(null);
@@ -103,14 +104,13 @@ export default function AdminPage() {
 
     if (isLoggedIn !== "true" || !token) {
       router.push("/admin/login");
+    } else {
+      setIsAuthenticated(true);
+      loadCategories();
+      loadProducts();
+      loadSettings();
     }
   }, [router]);
-
-  useEffect(() => {
-    loadCategories();
-    loadProducts();
-    loadSettings();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -178,13 +178,14 @@ export default function AdminPage() {
   };
 
   const handleSlideChange = (index, field, value) => {
-    const updatedSlides = [...settings.promoSlides];
-    updatedSlides[index][field] = value;
+    const updatedSlides = settings.promoSlides.map((slide, i) =>
+      i === index ? { ...slide, [field]: value } : slide
+    );
 
-    setSettings({
-      ...settings,
+    setSettings((prev) => ({
+      ...prev,
       promoSlides: updatedSlides,
-    });
+    }));
   };
 
   const addSlide = () => {
@@ -334,6 +335,8 @@ export default function AdminPage() {
     setImageFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  if (!isAuthenticated) return null;
 
   return (
     <main id="top" className="jt-admin-dashboard">

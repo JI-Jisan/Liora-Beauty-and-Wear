@@ -85,6 +85,34 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET single product by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (id.startsWith("demo-")) {
+      const demoItem = DEMO_PRODUCTS.find((p) => p._id === id);
+      if (demoItem) return res.json(demoItem);
+    }
+
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      const product = await Product.findById(id).populate("category");
+      if (product) {
+        return res.json(product);
+      }
+    }
+
+    const demoFallback = DEMO_PRODUCTS.find((p) => p._id === id);
+    if (demoFallback) {
+      return res.json(demoFallback);
+    }
+
+    res.status(404).json({ message: "Product not found" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // ADD new product
 router.post("/", adminAuth, async (req, res) => {
   try {
@@ -102,12 +130,17 @@ router.post("/", adminAuth, async (req, res) => {
       return res.status(400).json({ message: "Offer price cannot exceed original price" });
     }
 
+    const validCategory =
+      category && typeof category === "string" && category.match(/^[0-9a-fA-F]{24}$/)
+        ? category
+        : null;
+
     const product = new Product({
       ...req.body,
       name: name.trim(),
       originalPrice: Number(originalPrice),
       offerPrice: Number(offerPrice),
-      category: category || null,
+      category: validCategory,
     });
 
     await product.save();
@@ -121,7 +154,7 @@ router.post("/", adminAuth, async (req, res) => {
 // UPDATE product
 router.put("/:id", adminAuth, async (req, res) => {
   try {
-    const { name, originalPrice, offerPrice } = req.body;
+    const { name, originalPrice, offerPrice, category } = req.body;
 
     if (name !== undefined && (!name || typeof name !== "string" || !name.trim())) {
       return res.status(400).json({ message: "Product name cannot be empty" });
@@ -135,9 +168,17 @@ router.put("/:id", adminAuth, async (req, res) => {
       return res.status(400).json({ message: "Offer price must be non-negative" });
     }
 
+    const updateData = { ...req.body };
+    if (category !== undefined) {
+      updateData.category =
+        category && typeof category === "string" && category.match(/^[0-9a-fA-F]{24}$/)
+          ? category
+          : null;
+    }
+
     const updated = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true }
     ).populate("category");
 

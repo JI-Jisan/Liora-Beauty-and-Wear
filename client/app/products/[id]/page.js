@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
-import CartDrawer from "@/components/CartDrawer";
 import { API_BASE_URL } from "@/lib/api";
+import { useCart } from "@/context/CartContext";
 
 const DEMO_PRODUCTS = [
   {
@@ -78,12 +78,10 @@ const DEMO_PRODUCTS = [
 export default function ProductDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [allProducts, setAllProducts] = useState(DEMO_PRODUCTS);
   const [loading, setLoading] = useState(true);
-  const [cartCount, setCartCount] = useState(0);
-  const [cartItems, setCartItems] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
@@ -103,37 +101,34 @@ export default function ProductDetailsPage() {
   }, []);
 
   useEffect(() => {
-    Promise.resolve().then(() => {
-      try {
-        const savedCart = JSON.parse(localStorage.getItem("jt_cart")) || [];
-        setCartItems(savedCart);
-
-        const totalCount = savedCart.reduce((sum, item) => sum + item.quantity, 0);
-        setCartCount(totalCount);
-      } catch (e) {
-        console.error(e);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
     if (!params?.id) return;
 
-    fetch(`${API_BASE_URL}/api/products`)
-      .then((res) => res.json())
+    // Fetch target single product directly from API
+    fetch(`${API_BASE_URL}/api/products/${params.id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Product not found");
+        return res.json();
+      })
       .then((data) => {
-        const productList = Array.isArray(data) && data.length > 0 ? data : DEMO_PRODUCTS;
-        setAllProducts(productList);
-        const found = productList.find((item) => item._id === params.id);
-        setProduct(found || DEMO_PRODUCTS.find((item) => item._id === params.id) || null);
+        setProduct(data);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Single product fetch error:", err);
         const found = DEMO_PRODUCTS.find((item) => item._id === params.id);
         setProduct(found || null);
         setLoading(false);
       });
+
+    // Fetch all products for related products section
+    fetch(`${API_BASE_URL}/api/products`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAllProducts(data);
+        }
+      })
+      .catch((err) => console.error("All products fetch error:", err));
   }, [params]);
 
   const relatedProducts = useMemo(() => {
@@ -148,86 +143,17 @@ export default function ProductDetailsPage() {
   }, [allProducts, product]);
 
   const handleAddToCart = () => {
-  const existingCart = JSON.parse(localStorage.getItem("jt_cart")) || [];
+    if (product) {
+      addToCart(product);
+    }
+  };
 
-  const existingItem = existingCart.find((item) => item._id === product._id);
-
-  let updatedCart;
-
-  if (existingItem) {
-    updatedCart = existingCart.map((item) =>
-      item._id === product._id
-        ? { ...item, quantity: item.quantity + 1 }
-        : item
-    );
-  } else {
-    updatedCart = [...existingCart, { ...product, quantity: 1 }];
-  }
-
-  localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-  setCartItems(updatedCart);
-
-  const totalCount = updatedCart.reduce((sum, item) => sum + item.quantity, 0);
-  setCartCount(totalCount);
-
-  setIsCartOpen(true);
-};
-
-const handleBuyNow = () => {
-  const existingCart = JSON.parse(localStorage.getItem("jt_cart")) || [];
-  const existingItem = existingCart.find((item) => item._id === product._id);
-
-  let updatedCart;
-  if (existingItem) {
-    updatedCart = existingCart.map((item) =>
-      item._id === product._id
-        ? { ...item, quantity: item.quantity + 1 }
-        : item
-    );
-  } else {
-    updatedCart = [...existingCart, { ...product, quantity: 1 }];
-  }
-
-  localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-  setCartItems(updatedCart);
-  router.push("/checkout");
-};
-
-const increaseQty = (id) => {
-  const updatedCart = cartItems.map((item) =>
-    item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-  );
-
-  setCartItems(updatedCart);
-  localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-
-  const totalCount = updatedCart.reduce((sum, item) => sum + item.quantity, 0);
-  setCartCount(totalCount);
-};
-
-const decreaseQty = (id) => {
-  const updatedCart = cartItems
-    .map((item) =>
-      item._id === id ? { ...item, quantity: item.quantity - 1 } : item
-    )
-    .filter((item) => item.quantity > 0);
-
-  setCartItems(updatedCart);
-  localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-
-  const totalCount = updatedCart.reduce((sum, item) => sum + item.quantity, 0);
-  setCartCount(totalCount);
-};
-
-const removeItem = (id) => {
-  const updatedCart = cartItems.filter((item) => item._id !== id);
-
-  setCartItems(updatedCart);
-  localStorage.setItem("jt_cart", JSON.stringify(updatedCart));
-
-  const totalCount = updatedCart.reduce((sum, item) => sum + item.quantity, 0);
-  setCartCount(totalCount);
-};
+  const handleBuyNow = () => {
+    if (product) {
+      addToCart(product);
+      router.push("/checkout");
+    }
+  };
 
   if (loading) {
     return (
@@ -256,22 +182,11 @@ const removeItem = (id) => {
   return (
     <main className="jt-details-page-wrap">
       <Header
-        cartCount={cartCount}
-        onOpenCart={() => setIsCartOpen(true)}
         searchTerm=""
         onSearchChange={() => {}}
         brandName={siteSettings.brandName}
         brandSubtitle={siteSettings.brandSubtitle}
       />
-
-     <CartDrawer
-        cartItems={cartItems}
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        onIncrease={increaseQty}
-        onDecrease={decreaseQty}
-        onRemove={removeItem}
-     />
 
       <section className="jt-details-top">
         <div className="jt-details-main">

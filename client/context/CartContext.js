@@ -46,7 +46,9 @@ export function CartProvider({ children }) {
       }
       try {
         localStorage.setItem("jt_cart", JSON.stringify(updated));
-      } catch (e) {}
+      } catch (err) {
+        console.error("Cart save error:", err);
+      }
       return updated;
     });
     setIsCartOpen(true);
@@ -59,7 +61,9 @@ export function CartProvider({ children }) {
       );
       try {
         localStorage.setItem("jt_cart", JSON.stringify(updated));
-      } catch (e) {}
+      } catch (err) {
+        console.error("Cart save error:", err);
+      }
       return updated;
     });
   };
@@ -73,7 +77,9 @@ export function CartProvider({ children }) {
         .filter((item) => item.quantity > 0);
       try {
         localStorage.setItem("jt_cart", JSON.stringify(updated));
-      } catch (e) {}
+      } catch (err) {
+        console.error("Cart save error:", err);
+      }
       return updated;
     });
   };
@@ -83,7 +89,9 @@ export function CartProvider({ children }) {
       const updated = prev.filter((item) => item._id !== id);
       try {
         localStorage.setItem("jt_cart", JSON.stringify(updated));
-      } catch (e) {}
+      } catch (err) {
+        console.error("Cart save error:", err);
+      }
       return updated;
     });
   };

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
+const Product = require("../models/Product");
 const adminAuth = require("../middleware/adminAuth");
 const {
   sendOrderPlacedNotification,
@@ -69,7 +70,7 @@ router.get("/:id", async (req, res) => {
 // CREATE order (Public - Guest Checkout)
 router.post("/", async (req, res) => {
   try {
-    const { customerName, phone, address, items, subtotal, total, deliveryCharge } = req.body;
+    const { customerName, phone, address, items, deliveryCharge } = req.body;
 
     if (!customerName || !phone || !address) {
       return res.status(400).json({ message: "Customer name, phone and address are required" });
@@ -79,20 +80,67 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Cart cannot be empty" });
     }
 
-    // Generate collision-free order number (e.g. LIORA-8492105)
-    const timestampSuffix = Date.now().toString().slice(-4);
-    const randomSuffix = Math.floor(100 + Math.random() * 900);
-    const orderNumber = `LIORA-${timestampSuffix}${randomSuffix}`;
+    const safeDeliveryCharge = Number(deliveryCharge) === 110 ? 110 : 65;
+
+    // Recalculate prices on backend to prevent client-side price tampering
+    let calculatedSubtotal = 0;
+    const sanitizedItems = [];
+
+    for (const item of items) {
+      const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
+      let price = Number(item.price) || 0;
+
+      // Verify product price from DB if item._id is a valid ObjectId
+      if (item._id && String(item._id).match(/^[0-9a-fA-F]{24}$/)) {
+        const dbProduct = await Product.findById(item._id);
+        if (dbProduct && dbProduct.offerPrice > 0) {
+          price = dbProduct.offerPrice;
+        }
+      }
+
+      const itemTotal = price * qty;
+      calculatedSubtotal += itemTotal;
+
+      sanitizedItems.push({
+        productName: String(item.productName || item.name || "Product").trim(),
+        quantity: qty,
+        price: price,
+      });
+    }
+
+    const calculatedTotal = calculatedSubtotal + safeDeliveryCharge;
+
+    // Collision-resistant unique order number generation with retry safety
+    let orderNumber = "";
+    let isUnique = false;
+    let attempts = 0;
+
+    while (!isUnique && attempts < 5) {
+      attempts++;
+      const timeStamp = Date.now().toString().slice(-6);
+      const randomBits = Math.floor(1000 + Math.random() * 9000);
+      const candidateNumber = `LIORA-${timeStamp}${randomBits}`;
+
+      const existing = await Order.findOne({ orderNumber: candidateNumber });
+      if (!existing) {
+        orderNumber = candidateNumber;
+        isUnique = true;
+      }
+    }
+
+    if (!orderNumber) {
+      orderNumber = `LIORA-${Date.now()}`;
+    }
 
     const order = new Order({
       customerName: String(customerName).trim(),
       phone: String(phone).trim(),
       address: String(address).trim(),
       note: req.body.note ? String(req.body.note).trim() : "",
-      items,
-      deliveryCharge: Number(deliveryCharge) || 0,
-      subtotal: Number(subtotal) || 0,
-      total: Number(total) || 0,
+      items: sanitizedItems,
+      deliveryCharge: safeDeliveryCharge,
+      subtotal: calculatedSubtotal,
+      total: calculatedTotal,
       orderNumber,
     });
 

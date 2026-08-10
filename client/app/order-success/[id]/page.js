@@ -168,7 +168,7 @@ export default function OrderSuccessPage() {
                 </Link>
 
                 <a
-                  href={`https://wa.me/8801700000000?text=Hi%2C%20I%20have%20a%20question%20about%20Order%20%23${order.orderNumber || order._id}`}
+                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "8801837223147"}?text=${encodeURIComponent(`Hi, I have a question about Order #${order.orderNumber || order._id}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="jt-whatsapp-support-btn"
