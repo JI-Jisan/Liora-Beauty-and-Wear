@@ -1,53 +1,80 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect, useMemo } from "react";
+import { API_BASE_URL, getImageUrl } from "@/lib/api";
 
-const FEATURED_CATEGORIES = [
-  {
-    id: "cat-makeup",
-    title: "Makeup",
-    count: "340 products",
-    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80",
-    query: "Beauty & Wear",
-  },
-  {
-    id: "cat-skincare",
-    title: "Skin Care",
-    count: "215 products",
-    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
-    query: "Skin Care",
-  },
-  {
-    id: "cat-perfume",
-    title: "Perfume",
-    count: "148 products",
-    image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&auto=format&fit=crop&q=80",
-    query: "Perfume",
-  },
-  {
-    id: "cat-watches",
-    title: "Watches",
-    count: "86 products",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format&fit=crop&q=80",
-    query: "Watches",
-  },
-  {
-    id: "cat-lifestyle",
-    title: "Fashion & Wear",
-    count: "192 products",
-    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&auto=format&fit=crop&q=80",
-    query: "Lifestyle",
-  },
-  {
-    id: "cat-lipsticks",
-    title: "All Lipsticks",
-    count: "260 products",
-    image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&auto=format&fit=crop&q=80",
-    query: "Beauty & Wear",
-  },
-];
+const CATEGORY_DEFAULT_IMAGES = {
+  "skin care": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
+  "face care": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&auto=format&fit=crop&q=80",
+  "serum": "https://images.unsplash.com/photo-1608248597261-833258657640?w=400&auto=format&fit=crop&q=80",
+  "beauty & wear": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80",
+  "perfume": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&auto=format&fit=crop&q=80",
+  "watches": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format&fit=crop&q=80",
+};
+
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80";
 
 export default function FeaturedCategories() {
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/categories`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setCategories(data);
+      })
+      .catch((err) => console.error("Featured categories fetch error:", err));
+
+    fetch(`${API_BASE_URL}/api/products`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setProducts(data);
+      })
+      .catch((err) => console.error("Featured products fetch error:", err));
+  }, []);
+
+  const displayCategories = useMemo(() => {
+    if (!categories || categories.length === 0) return [];
+
+    return categories.map((cat) => {
+      const catId = String(cat._id).toLowerCase();
+      const catName = String(cat.name).trim().toLowerCase();
+
+      const count = products.filter((p) => {
+        let current = p.category;
+        while (current) {
+          if (typeof current === "object") {
+            const pCatId = String(current._id || "").toLowerCase();
+            const pCatName = String(current.name || "").trim().toLowerCase();
+            if (pCatId === catId || pCatName === catName) return true;
+            current = current.parentCategory;
+          } else if (typeof current === "string") {
+            if (current.toLowerCase() === catId || current.toLowerCase() === catName) return true;
+            break;
+          } else {
+            break;
+          }
+        }
+        return false;
+      }).length;
+
+      const img = cat.image
+        ? getImageUrl(cat.image)
+        : CATEGORY_DEFAULT_IMAGES[catName] || DEFAULT_IMAGE;
+
+      return {
+        id: cat._id,
+        title: cat.name,
+        count: `${count} ${count === 1 ? "product" : "products"}`,
+        image: img,
+      };
+    });
+  }, [categories, products]);
+
+  if (!displayCategories || displayCategories.length === 0) return null;
+
   return (
     <section
       style={{
@@ -85,12 +112,12 @@ export default function FeaturedCategories() {
           Explore our top authentic beauty, cosmetics & fashion collections
         </p>
 
-        {/* 2-Column Mobile & 6-Column Desktop Grid */}
+        {/* Dynamic Category Circles Grid */}
         <div className="jt-featured-cat-grid">
-          {FEATURED_CATEGORIES.map((cat) => (
+          {displayCategories.map((cat) => (
             <Link
               key={cat.id}
-              href={`/products?search=${encodeURIComponent(cat.query)}`}
+              href={`/products?category=${encodeURIComponent(cat.id)}`}
               style={{
                 textDecoration: "none",
                 display: "flex",
@@ -139,8 +166,8 @@ export default function FeaturedCategories() {
                 </h4>
                 <span
                   style={{
-                    color: "#64748B",
-                    fontSize: "13px",
+                    fontSize: "12px",
+                    color: "#94A3B8",
                     fontWeight: "600",
                   }}
                 >
