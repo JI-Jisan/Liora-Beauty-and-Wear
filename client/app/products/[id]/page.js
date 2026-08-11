@@ -562,10 +562,34 @@ export default function ProductDetailsPage() {
             background: "#f8fafc",
             borderRadius: "14px",
             border: "1px solid #e2e8f0",
+            marginBottom: "16px",
           }}>
             <span style={{ fontSize: "13px", color: "#64748b" }}>🚚 <strong>Dhaka:</strong> 65 Tk</span>
             <span style={{ fontSize: "13px", color: "#64748b" }}>📦 <strong>Outside:</strong> 110 Tk</span>
             <span style={{ fontSize: "13px", color: "#059669", fontWeight: "700" }}>✓ Cash on Delivery</span>
+          </div>
+
+          {/* Product Description Box in Main Overview Card */}
+          <div style={{
+            padding: "18px",
+            background: "#fff0f5",
+            borderRadius: "16px",
+            border: "1px solid #fecdd3",
+            marginTop: "14px",
+            boxShadow: "0 4px 14px rgba(225, 29, 72, 0.05)",
+          }}>
+            <h3 style={{ margin: "0 0 10px", fontSize: "15px", fontWeight: "800", color: "#9f1239", display: "flex", alignItems: "center", gap: "6px" }}>
+              📝 Product Description (পণ্যের বিবরণ)
+            </h3>
+            <div style={{
+              fontSize: "14px",
+              color: "#1e293b",
+              lineHeight: "1.65",
+              whiteSpace: "pre-line",
+              fontWeight: "500",
+            }}>
+              {product.description || "No description available for this product."}
+            </div>
           </div>
         </div>
       </div>
@@ -650,9 +674,9 @@ export default function ProductDetailsPage() {
       {/* ── SECTION 3: PRODUCT DETAILS ── */}
       <section id="details" className="jt-details-bottom">
         <div className="jt-details-description-card">
-          <h2>Product Details</h2>
-          <div className="jt-details-description-text">
-            {product.description || "No description available."}
+          <h2>Product Details & Specifications</h2>
+          <div className="jt-details-description-text" style={{ whiteSpace: "pre-line", fontSize: "14px", lineHeight: "1.7", color: "#334155" }}>
+            {product.description || "No description available for this product."}
           </div>
         </div>
       </section>
