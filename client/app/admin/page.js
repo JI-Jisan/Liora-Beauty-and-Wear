@@ -14,6 +14,9 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState(null);
 
+  // Slide-out Drawer State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   // Manage Products Advanced Controls State
   const [productSearch, setProductSearch] = useState("");
   const [productCategoryFilter, setProductCategoryFilter] = useState("all");
@@ -411,41 +414,91 @@ export default function AdminPage() {
 
   return (
     <main id="top" className="jt-admin-dashboard">
-      <aside className="jt-admin-sidebar">
-        <h2>LIORA Beauty & Wear</h2>
+      {/* Backdrop Overlay for Slide-out Drawer */}
+      <div
+        className={`jt-admin-sidebar-overlay ${isSidebarOpen ? "open" : ""}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
+      {/* Slide-out Navigation Drawer */}
+      <aside className={`jt-admin-sidebar ${isSidebarOpen ? "open" : ""}`}>
+        <div className="jt-admin-sidebar-header">
+          <h2>LIORA Beauty & Wear</h2>
+          <button
+            type="button"
+            className="jt-admin-sidebar-close"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-label="Close Sidebar"
+          >
+            ✕
+          </button>
+        </div>
+
         <ul>
-          <li onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })}>
-            Dashboard
+          <li
+            onClick={() => {
+              document.getElementById("top")?.scrollIntoView({ behavior: "smooth" });
+              setIsSidebarOpen(false);
+            }}
+          >
+            📊 Dashboard
           </li>
-          <li onClick={() => document.getElementById("category-section")?.scrollIntoView({ behavior: "smooth" })}>
-            Categories
+          <li
+            onClick={() => {
+              document.getElementById("category-section")?.scrollIntoView({ behavior: "smooth" });
+              setIsSidebarOpen(false);
+            }}
+          >
+            📁 Categories
           </li>
-          <li onClick={() => document.getElementById("product-section")?.scrollIntoView({ behavior: "smooth" })}>
-            Products
+          <li
+            onClick={() => {
+              document.getElementById("product-section")?.scrollIntoView({ behavior: "smooth" });
+              setIsSidebarOpen(false);
+            }}
+          >
+            🛍️ Products
           </li>
-          <li onClick={() => document.getElementById("orders-section")?.scrollIntoView({ behavior: "smooth" })}>
-            Orders
+          <li
+            onClick={() => {
+              document.getElementById("orders-section")?.scrollIntoView({ behavior: "smooth" });
+              setIsSidebarOpen(false);
+            }}
+          >
+            📦 Orders
           </li>
-          <li onClick={() => document.getElementById("branding-section")?.scrollIntoView({ behavior: "smooth" })}>
-            Branding
+          <li
+            onClick={() => {
+              document.getElementById("branding-section")?.scrollIntoView({ behavior: "smooth" });
+              setIsSidebarOpen(false);
+            }}
+          >
+            ✨ Branding & Flash Sale
           </li>
         </ul>
       </aside>
 
       <section className="jt-admin-main">
-        <div
-          className="jt-admin-top"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "20px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <h1>Admin Dashboard</h1>
-            <p>Manage products, categories and view orders</p>
+        <div className="jt-admin-top">
+          <div className="jt-admin-top-left">
+            <button
+              type="button"
+              className="jt-admin-menu-toggle-btn"
+              onClick={() => setIsSidebarOpen(true)}
+              title="Open Navigation Menu"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+              <span>Menu</span>
+            </button>
+
+            <div>
+              <h1>Admin Dashboard</h1>
+              <p>Manage products, categories and view orders</p>
+            </div>
           </div>
 
           <button
@@ -454,7 +507,7 @@ export default function AdminPage() {
               border: "none",
               background: "#ef4444",
               color: "white",
-              padding: "12px 18px",
+              padding: "10px 18px",
               borderRadius: "10px",
               fontWeight: "700",
               cursor: "pointer",
