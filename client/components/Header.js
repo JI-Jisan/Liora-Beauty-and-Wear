@@ -148,7 +148,6 @@ export default function Header({
             <Link href="/products">Products</Link>
             <Link href="/checkout">Checkout</Link>
             <Link href="/order-tracking">Track Order</Link>
-            <Link href="/admin">Admin</Link>
           </nav>
 
           <button type="button" className="jt-cart-top-btn" onClick={handleOpenCart}>
@@ -164,7 +163,6 @@ export default function Header({
           <Link href="/products" className="jt-mobile-nav-item">Products</Link>
           <Link href="/checkout" className="jt-mobile-nav-item">Checkout</Link>
           <Link href="/order-tracking" className="jt-mobile-nav-item">Track Order</Link>
-          <Link href="/admin" className="jt-mobile-nav-item">Admin</Link>
         </div>
       </div>
 
