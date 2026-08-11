@@ -4195,16 +4195,22 @@ button {
 }
 
 .jt-admin-top {
+  position: sticky !important;
+  top: 12px !important;
+  z-index: 100 !important;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  background: #ffffff;
-  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  padding: 14px 20px;
   border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(226, 232, 240, 0.9);
   margin-bottom: 24px;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+  transition: all 0.2s ease;
 }
 
 .jt-admin-top-left {
@@ -4245,4 +4251,27 @@ button {
   margin: 2px 0 0;
   color: #64748b;
   font-size: 13px;
+}
+
+.jt-admin-floating-top-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99;
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+  transition: all 0.2s ease;
+}
+
+.jt-admin-floating-top-btn:hover {
+  background: #ff4d6d;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 77, 109, 0.35);
 }

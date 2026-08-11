@@ -1069,6 +1069,16 @@ export default function AdminPage() {
           </div>
         </div>
       </section>
+
+      {/* Floating Scroll To Top Button */}
+      <button
+        type="button"
+        className="jt-admin-floating-top-btn"
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        title="Scroll to Top"
+      >
+        ↑ Top
+      </button>
     </main>
   );
 }
