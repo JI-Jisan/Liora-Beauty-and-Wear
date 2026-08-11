@@ -87,6 +87,7 @@ export default function HomePage() {
         flashButtonText={siteSettings.flashButtonText}
         flashButtonLink={siteSettings.flashButtonLink}
         flashDurationHours={siteSettings.flashDurationHours}
+        onAddToCart={addToCart}
       />
 
       {/* Featured Circle Category Showcase (Nirnita Style) */}

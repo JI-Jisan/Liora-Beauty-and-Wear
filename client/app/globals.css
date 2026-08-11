@@ -4253,25 +4253,409 @@ button {
   font-size: 13px;
 }
 
-.jt-admin-floating-top-btn {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 99;
-  background: #0f172a;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 10px 16px;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 13px;
-  cursor: pointer;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
-  transition: all 0.2s ease;
-}
-
 .jt-admin-floating-top-btn:hover {
   background: #ff4d6d;
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(255, 77, 109, 0.35);
+}
+
+/* =========================================================
+   PROMO BANNER SLIDER - LUXURY DARK NAVY THEME (#0F172A)
+========================================================= */
+.jt-promo-banner {
+  padding: 16px 24px;
+  max-width: 1400px;
+  margin: 0 auto 20px;
+}
+
+.jt-promo-inner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%);
+  border-radius: 24px;
+  padding: 36px 40px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: center;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.15);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.jt-promo-inner::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 77, 109, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.jt-promo-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  z-index: 2;
+}
+
+.jt-promo-badge {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ff4d6d;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 77, 109, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+.jt-promo-left h2 {
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.jt-promo-left p {
+  font-size: 15px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 500px;
+}
+
+.jt-promo-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.jt-promo-btn {
+  background: linear-gradient(135deg, #ff4d6d 0%, #e84a5f 100%);
+  color: #ffffff !important;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(255, 77, 109, 0.35);
+  transition: all 0.25s ease;
+}
+
+.jt-promo-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(255, 77, 109, 0.45);
+}
+
+.jt-promo-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.jt-promo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.jt-promo-dot.active {
+  width: 28px;
+  background: #ff4d6d;
+}
+
+.jt-promo-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+}
+
+.jt-promo-image-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  height: 240px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.jt-promo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.jt-promo-image-wrapper:hover .jt-promo-image {
+  transform: scale(1.05);
+}
+
+.jt-promo-glass-tag {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(10px);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+/* =========================================================
+   FLASH SALE BANNER - HIGH-ENERGY FLAME RED / ORANGE THEME
+========================================================= */
+.jt-flash-sale {
+  padding: 0 24px;
+  max-width: 1400px;
+  margin: 0 auto 32px;
+}
+
+.jt-flash-sale-inner {
+  background: linear-gradient(135deg, #ff4d6d 0%, #ff6b4a 50%, #ff8e53 100%);
+  border-radius: 24px;
+  padding: 32px 36px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: center;
+  box-shadow: 0 12px 36px rgba(255, 77, 109, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.jt-flash-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  color: #ffffff;
+}
+
+.jt-flash-badge {
+  background: #ffffff;
+  color: #ff4d6d;
+  font-weight: 900;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.jt-flash-left h2 {
+  font-size: 32px;
+  font-weight: 900;
+  margin: 0;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.jt-flash-left p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.jt-flash-timer {
+  display: flex;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.jt-time-box {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 14px;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 68px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.jt-time-box strong {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.jt-time-box span {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.jt-flash-btn {
+  background: #0f172a;
+  color: #ffffff !important;
+  padding: 12px 26px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3);
+  transition: all 0.25s ease;
+  margin-top: 4px;
+}
+
+.jt-flash-btn:hover {
+  background: #ffffff;
+  color: #ff4d6d !important;
+  transform: translateY(-2px);
+}
+
+/* Flash Right Featured Offer Products Showcase */
+.jt-flash-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.jt-flash-products-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.jt-flash-mini-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s ease;
+}
+
+.jt-flash-mini-card:hover {
+  transform: translateY(-3px);
+}
+
+.jt-flash-mini-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 110px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.jt-flash-mini-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.jt-flash-mini-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: #ff4d6d;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.jt-flash-mini-content h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jt-flash-mini-price-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.jt-flash-offer-price {
+  font-weight: 900;
+  font-size: 14px;
+  color: #ff4d6d;
+}
+
+.jt-flash-orig-price {
+  font-size: 11px;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.jt-flash-quick-btn {
+  width: 100%;
+  border: none;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jt-flash-quick-btn.added {
+  background: #047857;
+}
+
+.jt-flash-quick-btn:hover:not(.added) {
+  background: #ff4d6d;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 900px) {
+  .jt-promo-inner,
+  .jt-flash-sale-inner {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+
+  .jt-flash-right {
+    justify-content: center;
+  }
+
+  .jt-flash-products-grid {
+    max-width: 100%;
+  }
+
+  .jt-promo-left h2,
+  .jt-flash-left h2 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 500px) {
+  .jt-flash-products-grid {
+    grid-template-columns: 1fr;
+  }
 }
