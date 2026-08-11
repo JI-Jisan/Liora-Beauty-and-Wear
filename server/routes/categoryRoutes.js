@@ -17,12 +17,10 @@ router.get("/", async (req, res) => {
       path: "parentCategory",
       populate: { path: "parentCategory" }
     }).sort({ createdAt: -1 });
-    if (categories && categories.length > 0) {
-      return res.json(categories);
-    }
-    res.json(DEMO_CATEGORIES);
+
+    res.json(categories || []);
   } catch (error) {
-    res.json(DEMO_CATEGORIES);
+    res.json([]);
   }
 });
 
@@ -78,15 +76,31 @@ router.put("/:id", adminAuth, async (req, res) => {
   }
 });
 
+// CLEAR ALL categories (Protected)
+router.delete("/clear-all", adminAuth, async (req, res) => {
+  try {
+    await Category.deleteMany({});
+    res.json({ message: "All categories deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // DELETE category (Protected)
 router.delete("/:id", adminAuth, async (req, res) => {
   try {
-    const deleted = await Category.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
 
-    if (!deleted) {
-      return res.status(404).json({ message: "Category not found" });
+    if (id.startsWith("cat-")) {
+      return res.json({ message: "Demo category deleted successfully" });
     }
 
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      await Category.findByIdAndDelete(id);
+      return res.json({ message: "Category deleted successfully" });
+    }
+
+    await Category.deleteMany({ name: id });
     res.json({ message: "Category deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -479,6 +479,48 @@ export default function AdminPage() {
     }
   };
 
+  const handleDeleteCategory = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this category?");
+    if (!confirmDelete) return;
+
+    setCategories((prev) => prev.filter((c) => c._id !== id));
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+
+      if (!res.ok) throw new Error("Delete failed");
+      setMessage("✓ Category deleted successfully");
+      loadCategories();
+    } catch (error) {
+      setMessage(`❌ Category Delete Error: ${error.message}`);
+      loadCategories();
+    }
+  };
+
+  const handleClearAllCategories = async () => {
+    const confirmClear = window.confirm("Are you sure you want to delete ALL categories to start fresh?");
+    if (!confirmClear) return;
+
+    setCategories([]);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/categories/clear-all`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+
+      if (!res.ok) throw new Error("Clear failed");
+      setMessage("✓ All categories deleted successfully");
+      loadCategories();
+    } catch (error) {
+      setMessage(`❌ Clear Categories Error: ${error.message}`);
+      loadCategories();
+    }
+  };
+
   const handleEditProduct = (product) => {
     setEditingId(product._id);
     setFormData({
@@ -714,10 +756,32 @@ export default function AdminPage() {
 
             {/* Existing Categories Tree List */}
             <div style={{ marginTop: "20px", borderTop: "1px solid #e2e8f0", paddingTop: "16px" }}>
-              <h4 style={{ margin: "0 0 10px", fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>
-                📁 Existing Categories List ({categories.length})
-              </h4>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "260px", overflowY: "auto" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+                <h4 style={{ margin: 0, fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>
+                  📁 Existing Categories List ({categories.length})
+                </h4>
+
+                {categories.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleClearAllCategories}
+                    style={{
+                      background: "#dc2626",
+                      color: "#ffffff",
+                      border: "none",
+                      padding: "4px 10px",
+                      borderRadius: "6px",
+                      fontSize: "11px",
+                      fontWeight: "800",
+                      cursor: "pointer",
+                    }}
+                  >
+                    🗑️ Clear All
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "280px", overflowY: "auto" }}>
                 {categories.length === 0 ? (
                   <span style={{ fontSize: "12px", color: "#94a3b8" }}>No categories created yet.</span>
                 ) : (
@@ -728,6 +792,23 @@ export default function AdminPage() {
                         <span style={{ fontSize: "13px", fontWeight: "700", color: "#334155" }}>
                           {parentName ? `📁 ${parentName} ➔ ${c.name}` : `📁 ${c.name}`}
                         </span>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteCategory(c._id)}
+                          style={{
+                            background: "#fee2e2",
+                            color: "#dc2626",
+                            border: "1px solid #fca5a5",
+                            padding: "3px 8px",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            fontWeight: "800",
+                            cursor: "pointer",
+                          }}
+                        >
+                          🗑️ Delete
+                        </button>
                       </div>
                     );
                   })
