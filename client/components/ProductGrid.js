@@ -195,61 +195,20 @@ function ProductGridContent({
             <div
               key={product._id}
               className="jt-product-card"
-              style={{
-                background: "#FFFFFF",
-                border: "1px solid #F1F5F9",
-                borderRadius: "20px",
-                padding: "16px",
-                position: "relative",
-                boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
-                display: "flex",
-                flexDirection: "column",
-                justify: "space-between",
-                transition: "all 0.2s ease",
-              }}
             >
               {product.discountBadge && (
-                <div
-                  className="jt-discount-badge"
-                  style={{
-                    position: "absolute",
-                    top: "24px",
-                    right: "24px",
-                    background: "#FF4D6D",
-                    color: "#FFFFFF",
-                    fontSize: "11px",
-                    fontWeight: "800",
-                    padding: "6px 12px",
-                    borderRadius: "999px",
-                    boxShadow: "0 4px 12px rgba(255, 77, 109, 0.3)",
-                    zIndex: 5,
-                    letterSpacing: "0.5px",
-                  }}
-                >
+                <div className="jt-discount-badge">
                   {product.discountBadge}
                 </div>
               )}
 
-              <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none" }}>
-                <div
-                  className="jt-product-image-wrap"
-                  style={{
-                    width: "100%",
-                    height: "240px",
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    background: "#F8FAFC",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
+              <Link href={`/products/${product._id}`} className="jt-product-link">
+                <div className="jt-product-image-wrap">
                   {imageSrc ? (
                     <img
                       src={imageSrc}
                       alt={product.name}
                       className="jt-product-real-image"
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       onError={(e) => {
                         e.currentTarget.style.display = "none";
                         const fallback =
@@ -265,14 +224,6 @@ function ProductGridContent({
                     className="jt-image-fallback"
                     style={{
                       display: imageSrc ? "none" : "flex",
-                      width: "100%",
-                      height: "100%",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#64748B",
-                      fontWeight: "700",
-                      padding: "16px",
-                      textAlign: "center",
                     }}
                   >
                     <span>{product.name}</span>
@@ -280,53 +231,32 @@ function ProductGridContent({
                 </div>
               </Link>
 
-              <div className="jt-product-content" style={{ marginTop: "16px", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
+              <div className="jt-product-content">
                 <div>
-                  <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none" }}>
-                    <h4 style={{ color: "#0F172A", margin: "0 0 6px", fontSize: "18px", fontWeight: "800", lineHeight: "1.3", minHeight: "48px" }}>
-                      {product.name}
-                    </h4>
+                  <Link href={`/products/${product._id}`} className="jt-product-link">
+                    <h4>{product.name}</h4>
                   </Link>
 
-                  <p style={{ color: "#64748B", fontSize: "13px", margin: "0 0 10px", fontWeight: "600" }}>
+                  <p className="jt-card-cat-subtitle">
                     {catName}
                   </p>
                 </div>
 
                 <div>
-                  <p className="jt-price" style={{ color: "#FF4D6D", fontSize: "22px", fontWeight: "900", margin: "0 0 14px", display: "flex", alignItems: "baseline", gap: "8px" }}>
+                  <p className="jt-price">
                     {product.offerPrice} Tk
-                    <span style={{ fontSize: "14px", color: "#94A3B8", textDecoration: "line-through", fontWeight: "500" }}>
-                      {product.originalPrice} Tk
-                    </span>
+                    {product.originalPrice && (
+                      <span>{product.originalPrice} Tk</span>
+                    )}
                   </p>
 
                   <button
                     type="button"
                     onClick={() => onAddToCart(product)}
                     disabled={product.stockStatus === "Out of Stock"}
-                    style={{
-                      width: "100%",
-                      border: "none",
-                      background:
-                        product.stockStatus === "Out of Stock"
-                          ? "#94A3B8"
-                          : "linear-gradient(135deg, #FF4D6D 0%, #E84A5F 100%)",
-                      color: "#FFFFFF",
-                      padding: "14px 18px",
-                      borderRadius: "12px",
-                      fontWeight: "800",
-                      fontSize: "15px",
-                      cursor:
-                        product.stockStatus === "Out of Stock"
-                          ? "not-allowed"
-                          : "pointer",
-                      boxShadow:
-                        product.stockStatus === "Out of Stock"
-                          ? "none"
-                          : "0 6px 18px rgba(255, 77, 109, 0.25)",
-                      transition: "all 0.2s ease",
-                    }}
+                    className={`jt-add-to-cart-btn ${
+                      product.stockStatus === "Out of Stock" ? "disabled" : ""
+                    }`}
                   >
                     {product.stockStatus === "Out of Stock"
                       ? "Out of Stock"

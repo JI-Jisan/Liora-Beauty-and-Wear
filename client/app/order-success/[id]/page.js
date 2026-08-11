@@ -39,7 +39,7 @@ export default function OrderSuccessPage() {
 
   return (
     <main className="jt-page">
-      <Header cartCount={0} onOpenCart={() => {}} />
+      <Header />
 
       <div className="jt-success-wrapper">
         <div className="jt-success-container">

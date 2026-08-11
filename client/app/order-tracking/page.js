@@ -53,7 +53,7 @@ export default function OrderTrackingPage() {
 
   return (
     <main className="jt-page">
-      <Header cartCount={0} onOpenCart={() => {}} />
+      <Header />
 
       <div className="jt-tracking-wrapper">
         <div className="jt-tracking-container">

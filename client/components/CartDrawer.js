@@ -42,56 +42,69 @@ export default function CartDrawer({
   };
 
   return (
-    <div className={`jt-cart-drawer ${isOpen ? "open" : ""}`}>
-      <div className="jt-cart-header">
-        <h3>Your Cart</h3>
-        <button onClick={onClose}>✕</button>
-      </div>
+    <>
+      <div
+        className={`jt-cart-overlay ${isOpen ? "open" : ""}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className={`jt-cart-drawer ${isOpen ? "open" : ""}`}>
+        <div className="jt-cart-header">
+          <h3>Your Cart ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})</h3>
+          <button onClick={onClose} aria-label="Close cart">✕</button>
+        </div>
 
-      <div className="jt-cart-body">
-        {cartItems.length === 0 ? (
-          <p className="jt-empty-cart">No items in cart</p>
-        ) : (
-          cartItems.map((item) => (
-            <div key={item._id} className="jt-cart-item">
-              <div className="jt-cart-item-info">
-                <h4>{item.name}</h4>
-                <p>{item.offerPrice} Tk</p>
-                <p>Category: {typeof item.category === "object" ? item.category?.name : (item.category || "Beauty & Wear")}</p>
-              </div>
-
-              <div className="jt-cart-actions">
-                <div className="jt-qty-box">
-                  <button onClick={() => onDecrease(item._id)}>-</button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => onIncrease(item._id)}>+</button>
+        <div className="jt-cart-body">
+          {cartItems.length === 0 ? (
+            <div className="jt-empty-cart-view">
+              <p className="jt-empty-cart">Your cart is empty</p>
+              <button className="jt-continue-shopping-btn" onClick={onClose}>
+                Start Shopping
+              </button>
+            </div>
+          ) : (
+            cartItems.map((item) => (
+              <div key={item._id} className="jt-cart-item">
+                <div className="jt-cart-item-info">
+                  <h4>{item.name}</h4>
+                  <p className="jt-cart-price">{item.offerPrice} Tk</p>
+                  <p className="jt-cart-cat">Category: {typeof item.category === "object" ? item.category?.name : (item.category || "Beauty & Wear")}</p>
                 </div>
 
-                <button
-                  className="jt-remove-btn"
-                  onClick={() => onRemove(item._id)}
-                >
-                  Remove
-                </button>
+                <div className="jt-cart-actions">
+                  <div className="jt-qty-box">
+                    <button onClick={() => onDecrease(item._id)}>-</button>
+                    <span>{item.quantity}</span>
+                    <button onClick={() => onIncrease(item._id)}>+</button>
+                  </div>
+
+                  <button
+                    className="jt-remove-btn"
+                    onClick={() => onRemove(item._id)}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
 
-      <div className="jt-cart-footer">
-        <p className="jt-total">
-          Total: <span>{total} Tk</span>
-        </p>
+        <div className="jt-cart-footer">
+          <div className="jt-cart-subtotal-row">
+            <span>Subtotal</span>
+            <strong>{total} Tk</strong>
+          </div>
 
-        <button
-          className="jt-checkout-btn"
-          onClick={goToCheckout}
-          disabled={cartItems.length === 0}
-        >
-          Proceed to Checkout
-        </button>
+          <button
+            className="jt-checkout-btn"
+            onClick={goToCheckout}
+            disabled={cartItems.length === 0}
+          >
+            Proceed to Checkout
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
