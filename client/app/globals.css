@@ -4659,3 +4659,224 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   FULL-BLEED COVER IMAGE HERO PROMO BANNER SLIDER
+========================================================= */
+.jt-full-banner-container {
+  padding: 12px 24px;
+  max-width: 1400px;
+  margin: 0 auto 24px;
+}
+
+.jt-full-banner-card {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  display: flex;
+  align-items: center;
+}
+
+.jt-full-banner-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  animation: fadeInZoom 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInZoom {
+  0% {
+    opacity: 0.4;
+    transform: scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.jt-full-banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.92) 0%,
+    rgba(15, 23, 42, 0.75) 45%,
+    rgba(15, 23, 42, 0.35) 75%,
+    rgba(15, 23, 42, 0.1) 100%
+  );
+}
+
+.jt-full-banner-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  padding: 44px 52px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 32px;
+}
+
+.jt-full-banner-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 620px;
+}
+
+.jt-full-banner-badge {
+  background: #ff4d6d;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 13px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(255, 77, 109, 0.4);
+}
+
+.jt-full-banner-title {
+  font-size: 38px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.jt-full-banner-sub {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.6;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+}
+
+.jt-full-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.jt-full-banner-btn {
+  background: #ffffff;
+  color: #0f172a !important;
+  padding: 14px 32px;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 15px;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+}
+
+.jt-full-banner-btn:hover {
+  background: #ff4d6d;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(255, 77, 109, 0.4);
+}
+
+.jt-full-banner-price-tag {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+}
+
+.jt-full-banner-price-tag strong {
+  color: #ff4d6d;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.jt-full-banner-price-tag span {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: line-through;
+  font-size: 13px;
+}
+
+.jt-full-banner-right-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.jt-full-banner-dots {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.jt-full-banner-dot {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.jt-dot-inner {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.jt-full-banner-dot.active .jt-dot-inner {
+  width: 32px;
+  background: #ff4d6d;
+  box-shadow: 0 0 12px rgba(255, 77, 109, 0.6);
+}
+
+.jt-slide-counter {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 900px) {
+  .jt-full-banner-card {
+    min-height: 340px;
+  }
+
+  .jt-full-banner-content {
+    padding: 28px 24px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .jt-full-banner-title {
+    font-size: 28px;
+  }
+
+  .jt-full-banner-right-controls {
+    align-items: flex-start;
+    margin-top: 8px;
+  }
+}
