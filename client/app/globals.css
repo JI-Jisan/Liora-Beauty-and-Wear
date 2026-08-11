@@ -1798,6 +1798,57 @@ button {
   transition: background 0.2s ease;
 }
 
+/* Daraz-Style Sticky Product Sub-Tabs Bar */
+.jt-product-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: 960px;
+  margin: 10px auto 0;
+  padding: 4px 6px 0;
+  border-top: 1px solid #f1f5f9;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.jt-product-tabs-row::-webkit-scrollbar {
+  display: none;
+}
+
+.jt-product-tab-item {
+  background: transparent;
+  border: none;
+  padding: 8px 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.jt-product-tab-item:hover {
+  color: #0f172a;
+}
+
+.jt-product-tab-item.active {
+  color: #e11d48;
+  font-weight: 900;
+}
+
+.jt-product-tab-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #e11d48, #f97316);
+  border-radius: 3px 3px 0 0;
+}
+
 .jt-mobile-nav-strip {
   display: none;
   background: #ffffff;

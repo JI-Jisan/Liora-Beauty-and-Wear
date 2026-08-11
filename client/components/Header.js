@@ -55,6 +55,9 @@ export default function Header({
   onOpenCart: propsOnOpenCart,
   searchTerm: propsSearchTerm,
   onSearchChange,
+  showProductTabs = false,
+  activeProductTab = "overview",
+  onProductTabClick,
 }) {
   const router = useRouter();
   const cartContext = useCart();
@@ -260,6 +263,40 @@ export default function Header({
               </div>
             )}
           </form>
+
+          {/* ROW 4: Sticky Product Details Navigation Tabs (Overview, Ratings, Product Details, Recommendations) */}
+          {showProductTabs && (
+            <div className="jt-product-tabs-row">
+              <button
+                type="button"
+                className={`jt-product-tab-item ${activeProductTab === 'overview' ? 'active' : ''}`}
+                onClick={() => onProductTabClick?.('overview')}
+              >
+                Overview
+              </button>
+              <button
+                type="button"
+                className={`jt-product-tab-item ${activeProductTab === 'ratings' ? 'active' : ''}`}
+                onClick={() => onProductTabClick?.('ratings')}
+              >
+                Ratings
+              </button>
+              <button
+                type="button"
+                className={`jt-product-tab-item ${activeProductTab === 'details' ? 'active' : ''}`}
+                onClick={() => onProductTabClick?.('details')}
+              >
+                Product Details
+              </button>
+              <button
+                type="button"
+                className={`jt-product-tab-item ${activeProductTab === 'recommendations' ? 'active' : ''}`}
+                onClick={() => onProductTabClick?.('recommendations')}
+              >
+                Recommendations
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
