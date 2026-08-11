@@ -228,6 +228,7 @@ router.post("/", adminAuth, async (req, res) => {
 // UPDATE product
 router.put("/:id", adminAuth, async (req, res) => {
   try {
+    const { id } = req.params;
     const { name, originalPrice, offerPrice, category } = req.body;
 
     if (name !== undefined && (!name || typeof name !== "string" || !name.trim())) {
@@ -250,14 +251,29 @@ router.put("/:id", adminAuth, async (req, res) => {
           : null;
     }
 
-    const updated = await Product.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    ).populate("category");
+    // Mark demo as seeded
+    await SiteSettings.findOneAndUpdate({}, { isDemoSeeded: true }, { upsert: true });
+
+    // Handle demo item update by saving as real MongoDB product
+    if (id.startsWith("demo-")) {
+      delete updateData._id;
+      const newProduct = new Product(updateData);
+      await newProduct.save();
+      const saved = await Product.findById(newProduct._id).populate("category");
+      return res.json(saved);
+    }
+
+    let updated = null;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      updated = await Product.findByIdAndUpdate(id, updateData, { new: true }).populate("category");
+    }
 
     if (!updated) {
-      return res.status(404).json({ message: "Product not found" });
+      delete updateData._id;
+      const newProduct = new Product(updateData);
+      await newProduct.save();
+      const saved = await Product.findById(newProduct._id).populate("category");
+      return res.json(saved);
     }
 
     res.json(updated);
