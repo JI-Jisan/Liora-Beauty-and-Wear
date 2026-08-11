@@ -5078,3 +5078,92 @@ button {
   background: linear-gradient(90deg, #e11d48, #f97316) !important;
   border-radius: 3px 3px 0 0 !important;
 }
+
+/* ==========================================================================
+   HEADER NAVIGATION MOTHER CATEGORY DROPDOWN MENU
+   ========================================================================== */
+.jt-nav-sub-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 260px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+  border: 1px solid #e2e8f0;
+  padding: 16px;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jt-nav-sub-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.jt-sub-menu-header-link {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  color: #e11d48;
+  text-decoration: none;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid #f1f5f9;
+  width: 100%;
+}
+
+.jt-sub-menu-header-link:hover {
+  color: #be123c;
+}
+
+.jt-sub-menu-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jt-sub-menu-child-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  transition: background 0.2s ease;
+}
+
+.jt-sub-menu-child-title:hover {
+  background: #f1f5f9;
+  color: #e11d48;
+}
+
+.jt-sub-menu-grandchild-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 14px;
+  margin-top: 4px;
+  border-left: 2px dashed #cbd5e1;
+}
+
+.jt-sub-menu-grandchild-item {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  text-decoration: none;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.jt-sub-menu-grandchild-item:hover {
+  color: #e11d48;
+  background: #fff0f5;
+}
