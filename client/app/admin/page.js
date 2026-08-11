@@ -874,12 +874,63 @@ export default function AdminPage() {
                 onChange={handleChange}
               />
 
-              <textarea
-                name="description"
-                placeholder="Product description"
-                value={formData.description}
-                onChange={handleChange}
-              />
+              <div style={{ margin: "10px 0 4px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: "800", color: "#334155" }}>
+                    📝 Product Description (পণ্যের বিবরণ)
+                  </label>
+
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: prev.description ? `${prev.description} **Bold Text**` : "**Bold Text**",
+                        }));
+                      }}
+                      style={{
+                        padding: "3px 10px", background: "#ffffff", border: "1px solid #cbd5e1",
+                        borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer",
+                        color: "#0f172a", boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                      }}
+                      title="Add bold text"
+                    >
+                      <b>B</b> Bold
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          description: prev.description ? `${prev.description}\n• Bullet Point 1\n• Bullet Point 2` : "• Bullet Point 1\n• Bullet Point 2",
+                        }));
+                      }}
+                      style={{
+                        padding: "3px 10px", background: "#ffffff", border: "1px solid #cbd5e1",
+                        borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer",
+                        color: "#0f172a", boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                      }}
+                      title="Add bullet points"
+                    >
+                      • List
+                    </button>
+                  </div>
+                </div>
+
+                <textarea
+                  name="description"
+                  placeholder="Product description... (Bold করতে **bold text** অথবা <b>bold text</b> লিখুন)"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={5}
+                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}
+                />
+                <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginTop: "4px" }}>
+                  💡 টিপস: <b>B Bold</b> বাটনে চাপ দিলে বা টেক্সটের চারপাশে <b>**bold**</b> অথবা <b>&lt;b&gt;bold&lt;/b&gt;</b> লিখলে ওয়েবসাইটে লেখাটি <b>বোল্ড</b> হয়ে দেখাবে!
+                </span>
+              </div>
 
               <select
                 name="stockStatus"

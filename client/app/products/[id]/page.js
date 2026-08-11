@@ -157,7 +157,31 @@ function ProductImageCarousel({ images, fallback, productName }) {
     </div>
   );
 }
-// ─────────────────────────────────────────────────────────────────────────────
+function renderFormattedDescription(text) {
+  if (!text) return "No description available for this product.";
+
+  if (/<[a-z][\s\S]*>/i.test(text)) {
+    return (
+      <div
+        dangerouslySetInnerHTML={{ __html: text }}
+        style={{ lineHeight: "1.7" }}
+      />
+    );
+  }
+
+  const html = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.*?)__/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br/>');
+
+  return (
+    <div
+      dangerouslySetInnerHTML={{ __html: html }}
+      style={{ lineHeight: "1.7" }}
+    />
+  );
+}
 
 export default function ProductDetailsPage() {
   const params = useParams();
@@ -569,7 +593,6 @@ export default function ProductDetailsPage() {
             <span style={{ fontSize: "13px", color: "#059669", fontWeight: "700" }}>✓ Cash on Delivery</span>
           </div>
 
-          {/* Product Description Box in Main Overview Card */}
           <div style={{
             padding: "18px",
             background: "#fff0f5",
@@ -585,10 +608,9 @@ export default function ProductDetailsPage() {
               fontSize: "14px",
               color: "#1e293b",
               lineHeight: "1.65",
-              whiteSpace: "pre-line",
               fontWeight: "500",
             }}>
-              {product.description || "No description available for this product."}
+              {renderFormattedDescription(product.description)}
             </div>
           </div>
         </div>
@@ -675,8 +697,8 @@ export default function ProductDetailsPage() {
       <section id="details" className="jt-details-bottom">
         <div className="jt-details-description-card">
           <h2>Product Details & Specifications</h2>
-          <div className="jt-details-description-text" style={{ whiteSpace: "pre-line", fontSize: "14px", lineHeight: "1.7", color: "#334155" }}>
-            {product.description || "No description available for this product."}
+          <div className="jt-details-description-text" style={{ fontSize: "14px", lineHeight: "1.7", color: "#334155" }}>
+            {renderFormattedDescription(product.description)}
           </div>
         </div>
       </section>
