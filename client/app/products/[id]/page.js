@@ -386,22 +386,41 @@ export default function ProductDetailsPage() {
         {/* ── PRODUCT INFO CARD ── */}
         <div style={{ padding: "0 14px" }}>
 
-          {/* Breadcrumb Navigation */}
-          <nav className="jt-breadcrumb-nav" aria-label="Breadcrumb" style={{ margin: "12px 0 10px", fontSize: "13px", color: "#64748b", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px" }}>
-            <Link href="/" style={{ color: "#64748b", textDecoration: "none", fontWeight: "600" }}>Home</Link>
-            <span style={{ color: "#cbd5e1" }}>/</span>
-            {product.category?.name && (
-              <>
-                <Link href={`/products?category=${encodeURIComponent(product.category._id || product.category.name)}`} style={{ color: "#64748b", textDecoration: "none", fontWeight: "600" }}>
-                  {product.category.name}
-                </Link>
+          {/* Dynamic Nested Breadcrumb Navigation */}
+          {(() => {
+            const getBreadcrumbs = (cat) => {
+              const list = [];
+              let current = cat;
+              while (current && typeof current === "object") {
+                if (current.name) {
+                  list.unshift({ id: current._id || current.name, name: current.name });
+                }
+                current = current.parentCategory;
+              }
+              return list;
+            };
+            const categoryTree = getBreadcrumbs(product?.category);
+
+            return (
+              <nav className="jt-breadcrumb-nav" aria-label="Breadcrumb" style={{ margin: "12px 0 10px", fontSize: "13px", color: "#64748b", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px" }}>
+                <Link href="/" style={{ color: "#64748b", textDecoration: "none", fontWeight: "600" }}>Home</Link>
                 <span style={{ color: "#cbd5e1" }}>/</span>
-              </>
-            )}
-            <span style={{ color: "#0f172a", fontWeight: "700" }}>
-              {product.name}
-            </span>
-          </nav>
+
+                {categoryTree.map((item) => (
+                  <span key={item.id} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <Link href={`/products?category=${encodeURIComponent(item.id)}`} style={{ color: "#64748b", textDecoration: "none", fontWeight: "600" }}>
+                      {item.name}
+                    </Link>
+                    <span style={{ color: "#cbd5e1" }}>/</span>
+                  </span>
+                ))}
+
+                <span style={{ color: "#0f172a", fontWeight: "700" }}>
+                  {product.name}
+                </span>
+              </nav>
+            );
+          })()}
 
           {/* Category pill */}
           <span style={{

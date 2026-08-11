@@ -28,6 +28,7 @@ export default function AdminPage() {
   const [categoryForm, setCategoryForm] = useState({
     name: "",
     type: "main",
+    parentCategory: "",
   });
 
   const DEFAULT_5_SLIDES = [
@@ -238,6 +239,7 @@ export default function AdminPage() {
       setCategoryForm({
         name: "",
         type: "main",
+        parentCategory: "",
       });
 
       loadCategories();
@@ -673,19 +675,38 @@ export default function AdminPage() {
               <input
                 type="text"
                 name="name"
-                placeholder="Category name"
+                placeholder="Category name (e.g. Face Care)"
                 value={categoryForm.name}
                 onChange={handleCategoryChange}
                 required
               />
+
+              <div style={{ marginBottom: "6px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "700", color: "#64748b", display: "block", marginBottom: "4px" }}>
+                  📁 Parent Category (কোন ক্যাটাগরির ভেতরে থাকবে)
+                </label>
+                <select
+                  name="parentCategory"
+                  value={categoryForm.parentCategory || ""}
+                  onChange={handleCategoryChange}
+                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}
+                >
+                  <option value="">📁 None (Main Parent Category)</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      📁 Inside: {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <select
                 name="type"
                 value={categoryForm.type}
                 onChange={handleCategoryChange}
               >
-                <option value="main">Main</option>
-                <option value="more">More</option>
+                <option value="main">Main Header Navigation</option>
+                <option value="more">More Dropdown Menu</option>
               </select>
 
               <button type="submit">Add Category</button>
@@ -712,11 +733,15 @@ export default function AdminPage() {
                 required
               >
                 <option value="">Select category</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.name}
-                  </option>
-                ))}
+                {categories.map((cat) => {
+                  const parentName = cat.parentCategory?.name;
+                  const label = parentName ? `${parentName} ➔ ${cat.name}` : cat.name;
+                  return (
+                    <option key={cat._id} value={cat._id}>
+                      {label}
+                    </option>
+                  );
+                })}
               </select>
 
               <input

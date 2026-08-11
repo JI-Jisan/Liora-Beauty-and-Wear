@@ -13,7 +13,10 @@ const DEMO_CATEGORIES = [
 // GET all categories
 router.get("/", async (req, res) => {
   try {
-    const categories = await Category.find().sort({ createdAt: -1 });
+    const categories = await Category.find().populate({
+      path: "parentCategory",
+      populate: { path: "parentCategory" }
+    }).sort({ createdAt: -1 });
     if (categories && categories.length > 0) {
       return res.json(categories);
     }
@@ -26,19 +29,23 @@ router.get("/", async (req, res) => {
 // ADD new category (Protected)
 router.post("/", adminAuth, async (req, res) => {
   try {
-    const { name, type } = req.body;
+    const { name, type, parentCategory } = req.body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
       return res.status(400).json({ message: "Category name is required" });
     }
 
+    const validParent = parentCategory && parentCategory.match(/^[0-9a-fA-F]{24}$/) ? parentCategory : null;
+
     const category = new Category({
       name: name.trim(),
       type: type || "main",
+      parentCategory: validParent,
     });
 
     const savedCategory = await category.save();
-    res.status(201).json(savedCategory);
+    const populated = await Category.findById(savedCategory._id).populate("parentCategory");
+    res.status(201).json(populated);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -47,17 +54,19 @@ router.post("/", adminAuth, async (req, res) => {
 // UPDATE category (Protected)
 router.put("/:id", adminAuth, async (req, res) => {
   try {
-    const { name, type } = req.body;
+    const { name, type, parentCategory } = req.body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
       return res.status(400).json({ message: "Category name is required" });
     }
 
+    const validParent = parentCategory && parentCategory.match(/^[0-9a-fA-F]{24}$/) ? parentCategory : null;
+
     const updated = await Category.findByIdAndUpdate(
       req.params.id,
-      { name: name.trim(), type: type || "main" },
+      { name: name.trim(), type: type || "main", parentCategory: validParent },
       { new: true }
-    );
+    ).populate("parentCategory");
 
     if (!updated) {
       return res.status(404).json({ message: "Category not found" });

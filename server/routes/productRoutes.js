@@ -77,7 +77,13 @@ const SiteSettings = require("../models/SiteSettings");
 // GET all products
 router.get("/", async (req, res) => {
   try {
-    let products = await Product.find().populate("category");
+    let products = await Product.find().populate({
+      path: "category",
+      populate: {
+        path: "parentCategory",
+        populate: { path: "parentCategory" }
+      }
+    });
 
     // Check if database has been seeded before
     let settings = await SiteSettings.findOne();
@@ -141,7 +147,13 @@ router.get("/", async (req, res) => {
           ];
 
           await Product.insertMany(seedItems);
-          products = await Product.find().populate("category");
+          products = await Product.find().populate({
+      path: "category",
+      populate: {
+        path: "parentCategory",
+        populate: { path: "parentCategory" }
+      }
+    });
         } catch (seedErr) {
           console.error("Seed error:", seedErr);
         }
@@ -165,7 +177,13 @@ router.get("/:id", async (req, res) => {
     }
 
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      const product = await Product.findById(id).populate("category");
+      const product = await Product.findById(id).populate({
+      path: "category",
+      populate: {
+        path: "parentCategory",
+        populate: { path: "parentCategory" }
+      }
+    });
       if (product) {
         return res.json(product);
       }

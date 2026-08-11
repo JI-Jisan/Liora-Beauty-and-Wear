@@ -6,12 +6,16 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
     type: {
       type: String,
       enum: ["main", "more"],
       default: "main",
+    },
+    parentCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
     },
     isActive: {
       type: Boolean,
