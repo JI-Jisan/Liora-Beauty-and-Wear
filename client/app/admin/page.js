@@ -89,7 +89,7 @@ export default function AdminPage() {
     heroTitle: "",
     heroText: "",
     offerText: "",
-    promoSlides: DEFAULT_5_SLIDES,
+    promoSlides: [],
     flashTitle: "",
     flashSubtitle: "",
     flashButtonText: "",
@@ -143,18 +143,13 @@ export default function AdminPage() {
       const res = await fetch(`${API_BASE_URL}/api/settings`);
       const data = await res.json();
 
-      const slidesToUse =
-        Array.isArray(data.promoSlides) && data.promoSlides.length > 0
-          ? data.promoSlides
-          : DEFAULT_5_SLIDES;
-
       setSettings({
         brandName: data.brandName || "",
         brandSubtitle: data.brandSubtitle || "",
         heroTitle: data.heroTitle || "",
         heroText: data.heroText || "",
         offerText: data.offerText || "",
-        promoSlides: slidesToUse,
+        promoSlides: Array.isArray(data.promoSlides) ? data.promoSlides : [],
         flashTitle: data.flashTitle || "Limited Time Special Offer",
         flashSubtitle:
           data.flashSubtitle ||
