@@ -350,40 +350,58 @@ export default function AdminPage() {
     }
   };
 
-  const handleProductImageUpload = (file) => {
+  const handleProductImageUpload = (file, fieldName = "image") => {
     if (!file) return;
-
-    setMessage("⏳ Resizing & optimizing product image...");
+    const label = fieldName === "image" ? "Image 1" : fieldName === "image2" ? "Image 2" : "Image 3";
+    setMessage(`⏳ Reading ${label}...`);
 
     const reader = new FileReader();
+
     reader.onload = (e) => {
+      const rawBase64 = e.target.result;
+
+      // Immediately set raw base64 so preview works 100% reliably
+      setFormData((prev) => ({ ...prev, [fieldName]: rawBase64 }));
+
+      // Process canvas optimization in background
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 800;
-        let width = img.width;
-        let height = img.height;
+        try {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 900;
+          let width = img.width;
+          let height = img.height;
 
-        if (width > MAX_WIDTH) {
-          height = Math.round((height * MAX_WIDTH) / width);
-          width = MAX_WIDTH;
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+          if (compressedBase64 && compressedBase64.length > 100) {
+            setFormData((prev) => ({ ...prev, [fieldName]: compressedBase64 }));
+          }
+          setMessage(`✅ ${label} attached & optimized!`);
+        } catch (err) {
+          setMessage(`✅ ${label} attached!`);
         }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
-        setFormData((prev) => ({ ...prev, image: compressedBase64 }));
-        setMessage("✅ Product image attached & optimized!");
       };
       img.onerror = () => {
-        setMessage("❌ Failed to process product image file.");
+        setMessage(`✅ ${label} attached!`);
       };
-      img.src = e.target.result;
+      img.src = rawBase64;
     };
+
+    reader.onerror = () => {
+      setMessage(`❌ Failed to read ${label} file.`);
+    };
+
     reader.readAsDataURL(file);
   };
 
@@ -396,6 +414,10 @@ export default function AdminPage() {
         ...formData,
         originalPrice: Number(formData.originalPrice),
         offerPrice: Number(formData.offerPrice),
+        image: formData.image || "",
+        image2: formData.image2 || "",
+        image3: formData.image3 || "",
+        images: [formData.image, formData.image2, formData.image3].filter(Boolean),
       };
 
       const url = editingId
@@ -531,7 +553,11 @@ export default function AdminPage() {
       discountBadge: product.discountBadge || "",
       description: product.description || "",
       stockStatus: product.stockStatus || "In Stock",
-      image: product.image || "",
+      image: product.image || (product.images && product.images[0]) || "",
+      image2: product.image2 || (product.images && product.images[1]) || "",
+      image3: product.image3 || (product.images && product.images[2]) || "",
+      rating: product.rating || "",
+      reviewCount: product.reviewCount || "",
       isFeatured: product.isFeatured || false,
       isTrending: product.isTrending || false,
       isNewArrival: product.isNewArrival || false,
@@ -942,24 +968,25 @@ export default function AdminPage() {
                 <option value="Out of Stock">Out of Stock</option>
               </select>
 
+              {/* Image 1 */}
               <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "10px 0" }}>
                 <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
-                  📷 Product Image Upload:
+                  📷 Product Main Photo (Image 1):
                 </label>
                 <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
                   <input
                     type="file"
                     accept="image/*"
-                    id="product-file-input"
+                    id="product-file-input-1"
                     style={{ display: "none" }}
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
-                        handleProductImageUpload(e.target.files[0]);
+                        handleProductImageUpload(e.target.files[0], "image");
                       }
                     }}
                   />
                   <label
-                    htmlFor="product-file-input"
+                    htmlFor="product-file-input-1"
                     style={{
                       background: "#0f172a",
                       color: "#ffffff",
@@ -974,30 +1001,33 @@ export default function AdminPage() {
                       boxShadow: "0 2px 6px rgba(15,23,42,0.15)"
                     }}
                   >
-                    📁 Upload Product Photo from Computer / Phone
+                    📁 Upload Main Photo from Phone / Computer
                   </label>
-                  <span style={{ fontSize: "12px", color: "#64748b" }}>Or paste URL below:</span>
                 </div>
 
                 <input
                   type="text"
                   name="image"
-                  placeholder="Image URL or Base64 String"
+                  placeholder="Or paste Main Image URL / Base64"
                   value={formData.image || ""}
                   onChange={handleChange}
                   style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
                 />
 
                 {formData.image && (
-                  <div style={{ marginTop: "10px" }}>
-                    <span style={{ fontSize: "12px", fontWeight: "800", color: "#047857" }}>
-                      ✓ Product Image Preview:
-                    </span>
+                  <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
                     <img
                       src={getImageUrl(formData.image)}
-                      alt="Product Preview"
-                      style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px", marginTop: "4px", border: "2px solid #0f172a", display: "block" }}
+                      alt="Product Preview 1"
+                      style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px", border: "2px solid #0f172a" }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, image: "" }))}
+                      style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
+                    >
+                      🗑️ Clear Main Image
+                    </button>
                   </div>
                 )}
               </div>
@@ -1005,80 +1035,100 @@ export default function AdminPage() {
               {/* Image 2 */}
               <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "6px 0" }}>
                 <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
-                  📷 Product Image 2 (Optional - Carousel):
+                  📷 Product Photo 2 (Optional - Slider / Carousel):
                 </label>
                 <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
-                  <input type="file" accept="image/*" id="product-file-input-2" style={{ display: "none" }}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="product-file-input-2"
+                    style={{ display: "none" }}
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
-                        const file = e.target.files[0];
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          const img = new Image();
-                          img.onload = () => {
-                            const canvas = document.createElement("canvas");
-                            const MAX_WIDTH = 800;
-                            let w = img.width, h = img.height;
-                            if (w > MAX_WIDTH) { h = Math.round(h * MAX_WIDTH / w); w = MAX_WIDTH; }
-                            canvas.width = w; canvas.height = h;
-                            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-                            setFormData(prev => ({ ...prev, image2: canvas.toDataURL("image/jpeg", 0.85) }));
-                          };
-                          img.src = ev.target.result;
-                        };
-                        reader.readAsDataURL(file);
+                        handleProductImageUpload(e.target.files[0], "image2");
                       }
                     }}
                   />
-                  <label htmlFor="product-file-input-2" style={{ background: "#475569", color: "#fff", padding: "8px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}>
+                  <label
+                    htmlFor="product-file-input-2"
+                    style={{ background: "#475569", color: "#fff", padding: "8px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}
+                  >
                     📁 Upload Image 2
                   </label>
-                  <input type="text" name="image2" placeholder="Or paste Image 2 URL" value={formData.image2 || ""} onChange={handleChange}
-                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }} />
+                  <input
+                    type="text"
+                    name="image2"
+                    placeholder="Or paste Image 2 URL"
+                    value={formData.image2 || ""}
+                    onChange={handleChange}
+                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
+                  />
                 </div>
                 {formData.image2 && (
-                  <img src={getImageUrl(formData.image2)} alt="Image 2 Preview"
-                    style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", border: "2px solid #475569" }} />
+                  <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <img
+                      src={getImageUrl(formData.image2)}
+                      alt="Image 2 Preview"
+                      style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", border: "2px solid #475569" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, image2: "" }))}
+                      style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
+                    >
+                      🗑️ Clear Image 2
+                    </button>
+                  </div>
                 )}
               </div>
 
               {/* Image 3 */}
               <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "6px 0" }}>
                 <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
-                  📷 Product Image 3 (Optional - Carousel):
+                  📷 Product Photo 3 (Optional - Slider / Carousel):
                 </label>
                 <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
-                  <input type="file" accept="image/*" id="product-file-input-3" style={{ display: "none" }}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="product-file-input-3"
+                    style={{ display: "none" }}
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
-                        const file = e.target.files[0];
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                          const img = new Image();
-                          img.onload = () => {
-                            const canvas = document.createElement("canvas");
-                            const MAX_WIDTH = 800;
-                            let w = img.width, h = img.height;
-                            if (w > MAX_WIDTH) { h = Math.round(h * MAX_WIDTH / w); w = MAX_WIDTH; }
-                            canvas.width = w; canvas.height = h;
-                            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-                            setFormData(prev => ({ ...prev, image3: canvas.toDataURL("image/jpeg", 0.85) }));
-                          };
-                          img.src = ev.target.result;
-                        };
-                        reader.readAsDataURL(file);
+                        handleProductImageUpload(e.target.files[0], "image3");
                       }
                     }}
                   />
-                  <label htmlFor="product-file-input-3" style={{ background: "#7c3aed", color: "#fff", padding: "8px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}>
+                  <label
+                    htmlFor="product-file-input-3"
+                    style={{ background: "#7c3aed", color: "#fff", padding: "8px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}
+                  >
                     📁 Upload Image 3
                   </label>
-                  <input type="text" name="image3" placeholder="Or paste Image 3 URL" value={formData.image3 || ""} onChange={handleChange}
-                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }} />
+                  <input
+                    type="text"
+                    name="image3"
+                    placeholder="Or paste Image 3 URL"
+                    value={formData.image3 || ""}
+                    onChange={handleChange}
+                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
+                  />
                 </div>
                 {formData.image3 && (
-                  <img src={getImageUrl(formData.image3)} alt="Image 3 Preview"
-                    style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", border: "2px solid #7c3aed" }} />
+                  <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <img
+                      src={getImageUrl(formData.image3)}
+                      alt="Image 3 Preview"
+                      style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", border: "2px solid #7c3aed" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, image3: "" }))}
+                      style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
+                    >
+                      🗑️ Clear Image 3
+                    </button>
+                  </div>
                 )}
               </div>
 
