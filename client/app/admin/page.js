@@ -199,6 +199,15 @@ export default function AdminPage() {
     }));
   };
 
+  const handleSlideImageUpload = (index, file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      handleSlideChange(index, "image", reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const addSlide = () => {
     setSettings({
       ...settings,
@@ -1000,15 +1009,81 @@ export default function AdminPage() {
                   style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
                 />
 
-                <input
-                  type="text"
-                  placeholder="Image URL or /uploads/filename"
-                  value={slide.image}
-                  onChange={(e) =>
-                    handleSlideChange(index, "image", e.target.value)
-                  }
-                  style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
-                />
+                <div style={{ marginTop: "10px", marginBottom: "14px", background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1" }}>
+                  <label style={{ fontWeight: "700", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
+                    🖼️ Cover Image File Upload:
+                  </label>
+
+                  <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", marginBottom: "10px" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id={`slide-file-input-${index}`}
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleSlideImageUpload(index, e.target.files[0]);
+                        }
+                      }}
+                    />
+                    <label
+                      htmlFor={`slide-file-input-${index}`}
+                      style={{
+                        background: "#0f172a",
+                        color: "#ffffff",
+                        padding: "10px 18px",
+                        borderRadius: "10px",
+                        fontWeight: "800",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        boxShadow: "0 2px 8px rgba(15, 23, 42, 0.15)"
+                      }}
+                    >
+                      📁 Upload Image from Computer / Phone
+                    </label>
+
+                    <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>Or paste URL below</span>
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder="Image URL or Base64 String"
+                    value={slide.image || ""}
+                    onChange={(e) =>
+                      handleSlideChange(index, "image", e.target.value)
+                    }
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}
+                  />
+
+                  {slide.image && (
+                    <div style={{ marginTop: "10px" }}>
+                      <span style={{ fontSize: "12px", fontWeight: "800", color: "#047857" }}>
+                        ✓ Image Preview:
+                      </span>
+                      <img
+                        src={
+                          slide.image.startsWith("http") || slide.image.startsWith("data:")
+                            ? slide.image
+                            : slide.image.startsWith("/uploads")
+                            ? `${API_BASE_URL}${slide.image}`
+                            : slide.image
+                        }
+                        alt="Slide Cover Preview"
+                        style={{
+                          width: "100%",
+                          maxHeight: "160px",
+                          objectFit: "cover",
+                          borderRadius: "10px",
+                          marginTop: "6px",
+                          border: "2px solid #0f172a"
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <button
                   type="button"
