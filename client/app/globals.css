@@ -4485,149 +4485,207 @@ button {
 }
 
 /* =========================================================
-   FLASH SALE BANNER - HIGH-ENERGY FLAME RED / ORANGE THEME
+   FLASH SALE BANNER - HIGH-ENERGY LUXURY FLAME RED / VIOLET THEME
 ========================================================= */
 .jt-flash-sale {
   padding: 0 24px;
   max-width: 1400px;
-  margin: 0 auto 32px;
+  margin: 0 auto 36px;
 }
 
 .jt-flash-sale-inner {
-  background: linear-gradient(135deg, #ff4d6d 0%, #ff6b4a 50%, #ff8e53 100%);
-  border-radius: 24px;
-  padding: 32px 36px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #881337 100%);
+  border-radius: 28px;
+  padding: 36px 40px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 36px;
   align-items: center;
-  box-shadow: 0 12px 36px rgba(255, 77, 109, 0.25);
+  box-shadow: 0 20px 50px rgba(225, 29, 72, 0.25);
   position: relative;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.jt-flash-bg-glow-1 {
+  position: absolute;
+  top: -80px;
+  left: -80px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.35) 0%, rgba(244, 63, 94, 0) 70%);
+  pointer-events: none;
+}
+
+.jt-flash-bg-glow-2 {
+  position: absolute;
+  bottom: -100px;
+  right: -100px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.3) 0%, rgba(249, 115, 22, 0) 70%);
+  pointer-events: none;
 }
 
 .jt-flash-left {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
   color: #ffffff;
+  z-index: 2;
+}
+
+.jt-flash-badge-row {
+  display: flex;
+  align-items: center;
 }
 
 .jt-flash-badge {
-  background: #ffffff;
-  color: #ff4d6d;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  color: #fb7185;
+  border: 1px solid rgba(251, 113, 133, 0.4);
   font-weight: 900;
-  font-size: 13px;
+  font-size: 12px;
   padding: 6px 14px;
   border-radius: 999px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jt-flash-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f43f5e;
+  box-shadow: 0 0 10px #f43f5e;
+  animation: jtPulse 1.5s infinite;
+}
+
+@keyframes jtPulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
 }
 
 .jt-flash-left h2 {
-  font-size: 32px;
+  font-size: clamp(26px, 4vw, 36px);
   font-weight: 900;
   margin: 0;
   color: #ffffff;
   line-height: 1.2;
+  letter-spacing: -0.5px;
 }
 
 .jt-flash-left p {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.82);
   margin: 0;
   line-height: 1.5;
 }
 
 .jt-flash-timer {
   display: flex;
-  gap: 12px;
-  margin: 8px 0;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
 }
 
 .jt-time-box {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(244, 63, 94, 0.4);
+  border-radius: 16px;
   padding: 10px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 68px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  min-width: 64px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 .jt-time-box strong {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
+  text-shadow: 0 0 10px rgba(244, 63, 94, 0.6);
 }
 
 .jt-time-box span {
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 10px;
+  font-weight: 800;
+  color: #fb7185;
   margin-top: 4px;
-  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.jt-timer-colon {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fb7185;
 }
 
 .jt-flash-btn {
-  background: #0f172a;
+  background: linear-gradient(135deg, #f43f5e 0%, #fb923c 100%);
   color: #ffffff !important;
-  padding: 12px 26px;
-  border-radius: 12px;
-  font-weight: 800;
+  padding: 14px 30px;
+  border-radius: 50px;
+  font-weight: 900;
   font-size: 14px;
   text-decoration: none;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3);
+  box-shadow: 0 10px 30px rgba(244, 63, 94, 0.4);
   transition: all 0.25s ease;
-  margin-top: 4px;
+  margin-top: 6px;
+  letter-spacing: 0.5px;
 }
 
 .jt-flash-btn:hover {
-  background: #ffffff;
-  color: #ff4d6d !important;
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 36px rgba(244, 63, 94, 0.6);
 }
 
 /* Flash Right Featured Offer Products Showcase */
 .jt-flash-right {
   display: flex;
   justify-content: flex-end;
+  z-index: 2;
 }
 
 .jt-flash-products-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 18px;
   width: 100%;
-  max-width: 480px;
 }
 
 .jt-flash-mini-card {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 20px;
+  padding: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  transition: transform 0.2s ease;
+  gap: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .jt-flash-mini-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .jt-flash-mini-img-wrap {
   position: relative;
   width: 100%;
-  height: 110px;
-  border-radius: 12px;
+  height: 160px;
+  border-radius: 14px;
   overflow: hidden;
   background: #f8fafc;
 }
@@ -4636,23 +4694,29 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.jt-flash-mini-card:hover .jt-flash-mini-img-wrap img {
+  transform: scale(1.08);
 }
 
 .jt-flash-mini-badge {
   position: absolute;
-  top: 6px;
-  left: 6px;
-  background: #ff4d6d;
+  top: 8px;
+  left: 8px;
+  background: linear-gradient(135deg, #e11d48, #f97316);
   color: #ffffff;
-  font-weight: 800;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 6px;
+  font-weight: 900;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4);
 }
 
 .jt-flash-mini-content h4 {
-  margin: 0 0 4px;
-  font-size: 13px;
+  margin: 0 0 6px;
+  font-size: 14px;
   font-weight: 800;
   color: #0f172a;
   white-space: nowrap;
@@ -4662,19 +4726,19 @@ button {
 
 .jt-flash-mini-price-row {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .jt-flash-offer-price {
   font-weight: 900;
-  font-size: 14px;
-  color: #ff4d6d;
+  font-size: 16px;
+  color: #e11d48;
 }
 
 .jt-flash-orig-price {
-  font-size: 11px;
+  font-size: 12px;
   color: #94a3b8;
   text-decoration: line-through;
 }
@@ -4682,30 +4746,30 @@ button {
 .jt-flash-quick-btn {
   width: 100%;
   border: none;
-  background: #0f172a;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   color: #ffffff;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 50px;
   font-weight: 800;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .jt-flash-quick-btn.added {
-  background: #047857;
+  background: #059669;
 }
 
 .jt-flash-quick-btn:hover:not(.added) {
-  background: #ff4d6d;
+  background: linear-gradient(135deg, #e11d48 0%, #f97316 100%);
+  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.4);
 }
 
 /* Responsive Media Queries */
 @media (max-width: 900px) {
-  .jt-promo-inner,
   .jt-flash-sale-inner {
     grid-template-columns: 1fr;
-    padding: 24px;
+    padding: 28px 24px;
   }
 
   .jt-flash-right {
@@ -4715,16 +4779,16 @@ button {
   .jt-flash-products-grid {
     max-width: 100%;
   }
-
-  .jt-promo-left h2,
-  .jt-flash-left h2 {
-    font-size: 26px;
-  }
 }
 
 @media (max-width: 500px) {
   .jt-flash-products-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .jt-flash-mini-img-wrap {
+    height: 130px;
   }
 }
 

@@ -120,35 +120,44 @@ export default function FlashSale({
   return (
     <section className="jt-flash-sale">
       <div className="jt-flash-sale-inner">
-        {/* Left Countdown Section */}
+        {/* Background Decorative Glow Circles */}
+        <div className="jt-flash-bg-glow-1" />
+        <div className="jt-flash-bg-glow-2" />
+
+        {/* Left Countdown Banner Section */}
         <div className="jt-flash-left">
-          <span className="jt-flash-badge">🔥 Flash Sale</span>
+          <div className="jt-flash-badge-row">
+            <span className="jt-flash-badge">
+              <span className="jt-flash-dot" /> ⚡ LIMITED TIME FLASH DEAL
+            </span>
+          </div>
+
           <h2>{flashTitle}</h2>
           <p>{flashSubtitle}</p>
 
           <div className="jt-flash-timer">
             <div className="jt-time-box">
               <strong>{timeLeft.hours}</strong>
-              <span>Hours</span>
+              <span>HOURS</span>
             </div>
-
+            <span className="jt-timer-colon">:</span>
             <div className="jt-time-box">
               <strong>{timeLeft.minutes}</strong>
-              <span>Minutes</span>
+              <span>MINS</span>
             </div>
-
+            <span className="jt-timer-colon">:</span>
             <div className="jt-time-box">
               <strong>{timeLeft.seconds}</strong>
-              <span>Seconds</span>
+              <span>SECS</span>
             </div>
           </div>
 
           <Link href={flashButtonLink} className="jt-flash-btn">
-            {flashButtonText}
+            {flashButtonText} &rarr;
           </Link>
         </div>
 
-        {/* Right Featured Offer Products Showcase */}
+        {/* Right 2 Featured Product Banner Cards Showcase */}
         <div className="jt-flash-right">
           <div className="jt-flash-products-grid">
             {flashProducts.map((product) => {
@@ -183,7 +192,7 @@ export default function FlashSale({
                       />
                       {product.discountBadge && (
                         <span className="jt-flash-mini-badge">
-                          {product.discountBadge}
+                          🔥 {product.discountBadge}
                         </span>
                       )}
                     </div>
@@ -191,8 +200,9 @@ export default function FlashSale({
 
                   <div className="jt-flash-mini-content">
                     <Link href={`/products/${product._id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                      <h4>{product.name}</h4>
+                      <h4 title={product.name}>{product.name}</h4>
                     </Link>
+
                     <div className="jt-flash-mini-price-row">
                       <span className="jt-flash-offer-price">
                         {product.offerPrice} Tk
@@ -209,7 +219,7 @@ export default function FlashSale({
                       className={`jt-flash-quick-btn ${isAdded ? "added" : ""}`}
                       onClick={() => handleQuickAdd(product)}
                     >
-                      {isAdded ? "✓ Added" : "🛒 Add to Cart"}
+                      {isAdded ? "✓ Added to Cart" : "🛒 Add to Cart"}
                     </button>
                   </div>
                 </div>
