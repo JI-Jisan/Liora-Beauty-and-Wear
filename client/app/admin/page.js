@@ -539,69 +539,217 @@ export default function AdminPage() {
             {message && <p style={{ marginTop: "14px", fontWeight: "700" }}>{message}</p>}
           </div>
 
-          <div className="jt-admin-panel jt-admin-panel-wide">
-            <h3>Manage Products</h3>
+          <div id="product-section" className="jt-admin-panel jt-admin-panel-wide">
+            <div className="jt-manage-products-header">
+              <h3>Manage Products ({products.length})</h3>
+              <span className="jt-products-count-badge">
+                Showing {filteredAndSortedProducts.length} of {products.length} Products
+              </span>
+            </div>
 
-            {products.length === 0 ? (
-              <p>No products found</p>
+            {/* Advanced Controls Bar */}
+            <div className="jt-manage-products-toolbar">
+              {/* Search Bar */}
+              <div className="jt-products-search-box">
+                <input
+                  type="text"
+                  placeholder="🔍 Search products by name, category..."
+                  value={productSearch}
+                  onChange={(e) => {
+                    setProductSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div className="jt-products-filter-select">
+                <select
+                  value={productCategoryFilter}
+                  onChange={(e) => {
+                    setProductCategoryFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Stock Status Filter */}
+              <div className="jt-products-filter-select">
+                <select
+                  value={productStockFilter}
+                  onChange={(e) => {
+                    setProductStockFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="all">All Stock Status</option>
+                  <option value="In Stock">In Stock</option>
+                  <option value="Limited Stock">Limited Stock</option>
+                  <option value="Out of Stock">Out of Stock</option>
+                </select>
+              </div>
+
+              {/* Sort By Dropdown */}
+              <div className="jt-products-filter-select">
+                <select
+                  value={productSortBy}
+                  onChange={(e) => setProductSortBy(e.target.value)}
+                >
+                  <option value="newest">Sort: Newest First</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="name">Name: A to Z</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Product Cards List */}
+            {filteredAndSortedProducts.length === 0 ? (
+              <div className="jt-admin-empty-products">
+                <p>No products match your search or filter criteria.</p>
+              </div>
             ) : (
-              <div className="jt-manage-products-list">
-                {products.map((product) => {
-                  const imageSrc = product.image
-                    ? product.image.startsWith("http")
-                      ? product.image
-                      : product.image.startsWith("/uploads")
+              <>
+                <div className="jt-manage-products-list">
+                  {paginatedProducts.map((product) => {
+                    const imageSrc = product.image
+                      ? product.image.startsWith("http")
+                        ? product.image
+                        : product.image.startsWith("/uploads")
                         ? `${API_BASE_URL}${product.image}`
                         : `/images/${product.image}`
-                    : null;
+                      : null;
 
-                  return (
-                    <div key={product._id} className="jt-manage-product-card">
-                      <div className="jt-manage-product-left">
-                        {imageSrc ? (
-                          <img
-                            src={imageSrc}
-                            alt={product.name}
-                            className="jt-manage-product-image"
-                          />
-                        ) : (
-                          <div className="jt-manage-product-image jt-manage-product-placeholder">
-                            No Image
+                    return (
+                      <div key={product._id} className="jt-manage-product-card">
+                        <div className="jt-manage-product-left">
+                          {imageSrc ? (
+                            <img
+                              src={imageSrc}
+                              alt={product.name}
+                              className="jt-manage-product-image"
+                            />
+                          ) : (
+                            <div className="jt-manage-product-image jt-manage-product-placeholder">
+                              No Image
+                            </div>
+                          )}
+
+                          <div className="jt-manage-product-details">
+                            <div className="jt-manage-product-title-row">
+                              <h4>{product.name}</h4>
+                              <span className="jt-cat-pill">
+                                {product.category?.name || "Uncategorized"}
+                              </span>
+                            </div>
+
+                            <p className="jt-manage-product-price">
+                              <strong>{product.offerPrice} Tk</strong>
+                              {product.originalPrice > product.offerPrice && (
+                                <span className="jt-old-price">
+                                  {product.originalPrice} Tk
+                                </span>
+                              )}
+                              {product.discountBadge && (
+                                <span className="jt-disc-badge">
+                                  {product.discountBadge}
+                                </span>
+                              )}
+                            </p>
+
+                            <div className="jt-manage-product-flags">
+                              <span
+                                className={`jt-stock-tag ${
+                                  product.stockStatus === "In Stock"
+                                    ? "in-stock"
+                                    : product.stockStatus === "Limited Stock"
+                                    ? "limited-stock"
+                                    : "out-stock"
+                                }`}
+                              >
+                                {product.stockStatus}
+                              </span>
+
+                              {product.isFeatured && (
+                                <span className="jt-flag-tag featured">⭐ Featured</span>
+                              )}
+                              {product.isTrending && (
+                                <span className="jt-flag-tag trending">🔥 Trending</span>
+                              )}
+                              {product.isNewArrival && (
+                                <span className="jt-flag-tag new-arrival">✨ New</span>
+                              )}
+                            </div>
                           </div>
-                        )}
+                        </div>
 
-                        <div>
-                          <h4>{product.name}</h4>
-                          <p>Category: {product.category?.name || "No Category"}</p>
-                          <p>
-                            {product.offerPrice} Tk
-                            <span style={{ marginLeft: "8px", textDecoration: "line-through", color: "#888" }}>
-                              {product.originalPrice} Tk
-                            </span>
-                          </p>
-                          <p>Status: {product.stockStatus}</p>
+                        <div className="jt-manage-product-right">
+                          <button
+                            type="button"
+                            className="jt-edit-btn"
+                            onClick={() => handleEditProduct(product)}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            className="jt-delete-btn"
+                            onClick={() => handleDeleteProduct(product._id)}
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
 
-                      <div className="jt-manage-product-right">
-                        <button
-                          className="jt-edit-btn"
-                          onClick={() => handleEditProduct(product)}
-                        >
-                          Edit
-                        </button>
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="jt-admin-pagination">
+                    <button
+                      type="button"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    >
+                      « Previous
+                    </button>
 
-                        <button
-                          className="jt-delete-btn"
-                          onClick={() => handleDeleteProduct(product._id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
+                    <div className="jt-pagination-pages">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <button
+                            key={page}
+                            type="button"
+                            className={currentPage === page ? "active" : ""}
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </button>
+                        )
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+
+                    <button
+                      type="button"
+                      disabled={currentPage === totalPages}
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                    >
+                      Next »
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
