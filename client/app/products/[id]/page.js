@@ -250,96 +250,156 @@ export default function ProductDetailsPage() {
         brandSubtitle={siteSettings.brandSubtitle}
       />
 
-      <section className="jt-details-top">
-        <div className="jt-details-main">
-          <div className="jt-details-gallery">
-            <div className="jt-details-main-image-box">
-              <img
-                src={imageSrc}
-                alt={product.name}
-                className="jt-details-main-image"
-                onError={(e) => { e.currentTarget.src = fallbackUrl; }}
-              />
-            </div>
+      {/* Compact product card — image left + info right, all visible without scrolling */}
+      <div style={{
+        maxWidth: "960px",
+        margin: "0 auto",
+        padding: "16px 14px 0",
+      }}>
+        {/* Breadcrumb */}
+        <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 10px" }}>
+          Home / {product.category?.name || "Category"} / {product.name}
+        </p>
+
+        {/* Main card: image + info side by side */}
+        <div style={{
+          display: "flex",
+          gap: "16px",
+          alignItems: "flex-start",
+          background: "#fff",
+          borderRadius: "16px",
+          padding: "14px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
+          flexWrap: "wrap",
+        }}>
+          {/* Image — square, compact */}
+          <div style={{
+            flex: "0 0 auto",
+            width: "min(42vw, 180px)",
+            height: "min(42vw, 180px)",
+            borderRadius: "12px",
+            overflow: "hidden",
+            background: "#f8f0eb",
+          }}>
+            <img
+              src={imageSrc}
+              alt={product.name}
+              onError={(e) => { e.currentTarget.src = fallbackUrl; }}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           </div>
 
-         <div className="jt-details-info">
-  <p className="jt-details-breadcrumb">
-    Home / {product.category?.name || "Category"} / {product.name}
-  </p>
+          {/* Info panel */}
+          <div style={{ flex: 1, minWidth: "160px", display: "flex", flexDirection: "column", gap: "8px" }}>
+            {/* Category pill */}
+            <span style={{
+              background: "#fff0f5",
+              color: "#e11d48",
+              fontSize: "11px",
+              fontWeight: "700",
+              padding: "3px 10px",
+              borderRadius: "50px",
+              alignSelf: "flex-start",
+            }}>
+              {product.category?.name || "Product"}
+            </span>
 
-  <h1>{product.name}</h1>
+            {/* Name */}
+            <h1 style={{ margin: 0, fontSize: "clamp(15px, 4vw, 20px)", fontWeight: "900", color: "#0f172a", lineHeight: 1.3 }}>
+              {product.name}
+            </h1>
 
-  <p className="jt-details-category-inline">
-    Category: {product.category?.name || "No Category"}
-  </p>
-
-  <div className="jt-details-price-box">
-    <span className="jt-details-offer-price">
-      {product.offerPrice} Tk
-    </span>
-    <span className="jt-details-original-price">
-      {product.originalPrice} Tk
-    </span>
-  </div>
-
-  {product.discountBadge && (
-    <div className="jt-details-badge">{product.discountBadge}</div>
-  )}
-
-  <p className="jt-details-stock">
-    Stock Status: {product.stockStatus}
-  </p>
-
-  <div className="jt-details-action-row">
-    <button
-      className="jt-buy-now-btn"
-      onClick={handleBuyNow}
-      disabled={product.stockStatus === "Out of Stock"}
-      style={{
-        opacity: product.stockStatus === "Out of Stock" ? 0.6 : 1,
-        cursor:
-          product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
-      }}
-    >
-      {product.stockStatus === "Out of Stock" ? "Unavailable" : "Buy Now"}
-    </button>
-
-    <button
-      className="jt-add-cart-btn"
-      onClick={handleAddToCart}
-      disabled={product.stockStatus === "Out of Stock"}
-      style={{
-        opacity: product.stockStatus === "Out of Stock" ? 0.6 : 1,
-        cursor:
-          product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
-      }}
-    >
-      {product.stockStatus === "Out of Stock" ? "Out of Stock" : "Add to Cart"}
-    </button>
-  </div>
-</div>
-
-          <aside className="jt-details-sidebox">
-            <div className="jt-side-card">
-              <h3>Delivery Options</h3>
-              <p>
-                <strong>Standard Delivery:</strong> 65 Tk
-              </p>
-              <p>
-                <strong>Outside Dhaka:</strong> 110 Tk
-              </p>
-              <p>Cash on Delivery Available</p>
+            {/* Price row */}
+            <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "clamp(20px, 5vw, 26px)", fontWeight: "900", color: "#e11d48" }}>
+                {product.offerPrice} Tk
+              </span>
+              {product.originalPrice && (
+                <span style={{ fontSize: "14px", color: "#94a3b8", textDecoration: "line-through" }}>
+                  {product.originalPrice} Tk
+                </span>
+              )}
+              {product.discountBadge && (
+                <span style={{
+                  background: "#e11d48",
+                  color: "#fff",
+                  fontSize: "11px",
+                  fontWeight: "800",
+                  padding: "2px 8px",
+                  borderRadius: "50px",
+                }}>
+                  {product.discountBadge}
+                </span>
+              )}
             </div>
 
-            <div className="jt-side-card">
-              <h3>Return & Warranty</h3>
-              <p>Easy return available</p>
-              <p>Warranty depends on product type</p>
+            {/* Stock status */}
+            <p style={{
+              margin: 0,
+              fontSize: "12px",
+              fontWeight: "700",
+              color: product.stockStatus === "Out of Stock" ? "#dc2626" : "#059669",
+            }}>
+              ● {product.stockStatus || "In Stock"}
+            </p>
+
+            {/* Action buttons */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+              <button
+                onClick={handleBuyNow}
+                disabled={product.stockStatus === "Out of Stock"}
+                style={{
+                  background: product.stockStatus === "Out of Stock" ? "#94a3b8" : "#0f172a",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "50px",
+                  padding: "12px 18px",
+                  fontWeight: "800",
+                  fontSize: "14px",
+                  cursor: product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
+                  width: "100%",
+                }}
+              >
+                {product.stockStatus === "Out of Stock" ? "Unavailable" : "🛒 Buy Now"}
+              </button>
+
+              <button
+                onClick={handleAddToCart}
+                disabled={product.stockStatus === "Out of Stock"}
+                style={{
+                  background: "transparent",
+                  color: "#e11d48",
+                  border: "2px solid #e11d48",
+                  borderRadius: "50px",
+                  padding: "10px 18px",
+                  fontWeight: "800",
+                  fontSize: "14px",
+                  cursor: product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
+                  width: "100%",
+                }}
+              >
+                {product.stockStatus === "Out of Stock" ? "Out of Stock" : "+ Add to Cart"}
+              </button>
             </div>
-          </aside>
+          </div>
         </div>
-      </section>
+
+        {/* Delivery info bar */}
+        <div style={{
+          display: "flex",
+          gap: "8px",
+          flexWrap: "wrap",
+          margin: "12px 0 0",
+          padding: "10px 14px",
+          background: "#fff",
+          borderRadius: "12px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        }}>
+          <span style={{ fontSize: "12px", color: "#64748b" }}>🚚 <strong>Dhaka:</strong> 65 Tk</span>
+          <span style={{ fontSize: "12px", color: "#64748b" }}>📦 <strong>Outside:</strong> 110 Tk</span>
+          <span style={{ fontSize: "12px", color: "#059669", fontWeight: "700" }}>✓ Cash on Delivery</span>
+        </div>
+      </div>
 
       <section className="jt-details-bottom">
         <div className="jt-details-description-card">
