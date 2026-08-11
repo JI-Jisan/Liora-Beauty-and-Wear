@@ -551,8 +551,8 @@ export default function AdminPage() {
                     ? product.image.startsWith("http")
                       ? product.image
                       : product.image.startsWith("/uploads")
-                      ? `${API_BASE_URL}${product.image}`
-                      : `/images/${product.image}`
+                        ? `${API_BASE_URL}${product.image}`
+                        : `/images/${product.image}`
                     : null;
 
                   return (
