@@ -209,7 +209,7 @@ export default function ProductDetailsPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const tabs = ["overview", "ratings", "details", "recommendations"];
+      const tabs = ["overview", "ratings", "recommendations"];
 
       for (let i = tabs.length - 1; i >= 0; i--) {
         const el = document.getElementById(tabs[i]);
@@ -693,17 +693,7 @@ export default function ProductDetailsPage() {
         </div>
       </section>
 
-      {/* ── SECTION 3: PRODUCT DETAILS ── */}
-      <section id="details" className="jt-details-bottom">
-        <div className="jt-details-description-card">
-          <h2>Product Details & Specifications</h2>
-          <div className="jt-details-description-text" style={{ fontSize: "14px", lineHeight: "1.7", color: "#334155" }}>
-            {renderFormattedDescription(product.description)}
-          </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 4: RECOMMENDATIONS ── */}
+      {/* ── SECTION 3: RECOMMENDATIONS ── */}
       <section id="recommendations" className="jt-related-section">
         <div className="jt-related-inner">
           <h2>You may also like</h2>
