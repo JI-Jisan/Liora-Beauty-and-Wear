@@ -214,77 +214,71 @@ export default function Header({
           <nav className="jt-nav jt-desktop-nav">
             <Link href="/">Home</Link>
 
-            {/* Render Mother Category Dropdown Links */}
-            {categoryTree.map((mother) => {
-              const hasChildren = mother.children && mother.children.length > 0;
+            {/* Clean Single Dropdown: All Categories */}
+            <div
+              className="jt-nav-dropdown-item"
+              onMouseEnter={() => setActiveHoverCategory("all-categories")}
+              onMouseLeave={() => setActiveHoverCategory(null)}
+              style={{ position: "relative", display: "inline-block" }}
+            >
+              <button
+                type="button"
+                className="jt-nav-dropdown-link"
+                onClick={() => setIsCategoryDrawerOpen(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  color: "#0f172a",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  padding: "0",
+                }}
+              >
+                📁 Categories <span style={{ fontSize: "10px" }}>▼</span>
+              </button>
 
-              if (!hasChildren) {
-                return (
-                  <Link key={mother._id} href={`/products?category=${encodeURIComponent(mother._id)}`}>
-                    {mother.name}
-                  </Link>
-                );
-              }
+              {/* Single Hover Dropdown Menu for Categories */}
+              {activeHoverCategory === "all-categories" && categoryTree.length > 0 && (
+                <div className="jt-nav-sub-menu open" style={{ width: "320px" }}>
+                  <div className="jt-sub-menu-inner">
+                    <Link href="/products" className="jt-sub-menu-header-link">
+                      🛍️ Browse All Products &rarr;
+                    </Link>
 
-              return (
-                <div
-                  key={mother._id}
-                  className="jt-nav-dropdown-item"
-                  onMouseEnter={() => setActiveHoverCategory(mother._id)}
-                  onMouseLeave={() => setActiveHoverCategory(null)}
-                  style={{ position: "relative", display: "inline-block" }}
-                >
-                  <Link
-                    href={`/products?category=${encodeURIComponent(mother._id)}`}
-                    className="jt-nav-dropdown-link"
-                    style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                  >
-                    {mother.name} <span style={{ fontSize: "10px" }}>▼</span>
-                  </Link>
+                    <div className="jt-sub-menu-grid" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {categoryTree.map((mother) => (
+                        <div key={mother._id} className="jt-sub-menu-col">
+                          <Link
+                            href={`/products?category=${encodeURIComponent(mother._id)}`}
+                            className="jt-sub-menu-child-title"
+                          >
+                            📁 {mother.name}
+                          </Link>
 
-                  {/* Dropdown Menu showing Child & Sub-Child Categories */}
-                  {activeHoverCategory === mother._id && (
-                    <div className="jt-nav-sub-menu open">
-                      <div className="jt-sub-menu-inner">
-                        <Link
-                          href={`/products?category=${encodeURIComponent(mother._id)}`}
-                          className="jt-sub-menu-header-link"
-                        >
-                          📁 All {mother.name} &rarr;
-                        </Link>
-
-                        <div className="jt-sub-menu-grid">
-                          {mother.children.map((child) => (
-                            <div key={child._id} className="jt-sub-menu-col">
-                              <Link
-                                href={`/products?category=${encodeURIComponent(child._id)}`}
-                                className="jt-sub-menu-child-title"
-                              >
-                                📂 {child.name}
-                              </Link>
-
-                              {child.children && child.children.length > 0 && (
-                                <div className="jt-sub-menu-grandchild-list">
-                                  {child.children.map((grand) => (
-                                    <Link
-                                      key={grand._id}
-                                      href={`/products?category=${encodeURIComponent(grand._id)}`}
-                                      className="jt-sub-menu-grandchild-item"
-                                    >
-                                      📄 {grand.name}
-                                    </Link>
-                                  ))}
-                                </div>
-                              )}
+                          {mother.children && mother.children.length > 0 && (
+                            <div className="jt-sub-menu-grandchild-list" style={{ paddingLeft: "16px", marginTop: "4px" }}>
+                              {mother.children.map((child) => (
+                                <Link
+                                  key={child._id}
+                                  href={`/products?category=${encodeURIComponent(child._id)}`}
+                                  className="jt-sub-menu-grandchild-item"
+                                >
+                                  📂 {child.name}
+                                </Link>
+                              ))}
                             </div>
-                          ))}
+                          )}
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
                 </div>
-              );
-            })}
+              )}
+            </div>
 
             <Link href="/products">All Products</Link>
             <Link href="/checkout">Checkout</Link>
@@ -297,23 +291,21 @@ export default function Header({
         </div>
       </div>
 
-      {/* ROW 2: Mobile Nav Strip with Categories */}
+      {/* ROW 2: Mobile Nav Strip */}
       <div className="jt-mobile-nav-strip">
         <div className="jt-mobile-nav-inner">
           <Link href="/" className="jt-mobile-nav-item">Home</Link>
-
-          {/* Render Mother Category Links on Mobile Strip */}
-          {categoryTree.map((mother) => (
-            <Link
-              key={mother._id}
-              href={`/products?category=${encodeURIComponent(mother._id)}`}
-              className="jt-mobile-nav-item"
-            >
-              {mother.name}
-            </Link>
-          ))}
-
-          <Link href="/products" className="jt-mobile-nav-item">All Products</Link>
+          <button
+            type="button"
+            className="jt-mobile-nav-item"
+            onClick={() => setIsCategoryDrawerOpen(true)}
+            style={{ background: "none", border: "none", cursor: "pointer", fontWeight: "700" }}
+          >
+            📁 Categories (☰)
+          </button>
+          <Link href="/products" className="jt-mobile-nav-item">Products</Link>
+          <Link href="/checkout" className="jt-mobile-nav-item">Checkout</Link>
+          <Link href="/order-tracking" className="jt-mobile-nav-item">Track Order</Link>
         </div>
       </div>
 
