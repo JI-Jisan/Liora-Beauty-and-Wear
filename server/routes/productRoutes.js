@@ -81,71 +81,70 @@ router.get("/", async (req, res) => {
 
     // Check if database has been seeded before
     let settings = await SiteSettings.findOne();
+
+    // If database is completely brand new AND has no settings, seed ONCE
     if (!settings) {
-      settings = new SiteSettings();
-    }
+      settings = await SiteSettings.create({ isDemoSeeded: true });
 
-    // Seed initial demo products ONCE into DB if brand new database
-    if (!settings.isDemoSeeded && (!products || products.length === 0)) {
-      try {
-        const Category = require("../models/Category");
-        let perfCat = await Category.findOne({ name: "Perfume" });
-        if (!perfCat) perfCat = await Category.create({ name: "Perfume", type: "main" });
+      // Seed initial demo products ONCE into DB for a fresh installation
+      if (!products || products.length === 0) {
+        try {
+          const Category = require("../models/Category");
+          let perfCat = await Category.findOne({ name: "Perfume" });
+          if (!perfCat) perfCat = await Category.create({ name: "Perfume", type: "main" });
 
-        let watchCat = await Category.findOne({ name: "Watches" });
-        if (!watchCat) watchCat = await Category.create({ name: "Watches", type: "main" });
+          let watchCat = await Category.findOne({ name: "Watches" });
+          if (!watchCat) watchCat = await Category.create({ name: "Watches", type: "main" });
 
-        let fanCat = await Category.findOne({ name: "Fan Light" });
-        if (!fanCat) fanCat = await Category.create({ name: "Fan Light", type: "main" });
+          let fanCat = await Category.findOne({ name: "Fan Light" });
+          if (!fanCat) fanCat = await Category.create({ name: "Fan Light", type: "main" });
 
-        let beautyCat = await Category.findOne({ name: "Beauty Items" });
-        if (!beautyCat) beautyCat = await Category.create({ name: "Beauty Items", type: "main" });
+          let beautyCat = await Category.findOne({ name: "Beauty Items" });
+          if (!beautyCat) beautyCat = await Category.create({ name: "Beauty Items", type: "main" });
 
-        const seedItems = [
-          {
-            name: "Royal Oud Perfume 100ml",
-            description: "Premium long-lasting royal oud fragrance perfume for men and women.",
-            image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80",
-            originalPrice: 2500, offerPrice: 1850, discountBadge: "26% OFF", stockStatus: "In Stock",
-            category: perfCat._id, isFeatured: true, isTrending: true, isNewArrival: true
-          },
-          {
-            name: "Luxury Gold Chronograph Watch",
-            description: "Premium stainless steel quartz chronograph watch.",
-            image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80",
-            originalPrice: 3200, offerPrice: 2400, discountBadge: "25% OFF", stockStatus: "In Stock",
-            category: watchCat._id, isFeatured: true, isTrending: true
-          },
-          {
-            name: "Smart RGB LED Fan Light 30W",
-            description: "Multi-color remote control LED ceiling fan light.",
-            image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&auto=format&fit=crop&q=80",
-            originalPrice: 1800, offerPrice: 1350, discountBadge: "25% OFF", stockStatus: "In Stock",
-            category: fanCat._id, isFeatured: true, isNewArrival: true
-          },
-          {
-            name: "Vitamin C Brightening Serum 30ml",
-            description: "Natural organic vitamin C serum for glowing skin.",
-            image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80",
-            originalPrice: 1200, offerPrice: 850, discountBadge: "29% OFF", stockStatus: "In Stock",
-            category: beautyCat._id, isTrending: true, isNewArrival: true
-          },
-          {
-            name: "French Vanilla Long-Lasting Body Mist",
-            description: "Refreshing vanilla scent body mist for daily freshness.",
-            image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&auto=format&fit=crop&q=80",
-            originalPrice: 1500, offerPrice: 990, discountBadge: "34% OFF", stockStatus: "In Stock",
-            category: perfCat._id, isFeatured: true
-          }
-        ];
+          const seedItems = [
+            {
+              name: "Royal Oud Perfume 100ml",
+              description: "Premium long-lasting royal oud fragrance perfume for men and women.",
+              image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80",
+              originalPrice: 2500, offerPrice: 1850, discountBadge: "26% OFF", stockStatus: "In Stock",
+              category: perfCat._id, isFeatured: true, isTrending: true, isNewArrival: true
+            },
+            {
+              name: "Luxury Gold Chronograph Watch",
+              description: "Premium stainless steel quartz chronograph watch.",
+              image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80",
+              originalPrice: 3200, offerPrice: 2400, discountBadge: "25% OFF", stockStatus: "In Stock",
+              category: watchCat._id, isFeatured: true, isTrending: true
+            },
+            {
+              name: "Smart RGB LED Fan Light 30W",
+              description: "Multi-color remote control LED ceiling fan light.",
+              image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&auto=format&fit=crop&q=80",
+              originalPrice: 1800, offerPrice: 1350, discountBadge: "25% OFF", stockStatus: "In Stock",
+              category: fanCat._id, isFeatured: true, isNewArrival: true
+            },
+            {
+              name: "Vitamin C Brightening Serum 30ml",
+              description: "Natural organic vitamin C serum for glowing skin.",
+              image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80",
+              originalPrice: 1200, offerPrice: 850, discountBadge: "29% OFF", stockStatus: "In Stock",
+              category: beautyCat._id, isTrending: true, isNewArrival: true
+            },
+            {
+              name: "French Vanilla Long-Lasting Body Mist",
+              description: "Refreshing vanilla scent body mist for daily freshness.",
+              image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&auto=format&fit=crop&q=80",
+              originalPrice: 1500, offerPrice: 990, discountBadge: "34% OFF", stockStatus: "In Stock",
+              category: perfCat._id, isFeatured: true
+            }
+          ];
 
-        await Product.insertMany(seedItems);
-        settings.isDemoSeeded = true;
-        await settings.save();
-
-        products = await Product.find().populate("category");
-      } catch (seedErr) {
-        console.error("Seed error:", seedErr);
+          await Product.insertMany(seedItems);
+          products = await Product.find().populate("category");
+        } catch (seedErr) {
+          console.error("Seed error:", seedErr);
+        }
       }
     }
 
@@ -277,6 +276,17 @@ router.put("/:id", adminAuth, async (req, res) => {
     }
 
     res.json(updated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// CLEAR all products at once
+router.delete("/clear-all", adminAuth, async (req, res) => {
+  try {
+    await Product.deleteMany({});
+    await SiteSettings.findOneAndUpdate({}, { isDemoSeeded: true }, { upsert: true });
+    res.json({ message: "All products deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

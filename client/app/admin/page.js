@@ -453,6 +453,30 @@ export default function AdminPage() {
     }
   };
 
+  const handleClearAllProducts = async () => {
+    const confirmClear = window.confirm("Are you sure you want to delete ALL products to start adding your real products?");
+    if (!confirmClear) return;
+
+    setProducts([]);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/products/clear-all`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
+
+      if (!res.ok) {
+        throw new Error("Clear failed");
+      }
+
+      setMessage("✓ All products deleted successfully! You can now add your real products.");
+      loadProducts();
+    } catch (error) {
+      setMessage(`❌ Clear Error: ${error.message}`);
+      loadProducts();
+    }
+  };
+
   const handleEditProduct = (product) => {
     setEditingId(product._id);
     setFormData({
@@ -1011,6 +1035,30 @@ export default function AdminPage() {
                   <option value="name">Name: A to Z</option>
                 </select>
               </div>
+
+              {/* Clear All Products Button */}
+              {products.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAllProducts}
+                  style={{
+                    background: "#dc2626",
+                    color: "#ffffff",
+                    border: "none",
+                    padding: "8px 16px",
+                    borderRadius: "10px",
+                    fontWeight: "800",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  🗑️ Clear All Products ({products.length})
+                </button>
+              )}
             </div>
 
             {/* Product Cards List */}
