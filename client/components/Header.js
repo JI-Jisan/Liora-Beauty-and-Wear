@@ -64,7 +64,7 @@ export default function Header({
   const cartContext = useCart();
 
   const [localSearch, setLocalSearch] = useState("");
-  const [allProducts, setAllProducts] = useState(DEMO_LIVE_PRODUCTS);
+  const [allProducts, setAllProducts] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const searchWrapperRef = useRef(null);
@@ -111,7 +111,7 @@ export default function Header({
     fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setAllProducts(data);
         }
       })

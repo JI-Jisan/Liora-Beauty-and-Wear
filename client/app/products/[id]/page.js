@@ -188,7 +188,7 @@ export default function ProductDetailsPage() {
   const router = useRouter();
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
-  const [allProducts, setAllProducts] = useState(DEMO_PRODUCTS);
+  const [allProducts, setAllProducts] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
@@ -275,7 +275,7 @@ export default function ProductDetailsPage() {
     fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setAllProducts(data);
         }
       })

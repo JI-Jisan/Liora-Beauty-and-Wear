@@ -38,18 +38,18 @@ export default function FlashSale({
     minutes: "00",
     seconds: "00",
   });
-  const [flashProducts, setFlashProducts] = useState(DEMO_FLASH_PRODUCTS);
+  const [flashProducts, setFlashProducts] = useState([]);
   const [addedIds, setAddedIds] = useState([]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           const offers = data.filter((p) => p.offerPrice && p.offerPrice < p.originalPrice);
-          if (offers.length >= 2) {
+          if (offers.length > 0) {
             setFlashProducts(offers.slice(0, 2));
-          } else if (data.length >= 2) {
+          } else {
             setFlashProducts(data.slice(0, 2));
           }
         }

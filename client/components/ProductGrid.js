@@ -91,13 +91,8 @@ function ProductGridContent({
   const urlSearchTerm = searchParams ? searchParams.get("search") || "" : "";
   const activeSearchTerm = searchTerm || urlSearchTerm;
 
-  const [products, setProducts] = useState(DEMO_PRODUCTS);
-  const [categories, setCategories] = useState([
-    { _id: "cat-1", name: "Perfume" },
-    { _id: "cat-2", name: "Watches" },
-    { _id: "cat-3", name: "Fan Light" },
-    { _id: "cat-4", name: "Beauty & Wear" },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const urlCategoryParam = searchParams ? searchParams.get("category") || "" : "";
   const [selectedCategory, setSelectedCategory] = useState(urlCategoryParam || "all");
 
@@ -111,7 +106,7 @@ function ProductGridContent({
     fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setProducts(data);
         }
       })
@@ -120,7 +115,7 @@ function ProductGridContent({
     fetch(`${API_BASE_URL}/api/categories`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setCategories(data);
         }
       })
