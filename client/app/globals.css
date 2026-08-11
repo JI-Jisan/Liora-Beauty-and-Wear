@@ -33,6 +33,10 @@ button {
   padding: 20px 32px;
   background: white;
   border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
 
 .jt-logo-wrap {

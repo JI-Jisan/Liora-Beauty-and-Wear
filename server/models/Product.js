@@ -35,6 +35,22 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    image2: {
+      type: String,
+      default: "",
+    },
+    image3: {
+      type: String,
+      default: "",
+    },
+    rating: {
+      type: Number,
+      default: 0,
+    },
+    reviewCount: {
+      type: Number,
+      default: 0,
+    },
     description: {
       type: String,
       default: "",

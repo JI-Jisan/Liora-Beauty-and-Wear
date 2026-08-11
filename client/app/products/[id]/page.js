@@ -75,6 +75,90 @@ const DEMO_PRODUCTS = [
   }
 ];
 
+// ─── Auto-sliding image carousel ────────────────────────────────────────────
+function ProductImageCarousel({ images, fallback, productName }) {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+
+  if (!images.length) return null;
+
+  return (
+    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#f8f0eb" }}>
+      {/* Slides */}
+      <div
+        style={{
+          display: "flex",
+          transform: `translateX(-${current * 100}%)`,
+          transition: "transform 0.5s cubic-bezier(0.4,0,0.2,1)",
+          willChange: "transform",
+        }}
+      >
+        {images.map((src, i) => (
+          <div key={i} style={{ flex: "0 0 100%", width: "100%", aspectRatio: "1 / 1", maxHeight: "480px" }}>
+            <img
+              src={src}
+              alt={`${productName} - view ${i + 1}`}
+              onError={(e) => { e.currentTarget.src = fallback; }}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Dot indicators */}
+      {images.length > 1 && (
+        <div style={{
+          position: "absolute", bottom: "14px", left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex", gap: "8px",
+        }}>
+          {images.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              style={{
+                width: i === current ? "22px" : "8px",
+                height: "8px",
+                borderRadius: "50px",
+                background: i === current ? "#e11d48" : "rgba(255,255,255,0.7)",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                transition: "all 0.3s",
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Image count badge */}
+      {images.length > 1 && (
+        <div style={{
+          position: "absolute", top: "12px", right: "12px",
+          background: "rgba(0,0,0,0.55)", color: "#fff",
+          fontSize: "12px", fontWeight: "700",
+          padding: "3px 10px", borderRadius: "50px",
+        }}>
+          {current + 1}/{images.length}
+        </div>
+      )}
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function ProductDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -239,7 +323,12 @@ export default function ProductDetailsPage() {
 
   const catName = typeof product.category === "object" ? product.category?.name : product.category || "";
   const fallbackUrl = getFallbackProductImage(catName, product.name);
-  const imageSrc = getImageUrl(product.image) || fallbackUrl;
+  // Build carousel images list
+  const carouselImages = [
+    getImageUrl(product.image) || fallbackUrl,
+    getImageUrl(product.image2),
+    getImageUrl(product.image3),
+  ].filter(Boolean);
 
   return (
     <main className="jt-details-page-wrap">
@@ -250,154 +339,137 @@ export default function ProductDetailsPage() {
         brandSubtitle={siteSettings.brandSubtitle}
       />
 
-      {/* Compact product card — image left + info right, all visible without scrolling */}
-      <div style={{
-        maxWidth: "960px",
-        margin: "0 auto",
-        padding: "16px 14px 0",
-      }}>
-        {/* Breadcrumb */}
-        <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 10px" }}>
-          Home / {product.category?.name || "Category"} / {product.name}
-        </p>
 
-        {/* Main card: image + info side by side */}
-        <div style={{
-          display: "flex",
-          gap: "16px",
-          alignItems: "flex-start",
-          background: "#fff",
-          borderRadius: "16px",
-          padding: "14px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
-          flexWrap: "wrap",
-        }}>
-          {/* Image — square, compact */}
-          <div style={{
-            flex: "0 0 auto",
-            width: "min(42vw, 180px)",
-            height: "min(42vw, 180px)",
-            borderRadius: "12px",
-            overflow: "hidden",
-            background: "#f8f0eb",
+      <div style={{ maxWidth: "960px", margin: "0 auto", padding: "0 0 32px" }}>
+        {/* ── CAROUSEL ── */}
+        <ProductImageCarousel images={carouselImages} fallback={fallbackUrl} productName={product.name} />
+
+        {/* ── PRODUCT INFO CARD ── */}
+        <div style={{ padding: "0 14px" }}>
+
+          {/* Breadcrumb */}
+          <p style={{ fontSize: "12px", color: "#94a3b8", margin: "12px 0 8px" }}>
+            Home / {product.category?.name || "Category"} / {product.name}
+          </p>
+
+          {/* Category pill */}
+          <span style={{
+            background: "#fff0f5", color: "#e11d48",
+            fontSize: "11px", fontWeight: "700",
+            padding: "3px 12px", borderRadius: "50px",
           }}>
-            <img
-              src={imageSrc}
-              alt={product.name}
-              onError={(e) => { e.currentTarget.src = fallbackUrl; }}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </div>
+            {product.category?.name || "Product"}
+          </span>
 
-          {/* Info panel */}
-          <div style={{ flex: 1, minWidth: "160px", display: "flex", flexDirection: "column", gap: "8px" }}>
-            {/* Category pill */}
-            <span style={{
-              background: "#fff0f5",
-              color: "#e11d48",
-              fontSize: "11px",
-              fontWeight: "700",
-              padding: "3px 10px",
-              borderRadius: "50px",
-              alignSelf: "flex-start",
-            }}>
-              {product.category?.name || "Product"}
+          {/* Name */}
+          <h1 style={{ margin: "10px 0 4px", fontSize: "clamp(18px, 5vw, 26px)", fontWeight: "900", color: "#0f172a", lineHeight: 1.3 }}>
+            {product.name}
+          </h1>
+
+          {/* Rating row */}
+          {(product.rating > 0 || product.reviewCount > 0) && (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", margin: "6px 0" }}>
+              <div style={{ display: "flex", gap: "2px" }}>
+                {[1,2,3,4,5].map(s => {
+                  const filled = product.rating >= s;
+                  const half = !filled && product.rating >= s - 0.5;
+                  return (
+                    <span key={s} style={{ fontSize: "16px", color: filled || half ? "#f59e0b" : "#d1d5db" }}>
+                      {half ? "½" : "★"}
+                    </span>
+                  );
+                })}
+              </div>
+              <span style={{ fontSize: "13px", fontWeight: "700", color: "#f59e0b" }}>{product.rating}</span>
+              <span style={{ fontSize: "12px", color: "#94a3b8" }}>({product.reviewCount} reviews)</span>
+            </div>
+          )}
+
+          {/* Price */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap", margin: "10px 0" }}>
+            <span style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: "900", color: "#e11d48" }}>
+              {product.offerPrice} Tk
             </span>
-
-            {/* Name */}
-            <h1 style={{ margin: 0, fontSize: "clamp(15px, 4vw, 20px)", fontWeight: "900", color: "#0f172a", lineHeight: 1.3 }}>
-              {product.name}
-            </h1>
-
-            {/* Price row */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-              <span style={{ fontSize: "clamp(20px, 5vw, 26px)", fontWeight: "900", color: "#e11d48" }}>
-                {product.offerPrice} Tk
+            {product.originalPrice && (
+              <span style={{ fontSize: "16px", color: "#94a3b8", textDecoration: "line-through" }}>
+                {product.originalPrice} Tk
               </span>
-              {product.originalPrice && (
-                <span style={{ fontSize: "14px", color: "#94a3b8", textDecoration: "line-through" }}>
-                  {product.originalPrice} Tk
-                </span>
-              )}
-              {product.discountBadge && (
-                <span style={{
-                  background: "#e11d48",
-                  color: "#fff",
-                  fontSize: "11px",
-                  fontWeight: "800",
-                  padding: "2px 8px",
-                  borderRadius: "50px",
-                }}>
-                  {product.discountBadge}
-                </span>
-              )}
-            </div>
-
-            {/* Stock status */}
-            <p style={{
-              margin: 0,
-              fontSize: "12px",
-              fontWeight: "700",
-              color: product.stockStatus === "Out of Stock" ? "#dc2626" : "#059669",
-            }}>
-              ● {product.stockStatus || "In Stock"}
-            </p>
-
-            {/* Action buttons */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-              <button
-                onClick={handleBuyNow}
-                disabled={product.stockStatus === "Out of Stock"}
-                style={{
-                  background: product.stockStatus === "Out of Stock" ? "#94a3b8" : "#0f172a",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "50px",
-                  padding: "12px 18px",
-                  fontWeight: "800",
-                  fontSize: "14px",
-                  cursor: product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
-                  width: "100%",
-                }}
-              >
-                {product.stockStatus === "Out of Stock" ? "Unavailable" : "🛒 Buy Now"}
-              </button>
-
-              <button
-                onClick={handleAddToCart}
-                disabled={product.stockStatus === "Out of Stock"}
-                style={{
-                  background: "transparent",
-                  color: "#e11d48",
-                  border: "2px solid #e11d48",
-                  borderRadius: "50px",
-                  padding: "10px 18px",
-                  fontWeight: "800",
-                  fontSize: "14px",
-                  cursor: product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
-                  width: "100%",
-                }}
-              >
-                {product.stockStatus === "Out of Stock" ? "Out of Stock" : "+ Add to Cart"}
-              </button>
-            </div>
+            )}
+            {product.discountBadge && (
+              <span style={{
+                background: "linear-gradient(135deg, #e11d48, #f97316)",
+                color: "#fff", fontSize: "12px", fontWeight: "800",
+                padding: "3px 10px", borderRadius: "50px",
+              }}>
+                {product.discountBadge}
+              </span>
+            )}
           </div>
-        </div>
 
-        {/* Delivery info bar */}
-        <div style={{
-          display: "flex",
-          gap: "8px",
-          flexWrap: "wrap",
-          margin: "12px 0 0",
-          padding: "10px 14px",
-          background: "#fff",
-          borderRadius: "12px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        }}>
-          <span style={{ fontSize: "12px", color: "#64748b" }}>🚚 <strong>Dhaka:</strong> 65 Tk</span>
-          <span style={{ fontSize: "12px", color: "#64748b" }}>📦 <strong>Outside:</strong> 110 Tk</span>
-          <span style={{ fontSize: "12px", color: "#059669", fontWeight: "700" }}>✓ Cash on Delivery</span>
+          {/* Stock */}
+          <p style={{
+            margin: "0 0 14px",
+            fontSize: "13px", fontWeight: "700",
+            color: product.stockStatus === "Out of Stock" ? "#dc2626" : "#059669",
+          }}>
+            ● {product.stockStatus || "In Stock"}
+          </p>
+
+          {/* Buttons */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
+            <button
+              onClick={handleBuyNow}
+              disabled={product.stockStatus === "Out of Stock"}
+              style={{
+                background: product.stockStatus === "Out of Stock"
+                  ? "#94a3b8"
+                  : "linear-gradient(135deg, #e11d48 0%, #f97316 100%)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "50px",
+                padding: "16px 24px",
+                fontWeight: "900",
+                fontSize: "16px",
+                cursor: product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
+                width: "100%",
+                boxShadow: product.stockStatus === "Out of Stock" ? "none" : "0 6px 20px rgba(225,29,72,0.35)",
+                letterSpacing: "0.5px",
+              }}
+            >
+              {product.stockStatus === "Out of Stock" ? "Unavailable" : "🛒 Buy Now"}
+            </button>
+
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stockStatus === "Out of Stock"}
+              style={{
+                background: "transparent",
+                color: "#e11d48",
+                border: "2.5px solid #e11d48",
+                borderRadius: "50px",
+                padding: "14px 24px",
+                fontWeight: "800",
+                fontSize: "15px",
+                cursor: product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
+                width: "100%",
+              }}
+            >
+              {product.stockStatus === "Out of Stock" ? "Out of Stock" : "+ Add to Cart"}
+            </button>
+          </div>
+
+          {/* Delivery bar */}
+          <div style={{
+            display: "flex", gap: "14px", flexWrap: "wrap",
+            padding: "12px 16px",
+            background: "#f8fafc",
+            borderRadius: "14px",
+            border: "1px solid #e2e8f0",
+          }}>
+            <span style={{ fontSize: "13px", color: "#64748b" }}>🚚 <strong>Dhaka:</strong> 65 Tk</span>
+            <span style={{ fontSize: "13px", color: "#64748b" }}>📦 <strong>Outside:</strong> 110 Tk</span>
+            <span style={{ fontSize: "13px", color: "#059669", fontWeight: "700" }}>✓ Cash on Delivery</span>
+          </div>
         </div>
       </div>
 

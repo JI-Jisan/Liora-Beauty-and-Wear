@@ -113,6 +113,10 @@ export default function AdminPage() {
     description: "",
     stockStatus: "In Stock",
     image: "",
+    image2: "",
+    image3: "",
+    rating: "",
+    reviewCount: "",
     isFeatured: false,
     isTrending: false,
     isNewArrival: false,
@@ -788,6 +792,102 @@ export default function AdminPage() {
                     />
                   </div>
                 )}
+              </div>
+
+              {/* Image 2 */}
+              <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "6px 0" }}>
+                <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
+                  📷 Product Image 2 (Optional - Carousel):
+                </label>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
+                  <input type="file" accept="image/*" id="product-file-input-2" style={{ display: "none" }}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          const img = new Image();
+                          img.onload = () => {
+                            const canvas = document.createElement("canvas");
+                            const MAX_WIDTH = 800;
+                            let w = img.width, h = img.height;
+                            if (w > MAX_WIDTH) { h = Math.round(h * MAX_WIDTH / w); w = MAX_WIDTH; }
+                            canvas.width = w; canvas.height = h;
+                            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                            setFormData(prev => ({ ...prev, image2: canvas.toDataURL("image/jpeg", 0.85) }));
+                          };
+                          img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <label htmlFor="product-file-input-2" style={{ background: "#475569", color: "#fff", padding: "8px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}>
+                    📁 Upload Image 2
+                  </label>
+                  <input type="text" name="image2" placeholder="Or paste Image 2 URL" value={formData.image2 || ""} onChange={handleChange}
+                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }} />
+                </div>
+                {formData.image2 && (
+                  <img src={getImageUrl(formData.image2)} alt="Image 2 Preview"
+                    style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", border: "2px solid #475569" }} />
+                )}
+              </div>
+
+              {/* Image 3 */}
+              <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "6px 0" }}>
+                <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
+                  📷 Product Image 3 (Optional - Carousel):
+                </label>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
+                  <input type="file" accept="image/*" id="product-file-input-3" style={{ display: "none" }}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          const img = new Image();
+                          img.onload = () => {
+                            const canvas = document.createElement("canvas");
+                            const MAX_WIDTH = 800;
+                            let w = img.width, h = img.height;
+                            if (w > MAX_WIDTH) { h = Math.round(h * MAX_WIDTH / w); w = MAX_WIDTH; }
+                            canvas.width = w; canvas.height = h;
+                            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                            setFormData(prev => ({ ...prev, image3: canvas.toDataURL("image/jpeg", 0.85) }));
+                          };
+                          img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <label htmlFor="product-file-input-3" style={{ background: "#7c3aed", color: "#fff", padding: "8px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}>
+                    📁 Upload Image 3
+                  </label>
+                  <input type="text" name="image3" placeholder="Or paste Image 3 URL" value={formData.image3 || ""} onChange={handleChange}
+                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }} />
+                </div>
+                {formData.image3 && (
+                  <img src={getImageUrl(formData.image3)} alt="Image 3 Preview"
+                    style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", border: "2px solid #7c3aed" }} />
+                )}
+              </div>
+
+              {/* Rating & Reviews */}
+              <div style={{ display: "flex", gap: "10px" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: "12px", fontWeight: "700", color: "#64748b", display: "block", marginBottom: "4px" }}>⭐ Rating (0-5)</label>
+                  <input type="number" name="rating" min="0" max="5" step="0.1" placeholder="e.g. 4.5"
+                    value={formData.rating || ""} onChange={handleChange}
+                    style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: "12px", fontWeight: "700", color: "#64748b", display: "block", marginBottom: "4px" }}>💬 Review Count</label>
+                  <input type="number" name="reviewCount" min="0" placeholder="e.g. 128"
+                    value={formData.reviewCount || ""} onChange={handleChange}
+                    style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }} />
+                </div>
               </div>
 
               <label>
