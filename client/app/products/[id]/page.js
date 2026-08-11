@@ -165,6 +165,7 @@ export default function ProductDetailsPage() {
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [allProducts, setAllProducts] = useState(DEMO_PRODUCTS);
+  const [allCategories, setAllCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -185,7 +186,6 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     const handleScroll = () => {
       const tabs = ["overview", "ratings", "details", "recommendations"];
-      const scrollPosition = window.scrollY + 160;
 
       for (let i = tabs.length - 1; i >= 0; i--) {
         const el = document.getElementById(tabs[i]);
@@ -218,6 +218,13 @@ export default function ProductDetailsPage() {
         })
       )
       .catch((err) => console.error(err));
+
+    fetch(`${API_BASE_URL}/api/categories`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setAllCategories(data);
+      })
+      .catch((err) => console.error("Category fetch error:", err));
   }, []);
 
   useEffect(() => {
@@ -388,18 +395,44 @@ export default function ProductDetailsPage() {
 
           {/* Dynamic Nested Breadcrumb Navigation */}
           {(() => {
-            const getBreadcrumbs = (cat) => {
-              const list = [];
-              let current = cat;
-              while (current && typeof current === "object") {
-                if (current.name) {
-                  list.unshift({ id: current._id || current.name, name: current.name });
-                }
-                current = current.parentCategory;
+            const getBreadcrumbs = (prodCat, categoryList) => {
+              if (!prodCat) return [];
+
+              const catMap = {};
+              if (Array.isArray(categoryList)) {
+                categoryList.forEach((c) => {
+                  if (c && c._id) catMap[c._id] = c;
+                });
               }
-              return list;
+
+              const chain = [];
+              let current = typeof prodCat === "object" ? prodCat : catMap[prodCat];
+              const visited = new Set();
+
+              while (current && typeof current === "object") {
+                const cId = current._id || current.name;
+                if (!cId || visited.has(String(cId))) break;
+                visited.add(String(cId));
+
+                if (current.name) {
+                  chain.unshift({ id: cId, name: current.name });
+                }
+
+                // Move to parent Category
+                const parentObj = current.parentCategory;
+                if (parentObj && typeof parentObj === "object" && parentObj.name) {
+                  current = parentObj;
+                } else if (parentObj && catMap[parentObj]) {
+                  current = catMap[parentObj];
+                } else {
+                  current = null;
+                }
+              }
+
+              return chain;
             };
-            const categoryTree = getBreadcrumbs(product?.category);
+
+            const categoryTree = getBreadcrumbs(product?.category, allCategories);
 
             return (
               <nav className="jt-breadcrumb-nav" aria-label="Breadcrumb" style={{ margin: "12px 0 10px", fontSize: "13px", color: "#64748b", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px" }}>
