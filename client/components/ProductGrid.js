@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CategoryBar from "./CategoryBar";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, getImageUrl } from "@/lib/api";
 
 const DEMO_PRODUCTS = [
   {
@@ -183,11 +183,7 @@ function ProductGridContent({
 
       <div className="jt-product-grid">
         {filteredProducts.map((product) => {
-          const imageSrc = product.image
-            ? product.image.startsWith("http") || product.image.startsWith("/uploads")
-              ? product.image
-              : `/images/${product.image}`
-            : null;
+          const imageSrc = getImageUrl(product.image);
 
           const catName = getCategoryName(product.category);
 

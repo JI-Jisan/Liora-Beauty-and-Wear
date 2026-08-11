@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 
 const DEMO_PRODUCTS = [
@@ -171,13 +171,7 @@ export default function ProductDetailsPage() {
     );
   }
 
-  const imageSrc = product.image
-    ? product.image.startsWith("http")
-      ? product.image
-      : product.image.startsWith("/uploads")
-      ? `${API_BASE_URL}${product.image}`
-      : `/images/${product.image}`
-    : null;
+  const imageSrc = getImageUrl(product.image);
 
   return (
     <main className="jt-details-page-wrap">

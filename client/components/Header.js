@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useState, useEffect, useRef, useMemo } from "react";
 import LioraLogo from "./LioraLogo";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, getImageUrl } from "@/lib/api";
 
 const DEMO_LIVE_PRODUCTS = [
   {
@@ -205,12 +205,9 @@ export default function Header({
 
                     <div className="jt-live-search-list">
                       {liveSearchResults.map((product) => {
-                        const imageSrc = product.image
-                          ? product.image.startsWith("http") ||
-                            product.image.startsWith("/uploads")
-                            ? product.image
-                            : `/images/${product.image}`
-                          : "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&auto=format&fit=crop&q=80";
+                        const imageSrc =
+                          getImageUrl(product.image) ||
+                          "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&auto=format&fit=crop&q=80";
 
                         const catName =
                           typeof product.category === "object"

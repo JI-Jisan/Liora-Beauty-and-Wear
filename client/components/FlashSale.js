@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, getImageUrl } from "@/lib/api";
 
 const DEMO_FLASH_PRODUCTS = [
   {
@@ -152,13 +152,7 @@ export default function FlashSale({
         <div className="jt-flash-right">
           <div className="jt-flash-products-grid">
             {flashProducts.map((product) => {
-              const imageSrc = product.image
-                ? product.image.startsWith("http")
-                  ? product.image
-                  : product.image.startsWith("/uploads")
-                  ? `${API_BASE_URL}${product.image}`
-                  : `/images/${product.image}`
-                : "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80";
+              const imageSrc = getImageUrl(product.image) || "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80";
 
               const isAdded = addedIds.includes(product._id);
 

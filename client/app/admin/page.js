@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import AdminOrders from "@/components/AdminOrders";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
+import { API_BASE_URL, getAuthHeaders, getImageUrl } from "@/lib/api";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -841,13 +841,7 @@ export default function AdminPage() {
               <>
                 <div className="jt-manage-products-list">
                   {paginatedProducts.map((product) => {
-                    const imageSrc = product.image
-                      ? product.image.startsWith("http")
-                        ? product.image
-                        : product.image.startsWith("/uploads")
-                        ? `${API_BASE_URL}${product.image}`
-                        : `/images/${product.image}`
-                      : null;
+                    const imageSrc = getImageUrl(product.image);
 
                     return (
                       <div key={product._id} className="jt-manage-product-card">

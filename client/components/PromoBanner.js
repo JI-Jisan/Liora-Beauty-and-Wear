@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, getImageUrl } from "@/lib/api";
 
 const DEFAULT_5_SLIDES = [
   {
@@ -97,13 +97,9 @@ export default function PromoBanner({ promoSlides = [], isLoading = false }) {
 
   const currentSlide = slides[activeIndex];
 
-  const imageSrc = currentSlide.image
-    ? currentSlide.image.startsWith("http")
-      ? currentSlide.image
-      : currentSlide.image.startsWith("/uploads")
-      ? `${API_BASE_URL}${currentSlide.image}`
-      : currentSlide.image
-    : DEFAULT_5_SLIDES[activeIndex % DEFAULT_5_SLIDES.length].image;
+  const imageSrc =
+    getImageUrl(currentSlide.image) ||
+    DEFAULT_5_SLIDES[activeIndex % DEFAULT_5_SLIDES.length].image;
 
   return (
     <section className="jt-full-banner-container">
