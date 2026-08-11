@@ -57,7 +57,7 @@ const DEFAULT_5_SLIDES = [
   },
 ];
 
-export default function PromoBanner({ promoSlides = [] }) {
+export default function PromoBanner({ promoSlides = [], isLoading = false }) {
   const slides =
     Array.isArray(promoSlides) && promoSlides.length > 0
       ? promoSlides
@@ -73,6 +73,27 @@ export default function PromoBanner({ promoSlides = [] }) {
 
     return () => clearInterval(interval);
   }, [slides.length]);
+
+  if (isLoading) {
+    return (
+      <section className="jt-full-banner-container">
+        <div
+          className="jt-full-banner-card"
+          style={{
+            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+            minHeight: "380px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div style={{ color: "rgba(255,255,255,0.4)", fontWeight: "700", fontSize: "14px" }}>
+            Loading Banners...
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const currentSlide = slides[activeIndex];
 

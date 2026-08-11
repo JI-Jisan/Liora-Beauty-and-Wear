@@ -16,6 +16,8 @@ export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const { addToCart } = useCart();
 
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
     brandSubtitle: "Beauty. Style. You.",
@@ -37,7 +39,7 @@ export default function HomePage() {
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/settings`)
       .then((res) => res.json())
-      .then((data) =>
+      .then((data) => {
         setSiteSettings({
           brandName: data.brandName || "LIORA Beauty & Wear",
           brandSubtitle: data.brandSubtitle || "Beauty. Style. You.",
@@ -58,9 +60,13 @@ export default function HomePage() {
           flashButtonText: data.flashButtonText || "Shop Flash Sale",
           flashButtonLink: data.flashButtonLink || "/products",
           flashDurationHours: data.flashDurationHours || 6,
-        })
-      )
-      .catch((err) => console.error(err));
+        });
+        setIsLoadingSettings(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setIsLoadingSettings(false);
+      });
   }, []);
 
   return (
@@ -79,7 +85,10 @@ export default function HomePage() {
         heroText={siteSettings.heroText}
       />
 
-      <PromoBanner promoSlides={siteSettings.promoSlides} />
+      <PromoBanner
+        promoSlides={siteSettings.promoSlides}
+        isLoading={isLoadingSettings}
+      />
       
       <FlashSale
         flashTitle={siteSettings.flashTitle}
