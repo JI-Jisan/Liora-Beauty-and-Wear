@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import AdminOrders from "@/components/AdminOrders";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
@@ -13,6 +13,14 @@ export default function AdminPage() {
   const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState(null);
+
+  // Manage Products Advanced Controls State
+  const [productSearch, setProductSearch] = useState("");
+  const [productCategoryFilter, setProductCategoryFilter] = useState("all");
+  const [productStockFilter, setProductStockFilter] = useState("all");
+  const [productSortBy, setProductSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   const [categoryForm, setCategoryForm] = useState({
     name: "",
     type: "main",
@@ -335,6 +343,69 @@ export default function AdminPage() {
     setImageFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // Defensive safe array fallbacks
+  const safeProducts = Array.isArray(products) ? products : [];
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
+  // Filter & Sort Products for Manage Products section
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = [...safeProducts];
+
+    if (productSearch && typeof productSearch === "string" && productSearch.trim()) {
+      const keyword = productSearch.trim().toLowerCase();
+      result = result.filter(
+        (p) =>
+          (p && p.name && String(p.name).toLowerCase().includes(keyword)) ||
+          (p && p.description && String(p.description).toLowerCase().includes(keyword)) ||
+          (p && p.category && typeof p.category === "object" && p.category.name && String(p.category.name).toLowerCase().includes(keyword))
+      );
+    }
+
+    if (productCategoryFilter && productCategoryFilter !== "all") {
+      result = result.filter((p) => {
+        if (!p) return false;
+        const catId = p.category?._id || p.category;
+        const catName = p.category?.name || p.category;
+        return (
+          catId === productCategoryFilter ||
+          catName === productCategoryFilter
+        );
+      });
+    }
+
+    if (productStockFilter && productStockFilter !== "all") {
+      result = result.filter((p) => p && p.stockStatus === productStockFilter);
+    }
+
+    if (productSortBy === "price-low") {
+      result.sort((a, b) => (Number(a?.offerPrice) || 0) - (Number(b?.offerPrice) || 0));
+    } else if (productSortBy === "price-high") {
+      result.sort((a, b) => (Number(b?.offerPrice) || 0) - (Number(a?.offerPrice) || 0));
+    } else if (productSortBy === "name") {
+      result.sort((a, b) => String(a?.name || "").localeCompare(String(b?.name || "")));
+    } else {
+      result.sort(
+        (a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0)
+      );
+    }
+
+    return result;
+  }, [
+    products,
+    productSearch,
+    productCategoryFilter,
+    productStockFilter,
+    productSortBy,
+  ]);
+
+  const totalPages =
+    Math.ceil(filteredAndSortedProducts.length / itemsPerPage) || 1;
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredAndSortedProducts.slice(start, start + itemsPerPage);
+  }, [filteredAndSortedProducts, currentPage, itemsPerPage]);
 
   if (!isAuthenticated) return null;
 
