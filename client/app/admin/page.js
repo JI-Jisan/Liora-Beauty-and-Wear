@@ -430,6 +430,9 @@ export default function AdminPage() {
     const confirmDelete = window.confirm("Are you sure you want to delete this product?");
     if (!confirmDelete) return;
 
+    // Optimistically update local UI state
+    setProducts((prev) => prev.filter((p) => p._id !== id));
+
     try {
       const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
         method: "DELETE",
@@ -442,10 +445,11 @@ export default function AdminPage() {
         throw new Error(result.message || "Delete failed");
       }
 
-      setMessage("Product deleted successfully");
+      setMessage("✓ Product deleted successfully");
       loadProducts();
     } catch (error) {
-      setMessage(error.message);
+      setMessage(`❌ Delete Error: ${error.message}`);
+      loadProducts();
     }
   };
 

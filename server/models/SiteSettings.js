@@ -19,10 +19,11 @@ const siteSettingsSchema = new mongoose.Schema({
   ],
 
   flashTitle: String,
-flashSubtitle: String,
-flashButtonText: String,
-flashButtonLink: String,
-flashDurationHours: Number,
+  flashSubtitle: String,
+  flashButtonText: String,
+  flashButtonLink: String,
+  flashDurationHours: Number,
+  isDemoSeeded: { type: Boolean, default: false },
 });
 
 
