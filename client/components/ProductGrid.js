@@ -183,9 +183,27 @@ function ProductGridContent({
 
       <div className="jt-product-grid">
         {filteredProducts.map((product) => {
-          const imageSrc = getImageUrl(product.image);
-
           const catName = getCategoryName(product.category);
+
+          const getFallbackProductImage = (cName, pName) => {
+            const text = `${cName || ""} ${pName || ""}`.toLowerCase();
+            if (text.includes("perfume") || text.includes("oud") || text.includes("mist") || text.includes("chanel")) {
+              return "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80";
+            }
+            if (text.includes("watch") || text.includes("clock")) {
+              return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
+            }
+            if (text.includes("fan") || text.includes("light")) {
+              return "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&auto=format&fit=crop&q=80";
+            }
+            if (text.includes("serum") || text.includes("skin") || text.includes("pakhor") || text.includes("beauty")) {
+              return "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80";
+            }
+            return "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&auto=format&fit=crop&q=80";
+          };
+
+          const fallbackUrl = getFallbackProductImage(catName, product.name);
+          const imageSrc = getImageUrl(product.image) || fallbackUrl;
 
           return (
             <div
@@ -200,30 +218,14 @@ function ProductGridContent({
 
               <Link href={`/products/${product._id}`} className="jt-product-link">
                 <div className="jt-product-image-wrap">
-                  {imageSrc ? (
-                    <img
-                      src={imageSrc}
-                      alt={product.name}
-                      className="jt-product-real-image"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        const fallback =
-                          e.currentTarget.parentElement.querySelector(
-                            ".jt-image-fallback"
-                          );
-                        if (fallback) fallback.style.display = "flex";
-                      }}
-                    />
-                  ) : null}
-
-                  <div
-                    className="jt-image-fallback"
-                    style={{
-                      display: imageSrc ? "none" : "flex",
+                  <img
+                    src={imageSrc}
+                    alt={product.name}
+                    className="jt-product-real-image"
+                    onError={(e) => {
+                      e.currentTarget.src = fallbackUrl;
                     }}
-                  >
-                    <span>{product.name}</span>
-                  </div>
+                  />
                 </div>
               </Link>
 

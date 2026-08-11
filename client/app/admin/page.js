@@ -344,37 +344,52 @@ export default function AdminPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage(editingId ? "Updating..." : "Uploading...");
+  const handleProductImageUpload = (file) => {
+    if (!file) return;
 
-    try {
-      let uploadedImageUrl = formData.image || "";
+    setMessage("⏳ Resizing & optimizing product image...");
 
-      if (imageFile) {
-        const imageData = new FormData();
-        imageData.append("image", imageFile);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 800;
+        let width = img.width;
+        let height = img.height;
 
-        const uploadRes = await fetch(`${API_BASE_URL}/api/products/upload`, {
-          method: "POST",
-          headers: getAuthHeaders(true),
-          body: imageData,
-        });
-
-        const uploadResult = await uploadRes.json();
-
-        if (!uploadRes.ok) {
-          throw new Error(uploadResult.message || "Image upload failed");
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
         }
 
-        uploadedImageUrl = uploadResult.imageUrl;
-      }
+        canvas.width = width;
+        canvas.height = height;
 
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+        setFormData((prev) => ({ ...prev, image: compressedBase64 }));
+        setMessage("✅ Product image attached & optimized!");
+      };
+      img.onerror = () => {
+        setMessage("❌ Failed to process product image file.");
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage(editingId ? "⏳ Updating product..." : "⏳ Saving product...");
+
+    try {
       const finalProduct = {
         ...formData,
         originalPrice: Number(formData.originalPrice),
         offerPrice: Number(formData.offerPrice),
-        image: uploadedImageUrl,
       };
 
       const url = editingId
@@ -395,11 +410,15 @@ export default function AdminPage() {
         throw new Error(productResult.message || "Save failed");
       }
 
-      setMessage(editingId ? "Product updated successfully" : "Product added successfully");
+      setMessage(
+        editingId
+          ? "✅ Product updated successfully!"
+          : "✅ Product added successfully!"
+      );
       resetForm();
       loadProducts();
     } catch (error) {
-      setMessage(error.message);
+      setMessage(`❌ Product Save Failed: ${error.message}`);
     }
   };
 
@@ -711,7 +730,65 @@ export default function AdminPage() {
                 <option value="Out of Stock">Out of Stock</option>
               </select>
 
-              <input type="file" accept="image/*" onChange={handleImageChange} />
+              <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "10px 0" }}>
+                <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
+                  📷 Product Image Upload:
+                </label>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="product-file-input"
+                    style={{ display: "none" }}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleProductImageUpload(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="product-file-input"
+                    style={{
+                      background: "#0f172a",
+                      color: "#ffffff",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      fontWeight: "800",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      boxShadow: "0 2px 6px rgba(15,23,42,0.15)"
+                    }}
+                  >
+                    📁 Upload Product Photo from Computer / Phone
+                  </label>
+                  <span style={{ fontSize: "12px", color: "#64748b" }}>Or paste URL below:</span>
+                </div>
+
+                <input
+                  type="text"
+                  name="image"
+                  placeholder="Image URL or Base64 String"
+                  value={formData.image || ""}
+                  onChange={handleChange}
+                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
+                />
+
+                {formData.image && (
+                  <div style={{ marginTop: "10px" }}>
+                    <span style={{ fontSize: "12px", fontWeight: "800", color: "#047857" }}>
+                      ✓ Product Image Preview:
+                    </span>
+                    <img
+                      src={getImageUrl(formData.image)}
+                      alt="Product Preview"
+                      style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px", marginTop: "4px", border: "2px solid #0f172a", display: "block" }}
+                    />
+                  </div>
+                )}
+              </div>
 
               <label>
                 <input
