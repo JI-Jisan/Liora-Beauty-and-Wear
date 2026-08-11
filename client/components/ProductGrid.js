@@ -130,6 +130,15 @@ function ProductGridContent({
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
+    // Build category map by _id and by lowercase name for fast parent lookup
+    const catMap = {};
+    if (Array.isArray(categories)) {
+      categories.forEach((c) => {
+        if (c && c._id) catMap[c._id] = c;
+        if (c && c.name) catMap[c.name.trim().toLowerCase()] = c;
+      });
+    }
+
     if (type === "featured") {
       result = result.filter((p) => p.isFeatured);
     }
@@ -142,29 +151,42 @@ function ProductGridContent({
       result = result.filter((p) => p.isNewArrival);
     }
 
-    if (selectedCategory !== "all") {
+    if (selectedCategory && selectedCategory !== "all") {
       const targetStr = String(selectedCategory).trim().toLowerCase();
 
       result = result.filter((product) => {
-        let current = product.category;
-        while (current) {
-          if (typeof current === "object") {
-            const cId = String(current._id || "").toLowerCase();
-            const cName = String(current.name || "").trim().toLowerCase();
-            if (cId === targetStr || cName === targetStr) {
-              return true;
-            }
-            current = current.parentCategory;
-          } else if (typeof current === "string") {
-            const cStr = current.trim().toLowerCase();
-            if (cStr === targetStr) {
-              return true;
-            }
-            break;
+        if (!product.category) return false;
+
+        let current = typeof product.category === "object"
+          ? product.category
+          : catMap[product.category] || catMap[String(product.category).trim().toLowerCase()];
+
+        const visited = new Set();
+
+        while (current && typeof current === "object") {
+          const cId = String(current._id || "").toLowerCase();
+          const cName = String(current.name || "").trim().toLowerCase();
+
+          if (cId === targetStr || cName === targetStr) {
+            return true;
+          }
+
+          if (cId && visited.has(cId)) break;
+          if (cId) visited.add(cId);
+
+          // Move up to parent category
+          const parent = current.parentCategory;
+          if (parent && typeof parent === "object" && parent.name) {
+            current = parent;
+          } else if (parent && catMap[parent]) {
+            current = catMap[parent];
+          } else if (parent && catMap[String(parent).trim().toLowerCase()]) {
+            current = catMap[String(parent).trim().toLowerCase()];
           } else {
-            break;
+            current = null;
           }
         }
+
         return false;
       });
     }
