@@ -31,12 +31,14 @@ export default function CategoryBar({
         </button>
 
         {displayCategories.map((cat) => {
-          const isActive = selectedCategory === cat.name;
+          const isActive = selectedCategory === cat._id || selectedCategory === cat.name;
+          const label = typeof cat.parentCategory === "object" && cat.parentCategory?.name ? `${cat.parentCategory.name} ➔ ${cat.name}` : cat.name;
+
           return (
             <button
               key={cat._id}
               type="button"
-              onClick={() => onSelectCategory(cat.name)}
+              onClick={() => onSelectCategory(cat._id || cat.name)}
               style={{
                 border: isActive ? "none" : "1px solid #E2E8F0",
                 background: isActive ? "#FF4D6D" : "#FFFFFF",
@@ -51,7 +53,7 @@ export default function CategoryBar({
                 transition: "all 0.2s ease",
               }}
             >
-              {cat.name}
+              {label}
             </button>
           );
         })}

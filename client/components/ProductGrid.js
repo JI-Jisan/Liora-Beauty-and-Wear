@@ -98,7 +98,14 @@ function ProductGridContent({
     { _id: "cat-3", name: "Fan Light" },
     { _id: "cat-4", name: "Beauty & Wear" },
   ]);
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const urlCategoryParam = searchParams ? searchParams.get("category") || "" : "";
+  const [selectedCategory, setSelectedCategory] = useState(urlCategoryParam || "all");
+
+  useEffect(() => {
+    if (urlCategoryParam) {
+      setSelectedCategory(urlCategoryParam);
+    }
+  }, [urlCategoryParam]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/products`)
@@ -136,21 +143,29 @@ function ProductGridContent({
     }
 
     if (selectedCategory !== "all") {
-      const selectedLower = String(selectedCategory).trim().toLowerCase();
-      result = result.filter((product) => {
-        const catName =
-          typeof product.category === "object"
-            ? product.category?.name
-            : product.category;
-        const catId =
-          typeof product.category === "object"
-            ? product.category?._id
-            : product.category;
+      const targetStr = String(selectedCategory).trim().toLowerCase();
 
-        return (
-          catId === selectedCategory ||
-          (catName && String(catName).trim().toLowerCase() === selectedLower)
-        );
+      result = result.filter((product) => {
+        let current = product.category;
+        while (current) {
+          if (typeof current === "object") {
+            const cId = String(current._id || "").toLowerCase();
+            const cName = String(current.name || "").trim().toLowerCase();
+            if (cId === targetStr || cName === targetStr) {
+              return true;
+            }
+            current = current.parentCategory;
+          } else if (typeof current === "string") {
+            const cStr = current.trim().toLowerCase();
+            if (cStr === targetStr) {
+              return true;
+            }
+            break;
+          } else {
+            break;
+          }
+        }
+        return false;
       });
     }
 

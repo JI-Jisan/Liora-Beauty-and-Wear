@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useState, useEffect, useRef, useMemo } from "react";
 import LioraLogo from "./LioraLogo";
+import CategoryDrawer from "./CategoryDrawer";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 
 const DEMO_LIVE_PRODUCTS = [
@@ -65,6 +66,7 @@ export default function Header({
   const [localSearch, setLocalSearch] = useState("");
   const [allProducts, setAllProducts] = useState(DEMO_LIVE_PRODUCTS);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const searchWrapperRef = useRef(null);
 
   const cartCount =
@@ -139,12 +141,40 @@ export default function Header({
 
   return (
     <header className="jt-header">
-      {/* ROW 1: Top Bar (Logo Left, Cart Button Right) */}
+      {/* Category Drawer Component */}
+      <CategoryDrawer
+        isOpen={isCategoryDrawerOpen}
+        onClose={() => setIsCategoryDrawerOpen(false)}
+      />
+
+      {/* ROW 1: Top Bar (Hamburger + Logo Left, Cart Right) */}
       <div className="jt-header-main-row">
         <div className="jt-header-container">
-          <Link href="/" style={{ textDecoration: "none" }} className="jt-logo-corner">
-            <LioraLogo />
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button
+              type="button"
+              className="jt-hamburger-drawer-btn"
+              onClick={() => setIsCategoryDrawerOpen(true)}
+              title="Open Categories Drawer"
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "24px",
+                cursor: "pointer",
+                color: "#0f172a",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "4px",
+              }}
+            >
+              ☰
+            </button>
+
+            <Link href="/" style={{ textDecoration: "none" }} className="jt-logo-corner">
+              <LioraLogo />
+            </Link>
+          </div>
 
           <nav className="jt-nav jt-desktop-nav">
             <Link href="/">Home</Link>

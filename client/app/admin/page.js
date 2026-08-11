@@ -711,6 +711,29 @@ export default function AdminPage() {
 
               <button type="submit">Add Category</button>
             </form>
+
+            {/* Existing Categories Tree List */}
+            <div style={{ marginTop: "20px", borderTop: "1px solid #e2e8f0", paddingTop: "16px" }}>
+              <h4 style={{ margin: "0 0 10px", fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>
+                📁 Existing Categories List ({categories.length})
+              </h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "260px", overflowY: "auto" }}>
+                {categories.length === 0 ? (
+                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>No categories created yet.</span>
+                ) : (
+                  categories.map((c) => {
+                    const parentName = c.parentCategory?.name;
+                    return (
+                      <div key={c._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                        <span style={{ fontSize: "13px", fontWeight: "700", color: "#334155" }}>
+                          {parentName ? `📁 ${parentName} ➔ ${c.name}` : `📁 ${c.name}`}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
           </div>
 
           <div id="product-section" className="jt-admin-panel jt-admin-panel-wide">
