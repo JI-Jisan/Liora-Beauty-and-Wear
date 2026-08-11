@@ -40,3 +40,18 @@ export async function PUT(req, { params }) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req, { params }) {
+  try {
+    await connectToDatabase();
+    const { id } = await params;
+
+    const deleted = await Order.findByIdAndDelete(id);
+    if (!deleted) {
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
+    return NextResponse.json({ message: "Order deleted successfully" });
+  } catch (error) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
+}
