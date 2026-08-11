@@ -979,41 +979,136 @@ export default function AdminPage() {
               />
             </div>
 
-            <h4>Homepage Promo Slider</h4>
+            <h4>Homepage Promo Slider Settings</h4>
             {settings.promoSlides.map((slide, index) => (
               <div
                 key={index}
                 style={{
-                  border: "1px solid #d9dee7",
-                  borderRadius: "12px",
-                  padding: "14px",
-                  marginBottom: "14px",
-                  background: "#f9fbff",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "14px",
+                  padding: "16px",
+                  marginBottom: "16px",
+                  background: "#f8fafc",
+                  boxShadow: "0 2px 10px rgba(15, 23, 42, 0.03)"
                 }}
               >
-                <input
-                  type="text"
-                  placeholder="Badge"
-                  value={slide.badge}
-                  onChange={(e) =>
-                    handleSlideChange(index, "badge", e.target.value)
-                  }
-                  style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
-                />
+                {/* Select Product Dropdown to Auto-fill info */}
+                <div style={{ marginBottom: "14px", background: "#e0e7ff", padding: "12px 14px", borderRadius: "10px", border: "1px solid #c7d2fe" }}>
+                  <label style={{ fontWeight: "800", display: "block", marginBottom: "6px", color: "#3730a3", fontSize: "13px" }}>
+                    🛍️ Select Product (Auto-fills Title, Subtitle, Price, Badge & Link):
+                  </label>
+                  <select
+                    value={slide.productId || ""}
+                    onChange={(e) => {
+                      const selectedProdId = e.target.value;
+                      const prod = products.find((p) => p._id === selectedProdId);
+                      if (prod) {
+                        const offerPriceVal = prod.offerPrice || prod.originalPrice;
+                        const origPriceVal = prod.offerPrice && prod.originalPrice > prod.offerPrice ? prod.originalPrice : null;
+                        const discountPct = origPriceVal ? Math.round((1 - offerPriceVal / origPriceVal) * 100) : null;
 
+                        const updatedSlides = settings.promoSlides.map((s, i) =>
+                          i === index
+                            ? {
+                                ...s,
+                                productId: prod._id,
+                                title: prod.name,
+                                subtitle: prod.description || `Special deal on ${prod.name}`,
+                                price: `${offerPriceVal} Tk`,
+                                originalPrice: origPriceVal ? `${origPriceVal} Tk` : "",
+                                badge: discountPct ? `🔥 ${discountPct}% OFF` : "🔥 SPECIAL OFFER",
+                                buttonText: "Shop Now",
+                                buttonLink: `/products/${prod._id}`,
+                              }
+                            : s
+                        );
+                        setSettings((prev) => ({ ...prev, promoSlides: updatedSlides }));
+                      } else {
+                        handleSlideChange(index, "productId", "");
+                      }
+                    }}
+                    style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #a5b4fc", fontWeight: "700", background: "white", fontSize: "13px" }}
+                  >
+                    <option value="">-- Choose a Product (Optional) --</option>
+                    {products.map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.name} ({p.offerPrice || p.originalPrice} Tk)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                  <div>
+                    <label style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Badge Tag:</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 🔥 HOT DEAL - 25% OFF"
+                      value={slide.badge || ""}
+                      onChange={(e) =>
+                        handleSlideChange(index, "badge", e.target.value)
+                      }
+                      style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Offer Price:</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 1,350 Tk"
+                      value={slide.price || ""}
+                      onChange={(e) =>
+                        handleSlideChange(index, "price", e.target.value)
+                      }
+                      style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "10px" }}>
+                  <div>
+                    <label style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Original Price (Strikethrough):</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 1,800 Tk"
+                      value={slide.originalPrice || ""}
+                      onChange={(e) =>
+                        handleSlideChange(index, "originalPrice", e.target.value)
+                      }
+                      style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Button Link:</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. /products/id"
+                      value={slide.buttonLink || ""}
+                      onChange={(e) =>
+                        handleSlideChange(index, "buttonLink", e.target.value)
+                      }
+                      style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                    />
+                  </div>
+                </div>
+
+                <label style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Product Title:</label>
                 <input
                   type="text"
-                  placeholder="Title"
-                  value={slide.title}
+                  placeholder="Product Title"
+                  value={slide.title || ""}
                   onChange={(e) =>
                     handleSlideChange(index, "title", e.target.value)
                   }
-                  style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
+                  style={{ width: "100%", marginBottom: "10px", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
                 />
 
+                <label style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Subtitle / Description:</label>
                 <textarea
-                  placeholder="Subtitle"
-                  value={slide.subtitle}
+                  placeholder="Subtitle or short description"
+                  value={slide.subtitle || ""}
                   onChange={(e) =>
                     handleSlideChange(index, "subtitle", e.target.value)
                   }
@@ -1021,28 +1116,21 @@ export default function AdminPage() {
                     width: "100%",
                     marginBottom: "10px",
                     padding: "10px",
-                    minHeight: "90px",
+                    minHeight: "75px",
+                    borderRadius: "8px",
+                    border: "1px solid #cbd5e1"
                   }}
                 />
 
+                <label style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>Button Label:</label>
                 <input
                   type="text"
-                  placeholder="Button Text"
-                  value={slide.buttonText}
+                  placeholder="Button Text (e.g. Shop Now)"
+                  value={slide.buttonText || ""}
                   onChange={(e) =>
                     handleSlideChange(index, "buttonText", e.target.value)
                   }
-                  style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
-                />
-
-                <input
-                  type="text"
-                  placeholder="Button Link"
-                  value={slide.buttonLink}
-                  onChange={(e) =>
-                    handleSlideChange(index, "buttonLink", e.target.value)
-                  }
-                  style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
+                  style={{ width: "100%", marginBottom: "12px", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
                 />
 
                 <div style={{ marginTop: "10px", marginBottom: "14px", background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1" }}>

@@ -58,7 +58,10 @@ const DEFAULT_5_SLIDES = [
 ];
 
 export default function PromoBanner({ promoSlides = [] }) {
-  const slides = promoSlides.length >= 3 ? promoSlides : DEFAULT_5_SLIDES;
+  const slides =
+    Array.isArray(promoSlides) && promoSlides.length > 0
+      ? promoSlides
+      : DEFAULT_5_SLIDES;
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
