@@ -16,6 +16,7 @@ export default function AdminPage() {
 
   // Slide-out Drawer State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Manage Products Advanced Controls State
   const [productSearch, setProductSearch] = useState("");
@@ -201,9 +202,38 @@ export default function AdminPage() {
 
   const handleSlideImageUpload = (index, file) => {
     if (!file) return;
+
+    setMessage("⏳ Resizing & optimizing image...");
+
     const reader = new FileReader();
-    reader.onloadend = () => {
-      handleSlideChange(index, "image", reader.result);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress to optimized JPEG string
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.82);
+        handleSlideChange(index, "image", compressedBase64);
+        setMessage("✅ Image optimized & attached! Now click '💾 Save Settings' below.");
+      };
+      img.onerror = () => {
+        setMessage("❌ Failed to process image file.");
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   };
@@ -235,6 +265,8 @@ export default function AdminPage() {
   };
 
   const savePromoSlides = async () => {
+    setIsSavingSettings(true);
+    setMessage("⏳ Saving settings to MongoDB server...");
     try {
       const res = await fetch(`${API_BASE_URL}/api/settings`, {
         method: "PUT",
@@ -245,13 +277,17 @@ export default function AdminPage() {
       const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.message || "Failed to save promo slides");
+        throw new Error(result.message || "Failed to save settings");
       }
 
-      setMessage("Settings updated successfully");
-      loadSettings();
+      setMessage("✅ Settings & Cover Images saved successfully!");
+      if (result.promoSlides) {
+        setSettings(result);
+      }
     } catch (error) {
-      setMessage(error.message);
+      setMessage(`❌ Save Failed: ${error.message}`);
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -1123,19 +1159,41 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={savePromoSlides}
+                disabled={isSavingSettings}
                 style={{
                   border: "none",
-                  background: "#1f9d67",
+                  background: isSavingSettings ? "#94a3b8" : "#1f9d67",
                   color: "white",
-                  padding: "12px 16px",
+                  padding: "12px 22px",
                   borderRadius: "10px",
-                  fontWeight: "700",
-                  cursor: "pointer",
+                  fontWeight: "800",
+                  cursor: isSavingSettings ? "wait" : "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  boxShadow: "0 4px 12px rgba(31, 157, 103, 0.2)"
                 }}
               >
-                Save Settings
+                {isSavingSettings ? "⏳ Saving..." : "💾 Save Settings"}
               </button>
             </div>
+
+            {message && (
+              <div
+                style={{
+                  marginTop: "16px",
+                  padding: "12px 18px",
+                  borderRadius: "10px",
+                  background: message.includes("❌") ? "#fef2f2" : "#f0fdf4",
+                  border: `1px solid ${message.includes("❌") ? "#fca5a5" : "#86efac"}`,
+                  color: message.includes("❌") ? "#991b1b" : "#166534",
+                  fontWeight: "700",
+                  fontSize: "14px"
+                }}
+              >
+                {message}
+              </div>
+            )}
           </div>
 
           <div id="orders-section" className="jt-admin-panel jt-admin-panel-wide">
