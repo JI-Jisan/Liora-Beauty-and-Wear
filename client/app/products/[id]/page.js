@@ -386,10 +386,22 @@ export default function ProductDetailsPage() {
         {/* ── PRODUCT INFO CARD ── */}
         <div style={{ padding: "0 14px" }}>
 
-          {/* Breadcrumb */}
-          <p style={{ fontSize: "12px", color: "#94a3b8", margin: "12px 0 8px" }}>
-            Home / {product.category?.name || "Category"} / {product.name}
-          </p>
+          {/* Breadcrumb Navigation */}
+          <nav className="jt-breadcrumb-nav" aria-label="Breadcrumb" style={{ margin: "12px 0 10px", fontSize: "13px", color: "#64748b", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px" }}>
+            <Link href="/" style={{ color: "#64748b", textDecoration: "none", fontWeight: "600" }}>Home</Link>
+            <span style={{ color: "#cbd5e1" }}>/</span>
+            {product.category?.name && (
+              <>
+                <Link href={`/products?category=${encodeURIComponent(product.category._id || product.category.name)}`} style={{ color: "#64748b", textDecoration: "none", fontWeight: "600" }}>
+                  {product.category.name}
+                </Link>
+                <span style={{ color: "#cbd5e1" }}>/</span>
+              </>
+            )}
+            <span style={{ color: "#0f172a", fontWeight: "700" }}>
+              {product.name}
+            </span>
+          </nav>
 
           {/* Category pill */}
           <span style={{
