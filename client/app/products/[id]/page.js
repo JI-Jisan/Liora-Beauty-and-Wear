@@ -157,8 +157,57 @@ export default function ProductDetailsPage() {
 
   if (loading) {
     return (
-      <main style={{ padding: "40px", textAlign: "center" }}>
-        <h2>Loading product...</h2>
+      <main style={{ background: "#fdf8f5", minHeight: "100vh" }}>
+        <style>{`
+          @keyframes jt-shimmer {
+            0% { background-position: -600px 0; }
+            100% { background-position: 600px 0; }
+          }
+          .jt-skel {
+            background: linear-gradient(90deg, #f0e8e0 25%, #fde8e8 50%, #f0e8e0 75%);
+            background-size: 600px 100%;
+            animation: jt-shimmer 1.4s infinite linear;
+            border-radius: 10px;
+          }
+        `}</style>
+
+        {/* Header skeleton */}
+        <div style={{ background: "#fff", padding: "14px 20px", borderBottom: "1px solid #f0e8e0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div className="jt-skel" style={{ width: "110px", height: "36px" }} />
+          <div className="jt-skel" style={{ width: "90px", height: "36px" }} />
+        </div>
+
+        {/* Product skeleton */}
+        <div style={{ maxWidth: "960px", margin: "0 auto", padding: "28px 18px", display: "flex", flexDirection: "column", gap: "24px" }}>
+          {/* Image skeleton */}
+          <div className="jt-skel" style={{ width: "100%", height: "280px", borderRadius: "18px" }} />
+
+          {/* Breadcrumb */}
+          <div className="jt-skel" style={{ width: "55%", height: "14px" }} />
+
+          {/* Title */}
+          <div className="jt-skel" style={{ width: "80%", height: "30px" }} />
+
+          {/* Category */}
+          <div className="jt-skel" style={{ width: "35%", height: "14px" }} />
+
+          {/* Price */}
+          <div style={{ display: "flex", gap: "12px" }}>
+            <div className="jt-skel" style={{ width: "100px", height: "32px" }} />
+            <div className="jt-skel" style={{ width: "80px", height: "32px" }} />
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: "flex", gap: "12px" }}>
+            <div className="jt-skel" style={{ flex: 1, height: "50px", borderRadius: "50px" }} />
+            <div className="jt-skel" style={{ flex: 1, height: "50px", borderRadius: "50px" }} />
+          </div>
+
+          {/* Description lines */}
+          <div className="jt-skel" style={{ width: "100%", height: "14px" }} />
+          <div className="jt-skel" style={{ width: "90%", height: "14px" }} />
+          <div className="jt-skel" style={{ width: "75%", height: "14px" }} />
+        </div>
       </main>
     );
   }
