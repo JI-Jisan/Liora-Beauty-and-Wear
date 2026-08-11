@@ -185,24 +185,36 @@ function ProductGridContent({
         {filteredProducts.map((product) => {
           const catName = getCategoryName(product.category);
 
-          const getFallbackProductImage = (cName, pName) => {
+          // Pick a unique fallback based on product name + category keywords
+          const getSmartFallback = (cName, pName, id) => {
             const text = `${cName || ""} ${pName || ""}`.toLowerCase();
-            if (text.includes("perfume") || text.includes("oud") || text.includes("mist") || text.includes("chanel")) {
-              return "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80";
+            // Specific product name matches first
+            if (text.includes("oud")) return "https://images.unsplash.com/photo-1590156562745-5a03c5a2e21b?w=600&auto=format&fit=crop&q=80";
+            if (text.includes("chanel") || text.includes("coco")) return "https://images.unsplash.com/photo-1557053910-d9eadeed1c58?w=600&auto=format&fit=crop&q=80";
+            if (text.includes("vanilla") || text.includes("mist")) return "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&auto=format&fit=crop&q=80";
+            if (text.includes("royal")) return "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80";
+            if (text.includes("green") || text.includes("pakhor") || text.includes("attar")) return "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=600&auto=format&fit=crop&q=80";
+            // Category matches
+            if (text.includes("perfume") || text.includes("fragrance")) {
+              const perfumePool = [
+                "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1557053910-d9eadeed1c58?w=600&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1590156562745-5a03c5a2e21b?w=600&auto=format&fit=crop&q=80",
+                "https://images.unsplash.com/photo-1563170351-be82bc888aa4?w=600&auto=format&fit=crop&q=80",
+              ];
+              // Use last char of product ID to pick different images
+              const seed = id ? id.charCodeAt(id.length - 1) % perfumePool.length : 0;
+              return perfumePool[seed];
             }
-            if (text.includes("watch") || text.includes("clock")) {
-              return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
-            }
-            if (text.includes("fan") || text.includes("light")) {
-              return "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&auto=format&fit=crop&q=80";
-            }
-            if (text.includes("serum") || text.includes("skin") || text.includes("pakhor") || text.includes("beauty")) {
-              return "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80";
-            }
-            return "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&auto=format&fit=crop&q=80";
+            if (text.includes("watch") || text.includes("clock")) return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
+            if (text.includes("fan") || text.includes("light") || text.includes("led")) return "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=600&auto=format&fit=crop&q=80";
+            if (text.includes("serum") || text.includes("vitamin") || text.includes("skin")) return "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80";
+            if (text.includes("lipstick") || text.includes("makeup") || text.includes("cosmetic")) return "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=600&auto=format&fit=crop&q=80";
+            return "https://images.unsplash.com/photo-1607522370275-f6fd2c0c6b8d?w=600&auto=format&fit=crop&q=80";
           };
 
-          const fallbackUrl = getFallbackProductImage(catName, product.name);
+          const fallbackUrl = getSmartFallback(catName, product.name, product._id);
           const imageSrc = getImageUrl(product.image) || fallbackUrl;
 
           return (

@@ -171,7 +171,26 @@ export default function ProductDetailsPage() {
     );
   }
 
-  const imageSrc = getImageUrl(product.image);
+  const getFallbackProductImage = (catName, pName) => {
+    const text = `${catName || ""} ${pName || ""}`.toLowerCase();
+    if (text.includes("perfume") || text.includes("oud") || text.includes("mist") || text.includes("chanel") || text.includes("pakhor")) {
+      return "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&auto=format&fit=crop&q=80";
+    }
+    if (text.includes("watch") || text.includes("clock")) {
+      return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80";
+    }
+    if (text.includes("fan") || text.includes("light")) {
+      return "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800&auto=format&fit=crop&q=80";
+    }
+    if (text.includes("serum") || text.includes("skin") || text.includes("beauty") || text.includes("vitamin")) {
+      return "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&auto=format&fit=crop&q=80";
+    }
+    return "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&auto=format&fit=crop&q=80";
+  };
+
+  const catName = typeof product.category === "object" ? product.category?.name : product.category || "";
+  const fallbackUrl = getFallbackProductImage(catName, product.name);
+  const imageSrc = getImageUrl(product.image) || fallbackUrl;
 
   return (
     <main className="jt-details-page-wrap">
@@ -186,15 +205,12 @@ export default function ProductDetailsPage() {
         <div className="jt-details-main">
           <div className="jt-details-gallery">
             <div className="jt-details-main-image-box">
-              {imageSrc ? (
-                <img
-                  src={imageSrc}
-                  alt={product.name}
-                  className="jt-details-main-image"
-                />
-              ) : (
-                <div className="jt-details-fallback">No Image</div>
-              )}
+              <img
+                src={imageSrc}
+                alt={product.name}
+                className="jt-details-main-image"
+                onError={(e) => { e.currentTarget.src = fallbackUrl; }}
+              />
             </div>
           </div>
 
