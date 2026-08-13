@@ -5346,7 +5346,7 @@ button {
   font-weight: 800;
 }
 
-/* --- HERO SECTION (FULL SEAMLESS BANNER COVER) --- */
+/* --- HERO SECTION (FULL FRAME BANNER CARD) --- */
 .jt-hero-wrapper {
   max-width: 1200px;
   margin: 12px auto 20px;
@@ -5354,68 +5354,35 @@ button {
 }
 
 .jt-hero-card {
-  background: linear-gradient(135deg, #fff0f5 0%, #fff7f8 50%, #fdf2f4 100%);
-  border: 1px solid #fecdd3;
-  border-radius: 20px;
-  padding: 24px 20px 18px;
   position: relative;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(244, 63, 94, 0.06);
+  border: 1px solid #fecdd3;
+  box-shadow: 0 8px 24px rgba(244, 63, 94, 0.08);
+  background: #fff0f5;
 }
 
-.jt-hero-grid {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+.jt-full-banner-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.1 / 1;
+  min-height: 180px;
+  overflow: hidden;
+  border-radius: 20px;
 }
 
-.jt-hero-left {
-  flex: 1.1;
-  min-width: 0;
-  z-index: 2;
+.jt-full-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.jt-hero-right {
-  flex: 0.9;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  min-width: 0;
-  z-index: 2;
-}
-
-.jt-hero-trusted-text {
-  font-size: 12px;
-  font-weight: 700;
-  color: #334155;
-  margin-bottom: 8px;
-}
-
-.jt-hero-main-title {
-  font-size: clamp(17px, 3.8vw, 32px);
-  font-weight: 900;
-  color: #0f172a;
-  margin: 0 0 10px;
-  line-height: 1.25;
-  font-family: Georgia, serif;
-}
-
-.jt-hero-highlight-italic {
-  font-family: 'Great Vibes', 'Playfair Display', Georgia, serif;
-  font-style: italic;
-  color: #f43f5e;
-  font-weight: 700;
-}
-
-.jt-hero-desc {
-  color: #64748b;
-  font-size: 13px;
-  margin: 0 0 16px;
-  line-height: 1.5;
-}
-
-.jt-hero-btn-row {
+.jt-hero-overlay-actions {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  z-index: 10;
   display: flex;
   gap: 10px;
   align-items: center;
@@ -5430,7 +5397,7 @@ button {
   font-weight: 800;
   font-size: 13px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -5438,7 +5405,8 @@ button {
 }
 
 .jt-hero-offers-btn {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
   color: #0f172a;
   border: 1.5px solid #cbd5e1;
   padding: 10px 18px;
@@ -5450,44 +5418,51 @@ button {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.jt-hero-main-img {
-  width: 100%;
-  max-height: 260px;
-  object-fit: cover;
-  border-radius: 16px;
-  display: block;
+.jt-hero-dots-row {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-@media (max-width: 600px) {
-  .jt-hero-card {
-    padding: 14px 10px 12px;
+.jt-hero-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.jt-hero-dot.active {
+  width: 24px;
+  border-radius: 50px;
+  background: #f43f5e;
+}
+
+@media (max-width: 640px) {
+  .jt-full-banner-container {
+    aspect-ratio: 2 / 1;
+    min-height: 150px;
     border-radius: 16px;
   }
 
-  .jt-hero-grid {
-    gap: 8px;
+  .jt-hero-card {
+    border-radius: 16px;
   }
 
-  .jt-hero-trusted-text {
-    font-size: 9.5px;
-    margin-bottom: 4px;
-  }
-
-  .jt-hero-main-title {
-    font-size: 14.5px;
-    margin-bottom: 6px;
-    line-height: 1.2;
-  }
-
-  .jt-hero-desc {
-    font-size: 10px;
-    margin-bottom: 10px;
-    line-height: 1.35;
-  }
-
-  .jt-hero-btn-row {
+  .jt-hero-overlay-actions {
+    bottom: 10px;
+    left: 10px;
     gap: 6px;
   }
 
@@ -5501,17 +5476,9 @@ button {
     font-size: 10.5px;
   }
 
-  .jt-hero-main-img {
-    max-height: 170px;
-    border-radius: 12px;
+  .jt-hero-dots-row {
+    bottom: 8px;
   }
-}
-
-.jt-hero-dots-row {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 18px;
 }
 
 .jt-hero-dot {
