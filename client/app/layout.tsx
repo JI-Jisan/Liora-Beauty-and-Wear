@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import { CartProvider } from "@/context/CartContext";
 
 const geistSans = Geist({
@@ -34,6 +35,7 @@ export default function RootLayout({
           <div className="jt-root-wrapper">
             <div className="jt-content-area">{children}</div>
             <Footer />
+            <MobileBottomNav />
           </div>
         </CartProvider>
       </body>

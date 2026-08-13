@@ -4,168 +4,95 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getImageUrl } from "@/lib/api";
 
-const DEFAULT_5_SLIDES = [
+const DEFAULT_MINI_CARDS = [
   {
-    badge: "🔥 HOT DEAL - 26% OFF",
-    title: "Royal Oud Perfume 100ml",
-    subtitle: "Experience luxury oriental fragrances with long-lasting authentic scent.",
-    buttonText: "Shop Perfumes",
-    buttonLink: "/products?search=Perfume",
-    price: "1,850 Tk",
-    originalPrice: "2,500 Tk",
-    image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1400&auto=format&fit=crop&q=80",
+    _id: "mini-1",
+    badge: "Limited Offer",
+    title: "Special Discount",
+    subtitle: "Update this slider anytime from admin panel.",
+    buttonText: "Shop Now",
+    buttonLink: "/products",
+    image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&auto=format&fit=crop&q=80",
   },
   {
-    badge: "✨ EXCLUSIVE - 25% OFF",
-    title: "Luxury Gold Chronograph Watch",
-    subtitle: "Premium stainless steel quartz watch with water resistance & luxury design.",
-    buttonText: "Shop Watches",
-    buttonLink: "/products?search=Watch",
-    price: "2,400 Tk",
-    originalPrice: "3,200 Tk",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1400&auto=format&fit=crop&q=80",
-  },
-  {
-    badge: "🌿 BESTSELLER - 29% OFF",
-    title: "Vitamin C Brightening Serum",
-    subtitle: "Natural organic serum for glowing smooth skin & reducing dark spots.",
-    buttonText: "Shop Skincare",
-    buttonLink: "/products?search=Serum",
-    price: "850 Tk",
-    originalPrice: "1,200 Tk",
-    image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=1400&auto=format&fit=crop&q=80",
-  },
-  {
-    badge: "💡 TRENDING - 25% OFF",
-    title: "Smart RGB LED Fan Light 30W",
-    subtitle: "Multi-color remote control LED ceiling fan light with silent operation.",
-    buttonText: "Shop Fan Light",
-    buttonLink: "/products?search=Fan",
-    price: "1,350 Tk",
-    originalPrice: "1,800 Tk",
-    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=1400&auto=format&fit=crop&q=80",
-  },
-  {
-    badge: "🌸 NEW ARRIVAL - 34% OFF",
-    title: "French Vanilla Long-Lasting Body Mist",
-    subtitle: "Refreshing vanilla scent body mist for daily freshness & long lasting aroma.",
-    buttonText: "Shop Body Mists",
-    buttonLink: "/products?search=Vanilla",
-    price: "990 Tk",
-    originalPrice: "1,500 Tk",
-    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=1400&auto=format&fit=crop&q=80",
+    _id: "mini-2",
+    badge: "Limited Offer",
+    title: "Special Discount",
+    subtitle: "Update this slider anytime from admin panel.",
+    buttonText: "Shop Now",
+    buttonLink: "/products",
+    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&auto=format&fit=crop&q=80",
   },
 ];
 
-export default function PromoBanner({ promoSlides = [], isLoading = false }) {
+export default function PromoBanner({ promoSlides = [] }) {
   const slides =
-    Array.isArray(promoSlides) && promoSlides.length > 0
+    Array.isArray(promoSlides) && promoSlides.length >= 2
       ? promoSlides
-      : DEFAULT_5_SLIDES;
-  const [activeIndex, setActiveIndex] = useState(0);
+      : DEFAULT_MINI_CARDS;
+
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
   useEffect(() => {
-    if (slides.length <= 1) return;
-
+    if (slides.length <= 2) return;
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % slides.length);
-    }, 3500);
-
+      setActiveSlideIndex((prev) => (prev + 2) % slides.length);
+    }, 4000);
     return () => clearInterval(interval);
   }, [slides.length]);
 
-  if (isLoading) {
-    return (
-      <section className="jt-full-banner-container">
-        <div
-          className="jt-full-banner-card"
-          style={{
-            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-            minHeight: "380px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ color: "rgba(255,255,255,0.4)", fontWeight: "700", fontSize: "14px" }}>
-            Loading Banners...
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  const currentSlide = slides[activeIndex];
-
-  const imageSrc =
-    getImageUrl(currentSlide.image) ||
-    DEFAULT_5_SLIDES[activeIndex % DEFAULT_5_SLIDES.length].image;
+  const displayCards = slides.slice(activeSlideIndex, activeSlideIndex + 2);
+  const currentPair = displayCards.length < 2 ? slides.slice(0, 2) : displayCards;
 
   return (
-    <section className="jt-full-banner-container">
-      <div className="jt-full-banner-card">
-        {/* Full-Cover Background Image */}
-        <img
-          key={activeIndex}
-          src={imageSrc}
-          alt={currentSlide.title}
-          className="jt-full-banner-bg-image"
-        />
+    <section className="jt-mini-promo-section">
+      <div className="jt-mini-promo-grid">
+        {currentPair.map((slide, idx) => {
+          const imageSrc =
+            getImageUrl(slide.image) ||
+            DEFAULT_MINI_CARDS[idx % DEFAULT_MINI_CARDS.length].image;
 
-        {/* Dark Gradient Overlay */}
-        <div className="jt-full-banner-overlay" />
+          return (
+            <div key={slide._id || idx} className="jt-mini-promo-card">
+              <img
+                src={imageSrc}
+                alt={slide.title || "Special Discount"}
+                className="jt-mini-card-bg"
+              />
+              <div className="jt-mini-card-overlay" />
 
-        {/* Banner Content Container */}
-        <div className="jt-full-banner-content">
-          <div className="jt-full-banner-left">
-            <span className="jt-full-banner-badge">
-              {currentSlide.badge || "Special Offer"}
-            </span>
+              <div className="jt-mini-card-content">
+                <span className="jt-mini-badge">
+                  {slide.badge || "Limited Offer"}
+                </span>
 
-            <h2 className="jt-full-banner-title">{currentSlide.title}</h2>
-            <p className="jt-full-banner-sub">{currentSlide.subtitle}</p>
+                <h3 className="jt-mini-title">
+                  {slide.title || "Special Discount"}
+                </h3>
 
-            <div className="jt-full-banner-actions">
-              <Link
-                href={currentSlide.buttonLink || "/products"}
-                className="jt-full-banner-btn"
-              >
-                {currentSlide.buttonText || "Shop Now"}
-              </Link>
+                <p className="jt-mini-desc">
+                  {slide.subtitle || "Update this slider anytime from admin panel."}
+                </p>
 
-              {currentSlide.price && (
-                <div className="jt-full-banner-price-tag">
-                  <strong>{currentSlide.price}</strong>
-                  {currentSlide.originalPrice && (
-                    <span>{currentSlide.originalPrice}</span>
-                  )}
+                <div className="jt-mini-bottom-row">
+                  <Link
+                    href={slide.buttonLink || "/products"}
+                    className="jt-mini-shop-btn"
+                  >
+                    {slide.buttonText || "Shop Now"}
+                  </Link>
+
+                  <div className="jt-mini-progress-wrap">
+                    <div className="jt-mini-progress-bar">
+                      <div className="jt-mini-progress-fill" />
+                    </div>
+                    <span className="jt-mini-counter">01 / 02</span>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-
-          {/* Dots Indicator & Navigation Controls */}
-          <div className="jt-full-banner-right-controls">
-            <div className="jt-full-banner-dots">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  className={`jt-full-banner-dot ${
-                    activeIndex === index ? "active" : ""
-                  }`}
-                  onClick={() => setActiveIndex(index)}
-                  aria-label={`Go to slide ${index + 1}`}
-                >
-                  <span className="jt-dot-inner" />
-                </button>
-              ))}
-            </div>
-            <span className="jt-slide-counter">
-              0{activeIndex + 1} / 0{slides.length}
-            </span>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </section>
   );

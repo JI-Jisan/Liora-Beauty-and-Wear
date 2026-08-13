@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
-import MarqueeBar from "../components/MarqueeBar";
 import Hero from "../components/Hero";
 import FeaturedCategories from "../components/FeaturedCategories";
 import ProductGrid from "../components/ProductGrid";
@@ -15,8 +14,6 @@ import { useCart } from "@/context/CartContext";
 export default function HomePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const { addToCart } = useCart();
-
-  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
@@ -61,11 +58,9 @@ export default function HomePage() {
           flashButtonLink: data.flashButtonLink || "/products",
           flashDurationHours: data.flashDurationHours || 6,
         });
-        setIsLoadingSettings(false);
       })
       .catch((err) => {
         console.error(err);
-        setIsLoadingSettings(false);
       });
   }, []);
 
@@ -78,18 +73,15 @@ export default function HomePage() {
         brandSubtitle={siteSettings.brandSubtitle}
       />
 
-      <MarqueeBar offerText={siteSettings.offerText} />
-
       <Hero
         heroTitle={siteSettings.heroTitle}
         heroText={siteSettings.heroText}
       />
 
-      <PromoBanner
-        promoSlides={siteSettings.promoSlides}
-        isLoading={isLoadingSettings}
-      />
-      
+      <PromoBanner promoSlides={siteSettings.promoSlides} />
+
+      <FeaturedCategories />
+
       <FlashSale
         flashTitle={siteSettings.flashTitle}
         flashSubtitle={siteSettings.flashSubtitle}
@@ -98,9 +90,6 @@ export default function HomePage() {
         flashDurationHours={siteSettings.flashDurationHours}
         onAddToCart={addToCart}
       />
-
-      {/* Featured Circle Category Showcase (Nirnita Style) */}
-      <FeaturedCategories />
 
       <section id="shop-products">
         <ProductGrid
