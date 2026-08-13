@@ -27,7 +27,7 @@ export default function Hero({
         <div className="jt-hero-grid">
           {/* Left Text & CTA Content */}
           <div className="jt-hero-left">
-            <div className="jt-hero-trusted-pill">
+            <div className="jt-hero-trusted-text">
               <span>Bangladesh&apos;s Trusted Online Shop</span>
             </div>
 
@@ -59,18 +59,16 @@ export default function Hero({
             </div>
           </div>
 
-          {/* Right Product Showcase Banner Image */}
+          {/* Right Showcase Banner Image (Seamlessly Uploaded from Admin Panel) */}
           <div className="jt-hero-right">
-            <div className="jt-hero-image-frame">
-              <img
-                src={imageSrc}
-                alt="LIORA Beauty & Wear Showcase"
-                className="jt-hero-main-img"
-                onError={(e) => {
-                  e.currentTarget.src = DEFAULT_HERO_IMAGE;
-                }}
-              />
-            </div>
+            <img
+              src={imageSrc}
+              alt="LIORA Beauty & Wear Showcase"
+              className="jt-hero-main-img"
+              onError={(e) => {
+                e.currentTarget.src = DEFAULT_HERO_IMAGE;
+              }}
+            />
           </div>
         </div>
 
