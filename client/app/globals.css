@@ -5500,25 +5500,19 @@ button {
   background: #f43f5e;
 }
 
-/* --- TRUST BADGES BAR --- */
+/* --- TRUST BADGES BAR (STRICTLY 1 HORIZONTAL ROW SIDE-BY-SIDE ON ALL DEVICES) --- */
 .jt-trust-badges-bar {
   max-width: 1200px;
   margin: 16px auto;
   padding: 16px 20px;
   background: #ffffff;
   border-radius: 18px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid #fecdd3;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
-}
-
-@media (max-width: 640px) {
-  .jt-trust-badges-bar {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.05);
 }
 
 .jt-trust-item {
@@ -5530,18 +5524,52 @@ button {
 
 .jt-trust-icon {
   font-size: 22px;
+  flex-shrink: 0;
+}
+
+.jt-trust-text-box {
+  display: flex;
+  flex-direction: column;
 }
 
 .jt-trust-item strong {
   display: block;
   font-size: 13px;
+  font-weight: 800;
   color: #0f172a;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .jt-trust-item span {
   font-size: 12px;
   color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .jt-trust-badges-bar {
+    padding: 12px 6px;
+    gap: 4px;
+    border-radius: 14px;
+  }
+
+  .jt-trust-item {
+    gap: 5px;
+  }
+
+  .jt-trust-icon {
+    font-size: 16px;
+  }
+
+  .jt-trust-item strong {
+    font-size: 10.5px;
+  }
+
+  .jt-trust-item span {
+    font-size: 9.5px;
+  }
 }
 
 /* --- MINI PROMO CARDS (2-COLUMN) --- */

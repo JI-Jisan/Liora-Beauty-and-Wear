@@ -37,6 +37,7 @@ export default function AdminPage() {
     brandSubtitle: "",
     heroTitle: "",
     heroText: "",
+    heroImage: "",
     offerText: "",
     promoSlides: [],
     flashTitle: "",
@@ -101,6 +102,7 @@ export default function AdminPage() {
         brandSubtitle: data.brandSubtitle || "",
         heroTitle: data.heroTitle || "",
         heroText: data.heroText || "",
+        heroImage: data.heroImage || "",
         offerText: data.offerText || "",
         promoSlides: Array.isArray(data.promoSlides) ? data.promoSlides : [],
         flashTitle: data.flashTitle || "Limited Time Special Offer",
@@ -257,6 +259,42 @@ export default function AdminPage() {
         },
       ],
     });
+  };
+
+  const handleHeroImageUpload = (file) => {
+    if (!file) return;
+    setMessage("⏳ Resizing & optimizing hero image...");
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+        setSettings((prev) => ({ ...prev, heroImage: compressedBase64 }));
+        setMessage("✅ Hero banner image attached! Click '💾 Save Settings' below.");
+      };
+      img.onerror = () => {
+        setMessage("❌ Failed to process image file.");
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const removeSlide = (index) => {
@@ -1372,7 +1410,72 @@ export default function AdminPage() {
           </div>
 
           <div id="branding-section" className="jt-admin-panel jt-admin-panel-wide">
-            <h3>Flash Sale & Promo Settings</h3>
+            <h3>Homepage Hero Banner & Settings</h3>
+
+            {/* HERO BANNER IMAGE UPLOAD CONTROL */}
+            <div style={{ background: "#fff0f5", padding: "18px", borderRadius: "16px", border: "1.5px solid #fecdd3", marginBottom: "24px" }}>
+              <h4 style={{ margin: "0 0 8px", color: "#e11d48", fontSize: "16px", fontWeight: "900", display: "flex", alignItems: "center", gap: "8px" }}>
+                🖼️ Homepage Main Hero Banner Image (হোমপেজ মেইন ব্যানার ছবি)
+              </h4>
+              <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 14px" }}>
+                Upload or change the primary showcase image displayed in the homepage hero banner.
+              </p>
+
+              {settings.heroImage && (
+                <div style={{ marginBottom: "14px", width: "100%", maxWidth: "320px", borderRadius: "14px", overflow: "hidden", border: "2px solid #e11d48", boxShadow: "0 4px 14px rgba(225, 29, 72, 0.15)" }}>
+                  <img src={getImageUrl(settings.heroImage)} alt="Hero Banner Preview" style={{ width: "100%", height: "auto", display: "block" }} />
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", marginBottom: "14px" }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleHeroImageUpload(e.target.files[0])}
+                  style={{ fontSize: "13px" }}
+                />
+                <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: "700" }}>OR Image URL:</span>
+                <input
+                  type="text"
+                  placeholder="Paste Image URL"
+                  value={settings.heroImage || ""}
+                  onChange={(e) => setSettings({ ...settings, heroImage: e.target.value })}
+                  style={{ flex: 1, minWidth: "220px", padding: "9px 14px", borderRadius: "10px", border: "1px solid #cbd5e1", fontSize: "13px" }}
+                />
+              </div>
+
+              <div style={{ marginTop: "10px" }}>
+                <label style={{ fontSize: "13px", fontWeight: "700", color: "#0f172a", display: "block", marginBottom: "6px" }}>
+                  Hero Description Text (ব্যানারের বর্ণনা):
+                </label>
+                <textarea
+                  placeholder="Hero Description Text"
+                  value={settings.heroText || ""}
+                  onChange={(e) => setSettings({ ...settings, heroText: e.target.value })}
+                  style={{ width: "100%", padding: "10px", borderRadius: "10px", border: "1px solid #cbd5e1", fontSize: "13px", minHeight: "70px" }}
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={savePromoSlides}
+                disabled={isSavingSettings}
+                style={{
+                  marginTop: "12px",
+                  background: "linear-gradient(135deg, #e11d48 0%, #f97316 100%)",
+                  color: "#ffffff",
+                  border: "none",
+                  padding: "10px 22px",
+                  borderRadius: "10px",
+                  fontWeight: "800",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 14px rgba(225, 29, 72, 0.3)"
+                }}
+              >
+                {isSavingSettings ? "⏳ Saving..." : "💾 Save Hero Banner Settings"}
+              </button>
+            </div>
 
             <div style={{ marginBottom: "20px" }}>
               <input

@@ -46,6 +46,7 @@ export default function HomePage() {
           heroText:
             data.heroText ||
             "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
+          heroImage: data.heroImage || "",
           offerText:
             data.offerText ||
             "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ✨ 100% Authentic Products",
@@ -76,6 +77,7 @@ export default function HomePage() {
       <Hero
         heroTitle={siteSettings.heroTitle}
         heroText={siteSettings.heroText}
+        heroImage={siteSettings.heroImage}
       />
 
       <PromoBanner promoSlides={siteSettings.promoSlides} />

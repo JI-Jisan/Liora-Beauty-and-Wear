@@ -5,6 +5,7 @@ const siteSettingsSchema = new mongoose.Schema({
   brandSubtitle: String,
   heroTitle: String,
   heroText: String,
+  heroImage: String,
   offerText: String,
 
   promoSlides: [
