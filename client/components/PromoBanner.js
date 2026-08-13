@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { API_BASE_URL, getImageUrl } from "@/lib/api";
+import { getImageUrl } from "@/lib/api";
 
 const DEFAULT_5_SLIDES = [
   {

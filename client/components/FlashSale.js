@@ -45,16 +45,20 @@ export default function FlashSale({
     fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           const offers = data.filter((p) => p.offerPrice && p.offerPrice < p.originalPrice);
           if (offers.length > 0) {
             setFlashProducts(offers.slice(0, 2));
           } else {
             setFlashProducts(data.slice(0, 2));
           }
+        } else {
+          setFlashProducts(DEMO_FLASH_PRODUCTS);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setFlashProducts(DEMO_FLASH_PRODUCTS);
+      });
   }, []);
 
   useEffect(() => {
@@ -163,7 +167,7 @@ export default function FlashSale({
             {flashProducts.map((product) => {
               const catName = typeof product.category === "object" ? product.category?.name : product.category || "";
 
-              const getSmartFallback = (cName, pName, id) => {
+              const getSmartFallback = (cName, pName) => {
                 const text = `${cName || ""} ${pName || ""}`.toLowerCase();
                 if (text.includes("oud")) return "https://images.unsplash.com/photo-1590156562745-5a03c5a2e21b?w=600&auto=format&fit=crop&q=80";
                 if (text.includes("chanel") || text.includes("coco")) return "https://images.unsplash.com/photo-1557053910-d9eadeed1c58?w=600&auto=format&fit=crop&q=80";
@@ -177,7 +181,7 @@ export default function FlashSale({
                 return "https://images.unsplash.com/photo-1607522370275-f6fd2c0c6b8d?w=600&auto=format&fit=crop&q=80";
               };
 
-              const fallbackUrl = getSmartFallback(catName, product.name, product._id);
+              const fallbackUrl = getSmartFallback(catName, product.name);
               const imageSrc = getImageUrl(product.image) || fallbackUrl;
               const isAdded = addedIds.includes(product._id);
 

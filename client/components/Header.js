@@ -111,11 +111,16 @@ export default function Header({
     fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setAllProducts(data);
+        } else {
+          setAllProducts(DEMO_LIVE_PRODUCTS);
         }
       })
-      .catch((err) => console.error("Live search product fetch error:", err));
+      .catch((err) => {
+        console.error("Live search product fetch error:", err);
+        setAllProducts(DEMO_LIVE_PRODUCTS);
+      });
   }, []);
 
   const handleOpenCart = () => {

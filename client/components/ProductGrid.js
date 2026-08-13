@@ -94,23 +94,27 @@ function ProductGridContent({
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const urlCategoryParam = searchParams ? searchParams.get("category") || "" : "";
-  const [selectedCategory, setSelectedCategory] = useState(urlCategoryParam || "all");
+  const [selectedCategoryState, setSelectedCategoryState] = useState("all");
+  const activeCategory = urlCategoryParam || selectedCategoryState;
 
-  useEffect(() => {
-    if (urlCategoryParam) {
-      setSelectedCategory(urlCategoryParam);
-    }
-  }, [urlCategoryParam]);
+  const handleSelectCategory = (cat) => {
+    setSelectedCategoryState(cat);
+  };
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setProducts(data);
+        } else {
+          setProducts(DEMO_PRODUCTS);
         }
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("Products fetch error, using fallback:", err);
+        setProducts(DEMO_PRODUCTS);
+      });
 
     fetch(`${API_BASE_URL}/api/categories`)
       .then((res) => res.json())
@@ -146,8 +150,8 @@ function ProductGridContent({
       result = result.filter((p) => p.isNewArrival);
     }
 
-    if (selectedCategory && selectedCategory !== "all") {
-      const targetStr = String(selectedCategory).trim().toLowerCase();
+    if (activeCategory && activeCategory !== "all") {
+      const targetStr = String(activeCategory).trim().toLowerCase();
 
       result = result.filter((product) => {
         if (!product.category) return false;
@@ -196,15 +200,15 @@ function ProductGridContent({
     }
 
     return result;
-  }, [products, selectedCategory, activeSearchTerm, type]);
+  }, [products, categories, activeCategory, activeSearchTerm, type]);
 
   return (
     <section className="jt-product-section" style={{ maxWidth: "1400px", margin: "0 auto", padding: "30px 20px 60px" }}>
       {type === "all" && (
         <CategoryBar
           categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
+          selectedCategory={activeCategory}
+          onSelectCategory={handleSelectCategory}
         />
       )}
 

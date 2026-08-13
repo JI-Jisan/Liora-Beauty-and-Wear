@@ -10,7 +10,6 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
-  const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
   const [editingId, setEditingId] = useState(null);
 
@@ -31,58 +30,7 @@ export default function AdminPage() {
     parentCategory: "",
   });
 
-  const DEFAULT_5_SLIDES = [
-    {
-      badge: "🔥 HOT DEAL - 26% OFF",
-      title: "Royal Oud Perfume 100ml",
-      subtitle: "Experience luxury oriental fragrances with long-lasting authentic scent.",
-      buttonText: "Shop Perfumes",
-      buttonLink: "/products?search=Perfume",
-      price: "1,850 Tk",
-      originalPrice: "2,500 Tk",
-      image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1400&auto=format&fit=crop&q=80",
-    },
-    {
-      badge: "✨ EXCLUSIVE - 25% OFF",
-      title: "Luxury Gold Chronograph Watch",
-      subtitle: "Premium stainless steel quartz watch with water resistance & luxury design.",
-      buttonText: "Shop Watches",
-      buttonLink: "/products?search=Watch",
-      price: "2,400 Tk",
-      originalPrice: "3,200 Tk",
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1400&auto=format&fit=crop&q=80",
-    },
-    {
-      badge: "🌿 BESTSELLER - 29% OFF",
-      title: "Vitamin C Brightening Serum",
-      subtitle: "Natural organic serum for glowing smooth skin & reducing dark spots.",
-      buttonText: "Shop Skincare",
-      buttonLink: "/products?search=Serum",
-      price: "850 Tk",
-      originalPrice: "1,200 Tk",
-      image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=1400&auto=format&fit=crop&q=80",
-    },
-    {
-      badge: "💡 TRENDING - 25% OFF",
-      title: "Smart RGB LED Fan Light 30W",
-      subtitle: "Multi-color remote control LED ceiling fan light with silent operation.",
-      buttonText: "Shop Fan Light",
-      buttonLink: "/products?search=Fan",
-      price: "1,350 Tk",
-      originalPrice: "1,800 Tk",
-      image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=1400&auto=format&fit=crop&q=80",
-    },
-    {
-      badge: "🌸 NEW ARRIVAL - 34% OFF",
-      title: "French Vanilla Long-Lasting Body Mist",
-      subtitle: "Refreshing vanilla scent body mist for daily freshness & long lasting aroma.",
-      buttonText: "Shop Body Mists",
-      buttonLink: "/products?search=Vanilla",
-      price: "990 Tk",
-      originalPrice: "1,500 Tk",
-      image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=1400&auto=format&fit=crop&q=80",
-    },
-  ];
+
 
   const [settings, setSettings] = useState({
     brandName: "",
@@ -190,9 +138,7 @@ export default function AdminPage() {
     }));
   };
 
-  const handleImageChange = (e) => {
-    setImageFile(e.target.files[0]);
-  };
+
 
   const handleCategoryChange = (e) => {
     const { name, value } = e.target;
@@ -216,7 +162,6 @@ export default function AdminPage() {
       isTrending: false,
       isNewArrival: false,
     });
-    setImageFile(null);
     setEditingId(null);
   };
 
@@ -388,7 +333,7 @@ export default function AdminPage() {
             setFormData((prev) => ({ ...prev, [fieldName]: compressedBase64 }));
           }
           setMessage(`✅ ${label} attached & optimized!`);
-        } catch (err) {
+        } catch {
           setMessage(`✅ ${label} attached!`);
         }
       };
@@ -562,16 +507,14 @@ export default function AdminPage() {
       isTrending: product.isTrending || false,
       isNewArrival: product.isNewArrival || false,
     });
-    setImageFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Defensive safe array fallbacks
-  const safeProducts = Array.isArray(products) ? products : [];
-  const safeCategories = Array.isArray(categories) ? categories : [];
+
 
   // Filter & Sort Products for Manage Products section
   const filteredAndSortedProducts = useMemo(() => {
+    const safeProducts = Array.isArray(products) ? products : [];
     let result = [...safeProducts];
 
     if (productSearch && typeof productSearch === "string" && productSearch.trim()) {
