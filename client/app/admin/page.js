@@ -1417,9 +1417,13 @@ export default function AdminPage() {
               <h4 style={{ margin: "0 0 8px", color: "#e11d48", fontSize: "16px", fontWeight: "900", display: "flex", alignItems: "center", gap: "8px" }}>
                 🖼️ Homepage Main Hero Banner Image (হোমপেজ মেইন ব্যানার ছবি)
               </h4>
-              <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 14px" }}>
+              <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 8px" }}>
                 Upload or change the primary showcase image displayed in the homepage hero banner.
               </p>
+
+              <div style={{ background: "#ffffff", padding: "6px 12px", borderRadius: "8px", border: "1px solid #fecdd3", display: "inline-block", fontSize: "12px", color: "#e11d48", fontWeight: "700", marginBottom: "14px" }}>
+                💡 <strong>Recommended Aspect Ratio:</strong> 4:3 (e.g. 800×600 px or 1200×900 px) or 16:9 (e.g. 1200×675 px)
+              </div>
 
               {settings.heroImage && (
                 <div style={{ marginBottom: "14px", width: "100%", maxWidth: "320px", borderRadius: "14px", overflow: "hidden", border: "2px solid #e11d48", boxShadow: "0 4px 14px rgba(225, 29, 72, 0.15)" }}>
