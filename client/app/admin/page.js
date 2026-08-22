@@ -18,7 +18,9 @@ export default function AdminPage() {
   // Active Tab State (কোন পেজটি এখন দেখাবে তার জন্য)
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isSavingSettings, setIsSavingSettings] = useState(false);
-  const [reports, setReports] = useState(null);
+  // Report states
+  const [reportFilter, setReportFilter] = useState("30"); // ডিফল্ট ৩০ দিন (মান্থলি)
+  const [reportData, setReportData] = useState([]);
 
   // Manage Products Advanced Controls State
   const [productSearch, setProductSearch] = useState("");
@@ -565,6 +567,77 @@ export default function AdminPage() {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredAndSortedProducts.slice(start, start + itemsPerPage);
   }, [filteredAndSortedProducts, currentPage, itemsPerPage]);
+
+  // Fetch Reports Logic
+  useEffect(() => {
+    if (activeTab === "reports") {
+      const fetchReports = async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/admin/reports`, { 
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("jt_admin_token")}`
+            }
+          });
+          const data = await res.json();
+          setReportData(data.orders || []);
+        } catch (err) {
+          console.error("Failed to fetch reports", err);
+        }
+      };
+      fetchReports();
+    }
+  }, [activeTab]);
+
+  // Excel-like Calculation based on selected Time Filter
+  let totalRevenue = 0;
+  let totalCost = 0;
+  let totalProfit = 0;
+  const soldItems = [];
+
+  const now = new Date();
+  const filteredOrders = reportData.filter((order) => {
+    if (reportFilter === "all") return true;
+    const days = parseInt(reportFilter);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(now.getDate() - days);
+    return new Date(order.createdAt) >= cutoffDate;
+  });
+
+  filteredOrders.forEach((order) => {
+    (order.items || []).forEach((item) => {
+      const buyPrice = Number(item.purchasePrice || 0);
+      const sellPrice = Number(item.offerPrice || item.price || 0);
+      const origPrice = Number(item.originalPrice || sellPrice);
+      const qty = Number(item.quantity || 1);
+
+      const rowRevenue = sellPrice * qty;
+      const rowCost = buyPrice * qty;
+      const rowProfit = rowRevenue - rowCost;
+
+      // শতকরা হিসাব (Percentage Calculation)
+      const discountPct = origPrice > 0 ? Math.round(((origPrice - sellPrice) / origPrice) * 100) : 0;
+      const profitPct = buyPrice > 0 ? Math.round(((sellPrice - buyPrice) / buyPrice) * 100) : (rowProfit > 0 ? 100 : 0);
+
+      totalRevenue += rowRevenue;
+      totalCost += rowCost;
+      totalProfit += rowProfit;
+
+      soldItems.push({
+        date: new Date(order.createdAt).toLocaleDateString(),
+        orderId: order.orderNumber,
+        name: item.name,
+        category: item.categoryName || "Product", // ক্যাটাগরি নাম
+        buyPrice,
+        sellPrice,
+        qty,
+        discountPct,
+        profitPct,
+        rowProfit,
+      });
+    });
+  });
+
+  const overallProfitPct = totalCost > 0 ? Math.round((totalProfit / totalCost) * 100) : 0;
 
   if (!isAuthenticated) return null;
 
@@ -1898,46 +1971,95 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* Reports Tab */}
+          {/* Analytics & Profit Reports Tab */}
           {activeTab === "reports" && (
-            <div className="jt-admin-panel jt-admin-panel-wide">
-              <h3>📈 Business Profit & Sales Analytics</h3>
-              <p style={{ color: "#64748b", marginBottom: "20px" }}>আপনার ব্যবসার সার্বিক আয়, খরচ এবং নিট লাভের হিসাব</p>
-
-              {/* Summary Cards Grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "24px" }}>
+            <div className="jt-admin-panel jt-admin-panel-wide" style={{ padding: "20px" }}>
+              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "10px" }}>
+                <div>
+                  <h2 style={{ margin: "0 0 6px", color: "#0f172a", fontSize: "22px", fontWeight: "800" }}>📊 Sales & Profit Report</h2>
+                  <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>আপনার ব্যবসার রিয়েল-টাইম লাভ-ক্ষতির এক্সেল শিট ভিউ</p>
+                </div>
                 
-                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "18px", borderRadius: "12px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#166534" }}>💵 Total Revenue (মোট বিক্রি)</span>
-                  <h2 style={{ margin: "8px 0 0", color: "#15803d" }}>{reports ? reports.totalRevenue : "Calculating..."} Tk</h2>
-                </div>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <select 
+                    value={reportFilter} 
+                    onChange={(e) => setReportFilter(e.target.value)}
+                    style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a" }}
+                  >
+                    <option value="1">📅 Today (আজকের হিসাব)</option>
+                    <option value="7">📅 Last 7 Days (উইকলি)</option>
+                    <option value="30">📅 Last 30 Days (মান্থলি)</option>
+                    <option value="180">📅 Last 6 Months (ষান্মাসিক)</option>
+                    <option value="365">📅 Last 1 Year (বাৎসরিক)</option>
+                    <option value="all">📅 All Time (শুরু থেকে সব)</option>
+                  </select>
 
-                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "18px", borderRadius: "12px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#991b1b" }}>📦 Purchase Cost (কেনার খরচ)</span>
-                  <h2 style={{ margin: "8px 0 0", color: "#b91c1c" }}>{reports ? reports.totalCost : "Calculating..."} Tk</h2>
+                  <button
+                    onClick={() => window.print()}
+                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "10px 18px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+                  >
+                    🖨️ Download PDF / Print
+                  </button>
                 </div>
-
-                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "18px", borderRadius: "12px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#1e40af" }}>✨ Net Profit (নিট লাভ)</span>
-                  <h2 style={{ margin: "8px 0 0", color: "#2563eb" }}>{reports ? reports.netProfit : "Calculating..."} Tk</h2>
-                </div>
-
               </div>
 
-              <button
-                onClick={() => window.print()}
-                style={{
-                  background: "#0f172a",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  fontWeight: "700",
-                  cursor: "pointer"
-                }}
-              >
-                🖨️ Print / Download Profit Report (PDF)
-              </button>
+              {/* Summary Cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "14px", marginBottom: "24px" }}>
+                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "16px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#166534" }}>💵 Total Revenue (বিক্রি)</span>
+                  <h2 style={{ margin: "6px 0 0", color: "#15803d", fontSize: "22px" }}>{totalRevenue} Tk</h2>
+                </div>
+                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "16px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#991b1b" }}>📦 Total Cost (কেনা দাম)</span>
+                  <h2 style={{ margin: "6px 0 0", color: "#b91c1c", fontSize: "22px" }}>{totalCost} Tk</h2>
+                </div>
+                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "16px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#1e40af" }}>✨ Net Profit (নিট লাভ)</span>
+                  <h2 style={{ margin: "6px 0 0", color: "#2563eb", fontSize: "22px" }}>{totalProfit} Tk</h2>
+                </div>
+                <div style={{ background: "#fdf4ff", border: "1px solid #f9a8d4", padding: "16px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#86198f" }}>📈 Total Profit % (মার্জিন)</span>
+                  <h2 style={{ margin: "6px 0 0", color: "#a21caf", fontSize: "22px" }}>{overallProfitPct}%</h2>
+                </div>
+              </div>
+
+              {/* Excel-like Table View */}
+              <div style={{ overflowX: "auto", background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left", minWidth: "800px" }}>
+                  <thead style={{ background: "#f1f5f9" }}>
+                    <tr>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Date</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Order ID</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Qty</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Disc. %</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Profit %</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Net Profit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {soldItems.length === 0 ? (
+                      <tr><td colSpan="9" style={{ padding: "30px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
+                    ) : (
+                      soldItems.map((item, idx) => (
+                        <tr key={idx} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", color: "#475569" }}>{item.date}</td>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", color: "#2563eb", fontWeight: "700" }}>{item.orderId}</td>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b" }}>{item.buyPrice} Tk</td>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800" }}>{item.sellPrice} Tk</td>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "700" }}>{item.qty}</td>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", color: "#ea580c", fontWeight: "700" }}>{item.discountPct}%</td>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", color: "#16a34a", fontWeight: "800" }}>{item.profitPct}%</td>
+                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900" }}>{item.rowProfit} Tk</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
