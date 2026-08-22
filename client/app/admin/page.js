@@ -483,23 +483,24 @@ export default function AdminPage() {
     }
   };
 
-  const handleToggleSlider = async (id, currentStatus) => {
+  const handleToggleSlider = async (product) => {
     try {
-      // ডিলিট ফাংশনের মতো হুবহু একই সিকিউরিটি হেডার এবং API URL ব্যবহার করা হলো
-      const res = await fetch(`${API_BASE_URL}/api/products/${id}/slider`, {
-        method: "PATCH",
+      // আমরা নতুন /slider রাউট বাদ দিয়ে, আপনার আগে থেকে কাজ করা "Edit Product" রাউট ব্যবহার করছি
+      const res = await fetch(`${API_BASE_URL}/api/products/${product._id}`, {
+        method: "PUT", // আপনার সিস্টেমে প্রোডাক্ট আপডেটের লিগ্যাল মেথড
         headers: getAuthHeaders(),
-        body: JSON.stringify({ isSlider: !currentStatus })
+        body: JSON.stringify({ ...product, isSlider: !product.isSlider })
       });
       
       if (res.ok) {
+        // UI আপডেট 
         setProducts(products.map(p => 
-          p._id === id ? { ...p, isSlider: !currentStatus } : p
+          p._id === product._id ? { ...p, isSlider: !product.isSlider } : p
         ));
-        alert(currentStatus ? "❌ স্লাইডার থেকে রিমুভ করা হয়েছে!" : "✅ স্লাইডারে সফলভাবে যুক্ত হয়েছে!");
+        alert(!product.isSlider ? "✅ স্লাইডারে সফলভাবে যুক্ত হয়েছে!" : "❌ স্লাইডার থেকে রিমুভ করা হয়েছে!");
       } else {
         const errorData = await res.json();
-        alert(`⚠️ সার্ভার এরর: ${errorData.message || "API ঠিকমতো রেসপন্স করছে না"}`);
+        alert(`⚠️ সার্ভার এরর: ${errorData.message}`);
       }
     } catch (error) {
       alert("⚠️ নেটওয়ার্ক বা ফেচ এরর: " + error.message);
@@ -1555,7 +1556,7 @@ export default function AdminPage() {
                         <div className="jt-manage-product-right">
                           <button
                             type="button"
-                            onClick={() => handleToggleSlider(product._id, product.isSlider)}
+                            onClick={() => handleToggleSlider(product)}
                             style={{
                               background: product.isSlider ? "#16a34a" : "#f1f5f9",
                               color: product.isSlider ? "#ffffff" : "#334155",
