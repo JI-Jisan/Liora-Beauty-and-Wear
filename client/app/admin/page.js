@@ -492,11 +492,18 @@ export default function AdminPage() {
       });
       
       if (res.ok) {
-        loadProducts();
-        alert(currentStatus ? "Removed from Slider" : "Added to Slider successfully!");
+        // ম্যাজিক: পেজ রিলোড ছাড়াই বাটন আপডেট করার জন্য products স্টেট আপডেট
+        setProducts(products.map(p => 
+          p._id === id ? { ...p, isSlider: !currentStatus } : p
+        ));
+        
+        // সাকসেস মেসেজ দেখাবে
+        alert(currentStatus ? "❌ স্লাইডার থেকে রিমুভ করা হয়েছে!" : "✅ স্লাইডারে সফলভাবে যুক্ত হয়েছে!");
+      } else {
+        alert("⚠️ সমস্যা হয়েছে! আপনার API রাউট ঠিকমতো কাজ করছে না।");
       }
     } catch (error) {
-      console.error("Error updating slider status", error);
+      alert("⚠️ এরর: " + error.message);
     }
   };
 
