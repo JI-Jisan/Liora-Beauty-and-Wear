@@ -500,10 +500,10 @@ export default function AdminPage() {
       image3: product.image3 || (product.images && product.images[2]) || "",
       rating: product.rating || "",
       reviewCount: product.reviewCount || "",
-      isFeatured: product.isFeatured || false,
       isTrending: product.isTrending || false,
       isNewArrival: product.isNewArrival || false,
     });
+    setActiveTab("add-product");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -710,14 +710,24 @@ export default function AdminPage() {
             📁 Categories
           </li>
           <li
-            className={activeTab === "products" ? "active-tab" : ""}
+            className={activeTab === "add-product" ? "active-tab" : ""}
             onClick={() => {
-              setActiveTab("products");
+              setActiveTab("add-product");
               setIsSidebarOpen(false);
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
-            🛍️ Products
+            ➕ Add Product
+          </li>
+          <li
+            className={activeTab === "manage-products" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("manage-products");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            🛍️ Manage Products
           </li>
           <li
             className={activeTab === "orders" ? "active-tab" : ""}
@@ -797,13 +807,22 @@ export default function AdminPage() {
               {/* 2-Column Grid on Mobile */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
                 
-                {/* Products Box */}
+                {/* Add Product Box */}
                 <div 
-                  onClick={() => { setActiveTab("products"); window.scrollTo(0,0); }}
+                  onClick={() => { setActiveTab("add-product"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>➕</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Add Product</h3>
+                </div>
+
+                {/* Manage Products Box */}
+                <div 
+                  onClick={() => { setActiveTab("manage-products"); window.scrollTo(0,0); }}
                   style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>🛍️</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Products</h3>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Manage Products</h3>
                 </div>
 
                 {/* Orders Box */}
@@ -964,10 +983,9 @@ export default function AdminPage() {
           </div>
           )}
 
-          {/* Products Tab */}
-          {activeTab === "products" && (
-            <>
-              <div id="product-section" className="jt-admin-panel jt-admin-panel-wide">
+          {/* 1. Add / Edit Product Tab */}
+          {activeTab === "add-product" && (
+            <div id="add-product-section" className="jt-admin-panel jt-admin-panel-wide">
             <h3>{editingId ? "Edit Product" : "Add Product"}</h3>
 
             <form className="jt-admin-panel-form jt-admin-product-form" onSubmit={handleSubmit}>
@@ -1338,8 +1356,11 @@ export default function AdminPage() {
 
             {message && <p style={{ marginTop: "14px", fontWeight: "700" }}>{message}</p>}
           </div>
+          )}
 
-          <div id="product-section" className="jt-admin-panel jt-admin-panel-wide">
+          {/* 2. Manage Products Tab */}
+          {activeTab === "manage-products" && (
+            <div id="manage-products-section" className="jt-admin-panel jt-admin-panel-wide">
             <div className="jt-manage-products-header">
               <h3>Manage Products ({products.length})</h3>
               <span className="jt-products-count-badge">
@@ -1570,7 +1591,6 @@ export default function AdminPage() {
               </>
             )}
           </div>
-            </>
           )}
 
           {/* Branding Tab */}
