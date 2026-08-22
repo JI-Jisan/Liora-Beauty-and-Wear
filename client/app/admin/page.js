@@ -54,11 +54,31 @@ export default function AdminPage() {
     router.push("/admin/login");
   };
 
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "liora_store");
+
+    const res = await fetch("https://api.cloudinary.com/v1_1/dlgubaefs/image/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to upload image to Cloudinary");
+    }
+
+    const data = await res.json();
+    return data.secure_url;
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     category: "",
+    purchasePrice: "",
     originalPrice: "",
     offerPrice: "",
+    stockQuantity: "",
     discountBadge: "",
     description: "",
     stockStatus: "In Stock",
@@ -154,8 +174,10 @@ export default function AdminPage() {
     setFormData({
       name: "",
       category: "",
+      purchasePrice: "",
       originalPrice: "",
       offerPrice: "",
+      stockQuantity: "",
       discountBadge: "",
       description: "",
       stockStatus: "In Stock",
@@ -206,42 +228,18 @@ export default function AdminPage() {
     }));
   };
 
-  const handleSlideImageUpload = (index, file) => {
+  const handleSlideImageUpload = async (index, file) => {
     if (!file) return;
+    setMessage("⏳ Uploading slide image to Cloudinary...");
 
-    setMessage("⏳ Resizing & optimizing image...");
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 1400;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > MAX_WIDTH) {
-          height = Math.round((height * MAX_WIDTH) / width);
-          width = MAX_WIDTH;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress to optimized JPEG string
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.82);
-        handleSlideChange(index, "image", compressedBase64);
-        setMessage("✅ Image optimized & attached! Now click '💾 Save Settings' below.");
-      };
-      img.onerror = () => {
-        setMessage("❌ Failed to process image file.");
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+      handleSlideChange(index, "image", imageUrl);
+      setMessage("✅ Slide image uploaded! Now click '💾 Save Settings' below.");
+    } catch (error) {
+      setMessage("❌ Failed to upload slide image.");
+      console.error(error);
+    }
   };
 
   const addSlide = () => {
@@ -261,40 +259,18 @@ export default function AdminPage() {
     });
   };
 
-  const handleHeroImageUpload = (file) => {
+  const handleHeroImageUpload = async (file) => {
     if (!file) return;
-    setMessage("⏳ Resizing & optimizing hero image...");
+    setMessage("⏳ Uploading hero image to Cloudinary...");
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 1200;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > MAX_WIDTH) {
-          height = Math.round((height * MAX_WIDTH) / width);
-          width = MAX_WIDTH;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
-        setSettings((prev) => ({ ...prev, heroImage: compressedBase64 }));
-        setMessage("✅ Hero banner image attached! Click '💾 Save Settings' below.");
-      };
-      img.onerror = () => {
-        setMessage("❌ Failed to process image file.");
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+      setSettings((prev) => ({ ...prev, heroImage: imageUrl }));
+      setMessage("✅ Hero banner image uploaded! Click '💾 Save Settings' below.");
+    } catch (error) {
+      setMessage("❌ Failed to upload hero image.");
+      console.error(error);
+    }
   };
 
   const removeSlide = (index) => {
@@ -333,59 +309,19 @@ export default function AdminPage() {
     }
   };
 
-  const handleProductImageUpload = (file, fieldName = "image") => {
+  const handleProductImageUpload = async (file, fieldName = "image") => {
     if (!file) return;
     const label = fieldName === "image" ? "Image 1" : fieldName === "image2" ? "Image 2" : "Image 3";
-    setMessage(`⏳ Reading ${label}...`);
+    setMessage(`⏳ Uploading ${label} to Cloudinary...`);
 
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const rawBase64 = e.target.result;
-
-      // Immediately set raw base64 so preview works 100% reliably
-      setFormData((prev) => ({ ...prev, [fieldName]: rawBase64 }));
-
-      // Process canvas optimization in background
-      const img = new Image();
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 900;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
-          if (compressedBase64 && compressedBase64.length > 100) {
-            setFormData((prev) => ({ ...prev, [fieldName]: compressedBase64 }));
-          }
-          setMessage(`✅ ${label} attached & optimized!`);
-        } catch {
-          setMessage(`✅ ${label} attached!`);
-        }
-      };
-      img.onerror = () => {
-        setMessage(`✅ ${label} attached!`);
-      };
-      img.src = rawBase64;
-    };
-
-    reader.onerror = () => {
-      setMessage(`❌ Failed to read ${label} file.`);
-    };
-
-    reader.readAsDataURL(file);
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+      setFormData((prev) => ({ ...prev, [fieldName]: imageUrl }));
+      setMessage(`✅ ${label} uploaded successfully!`);
+    } catch (error) {
+      setMessage(`❌ Failed to upload ${label}.`);
+      console.error(error);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -395,8 +331,10 @@ export default function AdminPage() {
     try {
       const finalProduct = {
         ...formData,
+        purchasePrice: Number(formData.purchasePrice),
         originalPrice: Number(formData.originalPrice),
         offerPrice: Number(formData.offerPrice),
+        stockQuantity: Number(formData.stockQuantity),
         image: formData.image || "",
         image2: formData.image2 || "",
         image3: formData.image3 || "",
@@ -531,8 +469,10 @@ export default function AdminPage() {
     setFormData({
       name: product.name || "",
       category: product.category?._id || "",
+      purchasePrice: product.purchasePrice || "",
       originalPrice: product.originalPrice || "",
       offerPrice: product.offerPrice || "",
+      stockQuantity: product.stockQuantity || "",
       discountBadge: product.discountBadge || "",
       description: product.description || "",
       stockStatus: product.stockStatus || "In Stock",
@@ -869,6 +809,25 @@ export default function AdminPage() {
                 name="offerPrice"
                 placeholder="Offer price"
                 value={formData.offerPrice}
+                onChange={handleChange}
+                required
+              />
+
+              <input
+                type="number"
+                name="purchasePrice"
+                placeholder="Purchase Price (আপনার কেনার দাম)"
+                value={formData.purchasePrice}
+                onChange={handleChange}
+                required
+                style={{ border: "2px solid #3b82f6" }}
+              />
+
+              <input
+                type="number"
+                name="stockQuantity"
+                placeholder="Stock Quantity (কত পিস স্টকে আছে?)"
+                value={formData.stockQuantity}
                 onChange={handleChange}
                 required
               />
