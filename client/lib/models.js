@@ -18,8 +18,10 @@ const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
+    purchasePrice: { type: Number, required: true, default: 0 },
     originalPrice: { type: Number, required: true },
     offerPrice: { type: Number, required: true },
+    stockQuantity: { type: Number, required: true, default: 0 },
     discountBadge: { type: String, default: "" },
     stockStatus: {
       type: String,
