@@ -22,8 +22,17 @@ export async function POST(req) {
       return NextResponse.json({ message: "Missing required order fields" }, { status: 400 });
     }
 
+    // ইউনিক অর্ডার আইডি জেনারেট করা (যেমন: Liora_LC_2564)
     const count = await Order.countDocuments();
-    const orderNumber = `JT-${10001 + count}`;
+    const randomNum = Math.floor(1000 + Math.random() * 9000); // ৪ ডিজিটের র্যান্ডম নাম্বার
+    
+    // ক্যাটাগরি বা ডিফল্ট ইনিশিয়াল বের করা
+    let categoryPrefix = "GEN";
+    if (items && items.length > 0) {
+      // যদি আইটেমের সাথে ক্যাটাগরি বা নাম থাকে
+      categoryPrefix = "LIORA";
+    }
+    const orderNumber = `Liora_${categoryPrefix}_${randomNum}`;
 
     const order = new Order({
       ...body,
@@ -40,7 +49,7 @@ export async function POST(req) {
         if (productId) {
           const product = await Product.findById(productId);
           if (product) {
-            // স্টক থেকে অর্ডারের পরিমাণ বাদ দেওয়া
+            // স্টক থেকে অর্ডারের পরিমাণ বাদ দেওয়া
             product.stockQuantity = Math.max(0, (product.stockQuantity || 0) - item.quantity);
 
             // স্টক স্ট্যাটাস অটো আপডেট
