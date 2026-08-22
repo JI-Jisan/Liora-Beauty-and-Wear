@@ -15,6 +15,8 @@ export default function AdminPage() {
 
   // Slide-out Drawer State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // Active Tab State (কোন পেজটি এখন দেখাবে তার জন্য)
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Manage Products Advanced Controls State
@@ -576,41 +578,51 @@ export default function AdminPage() {
 
         <ul>
           <li
+            className={activeTab === "dashboard" ? "active-tab" : ""}
             onClick={() => {
-              document.getElementById("top")?.scrollIntoView({ behavior: "smooth" });
+              setActiveTab("dashboard");
               setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
             📊 Dashboard
           </li>
           <li
+            className={activeTab === "categories" ? "active-tab" : ""}
             onClick={() => {
-              document.getElementById("category-section")?.scrollIntoView({ behavior: "smooth" });
+              setActiveTab("categories");
               setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
             📁 Categories
           </li>
           <li
+            className={activeTab === "products" ? "active-tab" : ""}
             onClick={() => {
-              document.getElementById("product-section")?.scrollIntoView({ behavior: "smooth" });
+              setActiveTab("products");
               setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
             🛍️ Products
           </li>
           <li
+            className={activeTab === "orders" ? "active-tab" : ""}
             onClick={() => {
-              document.getElementById("orders-section")?.scrollIntoView({ behavior: "smooth" });
+              setActiveTab("orders");
               setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
             📦 Orders
           </li>
           <li
+            className={activeTab === "branding" ? "active-tab" : ""}
             onClick={() => {
-              document.getElementById("branding-section")?.scrollIntoView({ behavior: "smooth" });
+              setActiveTab("branding");
               setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
             ✨ Branding & Flash Sale
@@ -658,7 +670,18 @@ export default function AdminPage() {
         </div>
 
         <div className="jt-admin-grid">
-          <div id="category-section" className="jt-admin-panel">
+          
+          {/* Dashboard Tab */}
+          {activeTab === "dashboard" && (
+            <div className="jt-admin-panel jt-admin-panel-wide">
+              <h2>Welcome to Admin Dashboard!</h2>
+              <p>বাম দিকের মেনু থেকে ক্যাটাগরি, প্রোডাক্ট বা অর্ডার সিলেক্ট করুন।</p>
+            </div>
+          )}
+
+          {/* Categories Tab */}
+          {activeTab === "categories" && (
+            <div id="category-section" className="jt-admin-panel">
             <h3>Add Category</h3>
             <form className="jt-admin-panel-form" onSubmit={handleCategorySubmit}>
               <input
@@ -763,8 +786,12 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+          )}
 
-          <div id="product-section" className="jt-admin-panel jt-admin-panel-wide">
+          {/* Products Tab */}
+          {activeTab === "products" && (
+            <>
+              <div id="product-section" className="jt-admin-panel jt-admin-panel-wide">
             <h3>{editingId ? "Edit Product" : "Add Product"}</h3>
 
             <form className="jt-admin-panel-form jt-admin-product-form" onSubmit={handleSubmit}>
@@ -1367,8 +1394,12 @@ export default function AdminPage() {
               </>
             )}
           </div>
+            </>
+          )}
 
-          <div id="branding-section" className="jt-admin-panel jt-admin-panel-wide">
+          {/* Branding Tab */}
+          {activeTab === "branding" && (
+            <div id="branding-section" className="jt-admin-panel jt-admin-panel-wide">
             <h3>Homepage Hero Banner & Settings</h3>
 
             {/* HERO BANNER IMAGE UPLOAD CONTROL */}
@@ -1798,11 +1829,15 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+          )}
 
-          <div id="orders-section" className="jt-admin-panel jt-admin-panel-wide">
+          {/* Orders Tab */}
+          {activeTab === "orders" && (
+            <div id="orders-section" className="jt-admin-panel jt-admin-panel-wide">
             <h3>Recent Orders</h3>
             <AdminOrders />
           </div>
+          )}
         </div>
       </section>
 
