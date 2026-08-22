@@ -485,25 +485,27 @@ export default function AdminPage() {
 
   const handleToggleSlider = async (id, currentStatus) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/products/${id}/slider`, {
+      // API_BASE_URL বাদ দিয়ে সরাসরি /api/ দিয়ে কল করা হয়েছে
+      const res = await fetch(`/api/products/${id}/slider`, {
         method: "PATCH",
-        headers: getAuthHeaders(),
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders() // যদি আপনার অথেনটিকেশন হেডার থাকে
+        },
         body: JSON.stringify({ isSlider: !currentStatus })
       });
       
       if (res.ok) {
-        // ম্যাজিক: পেজ রিলোড ছাড়াই বাটন আপডেট করার জন্য products স্টেট আপডেট
         setProducts(products.map(p => 
           p._id === id ? { ...p, isSlider: !currentStatus } : p
         ));
-        
-        // সাকসেস মেসেজ দেখাবে
         alert(currentStatus ? "❌ স্লাইডার থেকে রিমুভ করা হয়েছে!" : "✅ স্লাইডারে সফলভাবে যুক্ত হয়েছে!");
       } else {
-        alert("⚠️ সমস্যা হয়েছে! আপনার API রাউট ঠিকমতো কাজ করছে না।");
+        const errorData = await res.json();
+        alert(`⚠️ সার্ভার এরর: ${errorData.message || "API ঠিকমতো রেসপন্স করছে না"}`);
       }
     } catch (error) {
-      alert("⚠️ এরর: " + error.message);
+      alert("⚠️ নেটওয়ার্ক বা ফেচ এরর: " + error.message);
     }
   };
 
