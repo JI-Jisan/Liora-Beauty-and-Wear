@@ -2,12 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
-import Hero from "../components/Hero";
 import FeaturedCategories from "../components/FeaturedCategories";
 import ProductGrid from "../components/ProductGrid";
 import WhatsAppButton from "../components/WhatsAppButton";
 import PromoBanner from "../components/PromoBanner";
-import FlashSale from "../components/FlashSale";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 
@@ -74,24 +72,9 @@ export default function HomePage() {
         brandSubtitle={siteSettings.brandSubtitle}
       />
 
-      <Hero
-        heroTitle={siteSettings.heroTitle}
-        heroText={siteSettings.heroText}
-        heroImage={siteSettings.heroImage}
-      />
-
       <PromoBanner promoSlides={siteSettings.promoSlides} />
 
       <FeaturedCategories />
-
-      <FlashSale
-        flashTitle={siteSettings.flashTitle}
-        flashSubtitle={siteSettings.flashSubtitle}
-        flashButtonText={siteSettings.flashButtonText}
-        flashButtonLink={siteSettings.flashButtonLink}
-        flashDurationHours={siteSettings.flashDurationHours}
-        onAddToCart={addToCart}
-      />
 
       <section id="shop-products">
         <ProductGrid
