@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const orderId = searchParams.get("id");
@@ -194,5 +194,13 @@ export default function OrderSuccessPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<div style={{ textAlign: "center", padding: "80px 20px" }}><h2>Loading your order details...</h2></div>}>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }
