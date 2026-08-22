@@ -698,8 +698,56 @@ export default function AdminPage() {
           {/* Dashboard Tab */}
           {activeTab === "dashboard" && (
             <div className="jt-admin-panel jt-admin-panel-wide">
-              <h2>Welcome to Admin Dashboard!</h2>
-              <p>বাম দিকের মেনু থেকে ক্যাটাগরি, প্রোডাক্ট বা অর্ডার সিলেক্ট করুন।</p>
+              <h2 style={{ marginBottom: "20px", color: "#0f172a", fontSize: "22px" }}>Welcome to Admin Dashboard 🚀</h2>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "16px" }}>
+                
+                {/* Products Box */}
+                <div 
+                  onClick={() => { setActiveTab("products"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                >
+                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>🛍️</div>
+                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Products</h3>
+                </div>
+
+                {/* Orders Box */}
+                <div 
+                  onClick={() => { setActiveTab("orders"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                >
+                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>📦</div>
+                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Orders</h3>
+                </div>
+
+                {/* Analytics Box */}
+                <div 
+                  onClick={() => { setActiveTab("reports"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                >
+                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>📈</div>
+                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Profit Reports</h3>
+                </div>
+
+                {/* Categories Box */}
+                <div 
+                  onClick={() => { setActiveTab("categories"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                >
+                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>📁</div>
+                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Categories</h3>
+                </div>
+                
+                {/* Branding Box */}
+                <div 
+                  onClick={() => { setActiveTab("branding"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                >
+                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>✨</div>
+                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Branding</h3>
+                </div>
+
+              </div>
             </div>
           )}
 
@@ -1917,6 +1965,42 @@ export default function AdminPage() {
       >
         ↑ Top
       </button>
+      {/* CSS For Seamless PDF Print Alignment */}
+      <style jsx global>{`
+        @media print {
+          /* প্রিন্ট করার সময় ফালতু জিনিস হাইড করা */
+          .jt-admin-top, 
+          .jt-admin-sidebar, 
+          .jt-admin-menu-toggle-btn,
+          .jt-admin-floating-top-btn,
+          footer,
+          .mobile-bottom-nav,
+          nav,
+          button {
+            display: none !important;
+          }
+          
+          /* মার্জিন ও প্যাডিং রিসেট করে পেজের শুরুতে আনা */
+          body {
+            background: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          
+          .jt-admin-main {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          .jt-admin-panel {
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 20px 0 !important;
+            page-break-inside: avoid;
+          }
+        }
+      `}</style>
     </main>
   );
 }
