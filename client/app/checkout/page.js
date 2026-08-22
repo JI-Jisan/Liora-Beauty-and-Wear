@@ -51,6 +51,7 @@ export default function CheckoutPage() {
       address: formData.address,
       note: formData.note,
       items: cartItems.map((item) => ({
+        productId: item._id,
         productName: item.name,
         quantity: item.quantity,
         price: item.offerPrice,
@@ -78,8 +79,7 @@ export default function CheckoutPage() {
 
       clearCart();
 
-      const redirectId = result.orderNumber || result._id;
-      router.push(`/order-success/${redirectId}`);
+      router.push(`/order/success?id=${result._id}`);
     } catch (error) {
       console.error("Order submit error:", error);
       setMessage(error.message || "Something went wrong");
