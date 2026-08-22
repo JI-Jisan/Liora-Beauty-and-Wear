@@ -33,6 +33,7 @@ const ProductSchema = new mongoose.Schema(
     isFeatured: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false },
+    isSlider: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

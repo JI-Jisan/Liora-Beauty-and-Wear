@@ -483,6 +483,23 @@ export default function AdminPage() {
     }
   };
 
+  const handleToggleSlider = async (id, currentStatus) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/products/${id}/slider`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ isSlider: !currentStatus })
+      });
+      
+      if (res.ok) {
+        loadProducts();
+        alert(currentStatus ? "Removed from Slider" : "Added to Slider successfully!");
+      }
+    } catch (error) {
+      console.error("Error updating slider status", error);
+    }
+  };
+
   const handleEditProduct = (product) => {
     setEditingId(product._id);
     setFormData({
@@ -1530,6 +1547,22 @@ export default function AdminPage() {
                         </div>
 
                         <div className="jt-manage-product-right">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSlider(product._id, product.isSlider)}
+                            style={{
+                              background: product.isSlider ? "#16a34a" : "#f1f5f9",
+                              color: product.isSlider ? "#ffffff" : "#334155",
+                              border: "1px solid #cbd5e1",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              fontWeight: "700"
+                            }}
+                          >
+                            {product.isSlider ? "✅ Added to Slider" : "🖼️ Add to Slider"}
+                          </button>
+
                           <button
                             type="button"
                             className="jt-edit-btn"
