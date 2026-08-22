@@ -485,15 +485,10 @@ export default function AdminPage() {
 
   const handleToggleSlider = async (id, currentStatus) => {
     try {
-      // লোকাল স্টোরেজ থেকে সরাসরি টোকেনটি নিয়ে আসা (আপনার টোকেনের নাম যদি "token" হয়)
-      const token = localStorage.getItem("token") || localStorage.getItem("adminToken");
-
-      const res = await fetch(`/api/products/${id}/slider`, {
+      // ডিলিট ফাংশনের মতো হুবহু একই সিকিউরিটি হেডার এবং API URL ব্যবহার করা হলো
+      const res = await fetch(`${API_BASE_URL}/api/products/${id}/slider`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // সিকিউরিটির জন্য টোকেনটি পাঠানো হলো
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ isSlider: !currentStatus })
       });
       
@@ -504,7 +499,7 @@ export default function AdminPage() {
         alert(currentStatus ? "❌ স্লাইডার থেকে রিমুভ করা হয়েছে!" : "✅ স্লাইডারে সফলভাবে যুক্ত হয়েছে!");
       } else {
         const errorData = await res.json();
-        alert(`⚠️ সার্ভার এরর: ${errorData.message}`);
+        alert(`⚠️ সার্ভার এরর: ${errorData.message || "API ঠিকমতো রেসপন্স করছে না"}`);
       }
     } catch (error) {
       alert("⚠️ নেটওয়ার্ক বা ফেচ এরর: " + error.message);
