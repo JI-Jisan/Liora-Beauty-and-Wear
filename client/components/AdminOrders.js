@@ -93,6 +93,82 @@ export default function AdminOrders() {
     }
   };
 
+  const handlePrintInvoice = (order) => {
+    // একটি নতুন উইন্ডো বা পপ-আপ ওপেন হবে
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    
+    // কুরিয়ারের জন্য সুন্দর ইনভয়েস ডিজাইন
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Invoice - ${order.orderNumber || order._id}</title>
+          <style>
+            body { font-family: 'Arial', sans-serif; padding: 40px; color: #000; }
+            .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 20px; margin-bottom: 20px; }
+            .header h1 { margin: 0 0 5px; font-size: 28px; }
+            .details-box { border: 1px solid #000; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+            .items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .items th, .items td { border: 1px solid #000; padding: 10px; text-align: left; }
+            .total-box { text-align: right; font-size: 18px; margin-top: 20px; }
+            .cod-amount { font-size: 24px; font-weight: bold; border: 2px solid #000; display: inline-block; padding: 10px; margin-top: 10px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>LIORA Beauty & Wear</h1>
+            <p><strong>Order ID / Tracking:</strong> ${order.orderNumber || order._id}</p>
+            <p>Date: ${new Date(order.createdAt).toLocaleDateString()}</p>
+          </div>
+          
+          <div class="details-box">
+            <h3 style="margin-top: 0;">🚚 Delivery Details:</h3>
+            <strong>Name:</strong> ${order.customerName}<br/><br/>
+            <strong>Phone:</strong> ${order.phone}<br/><br/>
+            <strong>Address:</strong> ${order.address}<br/><br/>
+            ${order.note ? `<strong>Note:</strong> ${order.note}` : ''}
+          </div>
+
+          <table class="items">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th style="text-align: center;">Qty</th>
+                <th style="text-align: right;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(order.items || []).map(item => `
+                <tr>
+                  <td>${item.productName || item.name}</td>
+                  <td style="text-align: center;">${item.quantity || 1}</td>
+                  <td style="text-align: right;">${(item.offerPrice || item.price) * (item.quantity || 1)} Tk</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="total-box">
+            Subtotal: ${order.subtotal || order.total - (order.deliveryCharge || order.deliveryFee || 0)} Tk<br/>
+            Delivery Charge: ${order.deliveryCharge || order.deliveryFee || 0} Tk<br/>
+            <div class="cod-amount">
+              Cash on Delivery (COD): ${order.total} Tk
+            </div>
+          </div>
+
+          <script>
+            // অটোমেটিক প্রিন্ট ডায়ালগ ওপেন হবে
+            window.onload = function() { 
+              window.print(); 
+              // প্রিন্ট শেষে উইন্ডো ক্লোজ হয়ে যাবে (ঐচ্ছিক)
+              // window.close(); 
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const matchesStatus =
@@ -280,6 +356,24 @@ export default function AdminOrders() {
                     </select>
                   </div>
 
+                  <button
+                    onClick={() => handlePrintInvoice(order)}
+                    style={{
+                      background: "#0f172a",
+                      color: "#ffffff",
+                      border: "none",
+                      padding: "8px 16px",
+                      borderRadius: "6px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      marginRight: "10px"
+                    }}
+                  >
+                    🖨️ Print Invoice
+                  </button>
                   <button
                     type="button"
                     className="jt-delete-order-btn"
