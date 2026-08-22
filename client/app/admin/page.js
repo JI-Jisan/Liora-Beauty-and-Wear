@@ -21,6 +21,7 @@ export default function AdminPage() {
   // Report states
   const [reportFilter, setReportFilter] = useState("30"); // ডিফল্ট ৩০ দিন (মান্থলি)
   const [reportData, setReportData] = useState([]);
+  const [stockCategoryFilter, setStockCategoryFilter] = useState("all");
 
   // Manage Products Advanced Controls State
   const [productSearch, setProductSearch] = useState("");
@@ -639,6 +640,30 @@ export default function AdminPage() {
 
   const overallProfitPct = totalCost > 0 ? Math.round((totalProfit / totalCost) * 100) : 0;
 
+  // Stock Calculation Logic
+  let totalStockItems = 0;
+  let outOfStockCount = 0;
+  let lowStockCount = 0;
+  let totalStockValue = 0; // গোডাউনে মোট কত টাকার মাল আছে (কেনার দাম অনুযায়ী)
+
+  // products স্টেট থেকে ডেটা ফিল্টার করা
+  const filteredStock = (products || []).filter((p) => {
+    if (stockCategoryFilter === "all") return true;
+    const catId = p.category?._id || p.category;
+    return catId === stockCategoryFilter;
+  });
+
+  filteredStock.forEach((p) => {
+    const qty = Number(p.stockQuantity || 0);
+    const buyPrice = Number(p.purchasePrice || 0);
+    
+    totalStockItems += qty;
+    totalStockValue += (qty * buyPrice);
+    
+    if (qty === 0) outOfStockCount++;
+    else if (qty <= 5) lowStockCount++;
+  });
+
   if (!isAuthenticated) return null;
 
   return (
@@ -724,6 +749,16 @@ export default function AdminPage() {
           >
             📈 Profit & Reports
           </li>
+          <li
+            className={activeTab === "stock" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("stock");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            📋 Inventory / Stock
+          </li>
         </ul>
       </aside>
 
@@ -796,6 +831,15 @@ export default function AdminPage() {
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>📁</div>
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Categories</h3>
+                </div>
+
+                {/* Inventory Box */}
+                <div 
+                  onClick={() => { setActiveTab("stock"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📋</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Inventory</h3>
                 </div>
                 
                 {/* Branding Box */}
@@ -2056,6 +2100,117 @@ export default function AdminPage() {
                           <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900" }}>{item.rowProfit} Tk</td>
                         </tr>
                       ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Inventory & Stock Management Tab */}
+          {activeTab === "stock" && (
+            <div className="jt-admin-panel jt-admin-panel-wide" style={{ padding: "20px" }}>
+              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "10px" }}>
+                <div>
+                  <h2 style={{ margin: "0 0 6px", color: "#0f172a", fontSize: "22px", fontWeight: "800" }}>📋 Inventory & Stock Report</h2>
+                  <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>আপনার গোডাউনের রিয়েল-টাইম স্টক এবং ভ্যালুয়েশন রিপোর্ট</p>
+                </div>
+                
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  {/* Category Filter */}
+                  <select 
+                    value={stockCategoryFilter} 
+                    onChange={(e) => setStockCategoryFilter(e.target.value)}
+                    style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a" }}
+                  >
+                    <option value="all">📁 All Categories (সব ক্যাটাগরি)</option>
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={() => window.print()}
+                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "10px 18px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+                  >
+                    🖨️ Download PDF / Print
+                  </button>
+                </div>
+              </div>
+
+              {/* Stock Summary Cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "14px", marginBottom: "24px" }}>
+                <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", padding: "16px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#475569" }}>📦 Total Products (ধরণ)</span>
+                  <h2 style={{ margin: "6px 0 0", color: "#0f172a", fontSize: "22px" }}>{filteredStock.length} Items</h2>
+                </div>
+                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "16px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#1e40af" }}>🔢 Total Units (মোট পিস)</span>
+                  <h2 style={{ margin: "6px 0 0", color: "#2563eb", fontSize: "22px" }}>{totalStockItems} Pcs</h2>
+                </div>
+                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "16px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#991b1b" }}>⚠️ Low / Out of Stock</span>
+                  <h2 style={{ margin: "6px 0 0", color: "#dc2626", fontSize: "22px" }}>{lowStockCount + outOfStockCount} Items</h2>
+                </div>
+                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "16px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#166534" }}>💰 Total Asset Value</span>
+                  <h2 style={{ margin: "6px 0 0", color: "#15803d", fontSize: "22px" }}>{totalStockValue} Tk</h2>
+                </div>
+              </div>
+
+              {/* Excel-like Stock Table */}
+              <div style={{ overflowX: "auto", background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left", minWidth: "800px" }}>
+                  <thead style={{ background: "#f1f5f9" }}>
+                    <tr>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Category</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>In Stock (Qty)</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Status</th>
+                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Total Asset Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredStock.length === 0 ? (
+                      <tr><td colSpan="7" style={{ padding: "30px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No products found in this category.</td></tr>
+                    ) : (
+                      filteredStock.map((item, idx) => {
+                        const qty = Number(item.stockQuantity || 0);
+                        const buyPrice = Number(item.purchasePrice || 0);
+                        const assetValue = qty * buyPrice;
+                        
+                        let statusColor = "#16a34a"; // Green
+                        let statusText = "In Stock";
+                        if (qty === 0) {
+                          statusColor = "#dc2626"; // Red
+                          statusText = "Out of Stock";
+                        } else if (qty <= 5) {
+                          statusColor = "#ea580c"; // Orange
+                          statusText = "Low Stock";
+                        }
+
+                        return (
+                          <tr key={item._id} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
+                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
+                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", color: "#475569" }}>
+                              {categories.find(c => c._id === (item.category?._id || item.category))?.name || "Unknown"}
+                            </td>
+                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b" }}>{buyPrice} Tk</td>
+                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800" }}>{item.offerPrice || item.originalPrice} Tk</td>
+                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "900", color: qty === 0 ? "#dc2626" : "#2563eb", fontSize: "15px" }}>
+                              {qty}
+                            </td>
+                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "800", color: statusColor }}>
+                              {statusText}
+                            </td>
+                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900" }}>{assetValue} Tk</td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
