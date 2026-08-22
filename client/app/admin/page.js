@@ -18,6 +18,7 @@ export default function AdminPage() {
   // Active Tab State (কোন পেজটি এখন দেখাবে তার জন্য)
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [reports, setReports] = useState(null);
 
   // Manage Products Advanced Controls State
   const [productSearch, setProductSearch] = useState("");
@@ -140,6 +141,18 @@ export default function AdminPage() {
     }
   };
 
+  const loadReports = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/admin/reports`);
+      if (res.ok) {
+        const data = await res.json();
+        setReports(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("jt_admin_logged_in");
     const token = localStorage.getItem("jt_admin_token");
@@ -151,6 +164,7 @@ export default function AdminPage() {
       loadCategories();
       loadProducts();
       loadSettings();
+      loadReports();
     }
   }, [router]);
 
@@ -626,6 +640,16 @@ export default function AdminPage() {
             }}
           >
             ✨ Branding & Flash Sale
+          </li>
+          <li
+            className={activeTab === "reports" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("reports");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            📈 Profit & Reports
           </li>
         </ul>
       </aside>
@@ -1834,9 +1858,52 @@ export default function AdminPage() {
           {/* Orders Tab */}
           {activeTab === "orders" && (
             <div id="orders-section" className="jt-admin-panel jt-admin-panel-wide">
-            <h3>Recent Orders</h3>
-            <AdminOrders />
-          </div>
+              <h3>Recent Orders</h3>
+              <AdminOrders />
+            </div>
+          )}
+
+          {/* Reports Tab */}
+          {activeTab === "reports" && (
+            <div className="jt-admin-panel jt-admin-panel-wide">
+              <h3>📈 Business Profit & Sales Analytics</h3>
+              <p style={{ color: "#64748b", marginBottom: "20px" }}>আপনার ব্যবসার সার্বিক আয়, খরচ এবং নিট লাভের হিসাব</p>
+
+              {/* Summary Cards Grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "24px" }}>
+                
+                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "18px", borderRadius: "12px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#166534" }}>💵 Total Revenue (মোট বিক্রি)</span>
+                  <h2 style={{ margin: "8px 0 0", color: "#15803d" }}>{reports ? reports.totalRevenue : "Calculating..."} Tk</h2>
+                </div>
+
+                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "18px", borderRadius: "12px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#991b1b" }}>📦 Purchase Cost (কেনার খরচ)</span>
+                  <h2 style={{ margin: "8px 0 0", color: "#b91c1c" }}>{reports ? reports.totalCost : "Calculating..."} Tk</h2>
+                </div>
+
+                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "18px", borderRadius: "12px" }}>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#1e40af" }}>✨ Net Profit (নিট লাভ)</span>
+                  <h2 style={{ margin: "8px 0 0", color: "#2563eb" }}>{reports ? reports.netProfit : "Calculating..."} Tk</h2>
+                </div>
+
+              </div>
+
+              <button
+                onClick={() => window.print()}
+                style={{
+                  background: "#0f172a",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  fontWeight: "700",
+                  cursor: "pointer"
+                }}
+              >
+                🖨️ Print / Download Profit Report (PDF)
+              </button>
+            </div>
           )}
         </div>
       </section>
