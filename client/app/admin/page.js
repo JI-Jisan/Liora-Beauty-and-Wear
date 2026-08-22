@@ -655,96 +655,83 @@ export default function AdminPage() {
       </aside>
 
       <section className="jt-admin-main">
-        <div className="jt-admin-top">
-          <div className="jt-admin-top-left">
-            <button
-              type="button"
-              className="jt-admin-menu-toggle-btn"
-              onClick={() => setIsSidebarOpen(true)}
-              title="Open Navigation Menu"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
-              <span>Menu</span>
-            </button>
+        {/* Modern Admin Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#ffffff", padding: "14px 16px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginBottom: "24px" }}>
+          
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            style={{ background: "#0f172a", color: "#ffffff", border: "none", padding: "8px 14px", borderRadius: "10px", fontWeight: "700", fontSize: "13px", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}
+          >
+            ☰ Menu
+          </button>
 
-            <div>
-              <h1>Admin Dashboard</h1>
-              <p>Manage products, categories and view orders</p>
-            </div>
-          </div>
+          <h1 style={{ fontSize: "16px", margin: 0, fontWeight: "900", color: "#0f172a", textAlign: "center", letterSpacing: "0.5px" }}>
+            LIORA ADMIN
+          </h1>
 
           <button
             onClick={handleLogout}
-            style={{
-              border: "none",
-              background: "#ef4444",
-              color: "white",
-              padding: "10px 18px",
-              borderRadius: "10px",
-              fontWeight: "700",
-              cursor: "pointer",
-            }}
+            style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "8px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
           >
             Logout
           </button>
+
         </div>
 
         <div className="jt-admin-grid">
           
-          {/* Dashboard Tab */}
+          {/* Dashboard Tab - Premium Look */}
           {activeTab === "dashboard" && (
-            <div className="jt-admin-panel jt-admin-panel-wide">
-              <h2 style={{ marginBottom: "20px", color: "#0f172a", fontSize: "22px" }}>Welcome to Admin Dashboard 🚀</h2>
+            <div style={{ background: "transparent", border: "none", padding: 0, boxShadow: "none" }} className="jt-admin-panel">
+              <h2 style={{ marginBottom: "16px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>Welcome, Admin! 🚀</h2>
               
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "16px" }}>
+              {/* 2-Column Grid on Mobile */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
                 
                 {/* Products Box */}
                 <div 
                   onClick={() => { setActiveTab("products"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
-                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>🛍️</div>
-                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Products</h3>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🛍️</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Products</h3>
                 </div>
 
                 {/* Orders Box */}
                 <div 
                   onClick={() => { setActiveTab("orders"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
-                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>📦</div>
-                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Orders</h3>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📦</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Orders</h3>
                 </div>
 
-                {/* Analytics Box */}
+                {/* Profit Reports Box */}
                 <div 
                   onClick={() => { setActiveTab("reports"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
-                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>📈</div>
-                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Profit Reports</h3>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📈</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Reports</h3>
                 </div>
 
                 {/* Categories Box */}
                 <div 
                   onClick={() => { setActiveTab("categories"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
-                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>📁</div>
-                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Categories</h3>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📁</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Categories</h3>
                 </div>
                 
                 {/* Branding Box */}
                 <div 
                   onClick={() => { setActiveTab("branding"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "24px 14px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 12px rgba(0,0,0,0.04)", transition: "all 0.3s" }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gridColumn: "span 2", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
-                  <div style={{ fontSize: "36px", marginBottom: "12px" }}>✨</div>
-                  <h3 style={{ margin: "0", fontSize: "15px", color: "#334155", fontWeight: "800" }}>Branding</h3>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>✨</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Branding & Settings</h3>
                 </div>
 
               </div>
