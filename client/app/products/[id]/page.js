@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { cld } from "@/lib/cloudinary";
+import { getDiscount, getSaved } from "@/lib/price";
 
 
 // ─── Auto-sliding image carousel ────────────────────────────────────────────
@@ -410,13 +411,18 @@ export default function ProductDetailsPage() {
                 {product.originalPrice} Tk
               </span>
             )}
-            {product.discountBadge && (
+            {getDiscount(product) > 0 && (
               <span style={{
                 background: "linear-gradient(135deg, #e11d48, #f97316)",
                 color: "#fff", fontSize: "12px", fontWeight: "800",
                 padding: "3px 10px", borderRadius: "50px",
               }}>
-                {product.discountBadge}
+                {getDiscount(product)}% OFF
+              </span>
+            )}
+            {getSaved(product) > 0 && (
+              <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, width: "100%", display: "block", marginTop: 4 }}>
+                ৳{getSaved(product)} সাশ্রয়
               </span>
             )}
           </div>

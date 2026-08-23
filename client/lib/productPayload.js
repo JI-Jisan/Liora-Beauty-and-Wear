@@ -35,7 +35,7 @@ export function buildPayload(body) {
     offerPrice,
     stockQuantity,
     stockStatus: deriveStockStatus(stockQuantity),
-    discountBadge: String(body.discountBadge || "").trim(),
+    discountBadge: originalPrice > offerPrice ? String(Math.round(((originalPrice - offerPrice) / originalPrice) * 100)) : "",
     image: String(body.image || "").trim(),
     images,
     description: String(body.description || "").trim().slice(0, 5000),

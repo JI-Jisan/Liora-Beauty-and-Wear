@@ -5,10 +5,11 @@ import { API_BASE_URL } from "@/lib/api";
 import { uploadToCloudinary, cld } from "@/lib/cloudinary";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
 import { useMemo } from "react";
+import { getDiscount } from "@/lib/price";
 
 const EMPTY = {
   name: "", category: "", purchasePrice: "", originalPrice: "", offerPrice: "",
-  stockQuantity: "", discountBadge: "", description: "",
+  stockQuantity: "", description: "",
   image: "", images: ["", "", ""],
   isFeatured: false, isTrending: false, isNewArrival: false, isSlider: false,
 };
@@ -36,8 +37,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       purchasePrice: editing.purchasePrice ?? "",
       originalPrice: editing.originalPrice ?? "",
       offerPrice: editing.offerPrice ?? "",
-      stockQuantity: editing.stockQuantity ?? "",
-      discountBadge: editing.discountBadge || "",
+      stockQuantity: editing.stockQuantity || "",
       description: editing.description || "",
       image: editing.image || "",
       images: [extra[0] || "", extra[1] || "", extra[2] || ""],
@@ -234,8 +234,11 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <input type="number" min="0" placeholder="স্টক সংখ্যা *" value={form.stockQuantity}
             onChange={(e) => set("stockQuantity", e.target.value)} required />
-          <input placeholder="ব্যাজ (যেমন: 20% OFF)" value={form.discountBadge}
-            onChange={(e) => set("discountBadge", e.target.value)} />
+          <div style={{ fontSize: 13, color: '#666' }}>
+            ডিসকাউন্ট: <b style={{ color: '#e11d48' }}>
+              {getDiscount({ originalPrice: form.originalPrice, offerPrice: form.offerPrice })}%
+            </b> (অটো হিসাব হবে)
+          </div>
         </div>
 
         <textarea

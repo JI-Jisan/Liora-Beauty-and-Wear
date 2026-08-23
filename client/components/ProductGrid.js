@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import CategoryBar from "./CategoryBar";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { cld } from "@/lib/cloudinary";
+import { getDiscount, getSaved } from "@/lib/price";
 
 
 const getCategoryName = (category) => {
@@ -188,14 +189,26 @@ function ProductGridContent({
               key={product._id}
               className="jt-product-card"
             >
-              {product.discountBadge && (
-                <div className="jt-discount-badge">
-                  {product.discountBadge}
-                </div>
-              )}
+
 
               <Link href={`/products/${product._id}`} className="jt-product-link">
                 <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 10, background: "#f8fafc" }}>
+                  {getDiscount(product) > 0 && (
+                    <div style={{
+                      position: 'absolute', top: 10, left: 10, zIndex: 2,
+                      background: 'linear-gradient(135deg,#ff3b6b,#e11d48)',
+                      color: '#fff', borderRadius: 10, padding: '5px 9px',
+                      lineHeight: 1, textAlign: 'center',
+                      boxShadow: '0 4px 12px rgba(225,29,72,.35)'
+                    }}>
+                      <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.3px' }}>
+                        {getDiscount(product)}%
+                      </div>
+                      <div style={{ fontSize: 9, fontWeight: 700, opacity: .95, marginTop: 2 }}>
+                        OFF
+                      </div>
+                    </div>
+                  )}
                   <img
                     src={cld(imageSrc, 500, 500)}
                     alt={product.name}
@@ -222,12 +235,17 @@ function ProductGridContent({
                 </div>
 
                 <div>
-                  <p className="jt-price">
+                  <p className="jt-price" style={{ margin: "0 0 4px" }}>
                     {product.offerPrice} Tk
                     {product.originalPrice && (
                       <span>{product.originalPrice} Tk</span>
                     )}
                   </p>
+                  {getSaved(product) > 0 && (
+                    <div style={{ fontSize: 11, color: '#16a34a', fontWeight: 700, marginBottom: 8 }}>
+                      ৳{getSaved(product)} সাশ্রয়
+                    </div>
+                  )}
 
                   <button
                     type="button"
