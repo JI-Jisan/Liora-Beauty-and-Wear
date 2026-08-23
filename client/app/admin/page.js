@@ -150,7 +150,7 @@ export default function AdminPage() {
       const res = await fetch(`${API_BASE_URL}/api/admin/reports`);
       if (res.ok) {
         const data = await res.json();
-        setReports(data);
+        setReportData(data.orders || []);
       }
     } catch (err) {
       console.error(err);
