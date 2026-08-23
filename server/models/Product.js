@@ -35,13 +35,13 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    image2: {
-      type: String,
-      default: "",
-    },
-    image3: {
-      type: String,
-      default: "",
+    images: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (a) => !a || a.length <= 3,
+        message: "সর্বোচ্চ ৩টি অতিরিক্ত ছবি",
+      },
     },
     rating: {
       type: Number,

@@ -80,31 +80,6 @@ function ProductImageCarousel({ product, fallback }) {
     </div>
   );
 }
-function renderFormattedDescription(text) {
-  if (!text) return "No description available for this product.";
-
-  if (/<[a-z][\s\S]*>/i.test(text)) {
-    return (
-      <div
-        dangerouslySetInnerHTML={{ __html: text }}
-        style={{ lineHeight: "1.7" }}
-      />
-    );
-  }
-
-  const html = text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/__(.*?)__/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/\n/g, '<br/>');
-
-  return (
-    <div
-      dangerouslySetInnerHTML={{ __html: html }}
-      style={{ lineHeight: "1.7" }}
-    />
-  );
-}
 
 export default function ProductDetailsPage() {
   const params = useParams();
@@ -409,17 +384,20 @@ export default function ProductDetailsPage() {
             {product.name}
           </h1>
 
-          {/* Rating row */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", margin: "6px 0" }}>
-            <div style={{ display: "flex", gap: "2px" }}>
-              {[1, 2, 3, 4, 5].map((s) => (
-                <span key={s} style={{ fontSize: "16px", color: (product.rating || 4.8) >= s ? "#f59e0b" : "#d1d5db" }}>
-                  ★
-                </span>
-              ))}
-            </div>
-            <span style={{ fontSize: "13px", fontWeight: "700", color: "#f59e0b" }}>{product.rating || 4.8}</span>
-            <span style={{ fontSize: "12px", color: "#94a3b8" }}>({product.reviewCount || 34} ratings & reviews)</span>
+            {product.reviewCount > 0 && (
+              <>
+                <div style={{ display: "flex", gap: "2px" }}>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <span key={s} style={{ fontSize: "16px", color: (product.rating || 0) >= s ? "#f59e0b" : "#d1d5db" }}>
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <span style={{ fontSize: "13px", fontWeight: "700", color: "#f59e0b" }}>{product.rating.toFixed(1)}</span>
+                <span style={{ fontSize: "12px", color: "#94a3b8" }}>({product.reviewCount} ratings & reviews)</span>
+              </>
+            )}
           </div>
 
           {/* Price */}
@@ -521,12 +499,13 @@ export default function ProductDetailsPage() {
               📝 Product Description (পণ্যের বিবরণ)
             </h3>
             <div style={{
-              fontSize: "14px",
+              whiteSpace: "pre-wrap",
+              lineHeight: "1.7",
+              fontSize: "15px",
               color: "#1e293b",
-              lineHeight: "1.65",
               fontWeight: "500",
             }}>
-              {renderFormattedDescription(product.description)}
+              {product.description || ""}
             </div>
           </div>
         </div>
@@ -542,13 +521,15 @@ export default function ProductDetailsPage() {
 
           {/* Rating Summary Header */}
           <div style={{ display: "flex", gap: "20px", alignItems: "center", background: "#fff0f3", padding: "16px", borderRadius: "14px", marginBottom: "16px", flexWrap: "wrap" }}>
-            <div>
-              <div style={{ fontSize: "36px", fontWeight: "900", color: "#e11d48", lineHeight: 1 }}>
-                {product.rating || 4.8}
+            {product.reviewCount > 0 && (
+              <div>
+                <div style={{ fontSize: "36px", fontWeight: "900", color: "#e11d48", lineHeight: 1 }}>
+                  {product.rating.toFixed(1)}
+                </div>
+                <div style={{ color: "#f59e0b", fontSize: "16px", marginTop: "4px" }}>★★★★★</div>
+                <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>out of 5.0</div>
               </div>
-              <div style={{ color: "#f59e0b", fontSize: "16px", marginTop: "4px" }}>★★★★★</div>
-              <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>out of 5.0</div>
-            </div>
+            )}
 
             <div style={{ flex: 1, minWidth: "180px", display: "flex", flexDirection: "column", gap: "4px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px" }}>
@@ -575,37 +556,13 @@ export default function ProductDetailsPage() {
             </div>
           </div>
 
-          {/* Filter Badges */}
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-            <span style={{ background: "#0f172a", color: "#fff", fontSize: "11px", fontWeight: "700", padding: "4px 12px", borderRadius: "50px" }}>All Reviews ({product.reviewCount || 34})</span>
-            <span style={{ background: "#f1f5f9", color: "#475569", fontSize: "11px", fontWeight: "700", padding: "4px 12px", borderRadius: "50px" }}>Verified Purchase (30)</span>
-            <span style={{ background: "#f1f5f9", color: "#475569", fontSize: "11px", fontWeight: "700", padding: "4px 12px", borderRadius: "50px" }}>With Photos (12)</span>
-          </div>
-
-          {/* Customer Reviews List */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ borderBottom: "1px solid #f1f5f9", paddingBottom: "10px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: "800", fontSize: "13px", color: "#0f172a" }}>Anika Rahman</span>
-                <span style={{ fontSize: "11px", color: "#059669", background: "#ecfdf5", padding: "2px 8px", borderRadius: "4px", fontWeight: "700" }}>✓ Verified Purchase</span>
-              </div>
-              <div style={{ color: "#f59e0b", fontSize: "12px", margin: "2px 0 4px" }}>★★★★★</div>
-              <p style={{ margin: 0, fontSize: "13px", color: "#334155", lineHeight: 1.4 }}>
-                100% authentic product! Scent is long-lasting and packaging was very premium. Quick delivery within 2 days in Dhaka.
-              </p>
+          {product.reviewCount > 0 && (
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
+              <span style={{ background: "#0f172a", color: "#fff", fontSize: "11px", fontWeight: "700", padding: "4px 12px", borderRadius: "50px" }}>All Reviews ({product.reviewCount})</span>
             </div>
+          )}
 
-            <div style={{ borderBottom: "1px solid #f1f5f9", paddingBottom: "10px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontWeight: "800", fontSize: "13px", color: "#0f172a" }}>Tanvir Ahmed</span>
-                <span style={{ fontSize: "11px", color: "#059669", background: "#ecfdf5", padding: "2px 8px", borderRadius: "4px", fontWeight: "700" }}>✓ Verified Purchase</span>
-              </div>
-              <div style={{ color: "#f59e0b", fontSize: "12px", margin: "2px 0 4px" }}>★★★★★</div>
-              <p style={{ margin: 0, fontSize: "13px", color: "#334155", lineHeight: 1.4 }}>
-                Great value for money! High quality build and original scent. Highly recommend LIORA Beauty & Wear.
-              </p>
-            </div>
-          </div>
+
         </div>
       </section>
 

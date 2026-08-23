@@ -128,8 +128,9 @@ export default function CartDrawer({
                       <button
                         type="button"
                         onClick={() => {
-                          if (item.stockQuantity !== undefined && qty(item) >= item.stockQuantity) {
-                            alert(`দুঃখিত, স্টকে মাত্র ${item.stockQuantity} টি আছে।`);
+                          const available = Number(item.stockQuantity ?? 0);
+                          if ((item.quantity || 1) >= available) {
+                            alert(`দুঃখিত, স্টকে মাত্র ${available} টি আছে।`);
                             return;
                           }
                           onIncrease(item._id);

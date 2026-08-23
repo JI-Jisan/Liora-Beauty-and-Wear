@@ -195,7 +195,7 @@ function ProductGridContent({
               )}
 
               <Link href={`/products/${product._id}`} className="jt-product-link">
-                <div style={{ width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 12, background: "#f1f5f9" }}>
+                <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 10, background: "#f8fafc" }}>
                   <img
                     src={cld(imageSrc, 500, 500)}
                     alt={product.name}
@@ -210,8 +210,10 @@ function ProductGridContent({
 
               <div className="jt-product-content">
                 <div>
-                  <Link href={`/products/${product._id}`} className="jt-product-link">
-                    <h4>{product.name}</h4>
+                  <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none" }}>
+                    <h3 style={{ fontSize: 14, margin: "8px 0 4px", lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: 38, color: "inherit" }}>
+                      {product.name}
+                    </h3>
                   </Link>
 
                   <p className="jt-card-cat-subtitle">
