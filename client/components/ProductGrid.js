@@ -37,7 +37,15 @@ function ProductGridContent({
   };
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products`)
+    let url = (activeCategory && activeCategory !== "all")
+      ? `${API_BASE_URL}/api/products?category=${activeCategory}`
+      : `${API_BASE_URL}/api/products`;
+      
+    if (type && type !== "all") {
+      url += url.includes('?') ? `&type=${type}` : `?type=${type}`;
+    }
+    
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         setProducts(Array.isArray(data) ? data : []);
@@ -55,71 +63,12 @@ function ProductGridContent({
         }
       })
       .catch((err) => console.error(err));
-  }, []);
+  }, [activeCategory]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    // Build category map by _id and by lowercase name for fast parent lookup
-    const catMap = {};
-    if (Array.isArray(categories)) {
-      categories.forEach((c) => {
-        if (c && c._id) catMap[c._id] = c;
-        if (c && c.name) catMap[c.name.trim().toLowerCase()] = c;
-      });
-    }
 
-    if (type === "featured") {
-      result = result.filter((p) => p.isFeatured);
-    }
-
-    if (type === "trending") {
-      result = result.filter((p) => p.isTrending);
-    }
-
-    if (type === "new") {
-      result = result.filter((p) => p.isNewArrival);
-    }
-
-    if (activeCategory && activeCategory !== "all") {
-      const targetStr = String(activeCategory).trim().toLowerCase();
-
-      result = result.filter((product) => {
-        if (!product.category) return false;
-
-        let current = typeof product.category === "object"
-          ? product.category
-          : catMap[product.category] || catMap[String(product.category).trim().toLowerCase()];
-
-        const visited = new Set();
-
-        while (current && typeof current === "object") {
-          const cId = String(current._id || "").toLowerCase();
-          const cName = String(current.name || "").trim().toLowerCase();
-
-          if (cId === targetStr || cName === targetStr) {
-            return true;
-          }
-
-          if (cId && visited.has(cId)) break;
-          if (cId) visited.add(cId);
-
-          // Move up to parent category
-          const parent = current.parentCategory;
-          if (parent && typeof parent === "object" && parent.name) {
-            current = parent;
-          } else if (parent && catMap[parent]) {
-            current = catMap[parent];
-          } else if (parent && catMap[String(parent).trim().toLowerCase()]) {
-            current = catMap[String(parent).trim().toLowerCase()];
-          } else {
-            current = null;
-          }
-        }
-
-        return false;
-      });
-    }
 
     if (activeSearchTerm.trim()) {
       const keyword = activeSearchTerm.toLowerCase();
