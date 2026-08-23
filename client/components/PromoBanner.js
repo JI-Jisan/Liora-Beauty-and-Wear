@@ -40,14 +40,12 @@ export default function PromoBanner() {
 
   if (loading) {
     return (
-      <div style={{ padding: "20px" }}>
-        <div style={{
-          width: '100%', aspectRatio: '16 / 7', borderRadius: 16,
-          background: 'linear-gradient(90deg,#f6e9ee 25%,#fdf5f8 50%,#f6e9ee 75%)',
-          backgroundSize: '200% 100%',
-          animation: 'sk 1.2s ease-in-out infinite'
-        }} />
-      </div>
+      <div style={{
+        margin: "20px", borderRadius: "16px", minHeight: "220px",
+        background: 'linear-gradient(90deg,#f6e9ee 25%,#fdf5f8 50%,#f6e9ee 75%)',
+        backgroundSize: '200% 100%',
+        animation: 'sk 1.2s ease-in-out infinite'
+      }} />
     );
   }
 
@@ -66,11 +64,11 @@ export default function PromoBanner() {
     ? Math.round(((product.originalPrice - product.offerPrice) / product.originalPrice) * 100) 
     : 0;
 
-  const opt = (url) => url?.replace('/upload/', '/upload/f_auto,q_auto,w_1200/');
+  const opt = (url) => url?.replace('/upload/', '/upload/f_auto,q_auto/');
   const optimizedImage = opt(product.image);
 
   return (
-    <div style={{ margin: "20px", borderRadius: "16px", overflow: "hidden", position: "relative", background: "linear-gradient(135deg, #1e222d 0%, #3a3f4e 100%)", color: "#fff", aspectRatio: '16 / 7', display: "flex", alignItems: "center" }}>
+    <div style={{ margin: "20px", borderRadius: "16px", overflow: "hidden", position: "relative", background: "linear-gradient(135deg, #1e222d 0%, #3a3f4e 100%)", color: "#fff", minHeight: "220px", display: "flex", alignItems: "center" }}>
       
       {/* ব্যাকগ্রাউন্ড ইমেজ (আবছা) */}
       <div 
