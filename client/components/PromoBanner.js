@@ -39,7 +39,16 @@ export default function PromoBanner() {
   }, [sliderProducts.length]);
 
   if (loading) {
-    return <div style={{ padding: "50px", textAlign: "center", color: "#64748b" }}>⏳ Loading Slider...</div>;
+    return (
+      <div style={{ padding: "20px" }}>
+        <div style={{
+          width: '100%', aspectRatio: '16 / 7', borderRadius: 16,
+          background: 'linear-gradient(90deg,#f6e9ee 25%,#fdf5f8 50%,#f6e9ee 75%)',
+          backgroundSize: '200% 100%',
+          animation: 'sk 1.2s ease-in-out infinite'
+        }} />
+      </div>
+    );
   }
 
   // যদি অ্যাডমিন থেকে কোনো প্রোডাক্ট স্লাইডারে যুক্ত করা না থাকে (এটি আপনাকে ভুল ধরতে সাহায্য করবে)
@@ -57,12 +66,15 @@ export default function PromoBanner() {
     ? Math.round(((product.originalPrice - product.offerPrice) / product.originalPrice) * 100) 
     : 0;
 
+  const opt = (url) => url?.replace('/upload/', '/upload/f_auto,q_auto,w_1200/');
+  const optimizedImage = opt(product.image);
+
   return (
-    <div style={{ margin: "20px", borderRadius: "16px", overflow: "hidden", position: "relative", background: "linear-gradient(135deg, #1e222d 0%, #3a3f4e 100%)", color: "#fff", minHeight: "220px", display: "flex", alignItems: "center" }}>
+    <div style={{ margin: "20px", borderRadius: "16px", overflow: "hidden", position: "relative", background: "linear-gradient(135deg, #1e222d 0%, #3a3f4e 100%)", color: "#fff", aspectRatio: '16 / 7', display: "flex", alignItems: "center" }}>
       
       {/* ব্যাকগ্রাউন্ড ইমেজ (আবছা) */}
       <div 
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: `url(${product.image})`, backgroundSize: "cover", backgroundPosition: "center", opacity: 0.2, zIndex: 0 }}
+        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: `url(${optimizedImage})`, backgroundSize: "cover", backgroundPosition: "center", opacity: 0.2, zIndex: 0 }}
       ></div>
 
       <div style={{ position: "relative", zIndex: 1, padding: "24px", width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>

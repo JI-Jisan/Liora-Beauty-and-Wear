@@ -5951,3 +5951,5 @@ button {
 .jt-bottom-nav-icon {
   font-size: 18px;
 }
+@keyframes sk { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
