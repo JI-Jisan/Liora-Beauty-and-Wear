@@ -96,19 +96,25 @@ export async function GET(req, { params }) {
   }
 }
 
+import { buildPayload } from "@/lib/productPayload";
+
 export async function PUT(req, { params }) {
   try {
     await connectToDatabase();
     const { id } = await params;
-    const body = await req.json();
-
-    const updated = await Product.findByIdAndUpdate(id, body, { new: true }).populate("category");
+    const payload = buildPayload(await req.json());
+    
+    const updated = await Product.findByIdAndUpdate(id, payload, { new: true, runValidators: true }).populate("category");
     if (!updated) {
       return NextResponse.json({ message: "Product not found" }, { status: 404 });
     }
     return NextResponse.json(updated);
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    const isValidation = error?.name === "ValidationError" || error?.message?.length < 120;
+    return NextResponse.json(
+      { message: isValidation ? error.message : "Product update failed" },
+      { status: isValidation ? 400 : 500 }
+    );
   }
 }
 

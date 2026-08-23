@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import AdminOrders from "@/components/AdminOrders";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, getAuthHeaders, getImageUrl } from "@/lib/api";
+import ProductForm from "@/components/admin/ProductForm";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function AdminPage() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [message, setMessage] = useState("");
-  const [editingId, setEditingId] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // Slide-out Drawer State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -200,12 +201,13 @@ export default function AdminPage() {
       discountBadge: "",
       description: "",
       stockStatus: "In Stock",
+      stockStatus: "In Stock",
       image: "",
       isFeatured: false,
       isTrending: false,
       isNewArrival: false,
     });
-    setEditingId(null);
+    setEditingProduct(null);
   };
 
   const handleCategorySubmit = async (e) => {
@@ -508,25 +510,7 @@ export default function AdminPage() {
   };
 
   const handleEditProduct = (product) => {
-    setEditingId(product._id);
-    setFormData({
-      name: product.name || "",
-      category: product.category?._id || "",
-      purchasePrice: product.purchasePrice || "",
-      originalPrice: product.originalPrice || "",
-      offerPrice: product.offerPrice || "",
-      stockQuantity: product.stockQuantity || "",
-      discountBadge: product.discountBadge || "",
-      description: product.description || "",
-      stockStatus: product.stockStatus || "In Stock",
-      image: product.image || (product.images && product.images[0]) || "",
-      image2: product.image2 || (product.images && product.images[1]) || "",
-      image3: product.image3 || (product.images && product.images[2]) || "",
-      rating: product.rating || "",
-      reviewCount: product.reviewCount || "",
-      isTrending: product.isTrending || false,
-      isNewArrival: product.isNewArrival || false,
-    });
+    setEditingProduct(product);
     setActiveTab("add-product");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -1010,376 +994,19 @@ export default function AdminPage() {
           {/* 1. Add / Edit Product Tab */}
           {activeTab === "add-product" && (
             <div id="add-product-section" className="jt-admin-panel jt-admin-panel-wide">
-            <h3>{editingId ? "Edit Product" : "Add Product"}</h3>
-
-            <form className="jt-admin-panel-form jt-admin-product-form" onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Product name"
-                value={formData.name}
-                onChange={handleChange}
-                required
+              <ProductForm
+                editing={editingProduct}
+                onCancel={() => {
+                  setEditingProduct(null);
+                  setActiveTab("manage-products");
+                }}
+                onSaved={() => {
+                  setEditingProduct(null);
+                  loadProducts();
+                  setActiveTab("manage-products");
+                }}
               />
-
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select category</option>
-                {categories.map((cat) => {
-                  const parentName = cat.parentCategory?.name;
-                  const label = parentName ? `${parentName} ➔ ${cat.name}` : cat.name;
-                  return (
-                    <option key={cat._id} value={cat._id}>
-                      {label}
-                    </option>
-                  );
-                })}
-              </select>
-
-              <input
-                type="number"
-                name="originalPrice"
-                placeholder="Original price"
-                value={formData.originalPrice}
-                onChange={handleChange}
-                required
-              />
-
-              <input
-                type="number"
-                name="offerPrice"
-                placeholder="Offer price"
-                value={formData.offerPrice}
-                onChange={handleChange}
-                required
-              />
-
-              <input
-                type="number"
-                name="purchasePrice"
-                placeholder="Purchase Price (আপনার কেনার দাম)"
-                value={formData.purchasePrice}
-                onChange={handleChange}
-                required
-                style={{ border: "2px solid #3b82f6" }}
-              />
-
-              <input
-                type="number"
-                name="stockQuantity"
-                placeholder="Stock Quantity (কত পিস স্টকে আছে?)"
-                value={formData.stockQuantity}
-                onChange={handleChange}
-                required
-              />
-
-              <input
-                type="text"
-                name="discountBadge"
-                placeholder="Discount badge (example: 30% OFF)"
-                value={formData.discountBadge}
-                onChange={handleChange}
-              />
-
-              <div style={{ margin: "10px 0 4px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-                  <label style={{ fontSize: "12px", fontWeight: "800", color: "#334155" }}>
-                    📝 Product Description (পণ্যের বিবরণ)
-                  </label>
-
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          description: prev.description ? `${prev.description} **Bold Text**` : "**Bold Text**",
-                        }));
-                      }}
-                      style={{
-                        padding: "3px 10px", background: "#ffffff", border: "1px solid #cbd5e1",
-                        borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer",
-                        color: "#0f172a", boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                      }}
-                      title="Add bold text"
-                    >
-                      <b>B</b> Bold
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          description: prev.description ? `${prev.description}\n• Bullet Point 1\n• Bullet Point 2` : "• Bullet Point 1\n• Bullet Point 2",
-                        }));
-                      }}
-                      style={{
-                        padding: "3px 10px", background: "#ffffff", border: "1px solid #cbd5e1",
-                        borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer",
-                        color: "#0f172a", boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                      }}
-                      title="Add bullet points"
-                    >
-                      • List
-                    </button>
-                  </div>
-                </div>
-
-                <textarea
-                  name="description"
-                  placeholder="Product description... (Bold করতে **bold text** অথবা <b>bold text</b> লিখুন)"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={5}
-                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}
-                />
-                <span style={{ fontSize: "11px", color: "#64748b", display: "block", marginTop: "4px" }}>
-                  💡 টিপস: <b>B Bold</b> বাটনে চাপ দিলে বা টেক্সটের চারপাশে <b>**bold**</b> অথবা <b>&lt;b&gt;bold&lt;/b&gt;</b> লিখলে ওয়েবসাইটে লেখাটি <b>বোল্ড</b> হয়ে দেখাবে!
-                </span>
-              </div>
-
-              <select
-                name="stockStatus"
-                value={formData.stockStatus}
-                onChange={handleChange}
-              >
-                <option value="In Stock">In Stock</option>
-                <option value="Limited Stock">Limited Stock</option>
-                <option value="Out of Stock">Out of Stock</option>
-              </select>
-
-              {/* Image 1 */}
-              <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "10px 0" }}>
-                <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
-                  📷 Product Main Photo (Image 1):
-                </label>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="product-file-input-1"
-                    style={{ display: "none" }}
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        handleProductImageUpload(e.target.files[0], "image");
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="product-file-input-1"
-                    style={{
-                      background: "#0f172a",
-                      color: "#ffffff",
-                      padding: "8px 16px",
-                      borderRadius: "8px",
-                      fontWeight: "800",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      boxShadow: "0 2px 6px rgba(15,23,42,0.15)"
-                    }}
-                  >
-                    📁 Upload Main Photo from Phone / Computer
-                  </label>
-                </div>
-
-                <input
-                  type="text"
-                  name="image"
-                  placeholder="Or paste Main Image URL / Base64"
-                  value={formData.image || ""}
-                  onChange={handleChange}
-                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
-                />
-
-                {formData.image && (
-                  <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <img
-                      src={getImageUrl(formData.image)}
-                      alt="Product Preview 1"
-                      style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px", border: "2px solid #0f172a" }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, image: "" }))}
-                      style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
-                    >
-                      🗑️ Clear Main Image
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Image 2 */}
-              <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "6px 0" }}>
-                <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
-                  📷 Product Photo 2 (Optional - Slider / Carousel):
-                </label>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="product-file-input-2"
-                    style={{ display: "none" }}
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        handleProductImageUpload(e.target.files[0], "image2");
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="product-file-input-2"
-                    style={{ background: "#475569", color: "#fff", padding: "8px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}
-                  >
-                    📁 Upload Image 2
-                  </label>
-                  <input
-                    type="text"
-                    name="image2"
-                    placeholder="Or paste Image 2 URL"
-                    value={formData.image2 || ""}
-                    onChange={handleChange}
-                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
-                  />
-                </div>
-                {formData.image2 && (
-                  <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <img
-                      src={getImageUrl(formData.image2)}
-                      alt="Image 2 Preview"
-                      style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", border: "2px solid #475569" }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, image2: "" }))}
-                      style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
-                    >
-                      🗑️ Clear Image 2
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Image 3 */}
-              <div style={{ background: "#ffffff", padding: "14px", borderRadius: "10px", border: "1px solid #cbd5e1", margin: "6px 0" }}>
-                <label style={{ fontWeight: "800", display: "block", marginBottom: "8px", fontSize: "14px", color: "#0f172a" }}>
-                  📷 Product Photo 3 (Optional - Slider / Carousel):
-                </label>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", marginBottom: "8px" }}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="product-file-input-3"
-                    style={{ display: "none" }}
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        handleProductImageUpload(e.target.files[0], "image3");
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="product-file-input-3"
-                    style={{ background: "#7c3aed", color: "#fff", padding: "8px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "12px", cursor: "pointer" }}
-                  >
-                    📁 Upload Image 3
-                  </label>
-                  <input
-                    type="text"
-                    name="image3"
-                    placeholder="Or paste Image 3 URL"
-                    value={formData.image3 || ""}
-                    onChange={handleChange}
-                    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
-                  />
-                </div>
-                {formData.image3 && (
-                  <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <img
-                      src={getImageUrl(formData.image3)}
-                      alt="Image 3 Preview"
-                      style={{ width: "70px", height: "70px", objectFit: "cover", borderRadius: "8px", border: "2px solid #7c3aed" }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, image3: "" }))}
-                      style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
-                    >
-                      🗑️ Clear Image 3
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Rating & Reviews */}
-              <div style={{ display: "flex", gap: "10px" }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "12px", fontWeight: "700", color: "#64748b", display: "block", marginBottom: "4px" }}>⭐ Rating (0-5)</label>
-                  <input type="number" name="rating" min="0" max="5" step="0.1" placeholder="e.g. 4.5"
-                    value={formData.rating || ""} onChange={handleChange}
-                    style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: "12px", fontWeight: "700", color: "#64748b", display: "block", marginBottom: "4px" }}>💬 Review Count</label>
-                  <input type="number" name="reviewCount" min="0" placeholder="e.g. 128"
-                    value={formData.reviewCount || ""} onChange={handleChange}
-                    style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }} />
-                </div>
-              </div>
-
-              <label>
-                <input
-                  type="checkbox"
-                  name="isFeatured"
-                  checked={formData.isFeatured}
-                  onChange={handleChange}
-                />
-                Featured
-              </label>
-
-              <label>
-                <input
-                  type="checkbox"
-                  name="isTrending"
-                  checked={formData.isTrending}
-                  onChange={handleChange}
-                />
-                Trending
-              </label>
-
-              <label>
-                <input
-                  type="checkbox"
-                  name="isNewArrival"
-                  checked={formData.isNewArrival}
-                  onChange={handleChange}
-                />
-                New Arrival
-              </label>
-
-              <button type="submit">
-                {editingId ? "Update Product" : "Add Product"}
-              </button>
-
-              {editingId && (
-                <button
-                  type="button"
-                  className="jt-cancel-btn"
-                  onClick={resetForm}
-                >
-                  Cancel Edit
-                </button>
-              )}
-            </form>
-
-            {message && <p style={{ marginTop: "14px", fontWeight: "700" }}>{message}</p>}
-          </div>
+            </div>
           )}
 
           {/* 2. Manage Products Tab */}

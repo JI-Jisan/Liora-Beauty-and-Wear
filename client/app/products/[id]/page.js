@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { cld } from "@/lib/cloudinary";
 
 const DEMO_PRODUCTS = [
   {
@@ -76,82 +77,71 @@ const DEMO_PRODUCTS = [
 ];
 
 // ─── Auto-sliding image carousel ────────────────────────────────────────────
-function ProductImageCarousel({ images, fallback, productName }) {
+function ProductImageCarousel({ product, fallback }) {
   const [current, setCurrent] = useState(0);
 
+  const gallery = [product.image, ...(product.images || [])].filter(Boolean);
+  if (!gallery.length && fallback) {
+    gallery.push(fallback);
+  }
+
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (gallery.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % images.length);
+      setCurrent((prev) => (prev + 1) % gallery.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, [images.length]);
+  }, [gallery.length]);
 
-  if (!images.length) return null;
+  if (!gallery.length) return null;
 
   return (
-    <div style={{ position: "relative", width: "100%", overflow: "hidden", background: "#f8f0eb" }}>
-      {/* Slides */}
-      <div
-        style={{
-          display: "flex",
-          transform: `translateX(-${current * 100}%)`,
-          transition: "transform 0.5s cubic-bezier(0.4,0,0.2,1)",
-          willChange: "transform",
-        }}
-      >
-        {images.map((src, i) => (
-          <div key={i} style={{ flex: "0 0 100%", width: "100%", aspectRatio: "1 / 1", maxHeight: "480px" }}>
-            <img
-              src={src}
-              alt={`${productName} - view ${i + 1}`}
-              onError={(e) => { e.currentTarget.src = fallback; }}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
-              }}
-            />
-          </div>
+    <div style={{ padding: "0 14px", marginTop: "14px", marginBottom: "14px" }}>
+      <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 16, background: "#f8fafc" }}>
+        {gallery.map((url, i) => (
+          <img
+            key={i}
+            src={cld(url, 900, 900)}
+            alt={`${product.name} ${i + 1}`}
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover",
+              opacity: i === current ? 1 : 0,
+              transition: "opacity .4s ease",
+            }}
+          />
         ))}
+
+        {gallery.length > 1 && (
+          <div style={{ position: "absolute", bottom: 12, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 8 }}>
+            {gallery.map((_, i) => (
+              <button
+                key={i} type="button" onClick={() => setCurrent(i)}
+                aria-label={`ছবি ${i + 1}`}
+                style={{
+                  width: i === current ? 20 : 8, height: 8, borderRadius: 4, border: "none",
+                  background: i === current ? "#ef4444" : "rgba(255,255,255,.7)",
+                  transition: "width .3s", cursor: "pointer",
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Dot indicators */}
-      {images.length > 1 && (
-        <div style={{
-          position: "absolute", bottom: "14px", left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex", gap: "8px",
-        }}>
-          {images.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
+      {/* নিচে thumbnail সারি */}
+      {gallery.length > 1 && (
+        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+          {gallery.map((url, i) => (
+            <button key={i} type="button" onClick={() => setCurrent(i)}
               style={{
-                width: i === current ? "22px" : "8px",
-                height: "8px",
-                borderRadius: "50px",
-                background: i === current ? "#e11d48" : "rgba(255,255,255,0.7)",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                transition: "all 0.3s",
-              }}
-            />
+                width: 64, height: 64, padding: 0, borderRadius: 8, overflow: "hidden",
+                border: i === current ? "2px solid #ef4444" : "1px solid #e2e8f0",
+                cursor: "pointer", background: "none",
+              }}>
+              <img src={cld(url, 160, 160)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </button>
           ))}
-        </div>
-      )}
-
-      {/* Image count badge */}
-      {images.length > 1 && (
-        <div style={{
-          position: "absolute", top: "12px", right: "12px",
-          background: "rgba(0,0,0,0.55)", color: "#fff",
-          fontSize: "12px", fontWeight: "700",
-          padding: "3px 10px", borderRadius: "50px",
-        }}>
-          {current + 1}/{images.length}
         </div>
       )}
     </div>
@@ -390,12 +380,6 @@ export default function ProductDetailsPage() {
 
   const catName = typeof product.category === "object" ? product.category?.name : product.category || "";
   const fallbackUrl = getFallbackProductImage(catName, product.name);
-  // Build carousel images list
-  const carouselImages = [
-    getImageUrl(product.image) || fallbackUrl,
-    getImageUrl(product.image2),
-    getImageUrl(product.image3),
-  ].filter(Boolean);
 
   return (
     <main className="jt-details-page-wrap">
@@ -412,7 +396,7 @@ export default function ProductDetailsPage() {
       {/* ── SECTION 1: OVERVIEW ── */}
       <div id="overview" style={{ maxWidth: "960px", margin: "0 auto", padding: "0 0 24px" }}>
         {/* ── CAROUSEL ── */}
-        <ProductImageCarousel images={carouselImages} fallback={fallbackUrl} productName={product.name} />
+        <ProductImageCarousel product={product} fallback={fallbackUrl} />
 
         {/* ── PRODUCT INFO CARD ── */}
         <div style={{ padding: "0 14px" }}>

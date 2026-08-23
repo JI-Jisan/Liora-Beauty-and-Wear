@@ -22,11 +22,7 @@ export const Category =
 const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      default: null,
-    },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
     purchasePrice: { type: Number, required: true, default: 0, min: 0 },
     originalPrice: { type: Number, required: true, min: 0 },
     offerPrice: { type: Number, required: true, min: 0 },
@@ -37,9 +33,12 @@ const ProductSchema = new mongoose.Schema(
       enum: ["In Stock", "Limited Stock", "Out of Stock"],
       default: "In Stock",
     },
-    image: { type: String, default: "" },
-    image2: { type: String, default: "" },
-    image3: { type: String, default: "" },
+    image: { type: String, default: "" },                 // মূল ছবি
+    images: {                                             // অতিরিক্ত ৩টা
+      type: [String],
+      default: [],
+      validate: [(v) => v.length <= 3, "সর্বোচ্চ ৩টি অতিরিক্ত ছবি দেওয়া যাবে"],
+    },
     description: { type: String, default: "" },
     rating: { type: Number, default: 0, min: 0, max: 5 },
     reviewCount: { type: Number, default: 0, min: 0 },

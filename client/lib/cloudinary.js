@@ -1,0 +1,47 @@
+export const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+export const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+
+export async function uploadToCloudinary(file) {
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw new Error("Cloudinary কনফিগার করা নেই (.env.local দেখুন)");
+  }
+  if (!ALLOWED.includes(file.type)) {
+    throw new Error("শুধু JPG, PNG, WEBP ছবি দেওয়া যাবে");
+  }
+  if (file.size > MAX_SIZE) {
+    throw new Error("ছবির সাইজ ৫MB এর কম হতে হবে");
+  }
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("upload_preset", UPLOAD_PRESET);
+  form.append("folder", "liora/products");
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    { method: "POST", body: form }
+  );
+
+  const data = await res.json();
+  if (!res.ok || !data.secure_url) {
+    throw new Error(data?.error?.message || "আপলোড ব্যর্থ হয়েছে");
+  }
+  return data.secure_url;
+}
+
+/**
+ * ছবির alignment ঠিক রাখার মূল চাবি।
+ * যেকোনো সাইজের ছবিকে ডেলিভারির সময়ই বর্গাকারে কেটে দেয়।
+ * c_fill = ভরাট করে কাটবে, g_auto = গুরুত্বপূর্ণ অংশ (প্রোডাক্ট) ধরে রাখবে
+ */
+export function cld(url, w = 800, h = 800) {
+  if (!url || typeof url !== "string") return "";
+  if (!url.includes("/upload/")) return url; // Cloudinary নয়, যেমন Unsplash
+  return url.replace(
+    "/upload/",
+    `/upload/c_fill,g_auto,w_${w},h_${h},q_auto,f_auto/`
+  );
+}

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CategoryBar from "./CategoryBar";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
+import { cld } from "@/lib/cloudinary";
 
 const DEMO_PRODUCTS = [
   {
@@ -265,11 +266,12 @@ function ProductGridContent({
               )}
 
               <Link href={`/products/${product._id}`} className="jt-product-link">
-                <div className="jt-product-image-wrap">
+                <div style={{ width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 12, background: "#f1f5f9" }}>
                   <img
-                    src={imageSrc}
+                    src={cld(imageSrc, 500, 500)}
                     alt={product.name}
-                    className="jt-product-real-image"
+                    loading="lazy"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                     onError={(e) => {
                       e.currentTarget.src = fallbackUrl;
                     }}
