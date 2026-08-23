@@ -1,30 +1,16 @@
 const mongoose = require("mongoose");
 
-const categorySchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    type: {
-      type: String,
-      enum: ["main", "more"],
-      default: "main",
-    },
-    parentCategory: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      default: null,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+const CategorySchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  parent: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
+  ancestors: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
+  level: { type: Number, default: 0 },
+  type: { type: String, enum: ["main", "more"], default: "main" },
+  order: { type: Number, default: 0 },
+  isActive: { type: Boolean, default: true },
+}, { timestamps: true });
 
-module.exports = mongoose.model("Category", categorySchema);
+CategorySchema.index({ parent: 1, name: 1 }, { unique: true });
+CategorySchema.index({ ancestors: 1 });
+
+module.exports = mongoose.model("Category", CategorySchema);

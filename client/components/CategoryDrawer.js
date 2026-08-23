@@ -3,11 +3,90 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
+import { buildTree } from "@/lib/categoryTree";
+import Link from "next/link";
+
+const MenuNode = ({ node, expandedIds, onToggle, onSelect }) => {
+  const hasChildren = node.children && node.children.length > 0;
+  const isExpanded = !!expandedIds[node._id];
+
+  return (
+    <div style={{ marginLeft: node.level === 0 ? 0 : 16, marginBottom: 4 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "10px 12px",
+          background: node.level === 0 ? "#f8fafc" : "transparent",
+          borderRadius: 8,
+          border: node.level === 0 ? "1px solid #f1f5f9" : "none",
+        }}
+      >
+        <div
+          onClick={() => onSelect(node._id)}
+          style={{
+            cursor: "pointer",
+            fontWeight: node.level === 0 ? 700 : 500,
+            fontSize: node.level === 0 ? 14 : 13,
+            color: node.level === 0 ? "#0f172a" : "#334155",
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          {node.level === 0 ? "📁" : node.level === 1 ? "📂" : "📄"} {node.name}
+        </div>
+        
+        {hasChildren && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle(node._id);
+            }}
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "18px",
+              color: "#94a3b8",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 32,
+              height: 32,
+              borderRadius: 4,
+            }}
+          >
+            {isExpanded ? "−" : "+"}
+          </button>
+        )}
+      </div>
+
+      {hasChildren && isExpanded && (
+        <div style={{ marginTop: 4, borderLeft: node.level === 0 ? "2px solid #e2e8f0" : "2px dashed #cbd5e1", marginLeft: 8 }}>
+          {node.children.map((child) => (
+            <MenuNode
+              key={child._id}
+              node={child}
+              expandedIds={expandedIds}
+              onToggle={onToggle}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
   const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [expandedIds, setExpandedIds] = useState({});
+  const [activeTab, setActiveTab] = useState("CATEGORY"); // 'MENU' | 'CATEGORY'
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/categories`)
@@ -17,9 +96,7 @@ export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
           setCategories(data);
           const initialExpanded = {};
           data.forEach((cat) => {
-            if (!cat.parentCategory) {
-              initialExpanded[cat._id] = true;
-            }
+            if (cat.level === 0) initialExpanded[cat._id] = true;
           });
           setExpandedIds(initialExpanded);
         }
@@ -27,34 +104,10 @@ export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
       .catch((err) => console.error("Drawer category fetch error:", err));
   }, []);
 
-  const categoryTree = useMemo(() => {
-    if (!categories || categories.length === 0) return [];
+  const categoryTree = useMemo(() => buildTree(categories), [categories]);
 
-    const map = {};
-    const roots = [];
-
-    categories.forEach((cat) => {
-      map[cat._id] = { ...cat, children: [] };
-    });
-
-    categories.forEach((cat) => {
-      const parentId = typeof cat.parentCategory === "object" ? cat.parentCategory?._id : cat.parentCategory;
-      if (parentId && map[parentId]) {
-        map[parentId].children.push(map[cat._id]);
-      } else {
-        roots.push(map[cat._id]);
-      }
-    });
-
-    return roots;
-  }, [categories]);
-
-  const toggleExpand = (id, e) => {
-    e.stopPropagation();
-    setExpandedIds((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  const toggleExpand = (id) => {
+    setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleCategoryClick = (catId) => {
@@ -72,28 +125,23 @@ export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
     <>
       {/* Backdrop overlay */}
       <div
-        className="jt-drawer-backdrop"
         onClick={onClose}
         style={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          inset: 0,
           background: "rgba(15, 23, 42, 0.65)",
           backdropFilter: "blur(4px)",
           zIndex: 99998,
         }}
       />
 
-      {/* Left Category Drawer Panel */}
+      {/* Drawer */}
       <aside
-        className="jt-left-category-drawer"
         style={{
           position: "fixed",
           top: 0,
           left: 0,
-          width: "310px",
+          width: 320,
           maxWidth: "85vw",
           height: "100vh",
           background: "#ffffff",
@@ -101,198 +149,94 @@ export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
           zIndex: 99999,
           display: "flex",
           flexDirection: "column",
-          overflowY: "auto",
         }}
       >
-        {/* Header */}
-        <div
-          style={{
-            padding: "20px",
-            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-            color: "#ffffff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ fontSize: "20px" }}>📁</span>
-            <div>
-              <h4 style={{ margin: 0, fontSize: "16px", fontWeight: "900", letterSpacing: "0.5px" }}>
-                CATEGORIES
-              </h4>
-              <span style={{ fontSize: "11px", color: "#94a3b8" }}>Folder Hierarchy View</span>
-            </div>
-          </div>
-
+        <div style={{ display: "flex", borderBottom: "1px solid #e2e8f0" }}>
           <button
-            type="button"
+            onClick={() => setActiveTab("MENU")}
+            style={{
+              flex: 1,
+              padding: "16px 0",
+              background: "transparent",
+              border: "none",
+              borderBottom: activeTab === "MENU" ? "2px solid #ef4444" : "2px solid transparent",
+              fontWeight: activeTab === "MENU" ? 800 : 600,
+              color: activeTab === "MENU" ? "#ef4444" : "#64748b",
+              cursor: "pointer",
+            }}
+          >
+            MENU
+          </button>
+          <button
+            onClick={() => setActiveTab("CATEGORY")}
+            style={{
+              flex: 1,
+              padding: "16px 0",
+              background: "transparent",
+              border: "none",
+              borderBottom: activeTab === "CATEGORY" ? "2px solid #ef4444" : "2px solid transparent",
+              fontWeight: activeTab === "CATEGORY" ? 800 : 600,
+              color: activeTab === "CATEGORY" ? "#ef4444" : "#64748b",
+              cursor: "pointer",
+            }}
+          >
+            CATEGORIES
+          </button>
+          <button
             onClick={onClose}
             style={{
-              background: "rgba(255, 255, 255, 0.15)",
+              padding: "0 16px",
+              background: "transparent",
               border: "none",
-              color: "#ffffff",
-              width: "34px",
-              height: "34px",
-              borderRadius: "50%",
+              fontSize: 20,
+              color: "#94a3b8",
               cursor: "pointer",
-              fontSize: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: "900",
             }}
           >
             ✕
           </button>
         </div>
 
-        {/* Body Category Tree */}
-        <div style={{ padding: "16px 14px", flex: 1 }}>
-          <div
-            onClick={() => handleCategoryClick("all")}
-            style={{
-              padding: "12px 16px",
-              borderRadius: "12px",
-              cursor: "pointer",
-              fontWeight: "800",
-              fontSize: "14px",
-              color: "#0f172a",
-              marginBottom: "12px",
-              background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
-              border: "1px solid #cbd5e1",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-            }}
-          >
-            <span>🛍️</span> Show All Products
-          </div>
-
-          <div className="jt-drawer-tree-container" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            {categoryTree.map((motherCat) => {
-              const hasChildren = motherCat.children && motherCat.children.length > 0;
-              const isExpanded = !!expandedIds[motherCat._id];
-
-              return (
-                <div key={motherCat._id} style={{ borderRadius: "12px", overflow: "hidden", border: "1px solid #f1f5f9" }}>
-                  {/* Mother Category Row */}
-                  <div
-                    onClick={() => handleCategoryClick(motherCat._id)}
-                    style={{
-                      padding: "12px 14px",
-                      background: "#f8fafc",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      fontWeight: "800",
-                      fontSize: "14px",
-                      color: "#0f172a",
-                      borderBottom: isExpanded && hasChildren ? "1px solid #e2e8f0" : "none",
-                    }}
-                  >
-                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      📁 {motherCat.name}
-                    </span>
-
-                    {hasChildren && (
-                      <button
-                        type="button"
-                        onClick={(e) => toggleExpand(motherCat._id, e)}
-                        style={{
-                          background: "#ffffff",
-                          border: "1px solid #cbd5e1",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "12px",
-                          color: "#475569",
-                          padding: "2px 8px",
-                          fontWeight: "700",
-                        }}
-                      >
-                        {isExpanded ? "▼" : "▶"}
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Children Sub-categories (1st Level) */}
-                  {hasChildren && isExpanded && (
-                    <div style={{ padding: "8px 12px 12px 24px", background: "#ffffff", display: "flex", flexDirection: "column", gap: "4px" }}>
-                      {motherCat.children.map((childCat) => {
-                        const hasSubChildren = childCat.children && childCat.children.length > 0;
-                        const isChildExpanded = !!expandedIds[childCat._id];
-
-                        return (
-                          <div key={childCat._id} style={{ borderLeft: "2px solid #cbd5e1", paddingLeft: "10px", margin: "2px 0" }}>
-                            <div
-                              onClick={() => handleCategoryClick(childCat._id)}
-                              style={{
-                                padding: "8px 10px",
-                                borderRadius: "8px",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                fontWeight: "700",
-                                fontSize: "13px",
-                                color: "#334155",
-                                background: "#f1f5f9",
-                              }}
-                            >
-                              <span>📂 {childCat.name}</span>
-                              {hasSubChildren && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => toggleExpand(childCat._id, e)}
-                                  style={{
-                                    background: "#ffffff",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    fontSize: "11px",
-                                    color: "#64748b",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
-                                  }}
-                                >
-                                  {isChildExpanded ? "▼" : "▶"}
-                                </button>
-                              )}
-                            </div>
-
-                            {/* Grandchildren Sub-categories (2nd Level) */}
-                            {hasSubChildren && isChildExpanded && (
-                              <div style={{ paddingLeft: "14px", marginTop: "4px", borderLeft: "2px dashed #94a3b8", display: "flex", flexDirection: "column", gap: "2px" }}>
-                                {childCat.children.map((grandChild) => (
-                                  <div
-                                    key={grandChild._id}
-                                    onClick={() => handleCategoryClick(grandChild._id)}
-                                    style={{
-                                      padding: "6px 10px",
-                                      borderRadius: "6px",
-                                      cursor: "pointer",
-                                      fontSize: "12px",
-                                      fontWeight: "600",
-                                      color: "#475569",
-                                      background: "#fafafa",
-                                    }}
-                                  >
-                                    📄 {grandChild.name}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
+          {activeTab === "MENU" ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <Link href="/" onClick={onClose} style={{ textDecoration: "none", color: "#334155", fontWeight: 700, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>🏠 Home</Link>
+              <Link href="/products" onClick={onClose} style={{ textDecoration: "none", color: "#334155", fontWeight: 700, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>🛍️ All Products</Link>
+              <Link href="/contact" onClick={onClose} style={{ textDecoration: "none", color: "#334155", fontWeight: 700, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>📞 Contact Us</Link>
+              <Link href="/admin/login" onClick={onClose} style={{ textDecoration: "none", color: "#334155", fontWeight: 700, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>⚙️ Admin Login</Link>
+            </div>
+          ) : (
+            <div>
+              <div
+                onClick={() => handleCategoryClick("all")}
+                style={{
+                  padding: "12px 16px",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  fontWeight: 800,
+                  fontSize: 14,
+                  color: "#0f172a",
+                  marginBottom: 16,
+                  background: "#f1f5f9",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                🛍️ Show All Products
+              </div>
+              
+              {categoryTree.map((node) => (
+                <MenuNode
+                  key={node._id}
+                  node={node}
+                  expandedIds={expandedIds}
+                  onToggle={toggleExpand}
+                  onSelect={handleCategoryClick}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </aside>
     </>

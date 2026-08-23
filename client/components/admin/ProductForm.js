@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/lib/api";
 import { uploadToCloudinary, cld } from "@/lib/cloudinary";
+import { buildTree, flattenWithPath } from "@/lib/categoryTree";
+import { useMemo } from "react";
 
 const EMPTY = {
   name: "", category: "", purchasePrice: "", originalPrice: "", offerPrice: "",
@@ -123,6 +125,8 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
     { key: 2, url: form.images[2], label: "ছবি ৪" },
   ];
 
+  const options = useMemo(() => flattenWithPath(buildTree(categories)), [categories]);
+
   return (
     <form onSubmit={submit} style={{ maxWidth: 720 }}>
       <h3>{editing ? "প্রোডাক্ট এডিট" : "নতুন প্রোডাক্ট"}</h3>
@@ -211,8 +215,10 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
 
         <select value={form.category} onChange={(e) => set("category", e.target.value)}>
           <option value="">-- ক্যাটাগরি নির্বাচন করুন --</option>
-          {categories.map((c) => (
-            <option key={c._id} value={c._id}>{c.name}</option>
+          {options.map((o) => (
+            <option key={o._id} value={o._id}>
+              {" ".repeat(o.level)}{o.path}
+            </option>
           ))}
         </select>
 

@@ -2,50 +2,42 @@ const express = require("express");
 const router = express.Router();
 const Category = require("../models/Category");
 const adminAuth = require("../middleware/adminAuth");
-
-const DEMO_CATEGORIES = [
-  { _id: "cat-1", name: "Perfume" },
-  { _id: "cat-2", name: "Watches" },
-  { _id: "cat-3", name: "Fan Light" },
-  { _id: "cat-4", name: "Beauty Items" },
-];
+const Product = require("../models/Product");
 
 // GET all categories
 router.get("/", async (req, res) => {
   try {
-    const categories = await Category.find().populate({
-      path: "parentCategory",
-      populate: { path: "parentCategory" }
-    }).sort({ createdAt: -1 });
-
-    res.json(categories || []);
-  } catch (error) {
-    res.json([]);
+    const cats = await Category.find({}).sort({ level: 1, order: 1, name: 1 }).lean();
+    res.json(cats);
+  } catch (e) {
+    res.status(500).json({ message: "লোড করা যায়নি" });
   }
 });
 
 // ADD new category (Protected)
 router.post("/", adminAuth, async (req, res) => {
   try {
-    const { name, type, parentCategory } = req.body;
+    const name = String(req.body.name || "").trim();
+    if (!name) return res.status(400).json({ message: "নাম দিন" });
 
-    if (!name || typeof name !== "string" || !name.trim()) {
-      return res.status(400).json({ message: "Category name is required" });
+    let parent = null, ancestors = [], level = 0;
+    if (req.body.parent) {
+      const p = await Category.findById(req.body.parent).lean();
+      if (!p) return res.status(404).json({ message: "Parent পাওয়া যায়নি" });
+      if ((p.level ?? 0) + 1 >= 4)
+        return res.status(400).json({ message: "সর্বোচ্চ ৪ ধাপ" });
+      parent = p._id;
+      ancestors = [...(p.ancestors || []), p._id];
+      level = (p.level ?? 0) + 1;
     }
 
-    const validParent = parentCategory && parentCategory.match(/^[0-9a-fA-F]{24}$/) ? parentCategory : null;
+    const dup = await Category.findOne({ name, parent });
+    if (dup) return res.status(409).json({ message: "এই নামে একটি আছে" });
 
-    const category = new Category({
-      name: name.trim(),
-      type: type || "main",
-      parentCategory: validParent,
-    });
-
-    const savedCategory = await category.save();
-    const populated = await Category.findById(savedCategory._id).populate("parentCategory");
-    res.status(201).json(populated);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const cat = await Category.create({ name, parent, ancestors, level, type: level === 0 ? (req.body.type || "main") : "main" });
+    res.status(201).json(cat);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
   }
 });
 
@@ -90,20 +82,14 @@ router.delete("/clear-all", adminAuth, async (req, res) => {
 router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
-
-    if (id.startsWith("cat-")) {
-      return res.json({ message: "Demo category deleted successfully" });
-    }
-
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      await Category.findByIdAndDelete(id);
-      return res.json({ message: "Category deleted successfully" });
-    }
-
-    await Category.deleteMany({ name: id });
-    res.json({ message: "Category deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const kids = await Category.find({ ancestors: id }).select("_id").lean();
+    const ids = [id, ...kids.map(k => String(k._id))];
+    const used = await Product.countDocuments({ category: { $in: ids } });
+    if (used > 0) return res.status(409).json({ message: `${used} টি প্রোডাক্ট আছে, আগে সরান` });
+    await Category.deleteMany({ _id: { $in: ids } });
+    res.json({ deleted: ids.length });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
   }
 });
 

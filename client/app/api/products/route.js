@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Product } from "@/lib/models";
+import mongoose from "mongoose";
+import { Product, Category } from "@/lib/models";
 import { buildPayload } from "@/lib/productPayload";
 
 export const runtime = "nodejs";
@@ -14,7 +15,10 @@ export async function GET(req) {
     const category = searchParams.get("category");
     const type = searchParams.get("type");
 
-    if (category && /^[0-9a-fA-F]{24}$/.test(category)) query.category = category;
+    if (category && mongoose.Types.ObjectId.isValid(category)) {
+      const kids = await Category.find({ ancestors: category }).select("_id").lean();
+      query.category = { $in: [new mongoose.Types.ObjectId(category), ...kids.map((k) => k._id)] };
+    }
     if (type === "featured") query.isFeatured = true;
     if (type === "trending") query.isTrending = true;
     if (type === "new") query.isNewArrival = true;

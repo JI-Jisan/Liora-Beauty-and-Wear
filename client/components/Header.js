@@ -7,49 +7,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import LioraLogo from "./LioraLogo";
 import CategoryDrawer from "./CategoryDrawer";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
+import { buildTree } from "@/lib/categoryTree";
 
-const DEMO_LIVE_PRODUCTS = [
-  {
-    _id: "demo-1",
-    name: "Royal Oud Perfume 100ml",
-    image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&auto=format&fit=crop&q=80",
-    offerPrice: 1850,
-    originalPrice: 2500,
-    category: { name: "Perfume" },
-  },
-  {
-    _id: "demo-2",
-    name: "Luxury Gold Chronograph Watch",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&auto=format&fit=crop&q=80",
-    offerPrice: 2400,
-    originalPrice: 3200,
-    category: { name: "Watches" },
-  },
-  {
-    _id: "demo-3",
-    name: "Smart RGB LED Fan Light 30W",
-    image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=200&auto=format&fit=crop&q=80",
-    offerPrice: 1350,
-    originalPrice: 1800,
-    category: { name: "Fan Light" },
-  },
-  {
-    _id: "demo-4",
-    name: "Vitamin C Brightening Serum 30ml",
-    image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&auto=format&fit=crop&q=80",
-    offerPrice: 850,
-    originalPrice: 1200,
-    category: { name: "Beauty & Wear" },
-  },
-  {
-    _id: "demo-5",
-    name: "French Vanilla Body Mist 250ml",
-    image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=200&auto=format&fit=crop&q=80",
-    offerPrice: 990,
-    originalPrice: 1500,
-    category: { name: "Perfume" },
-  },
-];
 
 export default function Header({
   cartCount: propsCartCount,
@@ -67,6 +26,8 @@ export default function Header({
   const [allProducts, setAllProducts] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
   const searchWrapperRef = useRef(null);
 
   const cartCount =
@@ -76,17 +37,22 @@ export default function Header({
     fetch(`${API_BASE_URL}/api/products`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setAllProducts(data);
-        } else {
-          setAllProducts(DEMO_LIVE_PRODUCTS);
-        }
+        setAllProducts(Array.isArray(data) ? data : []);
       })
       .catch((err) => {
         console.error("Live search product fetch error:", err);
-        setAllProducts(DEMO_LIVE_PRODUCTS);
+        setAllProducts([]);
       });
+
+    fetch(`${API_BASE_URL}/api/categories`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setCategories(data);
+      })
+      .catch((err) => console.error(err));
   }, []);
+
+  const categoryTree = useMemo(() => buildTree(categories), [categories]);
 
   const handleOpenCart = () => {
     if (cartContext?.openCart) {
@@ -281,13 +247,100 @@ export default function Header({
           <Link href="/" className="jt-tab-pill active">
             <span className="jt-tab-icon">🏠</span> Home
           </Link>
-          <button
-            type="button"
-            className="jt-tab-pill"
-            onClick={() => setIsCategoryDrawerOpen(true)}
+          <div
+            className="jt-tab-pill-dropdown-wrapper"
+            style={{ position: "relative" }}
+            onMouseEnter={() => setHoveredCategory("root")}
+            onMouseLeave={() => setHoveredCategory(null)}
           >
-            <span className="jt-tab-icon">🔲</span> Categories
-          </button>
+            <button
+              type="button"
+              className="jt-tab-pill"
+              onClick={() => setIsCategoryDrawerOpen(true)}
+            >
+              <span className="jt-tab-icon">🔲</span> Categories
+            </button>
+            {hoveredCategory === "root" && categoryTree.length > 0 && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  width: 260,
+                  background: "#fff",
+                  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                  borderRadius: 12,
+                  padding: "8px 0",
+                  zIndex: 9999,
+                  border: "1px solid #e2e8f0",
+                }}
+              >
+                {categoryTree.map((cat) => (
+                  <div
+                    key={cat._id}
+                    style={{ position: "relative" }}
+                    onMouseEnter={() => setHoveredCategory(cat._id)}
+                    onMouseLeave={() => setHoveredCategory("root")}
+                  >
+                    <div
+                      onClick={() => router.push(`/products?category=${cat._id}`)}
+                      style={{
+                        padding: "10px 16px",
+                        cursor: "pointer",
+                        fontWeight: 600,
+                        fontSize: 14,
+                        color: "#334155",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        background: hoveredCategory === cat._id ? "#f1f5f9" : "#fff",
+                      }}
+                    >
+                      {cat.name}
+                      {cat.children?.length > 0 && <span>▶</span>}
+                    </div>
+                    {hoveredCategory === cat._id && cat.children?.length > 0 && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: "100%",
+                          width: 240,
+                          background: "#fff",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+                          borderRadius: 12,
+                          padding: "8px 0",
+                          border: "1px solid #e2e8f0",
+                        }}
+                      >
+                        {cat.children.map((child) => (
+                          <div
+                            key={child._id}
+                            style={{ position: "relative" }}
+                          >
+                            <div
+                              onClick={() => router.push(`/products?category=${child._id}`)}
+                              style={{
+                                padding: "8px 16px",
+                                cursor: "pointer",
+                                fontWeight: 500,
+                                fontSize: 13,
+                                color: "#475569",
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = "#f8fafc"}
+                              onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
+                            >
+                              {child.name}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <Link href="/products" className="jt-tab-pill">
             <span className="jt-tab-icon">🛍️</span> Products
           </Link>

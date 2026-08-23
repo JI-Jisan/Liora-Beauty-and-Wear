@@ -5,6 +5,7 @@ import AdminOrders from "@/components/AdminOrders";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, getAuthHeaders, getImageUrl } from "@/lib/api";
 import ProductForm from "@/components/admin/ProductForm";
+import CategoryManager from "@/components/admin/CategoryManager";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -31,11 +32,6 @@ export default function AdminPage() {
   const [productSortBy, setProductSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
-  const [categoryForm, setCategoryForm] = useState({
-    name: "",
-    type: "main",
-    parentCategory: "",
-  });
 
 
 
@@ -180,16 +176,6 @@ export default function AdminPage() {
     }));
   };
 
-
-
-  const handleCategoryChange = (e) => {
-    const { name, value } = e.target;
-    setCategoryForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -208,34 +194,6 @@ export default function AdminPage() {
       isNewArrival: false,
     });
     setEditingProduct(null);
-  };
-
-  const handleCategorySubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/categories`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(categoryForm),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        throw new Error(result.message || "Category add failed");
-      }
-
-      setMessage("Category added successfully");
-      setCategoryForm({
-        name: "",
-        type: "main",
-        parentCategory: "",
-      });
-
-      loadCategories();
-    } catch (error) {
-      setMessage(error.message);
-    }
   };
 
   const handleSlideChange = (index, field, value) => {
@@ -440,48 +398,6 @@ export default function AdminPage() {
     } catch (error) {
       setMessage(`❌ Clear Error: ${error.message}`);
       loadProducts();
-    }
-  };
-
-  const handleDeleteCategory = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this category?");
-    if (!confirmDelete) return;
-
-    setCategories((prev) => prev.filter((c) => c._id !== id));
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-      });
-
-      if (!res.ok) throw new Error("Delete failed");
-      setMessage("✓ Category deleted successfully");
-      loadCategories();
-    } catch (error) {
-      setMessage(`❌ Category Delete Error: ${error.message}`);
-      loadCategories();
-    }
-  };
-
-  const handleClearAllCategories = async () => {
-    const confirmClear = window.confirm("Are you sure you want to delete ALL categories to start fresh?");
-    if (!confirmClear) return;
-
-    setCategories([]);
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/categories/clear-all`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-      });
-
-      if (!res.ok) throw new Error("Clear failed");
-      setMessage("✓ All categories deleted successfully");
-      loadCategories();
-    } catch (error) {
-      setMessage(`❌ Clear Categories Error: ${error.message}`);
-      loadCategories();
     }
   };
 
@@ -885,110 +801,8 @@ export default function AdminPage() {
           {/* Categories Tab */}
           {activeTab === "categories" && (
             <div id="category-section" className="jt-admin-panel">
-            <h3>Add Category</h3>
-            <form className="jt-admin-panel-form" onSubmit={handleCategorySubmit}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Category name (e.g. Face Care)"
-                value={categoryForm.name}
-                onChange={handleCategoryChange}
-                required
-              />
-
-              <div style={{ marginBottom: "6px" }}>
-                <label style={{ fontSize: "12px", fontWeight: "700", color: "#64748b", display: "block", marginBottom: "4px" }}>
-                  📁 Parent Category (কোন ক্যাটাগরির ভেতরে থাকবে)
-                </label>
-                <select
-                  name="parentCategory"
-                  value={categoryForm.parentCategory || ""}
-                  onChange={handleCategoryChange}
-                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px" }}
-                >
-                  <option value="">📁 None (Main Parent Category)</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      📁 Inside: {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <select
-                name="type"
-                value={categoryForm.type}
-                onChange={handleCategoryChange}
-              >
-                <option value="main">Main Header Navigation</option>
-                <option value="more">More Dropdown Menu</option>
-              </select>
-
-              <button type="submit">Add Category</button>
-            </form>
-
-            {/* Existing Categories Tree List */}
-            <div style={{ marginTop: "20px", borderTop: "1px solid #e2e8f0", paddingTop: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-                <h4 style={{ margin: 0, fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>
-                  📁 Existing Categories List ({categories.length})
-                </h4>
-
-                {categories.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleClearAllCategories}
-                    style={{
-                      background: "#dc2626",
-                      color: "#ffffff",
-                      border: "none",
-                      padding: "4px 10px",
-                      borderRadius: "6px",
-                      fontSize: "11px",
-                      fontWeight: "800",
-                      cursor: "pointer",
-                    }}
-                  >
-                    🗑️ Clear All
-                  </button>
-                )}
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "280px", overflowY: "auto" }}>
-                {categories.length === 0 ? (
-                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>No categories created yet.</span>
-                ) : (
-                  categories.map((c) => {
-                    const parentName = c.parentCategory?.name;
-                    return (
-                      <div key={c._id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                        <span style={{ fontSize: "13px", fontWeight: "700", color: "#334155" }}>
-                          {parentName ? `📁 ${parentName} ➔ ${c.name}` : `📁 ${c.name}`}
-                        </span>
-
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteCategory(c._id)}
-                          style={{
-                            background: "#fee2e2",
-                            color: "#dc2626",
-                            border: "1px solid #fca5a5",
-                            padding: "3px 8px",
-                            borderRadius: "6px",
-                            fontSize: "11px",
-                            fontWeight: "800",
-                            cursor: "pointer",
-                          }}
-                        >
-                          🗑️ Delete
-                        </button>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+              <CategoryManager />
             </div>
-          </div>
           )}
 
           {/* 1. Add / Edit Product Tab */}
