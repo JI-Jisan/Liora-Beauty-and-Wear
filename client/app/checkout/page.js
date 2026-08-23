@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -10,8 +10,15 @@ import { useCart } from "@/context/CartContext";
 export default function CheckoutPage() {
   const router = useRouter();
   const { cartItems, clearCart } = useCart();
-  const [deliveryCharge, setDeliveryCharge] = useState(65);
+
+  const [deliveryZone, setDeliveryZone] = useState("inside");
+  const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [rates, setRates] = useState({
+    deliveryInside: 65,
+    deliveryOutside: 110,
+    freeDeliveryThreshold: 0,
+  });
 
   const [formData, setFormData] = useState({
     customerName: "",
@@ -20,69 +27,93 @@ export default function CheckoutPage() {
     note: "",
   });
 
-  const subtotal = useMemo(() => {
-    return cartItems.reduce(
-      (sum, item) => sum + item.offerPrice * item.quantity,
-      0
-    );
-  }, [cartItems]);
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/settings`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d) return;
+        setRates({
+          deliveryInside: Number(d.deliveryInside ?? 65),
+          deliveryOutside: Number(d.deliveryOutside ?? 110),
+          freeDeliveryThreshold: Number(d.freeDeliveryThreshold ?? 0),
+        });
+      })
+      .catch(() => {});
+  }, []);
 
+  const unitPrice = (item) => Number(item.offerPrice ?? item.price ?? 0);
+
+  const subtotal = useMemo(
+    () => cartItems.reduce((sum, item) => sum + unitPrice(item) * (item.quantity || 1), 0),
+    [cartItems]
+  );
+
+  const baseCharge =
+    deliveryZone === "outside" ? rates.deliveryOutside : rates.deliveryInside;
+  const freeApplied =
+    rates.freeDeliveryThreshold > 0 && subtotal >= rates.freeDeliveryThreshold;
+  const deliveryCharge = freeApplied ? 0 : baseCharge;
   const total = subtotal + deliveryCharge;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const placeOrder = async (e) => {
     e.preventDefault();
+    if (submitting) return;
 
     if (cartItems.length === 0) {
-      setMessage("Cart is empty");
+      setMessage("কার্ট খালি");
+      return;
+    }
+    if (!/^01[3-9]\d{8}$/.test(formData.phone.trim())) {
+      setMessage("সঠিক ফোন নাম্বার দিন (যেমন 017XXXXXXXX)");
+      return;
+    }
+    if (!Number.isFinite(total) || total <= 0) {
+      setMessage("দামে সমস্যা হয়েছে, কার্ট রিফ্রেশ করুন");
       return;
     }
 
-    const orderData = {
-      customerName: formData.customerName,
-      phone: formData.phone,
-      address: formData.address,
-      note: formData.note,
-      items: cartItems.map((item) => ({
-        productId: item._id,
-        productName: item.name,
-        quantity: item.quantity,
-        price: item.offerPrice,
-      })),
-      deliveryCharge,
-      subtotal,
-      total,
-      status: "Pending",
-    };
+    setSubmitting(true);
+    setMessage("");
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: formData.customerName,
+          phone: formData.phone,
+          address: formData.address,
+          note: formData.note,
+          deliveryZone,
+          items: cartItems.map((item) => ({
+            productId: item._id,
+            quantity: item.quantity || 1,
+          })),
+        }),
       });
 
-      const result = await res.json();
+      let result = null;
+      try {
+        result = await res.json();
+      } catch {
+        // সার্ভার HTML error page পাঠালে
+      }
 
       if (!res.ok) {
-        throw new Error(result.message || "Order failed");
+        throw new Error(result?.message || "অর্ডার সম্পন্ন হয়নি");
       }
 
       clearCart();
-
-      router.push(`/order/success?id=${result._id}`);
+      router.push(`/order/success?id=${result._id}&no=${result.orderNumber}`);
     } catch (error) {
       console.error("Order submit error:", error);
-      setMessage(error.message || "Something went wrong");
+      setMessage(error.message || "কিছু একটা সমস্যা হয়েছে");
+      setSubmitting(false);
     }
   };
 
@@ -101,7 +132,7 @@ export default function CheckoutPage() {
               <h2>Your Shopping Cart is Empty</h2>
               <p>Looks like you haven&apos;t added any products to your cart yet.</p>
               <Link href="/products" className="jt-browse-products-btn">
-                Browse Products & Shop Now &rarr;
+                Browse Products &amp; Shop Now &rarr;
               </Link>
             </div>
           ) : (
@@ -118,18 +149,26 @@ export default function CheckoutPage() {
                       <div>
                         <strong>{item.name}</strong>
                         <p>
-                          {item.offerPrice} Tk × {item.quantity}
+                          {unitPrice(item)} Tk × {item.quantity || 1}
                         </p>
                       </div>
-                      <strong>{item.offerPrice * item.quantity} Tk</strong>
+                      <strong>{unitPrice(item) * (item.quantity || 1)} Tk</strong>
                     </div>
                   ))}
                 </div>
 
                 <div className="jt-summary-box">
                   <p>Subtotal: <strong>{subtotal} Tk</strong></p>
-                  <p>Delivery: <strong>{deliveryCharge} Tk</strong></p>
+                  <p>
+                    Delivery:{" "}
+                    <strong>{freeApplied ? "Free 🎉" : `${deliveryCharge} Tk`}</strong>
+                  </p>
                   <p className="jt-summary-total">Total: <strong>{total} Tk</strong></p>
+                  {rates.freeDeliveryThreshold > 0 && !freeApplied && (
+                    <p style={{ fontSize: "13px", color: "#059669" }}>
+                      আর {rates.freeDeliveryThreshold - subtotal} Tk কিনলেই ডেলিভারি ফ্রি!
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -139,15 +178,22 @@ export default function CheckoutPage() {
                   <input
                     type="text"
                     name="customerName"
+                    autoComplete="name"
                     placeholder="আপনার নাম (Your Name)"
                     value={formData.customerName}
                     onChange={handleChange}
+                    minLength={2}
                     required
                   />
 
                   <input
                     type="tel"
                     name="phone"
+                    autoComplete="tel"
+                    inputMode="numeric"
+                    maxLength={11}
+                    pattern="01[3-9][0-9]{8}"
+                    title="১১ ডিজিটের নাম্বার দিন, যেমন 017XXXXXXXX"
                     placeholder="ফোন নাম্বার (Phone Number e.g. 017...)"
                     value={formData.phone}
                     onChange={handleChange}
@@ -157,6 +203,8 @@ export default function CheckoutPage() {
                   <input
                     type="text"
                     name="address"
+                    autoComplete="street-address"
+                    minLength={10}
                     placeholder="সম্পূর্ণ ডেলিভারি এড্রেস (Full Address)"
                     value={formData.address}
                     onChange={handleChange}
@@ -169,12 +217,12 @@ export default function CheckoutPage() {
                         <input
                           type="radio"
                           name="delivery"
-                          checked={deliveryCharge === 65}
-                          onChange={() => setDeliveryCharge(65)}
+                          checked={deliveryZone === "inside"}
+                          onChange={() => setDeliveryZone("inside")}
                         />
                         <span>ঢাকা সিটির মধ্যে (Inside Dhaka)</span>
                       </div>
-                      <strong>65 Tk</strong>
+                      <strong>{rates.deliveryInside} Tk</strong>
                     </label>
 
                     <label className="jt-delivery-row">
@@ -182,32 +230,35 @@ export default function CheckoutPage() {
                         <input
                           type="radio"
                           name="delivery"
-                          checked={deliveryCharge === 110}
-                          onChange={() => setDeliveryCharge(110)}
+                          checked={deliveryZone === "outside"}
+                          onChange={() => setDeliveryZone("outside")}
                         />
                         <span>ঢাকা সিটির বাইরে (Outside Dhaka)</span>
                       </div>
-                      <strong>110 Tk</strong>
+                      <strong>{rates.deliveryOutside} Tk</strong>
                     </label>
                   </div>
 
                   <textarea
                     name="note"
+                    maxLength={300}
                     placeholder="কোনো বিশেষ নির্দেশনা থাকলে লিখুন (Special Notes - optional)"
                     value={formData.note}
                     onChange={handleChange}
                   ></textarea>
 
-                  <button type="submit" className="jt-place-order-btn">
-                    Place Cash on Delivery Order ({total} Tk)
+                  {message && (
+                    <div className="jt-order-message" style={{ color: "#dc2626", marginBottom: "10px" }}>
+                      <strong>{message}</strong>
+                    </div>
+                  )}
+
+                  <button type="submit" className="jt-place-order-btn" disabled={submitting}>
+                    {submitting
+                      ? "অর্ডার হচ্ছে, অপেক্ষা করুন..."
+                      : `Place Cash on Delivery Order (${total} Tk)`}
                   </button>
                 </form>
-
-                {message && (
-                  <div className="jt-order-message">
-                    <strong>{message}</strong>
-                  </div>
-                )}
               </div>
             </div>
           )}

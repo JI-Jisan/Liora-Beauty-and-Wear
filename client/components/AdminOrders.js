@@ -22,6 +22,8 @@ export default function AdminOrders() {
       const data = await res.json();
       if (Array.isArray(data)) {
         setOrders(data);
+      } else if (data && Array.isArray(data.orders)) {
+        setOrders(data.orders);
       } else {
         setOrders([]);
       }

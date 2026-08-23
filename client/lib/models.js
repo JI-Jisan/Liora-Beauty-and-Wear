@@ -1,10 +1,15 @@
 import mongoose from "mongoose";
 
-// Category Schema
+// ---------- Category ----------
 const CategorySchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, unique: true },
     type: { type: String, enum: ["main", "more"], default: "main" },
+    parentCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
+    },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -13,15 +18,19 @@ const CategorySchema = new mongoose.Schema(
 export const Category =
   mongoose.models.Category || mongoose.model("Category", CategorySchema);
 
-// Product Schema
+// ---------- Product ----------
 const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
-    purchasePrice: { type: Number, required: true, default: 0 },
-    originalPrice: { type: Number, required: true },
-    offerPrice: { type: Number, required: true },
-    stockQuantity: { type: Number, required: true, default: 0 },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
+    },
+    purchasePrice: { type: Number, required: true, default: 0, min: 0 },
+    originalPrice: { type: Number, required: true, min: 0 },
+    offerPrice: { type: Number, required: true, min: 0 },
+    stockQuantity: { type: Number, required: true, default: 0, min: 0 },
     discountBadge: { type: String, default: "" },
     stockStatus: {
       type: String,
@@ -29,7 +38,11 @@ const ProductSchema = new mongoose.Schema(
       default: "In Stock",
     },
     image: { type: String, default: "" },
+    image2: { type: String, default: "" },
+    image3: { type: String, default: "" },
     description: { type: String, default: "" },
+    rating: { type: Number, default: 0, min: 0, max: 5 },
+    reviewCount: { type: Number, default: 0, min: 0 },
     isFeatured: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
     isNewArrival: { type: Boolean, default: false },
@@ -38,13 +51,18 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ProductSchema.index({ category: 1 });
+ProductSchema.index({ isSlider: 1 });
+ProductSchema.index({ isFeatured: 1, isTrending: 1, isNewArrival: 1 });
+ProductSchema.index({ createdAt: -1 });
+
 export const Product =
   mongoose.models.Product || mongoose.model("Product", ProductSchema);
 
-// Admin Schema
+// ---------- Admin ----------
 const AdminSchema = new mongoose.Schema(
   {
-    email: { type: String, required: true, unique: true, trim: true },
+    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     password: { type: String, required: true },
     name: { type: String, default: "Admin" },
   },
@@ -54,7 +72,25 @@ const AdminSchema = new mongoose.Schema(
 export const Admin =
   mongoose.models.Admin || mongoose.model("Admin", AdminSchema);
 
-// Order Schema
+// ---------- Order ----------
+const OrderItemSchema = new mongoose.Schema(
+  {
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+    productName: { type: String, required: true },
+    quantity: { type: Number, required: true, min: 1 },
+    price: { type: Number, required: true, min: 0 },          // বিক্রয়মূল্য snapshot
+    purchasePrice: { type: Number, default: 0, min: 0 },      // ক্রয়মূল্য snapshot
+    originalPrice: { type: Number, default: 0, min: 0 },
+    categoryName: { type: String, default: "" },
+    image: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
 const OrderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, unique: true, sparse: true, trim: true },
@@ -62,52 +98,63 @@ const OrderSchema = new mongoose.Schema(
     phone: { type: String, required: true, trim: true },
     address: { type: String, required: true, trim: true },
     note: { type: String, default: "" },
-    items: [
-      {
-        productName: String,
-        quantity: Number,
-        price: Number,
-      },
-    ],
-    deliveryCharge: { type: Number, default: 0 },
-    subtotal: { type: Number, required: true },
-    total: { type: Number, required: true },
+    items: { type: [OrderItemSchema], required: true },
+    deliveryZone: { type: String, enum: ["inside", "outside"], default: "inside" },
+    deliveryCharge: { type: Number, default: 0, min: 0 },
+    subtotal: { type: Number, required: true, min: 0 },
+    total: { type: Number, required: true, min: 0 },
     status: {
       type: String,
       enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"],
       default: "Pending",
     },
+    stockRestored: { type: Boolean, default: false },  // Cancelled এ স্টক ফেরতের জন্য
+    isDeleted: { type: Boolean, default: false },      // soft delete
   },
   { timestamps: true }
 );
 
+OrderSchema.index({ createdAt: -1 });
+OrderSchema.index({ status: 1 });
+OrderSchema.index({ phone: 1 });
+
 export const Order =
   mongoose.models.Order || mongoose.model("Order", OrderSchema);
 
-// SiteSettings Schema
-const SiteSettingsSchema = new mongoose.Schema({
-  brandName: String,
-  brandSubtitle: String,
-  heroTitle: String,
-  heroText: String,
-  heroImage: String,
-  offerText: String,
-  promoSlides: [
-    {
-      badge: String,
-      title: String,
-      subtitle: String,
-      buttonText: String,
-      buttonLink: String,
-      image: String,
-    },
-  ],
-  flashTitle: String,
-  flashSubtitle: String,
-  flashButtonText: String,
-  flashButtonLink: String,
-  flashDurationHours: Number,
-});
+// ---------- SiteSettings ----------
+const SiteSettingsSchema = new mongoose.Schema(
+  {
+    brandName: String,
+    brandSubtitle: String,
+    heroTitle: String,
+    heroText: String,
+    heroImage: String,
+    offerText: String,
+    promoSlides: [
+      {
+        badge: String,
+        title: String,
+        subtitle: String,
+        buttonText: String,
+        buttonLink: String,
+        image: String,
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: null },
+        price: Number,
+        originalPrice: Number,
+      },
+    ],
+    flashTitle: String,
+    flashSubtitle: String,
+    flashButtonText: String,
+    flashButtonLink: String,
+    flashDurationHours: Number,
+    // ডেলিভারি সংক্রান্ত একমাত্র সত্য উৎস
+    deliveryInside: { type: Number, default: 65 },
+    deliveryOutside: { type: Number, default: 110 },
+    freeDeliveryThreshold: { type: Number, default: 0 }, // 0 = ফ্রি ডেলিভারি বন্ধ
+  },
+  { timestamps: true }
+);
 
 export const SiteSettings =
   mongoose.models.SiteSettings || mongoose.model("SiteSettings", SiteSettingsSchema);

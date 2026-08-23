@@ -1,72 +1,203 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Order, Product } from "@/lib/models";
+import { Order, Product, Category, SiteSettings } from "@/lib/models";
 
-export async function GET() {
+export const runtime = "nodejs";
+
+const MAX_QTY_PER_ITEM = 20;
+
+async function generateOrderNumber() {
+  const count = await Order.countDocuments();
+  const seq = String(count + 1).padStart(5, "0");
+  const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, "");
+  return `LIORA-${datePart}-${seq}`;
+}
+
+export async function GET(req) {
   try {
     await connectToDatabase();
-    const orders = await Order.find().sort({ createdAt: -1 });
-    return NextResponse.json(orders);
+
+    const { searchParams } = new URL(req.url);
+    const page = Math.max(1, parseInt(searchParams.get("page")) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit")) || 50));
+    const status = searchParams.get("status");
+
+    const query = { isDeleted: { $ne: true } };
+    if (status) query.status = status;
+
+    const [orders, totalCount] = await Promise.all([
+      Order.find(query)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      Order.countDocuments(query),
+    ]);
+
+    return NextResponse.json({
+      orders,
+      page,
+      limit,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+    });
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    console.error("Orders GET error:", error);
+    return NextResponse.json({ message: "অর্ডার লোড করা যায়নি" }, { status: 500 });
   }
 }
 
 export async function POST(req) {
+  const reserved = [];
+
+  const rollback = async () => {
+    for (const r of reserved) {
+      await Product.updateOne({ _id: r.id }, { $inc: { stockQuantity: r.qty } }).catch(() => {});
+    }
+  };
+
   try {
     await connectToDatabase();
     const body = await req.json();
-    const { customerName, phone, address, items, total } = body;
 
-    if (!customerName || !phone || !address || !items || !total) {
-      return NextResponse.json({ message: "Missing required order fields" }, { status: 400 });
-    }
+    const customerName = String(body.customerName || "").trim();
+    const phone = String(body.phone || "").trim();
+    const address = String(body.address || "").trim();
+    const note = String(body.note || "").trim().slice(0, 300);
+    const deliveryZone = body.deliveryZone === "outside" ? "outside" : "inside";
 
-    // ইউনিক অর্ডার আইডি জেনারেট করা (যেমন: Liora_LC_2564)
-    const count = await Order.countDocuments();
-    const randomNum = Math.floor(1000 + Math.random() * 9000); // ৪ ডিজিটের র্যান্ডম নাম্বার
-    
-    // ক্যাটাগরি বা ডিফল্ট ইনিশিয়াল বের করা
-    let categoryPrefix = "GEN";
-    if (items && items.length > 0) {
-      // যদি আইটেমের সাথে ক্যাটাগরি বা নাম থাকে
-      categoryPrefix = "LIORA";
-    }
-    const orderNumber = `Liora_${categoryPrefix}_${randomNum}`;
+    if (customerName.length < 2)
+      return NextResponse.json({ message: "সঠিক নাম লিখুন" }, { status: 400 });
+    if (!/^01[3-9]\d{8}$/.test(phone))
+      return NextResponse.json(
+        { message: "সঠিক ফোন নাম্বার দিন (যেমন 017XXXXXXXX)" },
+        { status: 400 }
+      );
+    if (address.length < 10)
+      return NextResponse.json({ message: "সম্পূর্ণ ঠিকানা লিখুন" }, { status: 400 });
+    if (!Array.isArray(body.items) || body.items.length === 0)
+      return NextResponse.json({ message: "কার্ট খালি" }, { status: 400 });
+    if (body.items.length > 50)
+      return NextResponse.json({ message: "অনেক বেশি আইটেম" }, { status: 400 });
 
-    const order = new Order({
-      ...body,
-      orderNumber,
-      status: "Pending",
-    });
+    // ---- দাম ও স্টক: সম্পূর্ণ সার্ভার থেকে, ক্লায়েন্টের পাঠানো দাম উপেক্ষিত ----
+    const items = [];
+    let subtotal = 0;
 
-    await order.save();
+    for (const raw of body.items) {
+      const qty = Number(raw.quantity);
+      if (!Number.isInteger(qty) || qty < 1 || qty > MAX_QTY_PER_ITEM) {
+        await rollback();
+        return NextResponse.json({ message: "পরিমাণ সঠিক নয়" }, { status: 400 });
+      }
 
-    // কাস্টমার অর্ডার করার পর স্টক আপডেট করার লজিক
-    if (items && Array.isArray(items)) {
-      for (const item of items) {
-        const productId = item.productId || item._id || item.id;
-        if (productId) {
-          const product = await Product.findById(productId);
-          if (product) {
-            // স্টক থেকে অর্ডারের পরিমাণ বাদ দেওয়া
-            product.stockQuantity = Math.max(0, (product.stockQuantity || 0) - item.quantity);
+      const productId = raw.productId || raw._id;
+      if (!productId || !/^[0-9a-fA-F]{24}$/.test(String(productId))) {
+        await rollback();
+        return NextResponse.json({ message: "ভুল প্রোডাক্ট" }, { status: 400 });
+      }
 
-            // স্টক স্ট্যাটাস অটো আপডেট
-            if (product.stockQuantity === 0) {
-              product.stockStatus = "Out of Stock";
-            } else if (product.stockQuantity <= 5) {
-              product.stockStatus = "Limited Stock";
-            }
+      // atomic: স্টক থাকলে তবেই কমবে, তাই oversell অসম্ভব
+      const p = await Product.findOneAndUpdate(
+        { _id: productId, stockQuantity: { $gte: qty } },
+        { $inc: { stockQuantity: -qty } },
+        { new: true }
+      );
 
-            await product.save();
-          }
-        }
+      if (!p) {
+        await rollback();
+        const exists = await Product.findById(productId).select("name").lean();
+        return NextResponse.json(
+          {
+            message: exists
+              ? `"${exists.name}" পর্যাপ্ত স্টকে নেই`
+              : "প্রোডাক্টটি আর পাওয়া যাচ্ছে না",
+          },
+          { status: 409 }
+        );
+      }
+      reserved.push({ id: p._id, qty });
+
+      const price = Number(p.offerPrice ?? p.originalPrice ?? 0);
+      subtotal += price * qty;
+
+      let categoryName = "";
+      if (p.category) {
+        const cat = await Category.findById(p.category).select("name").lean();
+        categoryName = cat?.name || "";
+      }
+
+      items.push({
+        productId: p._id,
+        productName: p.name,
+        quantity: qty,
+        price,
+        purchasePrice: Number(p.purchasePrice ?? 0),
+        originalPrice: Number(p.originalPrice ?? 0),
+        categoryName,
+        image: p.image || "",
+      });
+
+      const newStatus =
+        p.stockQuantity === 0
+          ? "Out of Stock"
+          : p.stockQuantity <= 5
+          ? "Limited Stock"
+          : "In Stock";
+      if (newStatus !== p.stockStatus) {
+        await Product.updateOne({ _id: p._id }, { stockStatus: newStatus });
       }
     }
 
-    return NextResponse.json(order, { status: 201 });
+    // ---- ডেলিভারি চার্জও সার্ভারেই ঠিক হবে ----
+    const settings = (await SiteSettings.findOne().lean()) || {};
+    const baseCharge =
+      deliveryZone === "outside"
+        ? Number(settings.deliveryOutside ?? 110)
+        : Number(settings.deliveryInside ?? 65);
+    const threshold = Number(settings.freeDeliveryThreshold ?? 0);
+    const deliveryCharge = threshold > 0 && subtotal >= threshold ? 0 : baseCharge;
+
+    // ---- orderNumber, collision হলে ৩ বার retry ----
+    let order = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        order = await Order.create({
+          customerName,
+          phone,
+          address,
+          note,
+          items,
+          deliveryZone,
+          deliveryCharge,
+          subtotal,
+          total: subtotal + deliveryCharge,
+          orderNumber: await generateOrderNumber(),
+          status: "Pending",
+        });
+        break;
+      } catch (e) {
+        if (e?.code === 11000 && attempt < 2) continue;
+        throw e;
+      }
+    }
+
+    return NextResponse.json(
+      {
+        _id: order._id,
+        orderNumber: order.orderNumber,
+        total: order.total,
+        subtotal: order.subtotal,
+        deliveryCharge: order.deliveryCharge,
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    console.error("Orders POST error:", error);
+    await rollback();
+    return NextResponse.json(
+      { message: "অর্ডার সম্পন্ন হয়নি, আবার চেষ্টা করুন" },
+      { status: 500 }
+    );
   }
 }
