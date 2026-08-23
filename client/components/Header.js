@@ -8,7 +8,7 @@ import LioraLogo from "./LioraLogo";
 import CategoryDrawer from "./CategoryDrawer";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { buildTree } from "@/lib/categoryTree";
-
+import useHideOnScroll from "@/lib/useHideOnScroll";
 
 export default function Header({
   cartCount: propsCartCount,
@@ -110,8 +110,13 @@ export default function Header({
     router.push(`/products/${productId}`);
   };
 
+  const collapsed = useHideOnScroll();
+
   return (
-    <header className="jt-header-new">
+    <header className="jt-header-new" style={{
+      position: 'sticky', top: 0, zIndex: 50, background: '#fff',
+      boxShadow: collapsed ? '0 2px 10px rgba(0,0,0,.06)' : 'none'
+    }}>
       {/* Category Drawer Component */}
       <CategoryDrawer
         isOpen={isCategoryDrawerOpen}
@@ -119,7 +124,7 @@ export default function Header({
       />
 
       {/* TOP ANNOUNCEMENT BAR */}
-      <div className="jt-top-announcement-bar">
+      <div className={`jt-top-announcement-bar hdr-row ${collapsed ? 'hide' : ''}`}>
         <div className="jt-announcement-content">
           <span>🚚 Free Delivery on orders above ৳999</span>
           <span className="jt-announcement-divider">|</span>
@@ -128,7 +133,7 @@ export default function Header({
       </div>
 
       {/* MAIN LOGO & HEADER ROW */}
-      <div className="jt-header-logo-row">
+      <div className={`jt-header-logo-row hdr-row ${collapsed ? 'hide' : ''}`}>
         <div className="jt-header-logo-container">
           <button
             type="button"
@@ -150,9 +155,15 @@ export default function Header({
       </div>
 
       {/* SEARCH BAR ROW */}
-      <div className="jt-header-search-container">
+      <div className="jt-header-search-container" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px' }}>
+        {collapsed && (
+          <button onClick={() => setIsCategoryDrawerOpen(true)} aria-label="Menu"
+            style={{ fontSize: 20, background: 'none', border: 'none', padding: 4, cursor: "pointer", color: "#334155" }}>☰</button>
+        )}
+
         <form
           className="jt-pill-search-form"
+          style={{ flex: 1, margin: 0 }}
           onSubmit={handleSearchSubmit}
           ref={searchWrapperRef}
         >
@@ -232,17 +243,23 @@ export default function Header({
                   </div>
                 </>
               ) : (
-                <div className="jt-live-search-empty">
+                  <div className="jt-live-search-empty">
                   No products found for &quot;{currentSearchValue}&quot;
                 </div>
               )}
             </div>
           )}
         </form>
+        
+        {collapsed && (
+          <button type="button" onClick={handleOpenCart} aria-label="Cart" style={{ fontSize: 20, padding: 4, background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}>
+            🛒{cartCount > 0 && <sup style={{ fontSize: 11, background: '#ff4d6d', color: '#fff', borderRadius: '50%', padding: '2px 5px', position: 'absolute', top: -4, right: -4, fontWeight: 700 }}>{cartCount}</sup>}
+          </button>
+        )}
       </div>
 
       {/* HORIZONTAL PILL NAV TABS STRIP */}
-      <div className="jt-header-tabs-strip">
+      <div className={`jt-header-tabs-strip hdr-row ${collapsed ? 'hide' : ''}`}>
         <div className="jt-tabs-strip-inner">
           <Link href="/" className="jt-tab-pill active">
             <span className="jt-tab-icon">🏠</span> Home

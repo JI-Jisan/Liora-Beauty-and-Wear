@@ -5953,3 +5953,12 @@ button {
 }
 @keyframes sk { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
 
+
+.hdr-row {
+  overflow: hidden; max-height: 200px; opacity: 1;
+  transition: max-height .28s ease, opacity .18s ease;
+}
+.hdr-row.hide { max-height: 0; opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .hdr-row { transition: none; } }
+@media (min-width: 768px) { .hdr-row.hide { max-height: 200px; opacity: 1; } }
+
