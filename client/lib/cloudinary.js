@@ -2,32 +2,28 @@ export const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 export const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/avif"];
-
 export async function uploadToCloudinary(file) {
   if (!CLOUD_NAME || !UPLOAD_PRESET) {
-    throw new Error("Cloudinary কনফিগার করা নেই (.env.local দেখুন)");
+    throw new Error(
+      `Cloudinary env নেই → cloud:${CLOUD_NAME || "❌"} preset:${UPLOAD_PRESET || "❌"} (Vercel এ redeploy করুন)`
+    );
   }
-  if (!ALLOWED.includes(file.type)) {
-    throw new Error("শুধু JPG, PNG, WEBP ছবি দেওয়া যাবে");
-  }
-  if (file.size > MAX_SIZE) {
-    throw new Error("ছবির সাইজ ৫MB এর কম হতে হবে");
-  }
+  if (file.size > MAX_SIZE) throw new Error("ছবির সাইজ ৫MB এর কম হতে হবে");
 
   const form = new FormData();
   form.append("file", file);
   form.append("upload_preset", UPLOAD_PRESET);
-  form.append("folder", "liora/products");
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
     { method: "POST", body: form }
   );
 
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
+  console.log("Cloudinary response:", res.status, data);   // ডিবাগের জন্য
+
   if (!res.ok || !data.secure_url) {
-    throw new Error(data?.error?.message || "আপলোড ব্যর্থ হয়েছে");
+    throw new Error(`Cloudinary ${res.status}: ${data?.error?.message || "আপলোড ব্যর্থ"}`);
   }
   return data.secure_url;
 }

@@ -79,7 +79,6 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
   const submit = async (e) => {
     e.preventDefault();
     if (saving) return;
-    setError("");
 
     if (!form.image) return setError("মূল ছবি (Main Image) দিতে হবে");
     if (Number(form.offerPrice) > Number(form.originalPrice))
@@ -132,7 +131,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
           gap: 12, margin: "16px 0",
         }}
       >
@@ -175,8 +174,8 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
               )}
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(e) => handleFile(e.target.files?.[0], s.key)}
+                accept="image/*"
+                onChange={(e) => { handleFile(e.target.files?.[0], s.key); e.target.value = ""; }}
                 disabled={uploading !== null}
                 style={{
                   position: "absolute", inset: 0, opacity: 0,
@@ -184,6 +183,21 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
                 }}
               />
             </div>
+            <input
+              type="url"
+              placeholder="অথবা ছবির লিংক পেস্ট করুন"
+              value={s.url}
+              onChange={(e) =>
+                s.key === "main"
+                  ? set("image", e.target.value)
+                  : setForm((p) => {
+                      const imgs = [...p.images];
+                      imgs[s.key] = e.target.value;
+                      return { ...p, images: imgs };
+                    })
+              }
+              style={{ width: "100%", marginTop: 6, fontSize: 11, padding: "6px 8px", border: "1px solid #e2e8f0", borderRadius: 6 }}
+            />
           </div>
         ))}
       </div>

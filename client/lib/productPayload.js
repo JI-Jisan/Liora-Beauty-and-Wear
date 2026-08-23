@@ -20,6 +20,8 @@ export function buildPayload(body) {
     throw new Error("Offer Price, Original Price এর চেয়ে বেশি হতে পারে না");
   if (!Number.isFinite(purchasePrice) || purchasePrice < 0)
     throw new Error("সঠিক Purchase Price দিন");
+  if (offerPrice < purchasePrice)
+    throw new Error("Offer Price ক্রয়মূল্যের (Purchase Price) চেয়ে কম হতে পারে না (লোকসান হবে)");
 
   const images = Array.isArray(body.images)
     ? body.images.filter((u) => typeof u === "string" && u.trim()).slice(0, 3)
