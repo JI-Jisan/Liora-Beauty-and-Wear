@@ -311,74 +311,40 @@ export default function ProductDetailsPage() {
 
           {/* Dynamic Nested Breadcrumb Navigation */}
           {(() => {
-            const getBreadcrumbs = (prodCat, categoryList) => {
-              if (!prodCat) return [];
-
-              const catMap = {};
-              if (Array.isArray(categoryList)) {
-                categoryList.forEach((c) => {
-                  if (c && c._id) catMap[c._id] = c;
-                });
-              }
-
-              const chain = [];
-              let current = typeof prodCat === "object" ? prodCat : catMap[prodCat];
-              const visited = new Set();
-
-              while (current && typeof current === "object") {
-                const cId = current._id || current.name;
-                if (!cId || visited.has(String(cId))) break;
-                visited.add(String(cId));
-
-                if (current.name) {
-                  chain.unshift({ id: cId, name: current.name });
-                }
-
-                // Move to parent Category
-                const parentObj = current.parentCategory;
-                if (parentObj && typeof parentObj === "object" && parentObj.name) {
-                  current = parentObj;
-                } else if (parentObj && catMap[parentObj]) {
-                  current = catMap[parentObj];
-                } else {
-                  current = null;
-                }
-              }
-
-              return chain;
-            };
-
-            const categoryTree = getBreadcrumbs(product?.category, allCategories);
+            const cat = product?.category;
+            // Build trail from ancestors + self
+            let trail = [...(cat?.ancestors || []), cat].filter(Boolean);
+            
+            // Fallback for older products or if populate didn't work completely
+            if (trail.length <= 1 && cat) {
+              const buildTrail = (allCats, catId) => {
+                const map = new Map(allCats.map(c => [String(c._id), c]));
+                const out = [];
+                let cur = map.get(String(catId));
+                while (cur) { out.unshift(cur); cur = cur.parent ? map.get(String(cur.parent)) : null; }
+                return out;
+              };
+              const fallbackTrail = buildTrail(allCategories, cat._id);
+              if (fallbackTrail.length > 0) trail = fallbackTrail;
+            }
 
             return (
-              <nav className="jt-breadcrumb-nav" aria-label="Breadcrumb" style={{ margin: "12px 0 10px", fontSize: "13px", color: "#64748b", display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px" }}>
-                <Link href="/" style={{ color: "#64748b", textDecoration: "none", fontWeight: "600" }}>Home</Link>
-                <span style={{ color: "#cbd5e1" }}>/</span>
-
-                {categoryTree.map((item) => (
-                  <span key={item.id} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                    <Link href={`/products?category=${encodeURIComponent(item.id)}`} style={{ color: "#64748b", textDecoration: "none", fontWeight: "600" }}>
-                      {item.name}
-                    </Link>
-                    <span style={{ color: "#cbd5e1" }}>/</span>
+              <nav style={{
+                display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'nowrap',
+                overflowX: 'auto', whiteSpace: 'nowrap', fontSize: 14, padding: '10px 0'
+              }}>
+                <Link href="/" style={{ color: '#6b7280', textDecoration: "none" }}>Home</Link>
+                {trail.map(c => (
+                  <span key={c._id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ color: '#c9c9c9' }}>/</span>
+                    <Link href={`/products?category=${c._id}`} style={{ color: '#6b7280', textDecoration: "none" }}>{c.name}</Link>
                   </span>
                 ))}
-
-                <span style={{ color: "#0f172a", fontWeight: "700" }}>
-                  {product.name}
-                </span>
+                <span style={{ color: '#c9c9c9' }}>/</span>
+                <span style={{ color: '#111', fontWeight: 600 }}>{product.name}</span>
               </nav>
             );
           })()}
-
-          {/* Category pill */}
-          <span style={{
-            background: "#fff0f5", color: "#e11d48",
-            fontSize: "11px", fontWeight: "700",
-            padding: "3px 12px", borderRadius: "50px",
-          }}>
-            {product.category?.name || "Product"}
-          </span>
 
           {/* Name */}
           <h1 style={{ margin: "10px 0 4px", fontSize: "clamp(18px, 5vw, 26px)", fontWeight: "900", color: "#0f172a", lineHeight: 1.3 }}>

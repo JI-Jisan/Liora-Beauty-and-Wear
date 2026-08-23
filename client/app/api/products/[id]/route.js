@@ -81,7 +81,11 @@ export async function GET(req, { params }) {
     }
 
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      const product = await Product.findById(id).populate("category");
+      const product = await Product.findById(id).populate({
+        path: "category",
+        select: "name ancestors",
+        populate: { path: "ancestors", select: "name" }
+      }).lean();
       if (product) {
         return NextResponse.json(product);
       }
