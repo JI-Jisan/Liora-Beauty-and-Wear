@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import connectDB from "@/lib/mongodb";
+import { connectToDatabase as connectDB } from "@/lib/db";
 import { Category } from "@/lib/models";
 
 const MAX_DEPTH = 4;
