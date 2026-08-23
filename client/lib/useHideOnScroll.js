@@ -4,14 +4,26 @@ export default function useHideOnScroll(threshold = 80) {
   const [collapsed, setCollapsed] = useState(false);
   useEffect(() => {
     let last = window.scrollY, ticking = false;
+    let lockUntil = 0;
+    
+    const apply = (v) => {
+      const now = Date.now();
+      if (now < lockUntil) return;
+      setCollapsed(prev => {
+        if (prev === v) return prev;
+        lockUntil = now + 350;
+        return v;
+      });
+    };
+
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
         const y = window.scrollY;
-        if (y < threshold) setCollapsed(false);
-        else if (y > last + 6) setCollapsed(true);   // নিচে নামছে
-        else if (y < last - 6) setCollapsed(false);  // উপরে উঠছে
+        if (y < threshold) { apply(false); }
+        else if (y > last + 24) { apply(true); }
+        else if (y < last - 24) { apply(false); }
         last = y; ticking = false;
       });
     };
