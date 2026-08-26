@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Header from "@/components/Header";
 
 export default function AdminBrands() {
   const [items, setItems] = useState([]);

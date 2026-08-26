@@ -6,6 +6,40 @@
   --bottom-nav-h: 60px;
 }
 
+.img-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .img-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.img-slot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 1px dashed #e5e7eb;
+  border-radius: 12px;
+  background: #f8fafc;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.img-slot > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 @media (max-width: 768px) {
   .has-bottom-nav {
     padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 12px) !important;
@@ -5990,4 +6024,3 @@ button {
 .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus {
   border-color: #e11d63;
   box-shadow: 0 0 0 3px rgba(225,29,99,.12);
-}

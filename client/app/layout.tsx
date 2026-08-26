@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     "Shop 100% authentic cosmetics, luxury perfumes, skincare, and trendy fashion wear in Bangladesh. Easy Cash on Delivery nationwide.",
 };
 
+import LayoutChrome from "@/components/LayoutChrome";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -20,9 +22,7 @@ export default function RootLayout({
       <body className="antialiased">
         <CartProvider>
           <div className="jt-root-wrapper">
-            <div className="jt-content-area">{children}</div>
-            <Footer />
-            <MobileBottomNav />
+            <LayoutChrome>{children}</LayoutChrome>
           </div>
         </CartProvider>
       </body>

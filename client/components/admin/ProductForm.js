@@ -157,16 +157,12 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       </div>
 
       <Card title="ছবি" desc="প্রথম ছবিটি মূল ছবি হিসেবে দেখানো হবে">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12, width: '100%', minWidth: 0 }}>
+        <div className="img-grid">
           {slots.map((s, i) => (
-            <div key={String(s.key)} style={{
-              position: 'relative', width: '100%', aspectRatio: '1 / 1', borderRadius: 12,
-              overflow: 'hidden', border: T.border, background: '#fafbfc',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-            }}>
+            <div key={String(s.key)} className="img-slot">
               {s.url ? (
                 <>
-                  <img src={cld(s.url, 300, 300)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  <img src={cld(s.url, 300, 300)} alt="" />
                   {i === 0 && (
                     <span style={{
                       position: 'absolute', bottom: 6, left: 6, fontSize: 10, fontWeight: 700,
