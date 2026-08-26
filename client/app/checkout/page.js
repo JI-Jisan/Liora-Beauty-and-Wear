@@ -110,11 +110,13 @@ export default function CheckoutPage() {
         throw new Error(result?.message || "অর্ডার সম্পন্ন হয়নি");
       }
 
+      setSuccess("অর্ডার সফলভাবে জমা হয়েছে! আমরা শীঘ্রই কল করব।");
       clearCart();
       router.push(`/order/success?id=${result._id}&no=${result.orderNumber}`);
-    } catch (error) {
-      console.error("Order submit error:", error);
-      setError(error.message || "কিছু একটা সমস্যা হয়েছে");
+    } catch (err) {
+      console.error("Order submit error:", err);
+      setError(err.message || "কিছু একটা সমস্যা হয়েছে");
+    } finally {
       setSubmitting(false);
     }
   };

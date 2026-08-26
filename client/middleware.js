@@ -9,7 +9,7 @@ export async function middleware(req) {
   if (path.startsWith('/api/')) {
     
     // ২. Login, Order Track এবং Customer Checkout API গুলোকে সবার জন্য উন্মুক্ত রাখতে হবে
-    if (path.includes('/api/admin/login') || path.includes('/api/orders/track') || (path === '/api/orders' && method === 'POST')) {
+    if (path.includes('/api/admin/login') || path.includes('/api/orders/track') || (method === 'POST' && /^\/api\/orders\/?$/.test(path))) {
       return NextResponse.next();
     }
 
