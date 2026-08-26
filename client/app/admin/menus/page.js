@@ -38,7 +38,6 @@ export default function AdminMenus() {
 
   return (
     <>
-      <Header />
       <div style={{ padding: 24, maxWidth: 800, margin: '0 auto' }}>
         <h2 style={{ marginBottom: 20 }}>মেনু ম্যানেজ (Menus)</h2>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24, padding: 16, background: '#f8fafc', borderRadius: 8 }}>

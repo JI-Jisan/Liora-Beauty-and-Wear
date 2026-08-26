@@ -30,7 +30,6 @@ export default function AdminBrands() {
 
   return (
     <>
-      <Header />
       <div style={{ padding: 24, maxWidth: 800, margin: '0 auto' }}>
         <h2 style={{ marginBottom: 20 }}>ব্র্যান্ড ম্যানেজ (Brands)</h2>
         {msg && <p style={{ color: '#ef4444', marginBottom: 16 }}>{msg}</p>}
