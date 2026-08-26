@@ -135,7 +135,11 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
   const options = useMemo(() => flattenWithPath(buildTree(categories)), [categories]);
 
   return (
-    <form onSubmit={submit} style={{ maxWidth: 720 }}>
+    <form onSubmit={submit} style={{ 
+      width: '100%', maxWidth: 720, margin: '0 auto', padding: 16,
+      boxSizing: 'border-box', overflowX: 'hidden',
+      paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' 
+    }}>
       <h3>{editing ? "প্রোডাক্ট এডিট" : "নতুন প্রোডাক্ট"}</h3>
 
       {/* ---- ছবি আপলোড গ্রিড ---- */}
@@ -144,6 +148,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
           gap: 12, margin: "16px 0",
+          width: "100%", boxSizing: "border-box"
         }}
       >
         {slots.map((s) => (
@@ -218,6 +223,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
         <input
           placeholder="প্রোডাক্টের নাম *" value={form.name}
           onChange={(e) => set("name", e.target.value)} required
+          style={{ minWidth: 0, width: "100%", boxSizing: "border-box" }}
         />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -240,18 +246,18 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
           </select>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 10, width: "100%" }}>
           <input type="number" min="0" placeholder="ক্রয়মূল্য *" value={form.purchasePrice}
-            onChange={(e) => set("purchasePrice", e.target.value)} required />
+            onChange={(e) => set("purchasePrice", e.target.value)} required style={{ minWidth: 0, width: "100%", boxSizing: "border-box" }} />
           <input type="number" min="0" placeholder="Original Price *" value={form.originalPrice}
-            onChange={(e) => set("originalPrice", e.target.value)} required />
+            onChange={(e) => set("originalPrice", e.target.value)} required style={{ minWidth: 0, width: "100%", boxSizing: "border-box" }} />
           <input type="number" min="0" placeholder="Offer Price *" value={form.offerPrice}
-            onChange={(e) => set("offerPrice", e.target.value)} required />
+            onChange={(e) => set("offerPrice", e.target.value)} required style={{ minWidth: 0, width: "100%", boxSizing: "border-box" }} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, width: "100%" }}>
           <input type="number" min="0" placeholder="স্টক সংখ্যা *" value={form.stockQuantity}
-            onChange={(e) => set("stockQuantity", e.target.value)} required />
+            onChange={(e) => set("stockQuantity", e.target.value)} required style={{ minWidth: 0, width: "100%", boxSizing: "border-box" }} />
           <div style={{ fontSize: 13, color: '#666' }}>
             ডিসকাউন্ট: <b style={{ color: '#e11d48' }}>
               {getDiscount({ originalPrice: form.originalPrice, offerPrice: form.offerPrice })}%
@@ -262,6 +268,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
         <textarea
           rows={5} placeholder="বিবরণ" value={form.description}
           onChange={(e) => set("description", e.target.value)}
+          style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box", resize: "vertical", minWidth: 0 }}
         />
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
