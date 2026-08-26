@@ -19,6 +19,8 @@ body {
   font-family: var(--font-geist-sans), "Outfit", "Segoe UI", sans-serif;
   background: #faf7f5;
   color: #1e293b;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 a {
@@ -5355,6 +5357,7 @@ button {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s ease;
 }
 

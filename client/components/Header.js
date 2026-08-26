@@ -260,7 +260,12 @@ export default function Header({
 
       {/* HORIZONTAL PILL NAV TABS STRIP */}
       <div className={`jt-header-tabs-strip hdr-row ${collapsed ? 'hide' : ''}`}>
-        <div className="jt-tabs-strip-inner">
+        <div className="jt-tabs-strip-inner" style={{
+          display: 'flex', gap: 8, flexWrap: 'nowrap',
+          overflowX: 'auto', WebkitOverflowScrolling: 'touch',
+          width: '100%', minWidth: 0,
+          padding: '8px 12px', scrollbarWidth: 'none'
+        }}>
           <Link href="/" className="jt-tab-pill active">
             <span className="jt-tab-icon">🏠</span> Home
           </Link>

@@ -30,6 +30,11 @@ export default function CartDrawer({
     };
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   const unit = (i) => Number(i.offerPrice ?? i.price ?? 0);
   const qty = (i) => Number(i.quantity) || 1;
   const subtotal = cartItems.reduce((s, i) => s + unit(i) * qty(i), 0);
@@ -42,9 +47,17 @@ export default function CartDrawer({
         onClick={onClose}
         aria-hidden="true"
       />
-      <div
+      <aside
         className={`jt-cart-drawer ${isOpen ? "open" : ""}`}
-        style={{ height: "100dvh", display: "flex", flexDirection: "column" }}
+        style={{
+          position: 'fixed', top: 0, right: 0, height: '100%',
+          width: 'min(88%, 380px)', maxWidth: '100%',
+          background: '#fff', zIndex: 1000,
+          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform .28s ease',
+          visibility: isOpen ? 'visible' : 'hidden',
+          display: 'flex', flexDirection: 'column'
+        }}
       >
         <div className="jt-cart-header" style={{ flexShrink: 0 }}>
           <h3>Your Cart ({totalQty})</h3>
@@ -67,6 +80,7 @@ export default function CartDrawer({
               style={{
                 flex: 1,
                 overflowY: "auto",
+                overflowX: "hidden",
                 padding: "12px",
                 paddingBottom: "24px",
                 WebkitOverflowScrolling: "touch",
@@ -83,7 +97,7 @@ export default function CartDrawer({
                     background: "#fff",
                   }}
                 >
-                  <strong style={{ fontSize: "14px", lineHeight: 1.4, display: "block" }}>
+                  <strong style={{ fontSize: "14px", lineHeight: 1.4, display: "block", overflowWrap: "anywhere" }}>
                     {item.name}
                   </strong>
 
