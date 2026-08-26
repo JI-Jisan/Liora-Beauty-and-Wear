@@ -5987,3 +5987,9 @@ button {
 @media (prefers-reduced-motion: reduce) { .hdr-row { transition: none; } }
 @media (min-width: 768px) { .hdr-row.hide { grid-template-rows: 1fr; opacity: 1; pointer-events: auto; } }
 
+
+ . a d m i n - f o r m   i n p u t : f o c u s ,   . a d m i n - f o r m   s e l e c t : f o c u s ,   . a d m i n - f o r m   t e x t a r e a : f o c u s   { 
+     b o r d e r - c o l o r :   # e 1 1 d 6 3 ; 
+     b o x - s h a d o w :   0   0   0   3 p x   r g b a ( 2 2 5 , 2 9 , 9 9 , . 1 2 ) ; 
+ }  
+ 
