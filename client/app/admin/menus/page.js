@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getAuthHeaders } from "@/lib/api";
 
 export default function AdminMenus() {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState({ label: '', href: '', icon: '' });
 
-  const load = () => fetch('/api/menus?all=1').then(r => r.json()).then(setItems);
+  const load = () => fetch('/api/menus?all=1', { headers: getAuthHeaders() }).then(r => r.json()).then(setItems);
   useEffect(() => { load(); }, []);
 
   const add = async () => {
     if (!form.label || !form.href) return;
     await fetch('/api/menus', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(form)
     });
     setForm({ label: '', href: '', icon: '' });
@@ -23,7 +24,7 @@ export default function AdminMenus() {
   const patch = (id, data) =>
     fetch(`/api/menus/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(data)
     }).then(load);
 

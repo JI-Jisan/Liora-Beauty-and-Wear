@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from "react";
 import ImageUpload from "@/components/ImageUpload";
+import { getAuthHeaders } from "@/lib/api";
 
 export default function AdminBrands() {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState({ name: '', logo: '' });
   const [msg, setMsg] = useState('');
 
-  const load = () => fetch('/api/brands?all=1').then(r => r.json()).then(setItems);
+  const load = () => fetch('/api/brands?all=1', { headers: getAuthHeaders() }).then(r => r.json()).then(setItems);
   useEffect(() => { load(); }, []);
 
   const add = async () => {
     const res = await fetch('/api/brands', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(form)
     });
     const d = await res.json();
@@ -25,7 +26,7 @@ export default function AdminBrands() {
   };
 
   const patch = (id, data) => fetch(`/api/brands/${id}`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    method: 'PUT', headers: getAuthHeaders(),
     body: JSON.stringify(data)
   }).then(load);
 

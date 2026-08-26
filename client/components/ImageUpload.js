@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 
 export default function ImageUpload({ value, onChange, label = 'ছবি আপলোড' }) {
   const [busy, setBusy] = useState(false);
@@ -9,23 +10,11 @@ export default function ImageUpload({ value, onChange, label = 'ছবি আপ
     if (!file) return;
     setBusy(true);
     try {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '');
-      
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
-      if (!cloudName) {
-        alert('Cloudinary cloud name is missing!');
-        return;
-      }
-
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        { method: 'POST', body: fd }
-      );
-      const data = await res.json();
-      if (data.secure_url) onChange(data.secure_url);
-      else alert('আপলোড ব্যর্থ: ' + (data.error?.message || 'unknown'));
+      const url = await uploadToCloudinary(file);
+      if (url) onChange(url);
+      else alert('আপলোড ব্যর্থ: url পাওয়া যায়নি');
+    } catch (err) {
+      alert('আপলোড ব্যর্থ: ' + err.message);
     } finally {
       setBusy(false);
     }
