@@ -31,8 +31,23 @@ export default function CartDrawer({
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (!isOpen) return;
+    const y = window.scrollY;
+    const body = document.body;
+    body.style.position = 'fixed';
+    body.style.top = `-${y}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.overflow = 'hidden';
+
+    return () => {
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      body.style.overflow = '';
+      window.scrollTo(0, y);
+    };
   }, [isOpen]);
 
   const unit = (i) => Number(i.offerPrice ?? i.price ?? 0);
@@ -43,16 +58,23 @@ export default function CartDrawer({
   return (
     <>
       <div
-        className={`jt-cart-overlay ${isOpen ? "open" : ""}`}
         onClick={onClose}
         aria-hidden="true"
+        style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(0,0,0,.35)',
+          backdropFilter: 'blur(3px)',
+          touchAction: 'none',
+          opacity: isOpen ? 1 : 0,
+          visibility: isOpen ? 'visible' : 'hidden',
+          transition: 'all 0.3s ease'
+        }}
       />
       <aside
-        className={`jt-cart-drawer ${isOpen ? "open" : ""}`}
         style={{
           position: 'fixed', top: 0, right: 0, height: '100%',
-          width: 'min(88%, 380px)', maxWidth: '100%',
-          background: '#fff', zIndex: 1000,
+          width: 'min(88%, 380px)', maxWidth: '100%', zIndex: 1001,
+          background: '#fff', opacity: 1, filter: 'none',
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform .28s ease',
           visibility: isOpen ? 'visible' : 'hidden',
@@ -81,6 +103,7 @@ export default function CartDrawer({
                 flex: 1,
                 overflowY: "auto",
                 overflowX: "hidden",
+                overscrollBehavior: "contain",
                 padding: "12px",
                 paddingBottom: "24px",
                 WebkitOverflowScrolling: "touch",
