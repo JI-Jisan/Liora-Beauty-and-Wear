@@ -20,6 +20,19 @@ CategorySchema.index({ ancestors: 1 });
 export const Category =
   mongoose.models.Category || mongoose.model("Category", CategorySchema);
 
+// ---------- Menu ----------
+const MenuSchema = new mongoose.Schema({
+  label:     { type: String, required: true, trim: true },
+  href:      { type: String, required: true, trim: true },
+  icon:      { type: String, default: '' },
+  order:     { type: Number, default: 0 },
+  isActive:  { type: Boolean, default: true },
+  authOnly:  { type: Boolean, default: false },
+  openInNew: { type: Boolean, default: false }
+}, { timestamps: true });
+
+export const Menu = mongoose.models.Menu || mongoose.model('Menu', MenuSchema);
+
 // ---------- Product ----------
 const ProductSchema = new mongoose.Schema(
   {

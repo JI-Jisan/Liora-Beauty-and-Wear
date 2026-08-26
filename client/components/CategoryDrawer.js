@@ -86,9 +86,16 @@ export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
   const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [expandedIds, setExpandedIds] = useState({});
-  const [activeTab, setActiveTab] = useState("CATEGORY"); // 'MENU' | 'CATEGORY'
+  const [activeTab, setActiveTab] = useState("MENU"); // 'MENU' | 'CATEGORY'
+  const [menus, setMenus] = useState([]);
 
   useEffect(() => {
+    fetch("/api/menus")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setMenus(data);
+      })
+      .catch((err) => console.error("Menu fetch error:", err));
     fetch(`${API_BASE_URL}/api/categories`)
       .then((res) => res.json())
       .then((data) => {
@@ -199,11 +206,30 @@ export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
 
         <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
           {activeTab === "MENU" ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <Link href="/" onClick={onClose} style={{ textDecoration: "none", color: "#334155", fontWeight: 700, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>🏠 Home</Link>
-              <Link href="/products" onClick={onClose} style={{ textDecoration: "none", color: "#334155", fontWeight: 700, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>🛍️ All Products</Link>
-              <Link href="/contact" onClick={onClose} style={{ textDecoration: "none", color: "#334155", fontWeight: 700, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>📞 Contact Us</Link>
-              <Link href="/admin/login" onClick={onClose} style={{ textDecoration: "none", color: "#334155", fontWeight: 700, padding: "10px 12px", background: "#f8fafc", borderRadius: 8 }}>⚙️ Admin Login</Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              {menus.map((m) => (
+                <Link
+                  key={m._id}
+                  href={m.href}
+                  onClick={onClose}
+                  target={m.openInNew ? "_blank" : "_self"}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "16px 20px",
+                    borderBottom: "1px solid #f2f2f2",
+                    textDecoration: "none",
+                    color: "#222",
+                    fontWeight: 600,
+                    fontSize: 14,
+                    letterSpacing: 0.3,
+                  }}
+                >
+                  {m.icon && <span>{m.icon}</span>}
+                  {m.label}
+                </Link>
+              ))}
             </div>
           ) : (
             <div>
