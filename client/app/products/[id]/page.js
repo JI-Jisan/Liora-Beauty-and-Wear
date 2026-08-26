@@ -351,6 +351,16 @@ export default function ProductDetailsPage() {
             {product.name}
           </h1>
 
+          {/* Brand */}
+          {product.brand && (
+            <div style={{ marginBottom: "8px", fontSize: "14px" }}>
+              <span style={{ color: "#64748b" }}>Brand: </span>
+              <Link href={`/brands/${product.brand.slug}`} style={{ color: "#e11d48", fontWeight: "600", textDecoration: "none" }}>
+                {product.brand.name}
+              </Link>
+            </div>
+          )}
+
           <div style={{ display: "flex", alignItems: "center", gap: "6px", margin: "6px 0" }}>
             {product.reviewCount > 0 && (
               <>

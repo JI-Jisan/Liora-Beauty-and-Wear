@@ -1,4 +1,5 @@
 require("./Category");
+require("./Brand");
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
@@ -12,6 +13,11 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: false,
+      default: null,
+    },
+    brand: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Brand",
       default: null,
     },
     originalPrice: {

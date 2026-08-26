@@ -33,11 +33,23 @@ const MenuSchema = new mongoose.Schema({
 
 export const Menu = mongoose.models.Menu || mongoose.model('Menu', MenuSchema);
 
+// ---------- Brand ----------
+const BrandSchema = new mongoose.Schema({
+  name:     { type: String, required: true, trim: true },
+  slug:     { type: String, required: true, unique: true, lowercase: true, index: true },
+  logo:     { type: String, default: '' },
+  isActive: { type: Boolean, default: true },
+  order:    { type: Number, default: 0 }
+}, { timestamps: true });
+
+export const Brand = mongoose.models.Brand || mongoose.model('Brand', BrandSchema);
+
 // ---------- Product ----------
 const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
+    brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', default: null },
     purchasePrice: { type: Number, required: true, default: 0, min: 0 },
     originalPrice: { type: Number, required: true, min: 0 },
     offerPrice: { type: Number, required: true, min: 0 },

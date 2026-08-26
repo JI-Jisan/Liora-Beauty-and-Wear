@@ -85,7 +85,7 @@ export async function GET(req, { params }) {
         path: "category",
         select: "name ancestors",
         populate: { path: "ancestors", select: "name" }
-      }).lean();
+      }).populate("brand", "name slug").lean();
       if (product) {
         return NextResponse.json(product);
       }

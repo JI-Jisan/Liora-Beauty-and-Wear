@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import mongoose from "mongoose";
-import { Product, Category } from "@/lib/models";
+import { Product, Category, Brand } from "@/lib/models";
 import { buildPayload } from "@/lib/productPayload";
 
 export const runtime = "nodejs";
@@ -14,6 +14,12 @@ export async function GET(req) {
     const query = {};
     const category = searchParams.get("category");
     const type = searchParams.get("type");
+    const brandSlug = searchParams.get("brand");
+
+    if (brandSlug) {
+      const b = await Brand.findOne({ slug: brandSlug }).select('_id').lean();
+      query.brand = b?._id ?? null;
+    }
 
     if (category && mongoose.Types.ObjectId.isValid(category)) {
       const kids = await Category.find({ ancestors: category }).select("_id").lean();
@@ -30,6 +36,7 @@ export async function GET(req) {
 
     const products = await Product.find(query)
       .populate("category", "name")   // related products ও ক্যাটাগরি নাম ঠিক করবে
+      .populate("brand", "name slug")
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();

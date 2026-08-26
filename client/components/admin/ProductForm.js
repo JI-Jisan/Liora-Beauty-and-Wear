@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { getDiscount } from "@/lib/price";
 
 const EMPTY = {
-  name: "", category: "", purchasePrice: "", originalPrice: "", offerPrice: "",
+  name: "", category: "", brand: "", purchasePrice: "", originalPrice: "", offerPrice: "",
   stockQuantity: "", description: "",
   image: "", images: ["", "", ""],
   isFeatured: false, isTrending: false, isNewArrival: false, isSlider: false,
@@ -17,6 +17,7 @@ const EMPTY = {
 export default function ProductForm({ editing, onSaved, onCancel }) {
   const [form, setForm] = useState(EMPTY);
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [uploading, setUploading] = useState(null); // 'main' | 0 | 1 | 2
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -26,6 +27,11 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       .then((r) => r.json())
       .then((d) => setCategories(Array.isArray(d) ? d : []))
       .catch(() => setCategories([]));
+      
+    fetch(`${API_BASE_URL}/api/brands?all=1`)
+      .then((r) => r.json())
+      .then((d) => setBrands(Array.isArray(d) ? d : []))
+      .catch(() => setBrands([]));
   }, []);
 
   useEffect(() => {
@@ -34,6 +40,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
     setForm({
       name: editing.name || "",
       category: editing.category?._id || editing.category || "",
+      brand: editing.brand?._id || editing.brand || "",
       purchasePrice: editing.purchasePrice ?? "",
       originalPrice: editing.originalPrice ?? "",
       offerPrice: editing.offerPrice ?? "",
@@ -213,14 +220,25 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
           onChange={(e) => set("name", e.target.value)} required
         />
 
-        <select value={form.category} onChange={(e) => set("category", e.target.value)}>
-          <option value="">-- ক্যাটাগরি নির্বাচন করুন --</option>
-          {options.map((o) => (
-            <option key={o._id} value={o._id}>
-              {" ".repeat(o.level)}{o.path}
-            </option>
-          ))}
-        </select>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <select value={form.category} onChange={(e) => set("category", e.target.value)}>
+            <option value="">-- ক্যাটাগরি নির্বাচন করুন --</option>
+            {options.map((o) => (
+              <option key={o._id} value={o._id}>
+                {" ".repeat(o.level)}{o.path}
+              </option>
+            ))}
+          </select>
+
+          <select value={form.brand || ""} onChange={(e) => set("brand", e.target.value)}>
+            <option value="">-- ব্র্যান্ড নেই --</option>
+            {brands.map((b) => (
+              <option key={b._id} value={b._id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
           <input type="number" min="0" placeholder="ক্রয়মূল্য *" value={form.purchasePrice}
