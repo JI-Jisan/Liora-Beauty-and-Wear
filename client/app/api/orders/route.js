@@ -1,17 +1,12 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Order, Product, Category, SiteSettings } from "@/lib/models";
+import { Order, Product, Category, SiteSettings, nextOrderNumber } from "@/lib/models";
 
 export const runtime = "nodejs";
 
 const MAX_QTY_PER_ITEM = 20;
 
-async function generateOrderNumber() {
-  const count = await Order.countDocuments();
-  const seq = String(count + 1).padStart(5, "0");
-  const datePart = new Date().toISOString().slice(2, 10).replace(/-/g, "");
-  return `LIORA-${datePart}-${seq}`;
-}
+
 
 export async function GET(req) {
   try {
@@ -172,7 +167,7 @@ export async function POST(req) {
           deliveryCharge,
           subtotal,
           total: subtotal + deliveryCharge,
-          orderNumber: await generateOrderNumber(),
+          orderNumber: await nextOrderNumber(),
           status: "Pending",
         });
         break;

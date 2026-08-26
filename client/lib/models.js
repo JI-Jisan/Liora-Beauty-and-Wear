@@ -73,6 +73,23 @@ const AdminSchema = new mongoose.Schema(
 export const Admin =
   mongoose.models.Admin || mongoose.model("Admin", AdminSchema);
 
+// ---------- Counter ----------
+const CounterSchema = new mongoose.Schema({
+  _id: { type: String, required: true },
+  seq: { type: Number, default: 500000 }
+});
+
+export const Counter = mongoose.models.Counter || mongoose.model("Counter", CounterSchema);
+
+export async function nextOrderNumber() {
+  const c = await Counter.findByIdAndUpdate(
+    'order',
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  return `LIORA-${c.seq}`;
+}
+
 // ---------- Order ----------
 const OrderItemSchema = new mongoose.Schema(
   {
@@ -94,7 +111,7 @@ const OrderItemSchema = new mongoose.Schema(
 
 const OrderSchema = new mongoose.Schema(
   {
-    orderNumber: { type: String, unique: true, sparse: true, trim: true },
+    orderNumber: { type: String, unique: true, index: true, sparse: true, trim: true },
     customerName: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
     address: { type: String, required: true, trim: true },

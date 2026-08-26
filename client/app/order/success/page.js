@@ -22,7 +22,7 @@ function OrderSuccessContent() {
 
     const fetchOrder = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/orders/track?id=${orderId}`);
+        const res = await fetch(`${API_BASE_URL}/api/orders/${orderId}`);
         if (res.ok) {
           const data = await res.json();
           setOrder(data);
@@ -106,7 +106,7 @@ function OrderSuccessContent() {
           <tbody>
             {order?.items?.map((item, idx) => (
               <tr key={idx} style={{ borderBottom: "1px solid #f1f5f9", fontSize: "13px" }}>
-                <td style={{ padding: "10px 0", fontWeight: "600", color: "#1e293b" }}>{item.name}</td>
+                <td style={{ padding: "10px 0", fontWeight: "600", color: "#1e293b" }}>{item.productName || item.name}</td>
                 <td style={{ padding: "10px 0", textAlign: "center", color: "#475569" }}>{item.quantity || 1}</td>
                 <td style={{ padding: "10px 0", textAlign: "right", fontWeight: "700" }}>
                   {(item.offerPrice || item.price) * (item.quantity || 1)} Tk
@@ -122,10 +122,10 @@ function OrderSuccessContent() {
             <span>Subtotal:</span>
             <span>{order?.subtotal || order?.total} Tk</span>
           </div>
-          {order?.deliveryFee && (
+          {order?.deliveryCharge !== undefined && (
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "13px", color: "#475569" }}>
               <span>Delivery Charge:</span>
-              <span>{order.deliveryFee} Tk</span>
+              <span>{order.deliveryCharge} Tk</span>
             </div>
           )}
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "800", color: "#0f172a", marginTop: "10px" }}>
