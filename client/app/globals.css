@@ -5196,6 +5196,15 @@ button {
 }
 
 /* --- HEADER LOGO ROW --- */
+.hdr-row {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows .3s cubic-bezier(.4,0,.2,1), opacity .2s ease;
+  opacity: 1;
+}
+.hdr-row > * { overflow: hidden; min-height: 0; }
+.hdr-row.hide { grid-template-rows: 0fr; opacity: 0; pointer-events: none; }
+
 .jt-header-new {
   background: #ffffff;
   position: sticky;
