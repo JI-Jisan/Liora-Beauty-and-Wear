@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ImageUpload from "@/components/ImageUpload";
 
 export default function AdminBrands() {
   const [items, setItems] = useState([]);
@@ -41,15 +42,17 @@ export default function AdminBrands() {
             style={{ flex: 1, padding: 10, borderRadius: 6, border: '1px solid #cbd5e1' }}
             onChange={e => setForm({ ...form, name: e.target.value })} 
           />
-          <input 
-            placeholder="লোগো URL (Cloudinary)" 
-            value={form.logo}
-            style={{ flex: 2, padding: 10, borderRadius: 6, border: '1px solid #cbd5e1' }}
-            onChange={e => setForm({ ...form, logo: e.target.value })} 
-          />
+          <div style={{ width: '100%', marginBottom: 12 }}>
+            <ImageUpload 
+              value={form.logo} 
+              onChange={logo => setForm({ ...form, logo })} 
+              label="ব্র্যান্ড লোগো (ঐচ্ছিক)" 
+            />
+          </div>
           <button 
+            disabled={!form.name.trim()}
             onClick={add}
-            style={{ padding: '10px 20px', background: '#0f172a', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ padding: '10px 20px', background: form.name.trim() ? '#0f172a' : '#cbd5e1', color: 'white', border: 'none', borderRadius: 6, cursor: form.name.trim() ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}
           >
             যোগ করুন
           </button>

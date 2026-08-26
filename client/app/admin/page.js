@@ -959,105 +959,81 @@ export default function AdminPage() {
               </div>
             ) : (
               <>
-                <div className="jt-manage-products-list">
+                <div className="plist">
                   {paginatedProducts.map((product) => {
                     const imageSrc = getImageUrl(product.image);
 
                     return (
-                      <div key={product._id} className="jt-manage-product-card">
-                        <div className="jt-manage-product-left">
+                      <div key={product._id} className="pcard">
+                        <div className="pcard-thumb">
                           {imageSrc ? (
-                            <img
-                              src={imageSrc}
-                              alt={product.name}
-                              className="jt-manage-product-image"
-                            />
+                            <img src={imageSrc} alt={product.name} />
                           ) : (
-                            <div className="jt-manage-product-image jt-manage-product-placeholder">
-                              No Image
-                            </div>
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: '#94a3b8' }}>No Image</div>
                           )}
-
-                          <div className="jt-manage-product-details">
-                            <div className="jt-manage-product-title-row">
-                              <h4>{product.name}</h4>
-                              <span className="jt-cat-pill">
-                                {product.category?.name || "Uncategorized"}
-                              </span>
-                            </div>
-
-                            <p className="jt-manage-product-price">
-                              <strong>{product.offerPrice} Tk</strong>
-                              {product.originalPrice > product.offerPrice && (
-                                <span className="jt-old-price">
-                                  {product.originalPrice} Tk
-                                </span>
-                              )}
-                              {product.discountBadge && (
-                                <span className="jt-disc-badge">
-                                  {product.discountBadge}
-                                </span>
-                              )}
-                            </p>
-
-                            <div className="jt-manage-product-flags">
-                              <span
-                                className={`jt-stock-tag ${
-                                  product.stockStatus === "In Stock"
-                                    ? "in-stock"
-                                    : product.stockStatus === "Limited Stock"
-                                    ? "limited-stock"
-                                    : "out-stock"
-                                }`}
-                              >
-                                {product.stockStatus}
-                              </span>
-
-                              {product.isFeatured && (
-                                <span className="jt-flag-tag featured">⭐ Featured</span>
-                              )}
-                              {product.isTrending && (
-                                <span className="jt-flag-tag trending">🔥 Trending</span>
-                              )}
-                              {product.isNewArrival && (
-                                <span className="jt-flag-tag new-arrival">✨ New</span>
-                              )}
-                            </div>
-                          </div>
                         </div>
 
-                        <div className="jt-manage-product-right">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleSlider(product)}
-                            style={{
-                              background: product.isSlider ? "#16a34a" : "#f1f5f9",
-                              color: product.isSlider ? "#ffffff" : "#334155",
-                              border: "1px solid #cbd5e1",
-                              padding: "6px 12px",
-                              borderRadius: "6px",
-                              cursor: "pointer",
-                              fontWeight: "700"
-                            }}
-                          >
-                            {product.isSlider ? "✅ Added to Slider" : "🖼️ Add to Slider"}
-                          </button>
+                        <div className="pcard-body">
+                          <h3 className="pcard-title">{product.name}</h3>
+                          
+                          <div className="pcard-badges">
+                            <span className="jt-cat-pill">{product.category?.name || "Uncategorized"}</span>
+                            <span
+                              className={`jt-stock-tag ${
+                                product.stockStatus === "In Stock"
+                                  ? "in-stock"
+                                  : product.stockStatus === "Limited Stock"
+                                  ? "limited-stock"
+                                  : "out-stock"
+                              }`}
+                            >
+                              {product.stockStatus}
+                            </span>
+                            {product.isFeatured && <span className="jt-flag-tag featured">⭐ Featured</span>}
+                            {product.isTrending && <span className="jt-flag-tag trending">🔥 Trending</span>}
+                            {product.isNewArrival && <span className="jt-flag-tag new-arrival">✨ New</span>}
+                          </div>
 
-                          <button
-                            type="button"
-                            className="jt-edit-btn"
-                            onClick={() => handleEditProduct(product)}
-                          >
-                            Edit
-                          </button>
+                          <div>
+                            <strong>{product.offerPrice} Tk</strong>
+                            {product.originalPrice > product.offerPrice && (
+                              <span className="jt-old-price" style={{ marginLeft: 6 }}>{product.originalPrice} Tk</span>
+                            )}
+                            {product.discountBadge && (
+                              <span className="jt-disc-badge" style={{ marginLeft: 6 }}>{product.discountBadge}</span>
+                            )}
+                          </div>
 
-                          <button
-                            type="button"
-                            className="jt-delete-btn"
-                            onClick={() => handleDeleteProduct(product._id)}
-                          >
-                            Delete
-                          </button>
+                          <div className="pcard-actions">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleSlider(product)}
+                              style={{
+                                background: product.isSlider ? "#16a34a" : "#f1f5f9",
+                                color: product.isSlider ? "#ffffff" : "#334155",
+                                cursor: "pointer",
+                                fontWeight: "700"
+                              }}
+                            >
+                              {product.isSlider ? "✅ In Slider" : "🖼️ Slider"}
+                            </button>
+
+                            <button
+                              type="button"
+                              className="jt-edit-btn"
+                              onClick={() => handleEditProduct(product)}
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              type="button"
+                              className="jt-delete-btn"
+                              onClick={() => handleDeleteProduct(product._id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );
@@ -1101,6 +1077,7 @@ export default function AdminPage() {
                     </button>
                   </div>
                 )}
+                <div style={{ paddingBottom: 'calc(72px + env(safe-area-inset-bottom))' }} />
               </>
             )}
           </div>
