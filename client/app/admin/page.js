@@ -634,6 +634,20 @@ export default function AdminPage() {
             📁 Categories
           </li>
           <li
+            onClick={() => {
+              router.push("/admin/brands");
+            }}
+          >
+            🏷️ Brands
+          </li>
+          <li
+            onClick={() => {
+              router.push("/admin/menus");
+            }}
+          >
+            ☰ Menus
+          </li>
+          <li
             className={activeTab === "add-product" ? "active-tab" : ""}
             onClick={() => {
               setActiveTab("add-product");
@@ -774,6 +788,24 @@ export default function AdminPage() {
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>📁</div>
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Categories</h3>
+                </div>
+
+                {/* Brands Box */}
+                <div 
+                  onClick={() => { router.push("/admin/brands"); }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🏷️</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Brands</h3>
+                </div>
+
+                {/* Menus Box */}
+                <div 
+                  onClick={() => { router.push("/admin/menus"); }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>☰</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Menus</h3>
                 </div>
 
                 {/* Inventory Box */}
