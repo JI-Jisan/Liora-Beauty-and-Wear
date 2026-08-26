@@ -8,8 +8,8 @@ export async function middleware(req) {
   // ১. শুধুমাত্র API রাউটগুলোর জন্য এই গার্ড কাজ করবে
   if (path.startsWith('/api/')) {
     
-    // ২. Login এবং Order Track API গুলোকে সবার জন্য উন্মুক্ত রাখতে হবে
-    if (path.includes('/api/admin/login') || path.includes('/api/orders/track')) {
+    // ২. Login, Order Track এবং Customer Checkout API গুলোকে সবার জন্য উন্মুক্ত রাখতে হবে
+    if (path.includes('/api/admin/login') || path.includes('/api/orders/track') || (path === '/api/orders' && method === 'POST')) {
       return NextResponse.next();
     }
 

@@ -13,7 +13,8 @@ export default function CheckoutPage() {
 
   const [deliveryZone, setDeliveryZone] = useState("inside");
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [rates, setRates] = useState({
     deliveryInside: 65,
     deliveryOutside: 110,
@@ -73,12 +74,13 @@ export default function CheckoutPage() {
       return;
     }
     if (!Number.isFinite(total) || total <= 0) {
-      setMessage("দামে সমস্যা হয়েছে, কার্ট রিফ্রেশ করুন");
+      setError("দামে সমস্যা হয়েছে, কার্ট রিফ্রেশ করুন");
       return;
     }
 
     setSubmitting(true);
-    setMessage("");
+    setError("");
+    setSuccess("");
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/orders`, {
@@ -112,7 +114,7 @@ export default function CheckoutPage() {
       router.push(`/order/success?id=${result._id}&no=${result.orderNumber}`);
     } catch (error) {
       console.error("Order submit error:", error);
-      setMessage(error.message || "কিছু একটা সমস্যা হয়েছে");
+      setError(error.message || "কিছু একটা সমস্যা হয়েছে");
       setSubmitting(false);
     }
   };
@@ -247,11 +249,8 @@ export default function CheckoutPage() {
                     onChange={handleChange}
                   ></textarea>
 
-                  {message && (
-                    <div className="jt-order-message" style={{ color: "#dc2626", marginBottom: "10px" }}>
-                      <strong>{message}</strong>
-                    </div>
-                  )}
+                  {error && <div style={{background:'#fdecec', color:'#c0392b', padding:12, borderRadius:8, marginBottom: "10px"}}>{error}</div>}
+                  {success && <div style={{background:'#eafaf1', color:'#1e8449', padding:12, borderRadius:8, marginBottom: "10px"}}>{success}</div>}
 
                   <button type="submit" className="jt-place-order-btn" disabled={submitting}>
                     {submitting
