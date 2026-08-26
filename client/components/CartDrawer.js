@@ -183,6 +183,7 @@ export default function CartDrawer({
 
             {/* ---- নিচে আটকানো subtotal + checkout ---- */}
             <div
+              className="has-bottom-nav"
               style={{
                 borderTop: "1px solid #e5e7eb",
                 background: "#fff",

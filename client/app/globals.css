@@ -2,6 +2,16 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bottom-nav-h: 60px;
+}
+
+@media (max-width: 768px) {
+  .has-bottom-nav {
+    padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 12px) !important;
+  }
+}
+
 html,
 body {
   padding: 0;
