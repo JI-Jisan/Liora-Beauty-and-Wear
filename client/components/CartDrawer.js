@@ -261,7 +261,7 @@ export default function CartDrawer({
             </div>
           </div>
         )}
-      </div>
+      </aside>
     </>
   );
 }
