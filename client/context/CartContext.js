@@ -38,7 +38,7 @@ export function CartProvider({ children }) {
       if (existing) {
         updated = prev.map((item) =>
           item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: Math.min(item.quantity + 1, 20) }
             : item
         );
       } else {
@@ -57,7 +57,7 @@ export function CartProvider({ children }) {
   const increaseQty = (id) => {
     setCartItems((prev) => {
       const updated = prev.map((item) =>
-        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
+        item._id === id ? { ...item, quantity: Math.min(item.quantity + 1, 20) } : item
       );
       try {
         localStorage.setItem("jt_cart", JSON.stringify(updated));

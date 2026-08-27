@@ -26,9 +26,13 @@ router.get("/track", async (req, res) => {
     const isPhone = /^01\d{9}$/.test(raw);
     if (!isOrderNo && !isPhone) return res.status(400).json({ message: "Invalid format" });
 
+    const PUBLIC_ORDER_FIELDS =
+      "orderNumber status subtotal deliveryCharge total createdAt customerName " +
+      "items.productName items.quantity items.price items.image";
+
     const filter = isOrderNo ? { orderNumber: raw.toUpperCase() } : { phone: raw };
     const orders = await Order.find(filter)
-      .select("orderNumber status total createdAt items")
+      .select(PUBLIC_ORDER_FIELDS)
       .sort({ createdAt: -1 }).limit(10);
     res.json(orders);
   } catch (error) {
@@ -36,24 +40,24 @@ router.get("/track", async (req, res) => {
   }
 });
 
-// GET single order by ID or Order Number (Public for Success page)
+const PUBLIC_ORDER_FIELDS =
+  "orderNumber status subtotal deliveryCharge total createdAt customerName " +
+  "items.productName items.quantity items.price items.image";
+
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
     let order = null;
 
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      order = await Order.findById(id);
+    if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      order = await Order.findById(id).select(PUBLIC_ORDER_FIELDS).lean();
     }
-
     if (!order) {
-      order = await Order.findOne({ orderNumber: id });
+      order = await Order.findOne({ orderNumber: id.toUpperCase() })
+        .select(PUBLIC_ORDER_FIELDS)
+        .lean();
     }
-
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+    if (!order) return res.status(404).json({ message: "Order not found" });
 
     res.json(order);
   } catch (error) {
@@ -158,13 +162,20 @@ router.post("/", async (req, res) => {
   }
 });
 
+const { ORDER_STATUSES } = require("../models/Order");
+
 // UPDATE order status (Protected - Admin only)
 router.put("/:id/status", adminAuth, async (req, res) => {
   try {
+    const status = String(req.body.status || "");
+    if (!ORDER_STATUSES.includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
     const order = await Order.findByIdAndUpdate(
       req.params.id,
-      { status: req.body.status },
-      { new: true }
+      { status },
+      { new: true, runValidators: true }
     );
 
     if (!order) {
