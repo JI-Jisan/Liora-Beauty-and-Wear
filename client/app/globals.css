@@ -798,6 +798,13 @@ button {
 
 .jt-cart-top-btn {
   border: none;
+  background: #ff4d6d;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.2);
 }
 
 .jt-admin-order-card input,
@@ -817,14 +824,6 @@ button {
 .jt-orders-filter-tabs > button { flex: 0 0 auto; white-space: nowrap; }
 
 .jt-admin-order-card, .jt-admin-order-card * { min-width: 0; overflow-wrap: anywhere; }
-  background: #ff4d6d;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 77, 109, 0.2);
-}
 
 .jt-cart-overlay {
   position: fixed;
