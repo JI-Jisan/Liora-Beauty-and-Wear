@@ -5,13 +5,12 @@ export function getAdminFromRequest(req) {
   if (!secret) return null;
 
   const auth = req.headers.get("authorization") || "";
-  let token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
-  if (!token) token = req.cookies?.get?.("adminToken")?.value || null;
-  if (!token) return null;
+  if (!auth.startsWith("Bearer ")) return null;
 
   try {
-    return jwt.verify(token, secret);
-  } catch {
+    return jwt.verify(auth.slice(7), secret);
+  } catch (e) {
+    console.log("JWT FAIL:", e.name);
     return null;
   }
 }

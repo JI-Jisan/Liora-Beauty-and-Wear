@@ -4,7 +4,23 @@ import jwt from "jsonwebtoken";
 import { connectToDatabase } from "@/lib/db";
 import { Admin } from "@/lib/models";
 
+const attempts = new Map();
+
+function tooMany(ip) {
+  const now = Date.now();
+  const rec = attempts.get(ip) || { n: 0, t: now };
+  if (now - rec.t > 15 * 60 * 1000) { rec.n = 0; rec.t = now; }
+  rec.n++;
+  attempts.set(ip, rec);
+  return rec.n > 8;
+}
+
 export async function POST(req) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+  if (tooMany(ip)) {
+    return NextResponse.json({ message: "অনেকবার চেষ্টা হয়েছে, ১৫ মিনিট পর আবার" }, { status: 429 });
+  }
+
   try {
     await connectToDatabase();
     const body = await req.json();
@@ -15,18 +31,6 @@ export async function POST(req) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-
-    // Check if any admin exists, if not seed default admin
-    const adminCount = await Admin.countDocuments();
-    if (adminCount === 0) {
-      const defaultPassword = process.env.ADMIN_PASSWORD || "admin123456";
-      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-      await Admin.create({
-        name: "Jisan Admin",
-        email: "admin@jisantrends.com",
-        password: hashedPassword,
-      });
-    }
 
     const admin = await Admin.findOne({ email: cleanEmail });
 
@@ -41,6 +45,10 @@ export async function POST(req) {
     }
 
     const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error("JWT_SECRET missing");
+      return NextResponse.json({ message: "Server config error" }, { status: 500 });
+    }
 
     const token = jwt.sign(
       {
@@ -63,6 +71,6 @@ export async function POST(req) {
     });
   } catch (error) {
     console.error("Login API error:", error);
-    return NextResponse.json({ message: error.message || "Internal server error" }, { status: 500 });
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
