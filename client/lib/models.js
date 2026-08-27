@@ -124,7 +124,8 @@ export async function nextOrderNumber() {
     { $inc: { seq: 1 } },
     { new: true, upsert: true }
   );
-  return `LIORA-${c.seq}`;
+  const seq = c.seq < 500000 ? 500000 + c.seq : c.seq;
+  return `LIORA-${seq}`;
 }
 
 // ---------- Order ----------

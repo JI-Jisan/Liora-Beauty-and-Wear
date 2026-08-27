@@ -19,8 +19,8 @@ body {
   font-family: var(--font-geist-sans), "Outfit", "Segoe UI", sans-serif;
   background: #faf7f5;
   color: #1e293b;
-  overflow-x: hidden;
   max-width: 100%;
+  overflow-x: hidden;
 }
 
 a {
@@ -798,6 +798,25 @@ button {
 
 .jt-cart-top-btn {
   border: none;
+}
+
+.jt-admin-order-card input,
+.jt-admin-order-card textarea {
+  width: 100%;
+  max-width: 100%;
+}
+
+.jt-orders-filter-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+.jt-orders-filter-tabs::-webkit-scrollbar { display: none; }
+.jt-orders-filter-tabs > button { flex: 0 0 auto; white-space: nowrap; }
+
+.jt-admin-order-card, .jt-admin-order-card * { min-width: 0; overflow-wrap: anywhere; }
   background: #ff4d6d;
   color: white;
   padding: 10px 16px;
