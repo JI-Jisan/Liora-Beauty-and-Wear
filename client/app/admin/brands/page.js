@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 import ImageUpload from "@/components/ImageUpload";
 import { getAuthHeaders } from "@/lib/api";
 
+import { useRouter } from "next/navigation";
+
 export default function AdminBrands() {
+  const router = useRouter();
   const [items, setItems] = useState([]);
   const [form, setForm] = useState({ name: '', logo: '' });
   const [msg, setMsg] = useState('');
@@ -18,6 +21,13 @@ export default function AdminBrands() {
       headers: getAuthHeaders(),
       body: JSON.stringify(form)
     });
+    
+    if (res.status === 401) {
+      setMsg('সেশন শেষ হয়ে গেছে। আবার লগইন করুন।');
+      setTimeout(() => router.push('/admin/login'), 1200);
+      return;
+    }
+
     const d = await res.json();
     if (!res.ok) return setMsg(d.message);
     setForm({ name: '', logo: '' }); 
@@ -25,10 +35,34 @@ export default function AdminBrands() {
     load();
   };
 
-  const patch = (id, data) => fetch(`/api/brands/${id}`, {
-    method: 'PUT', headers: getAuthHeaders(),
-    body: JSON.stringify(data)
-  }).then(load);
+  const patch = async (id, data) => {
+    const res = await fetch(`/api/brands/${id}`, {
+      method: 'PUT', headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    if (res.status === 401) {
+      setMsg('সেশন শেষ হয়ে গেছে। আবার লগইন করুন।');
+      setTimeout(() => router.push('/admin/login'), 1200);
+      return;
+    }
+    load();
+  };
+
+  const remove = async (id) => {
+    if (!confirm('সত্যিই মুছে ফেলবেন?')) return;
+    const res = await fetch(`/api/brands/${id}`, { 
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    if (res.status === 401) {
+      setMsg('সেশন শেষ হয়ে গেছে। আবার লগইন করুন।');
+      setTimeout(() => router.push('/admin/login'), 1200);
+      return;
+    }
+    const d = await res.json();
+    if (d.message && !d.message.includes('successfully')) setMsg(d.message);
+    load();
+  };
 
   return (
     <>
@@ -81,7 +115,7 @@ export default function AdminBrands() {
               </button>
               
               <button 
-                onClick={() => confirm('সত্যিই মুছে ফেলবেন?') && fetch(`/api/brands/${b._id}`, { method: 'DELETE' }).then(r => r.json()).then(d => { if (d.message && !d.message.includes('successfully')) setMsg(d.message); load(); })}
+                onClick={() => remove(b._id)}
                 style={{ padding: '6px 12px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: 4, cursor: 'pointer' }}
               >
                 মুছুন

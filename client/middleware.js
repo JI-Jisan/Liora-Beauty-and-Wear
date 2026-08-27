@@ -38,8 +38,14 @@ export async function middleware(req) {
       await jwtVerify(token, secret);
       return NextResponse.next();
     } catch (error) {
+      if (error.code === 'ERR_JWT_EXPIRED') {
+        return NextResponse.json(
+          { message: 'সেশন শেষ হয়ে গেছে। আবার লগইন করুন।' }, 
+          { status: 401 }
+        );
+      }
       return NextResponse.json(
-        { message: 'Invalid or Expired Token! Hacker Blocked 🛑' }, 
+        { message: 'Invalid Token! Access Denied.' }, 
         { status: 403 }
       );
     }
