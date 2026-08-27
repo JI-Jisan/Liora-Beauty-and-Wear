@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { Brand, Product } from "@/lib/models";
+import { getAdminFromRequest } from "@/lib/adminGuard";
 
 export const runtime = "nodejs";
 
 export async function PUT(req, { params }) {
+  const admin = getAdminFromRequest(req);
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
   try {
     await connectToDatabase();
     const { id } = await params;
@@ -22,6 +27,10 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
+  const admin = getAdminFromRequest(req);
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
   try {
     await connectToDatabase();
     const { id } = await params;

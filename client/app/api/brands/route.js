@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { Brand } from "@/lib/models";
+import { getAdminFromRequest } from "@/lib/adminGuard";
 
 export const runtime = "nodejs";
 
@@ -22,6 +23,10 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+  const admin = getAdminFromRequest(req);
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
   try {
     await connectToDatabase();
     const { name, logo } = await req.json();

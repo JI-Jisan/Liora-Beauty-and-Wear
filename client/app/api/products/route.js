@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/db";
 import mongoose from "mongoose";
 import { Product, Category, Brand } from "@/lib/models";
 import { buildPayload } from "@/lib/productPayload";
+import { getAdminFromRequest } from "@/lib/adminGuard";
 
 export const runtime = "nodejs";
 
@@ -52,6 +53,10 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+  const admin = getAdminFromRequest(req);
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
   try {
     await connectToDatabase();
     const body = await req.json();

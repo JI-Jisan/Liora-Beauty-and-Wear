@@ -66,7 +66,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // CREATE order (Public - Guest Checkout)
-router.post("/", async (req, res) => {
+/* router.post("/", async (req, res) => {
   try {
     const { customerName, phone, address, items, deliveryCharge } = req.body;
 
@@ -160,7 +160,7 @@ router.post("/", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-});
+}); */
 
 const { ORDER_STATUSES } = require("../models/Order");
 

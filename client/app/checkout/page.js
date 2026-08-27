@@ -66,11 +66,11 @@ export default function CheckoutPage() {
     if (submitting) return;
 
     if (cartItems.length === 0) {
-      setMessage("কার্ট খালি");
+      setError("কার্ট খালি");
       return;
     }
     if (!/^01[3-9]\d{8}$/.test(formData.phone.trim())) {
-      setMessage("সঠিক ফোন নাম্বার দিন (যেমন 017XXXXXXXX)");
+      setError("সঠিক ফোন নাম্বার দিন (যেমন 017XXXXXXXX)");
       return;
     }
     if (!Number.isFinite(total) || total <= 0) {
@@ -112,7 +112,7 @@ export default function CheckoutPage() {
 
       setSuccess("অর্ডার সফলভাবে জমা হয়েছে! আমরা শীঘ্রই কল করব।");
       clearCart();
-      router.push(`/order/success?id=${result._id}&no=${result.orderNumber}`);
+      router.push(`/order/success?id=${result._id}&no=${result.orderNumber}&total=${result.total}`);
     } catch (err) {
       console.error("Order submit error:", err);
       setError(err.message || "কিছু একটা সমস্যা হয়েছে");

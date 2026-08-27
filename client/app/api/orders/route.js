@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { Order, Product, Category, SiteSettings, nextOrderNumber } from "@/lib/models";
+import { getAdminFromRequest } from "@/lib/adminGuard";
 
 export const runtime = "nodejs";
 
@@ -9,6 +10,10 @@ const MAX_QTY_PER_ITEM = 20;
 
 
 export async function GET(req) {
+  const admin = getAdminFromRequest(req);
+  if (!admin) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
   try {
     await connectToDatabase();
 
