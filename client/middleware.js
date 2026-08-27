@@ -37,17 +37,9 @@ export async function middleware(req) {
       // ৫. টোকেনটি আসল কি না তা চেক করা হচ্ছে
       await jwtVerify(token, secret);
       return NextResponse.next();
-    } catch (error) {
-      if (error.code === 'ERR_JWT_EXPIRED') {
-        return NextResponse.json(
-          { message: 'সেশন শেষ হয়ে গেছে। আবার লগইন করুন।' }, 
-          { status: 401 }
-        );
-      }
-      return NextResponse.json(
-        { message: 'Invalid Token! Access Denied.' }, 
-        { status: 403 }
-      );
+    } catch (err) {
+      console.log('JWT FAIL:', err.name, err.message, 'secret?', !!process.env.JWT_SECRET);
+      return NextResponse.json({ message: err.name }, { status: 401 });
     }
   }
 
