@@ -10,13 +10,43 @@ const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+
 const app = express();
 
 connectDB();
 
-app.use(cors());
+app.use(helmet());
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : "http://localhost:3000",
+  credentials: true
+}));
+
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  message: { message: "Too many login attempts, please try again after 15 minutes." }
+});
+
+const orderTrackLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { message: "Too many tracking requests, please try again later." }
+});
+
+app.use("/api/admin/login", authLimiter);
+app.use("/api/orders/track", orderTrackLimiter);
+app.use("/api/", apiLimiter);
 
 app.get("/", (req, res) => {
   res.send("Jisan Trends API is running...");

@@ -9,7 +9,7 @@ const adminAuth = (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-    const jwtSecret = process.env.JWT_SECRET || "liora_secure_default_secret_key_2026";
+    const jwtSecret = process.env.JWT_SECRET;
 
     const decoded = jwt.verify(token, jwtSecret);
 

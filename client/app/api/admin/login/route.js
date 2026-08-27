@@ -40,7 +40,7 @@ export async function POST(req) {
       return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || "liora_secure_default_secret_key_2026";
+    const jwtSecret = process.env.JWT_SECRET;
 
     const token = jwt.sign(
       {

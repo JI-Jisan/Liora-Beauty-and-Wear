@@ -30,7 +30,7 @@ export async function middleware(req) {
     const token = authHeader.split(' ')[1];
     // আপনার .env ফাইলে থাকা সিক্রেট কি, না থাকলে ডিফল্ট কি
     const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || "liora_secure_default_secret_key_2026"
+      process.env.JWT_SECRET
     );
 
     try {

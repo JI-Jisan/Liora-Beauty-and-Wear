@@ -28,7 +28,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || "liora_secure_default_secret_key_2026";
+    const jwtSecret = process.env.JWT_SECRET;
 
     const token = jwt.sign(
       {

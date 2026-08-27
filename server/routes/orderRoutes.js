@@ -21,22 +21,16 @@ router.get("/", adminAuth, async (req, res) => {
 // TRACK orders (Public - Search by Phone or Order Number)
 router.get("/track", async (req, res) => {
   try {
-    const { query } = req.query;
+    const raw = String(req.query.query || "").trim();
+    const isOrderNo = /^LIORA-\d{6,}$/i.test(raw);
+    const isPhone = /^01\d{9}$/.test(raw);
+    if (!isOrderNo && !isPhone) return res.status(400).json({ message: "Invalid format" });
 
-    if (!query || !query.trim()) {
-      return res.status(400).json({ message: "Search keyword is required" });
-    }
-
-    const safeQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-    const orders = await Order.find({
-      $or: [
-        { phone: { $regex: safeQuery, $options: "i" } },
-        { orderNumber: { $regex: safeQuery, $options: "i" } },
-      ],
-    }).sort({ createdAt: -1 });
-
-    res.json(orders || []);
+    const filter = isOrderNo ? { orderNumber: raw.toUpperCase() } : { phone: raw };
+    const orders = await Order.find(filter)
+      .select("orderNumber status total createdAt items")
+      .sort({ createdAt: -1 }).limit(10);
+    res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -88,23 +82,30 @@ router.post("/", async (req, res) => {
 
     for (const item of items) {
       const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
-      let price = Number(item.price) || 0;
-
-      // Verify product price from DB if item._id is a valid ObjectId
-      if (item._id && String(item._id).match(/^[0-9a-fA-F]{24}$/)) {
-        const dbProduct = await Product.findById(item._id);
-        if (dbProduct && dbProduct.offerPrice > 0) {
-          price = dbProduct.offerPrice;
-        }
+      
+      const productId = item.productId || item._id;
+      if (!productId || !String(productId).match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({ message: "Invalid product ID in cart" });
       }
+
+      const dbProduct = await Product.findById(productId);
+      if (!dbProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const price = Number(dbProduct.offerPrice ?? dbProduct.originalPrice ?? 0);
 
       const itemTotal = price * qty;
       calculatedSubtotal += itemTotal;
 
       sanitizedItems.push({
-        productName: String(item.productName || item.name || "Product").trim(),
+        productId: dbProduct._id,
+        productName: dbProduct.name,
         quantity: qty,
         price: price,
+        purchasePrice: Number(dbProduct.purchasePrice ?? 0),
+        originalPrice: Number(dbProduct.originalPrice ?? 0),
+        image: dbProduct.image || "",
       });
     }
 
