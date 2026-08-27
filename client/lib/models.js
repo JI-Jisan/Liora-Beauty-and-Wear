@@ -49,7 +49,7 @@ const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
-    brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', default: null },
+    brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand', default: null, index: true },
     purchasePrice: { type: Number, required: true, default: 0, min: 0 },
     originalPrice: { type: Number, required: true, min: 0 },
     offerPrice: { type: Number, required: true, min: 0 },

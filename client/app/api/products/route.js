@@ -14,11 +14,14 @@ export async function GET(req) {
     const query = {};
     const category = searchParams.get("category");
     const type = searchParams.get("type");
-    const brandSlug = searchParams.get("brand");
+    const brand = searchParams.get("brand");
 
-    if (brandSlug) {
-      const b = await Brand.findOne({ slug: brandSlug }).select('_id').lean();
-      query.brand = b?._id ?? null;
+    if (brand) {
+      const isId = /^[0-9a-fA-F]{24}$/.test(brand);
+      const doc = isId ? { _id: brand } : { slug: brand };
+      const b = await Brand.findOne(doc).select('_id');
+      if (!b) return NextResponse.json([]);
+      query.brand = b._id;
     }
 
     if (category && mongoose.Types.ObjectId.isValid(category)) {

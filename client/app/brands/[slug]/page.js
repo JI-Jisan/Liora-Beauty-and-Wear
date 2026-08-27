@@ -45,7 +45,7 @@ export default function BrandProductsPage({ params }) {
           ) : (
             <ProductGrid 
               title="" 
-              products={products} 
+              brand={slug} 
               category="" 
               type="" 
             />

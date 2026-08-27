@@ -19,6 +19,7 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Brand",
       default: null,
+      index: true,
     },
     originalPrice: {
       type: Number,

@@ -20,7 +20,8 @@ function ProductGridContent({
   onAddToCart,
   searchTerm = "",
   type = "all",
-  title = "Products"
+  title = "Products",
+  brand = ""
 }) {
   const searchParams = useSearchParams();
   const urlSearchTerm = searchParams ? searchParams.get("search") || "" : "";
@@ -31,21 +32,20 @@ function ProductGridContent({
   const urlCategoryParam = searchParams ? searchParams.get("category") || "" : "";
   const [selectedCategoryState, setSelectedCategoryState] = useState("all");
   const activeCategory = urlCategoryParam || selectedCategoryState;
+  
+  const activeBrand = brand || (searchParams ? searchParams.get("brand") || "" : "");
 
   const handleSelectCategory = (cat) => {
     setSelectedCategoryState(cat);
   };
 
   useEffect(() => {
-    let url = (activeCategory && activeCategory !== "all")
-      ? `${API_BASE_URL}/api/products?category=${activeCategory}`
-      : `${API_BASE_URL}/api/products`;
-      
-    if (type && type !== "all") {
-      url += url.includes('?') ? `&type=${type}` : `?type=${type}`;
-    }
-    
-    fetch(url)
+    const qs = new URLSearchParams();
+    if (activeCategory && activeCategory !== "all") qs.set('category', activeCategory);
+    if (activeBrand) qs.set('brand', activeBrand);
+    if (type && type !== "all") qs.set('type', type);
+
+    fetch(`${API_BASE_URL}/api/products?${qs.toString()}`)
       .then((res) => res.json())
       .then((data) => {
         setProducts(Array.isArray(data) ? data : []);
@@ -63,7 +63,7 @@ function ProductGridContent({
         }
       })
       .catch((err) => console.error(err));
-  }, [activeCategory]);
+  }, [activeCategory, activeBrand, type]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];

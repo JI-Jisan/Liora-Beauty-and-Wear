@@ -30,7 +30,7 @@ export function buildPayload(body) {
   return {
     name,
     category: body.category || null,
-    brand: body.brand || null,
+    brand: body.brand && body.brand !== '' ? body.brand : null,
     purchasePrice,
     originalPrice,
     offerPrice,
