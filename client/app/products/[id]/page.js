@@ -129,6 +129,8 @@ export default function ProductDetailsPage() {
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
     brandSubtitle: "Beauty. Style. You.",
+    deliveryInside: 65,
+    deliveryOutside: 110,
   });
 
   useEffect(() => {
@@ -138,6 +140,8 @@ export default function ProductDetailsPage() {
         setSiteSettings({
           brandName: data.brandName || "LIORA Beauty & Wear",
           brandSubtitle: data.brandSubtitle || "Beauty. Style. You.",
+          deliveryInside: data.deliveryInside ?? 65,
+          deliveryOutside: data.deliveryOutside ?? 110,
         })
       )
       .catch((err) => console.error(err));
@@ -467,7 +471,6 @@ export default function ProductDetailsPage() {
             </button>
           </div>
 
-          {/* Delivery bar */}
           <div style={{
             display: "flex", gap: "14px", flexWrap: "wrap",
             padding: "12px 16px",
@@ -476,8 +479,8 @@ export default function ProductDetailsPage() {
             border: "1px solid #e2e8f0",
             marginBottom: "16px",
           }}>
-            <span style={{ fontSize: "13px", color: "#64748b" }}>🚚 <strong>Dhaka:</strong> 65 Tk</span>
-            <span style={{ fontSize: "13px", color: "#64748b" }}>📦 <strong>Outside:</strong> 110 Tk</span>
+            <span style={{ fontSize: "13px", color: "#64748b" }}>🚚 <strong>Dhaka:</strong> {siteSettings.deliveryInside} Tk</span>
+            <span style={{ fontSize: "13px", color: "#64748b" }}>📦 <strong>Outside:</strong> {siteSettings.deliveryOutside} Tk</span>
             <span style={{ fontSize: "13px", color: "#059669", fontWeight: "700" }}>✓ Cash on Delivery</span>
           </div>
 

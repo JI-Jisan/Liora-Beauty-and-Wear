@@ -39,6 +39,7 @@ export async function GET(req) {
     if (exclude && /^[0-9a-fA-F]{24}$/.test(exclude)) query._id = { $ne: exclude };
 
     const products = await Product.find(query)
+      .select("-purchasePrice")
       .populate("category", "name")   // related products ও ক্যাটাগরি নাম ঠিক করবে
       .populate("brand", "name slug")
       .sort({ createdAt: -1 })
