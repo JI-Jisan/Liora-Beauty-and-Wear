@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { Order, Product, Category, SiteSettings, nextOrderIdentity } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
+import crypto from "crypto";
 
 export const runtime = "nodejs";
 
@@ -175,6 +176,7 @@ export async function POST(req) {
           total: subtotal + deliveryCharge,
           orderNumber,
           serial,
+          accessToken: crypto.randomBytes(12).toString("hex"),
           status: "Pending",
         });
         break;

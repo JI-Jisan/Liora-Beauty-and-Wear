@@ -158,6 +158,7 @@ const OrderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, unique: true, index: true, sparse: true, trim: true },
     serial: { type: Number, index: true },
+    accessToken: { type: String, index: true },
     customerName: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
     address: { type: String, required: true, trim: true },

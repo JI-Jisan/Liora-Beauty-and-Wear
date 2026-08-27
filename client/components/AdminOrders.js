@@ -122,12 +122,21 @@ export default function AdminOrders() {
             <p>Date: ${new Date(order.createdAt).toLocaleDateString()}</p>
           </div>
           
-          <div class="details-box">
-            <h3 style="margin-top: 0;">🚚 Delivery Details:</h3>
-            <strong>Name:</strong> ${order.customerName}<br/><br/>
-            <strong>Phone:</strong> ${order.phone}<br/><br/>
-            <strong>Address:</strong> ${order.address}<br/><br/>
-            ${order.note ? `<strong>Note:</strong> ${order.note}` : ''}
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="details-box" style="flex: 1; margin-right: 20px;">
+              <h3 style="margin-top: 0;">🚚 Delivery Details:</h3>
+              <strong>Name:</strong> ${order.customerName}<br/><br/>
+              <strong>Phone:</strong> ${order.phone}<br/><br/>
+              <strong>Address:</strong> ${order.address}<br/><br/>
+              ${order.note ? `<strong>Note:</strong> ${order.note}` : ''}
+            </div>
+
+            ${order.accessToken ? `
+            <div style="text-align: center; border: 1px dashed #ccc; padding: 10px; border-radius: 8px;">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(`https://liora-beauty-and-wear-seven.vercel.app/order/verify?no=${order.orderNumber}&k=${order.accessToken}`)}" alt="QR Code" width="110" height="110" />
+              <p style="font-size: 11px; margin: 5px 0 0; color: #555;">স্ক্যান করে<br/>পণ্য মিলিয়ে নিন</p>
+            </div>
+            ` : ''}
           </div>
 
           <table class="items">
