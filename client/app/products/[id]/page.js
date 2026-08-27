@@ -404,21 +404,33 @@ export default function ProductDetailsPage() {
           </div>
 
           {/* Stock */}
-          <p style={{
-            margin: "0 0 14px",
-            fontSize: "13px", fontWeight: "700",
-            color: product.stockStatus === "Out of Stock" ? "#dc2626" : "#059669",
-          }}>
-            ● {product.stockStatus || "In Stock"}
-          </p>
+          {product.stockQuantity > 0 ? (
+            <p style={{
+              margin: "0 0 14px",
+              fontSize: "13px", fontWeight: "700",
+              color: product.stockQuantity <= 5 ? "#d97706" : "#059669"
+            }}>
+              ● {product.stockQuantity <= 5
+                ? `তাড়াতাড়ি করুন! মাত্র ${product.stockQuantity} টি বাকি`
+                : `স্টকে আছে`}
+            </p>
+          ) : (
+            <p style={{
+              margin: "0 0 14px",
+              fontSize: "13px", fontWeight: "700",
+              color: "#dc2626"
+            }}>
+              ● স্টক শেষ
+            </p>
+          )}
 
           {/* Buttons */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
             <button
               onClick={handleBuyNow}
-              disabled={product.stockStatus === "Out of Stock"}
+              disabled={product.stockQuantity <= 0}
               style={{
-                background: product.stockStatus === "Out of Stock"
+                background: product.stockQuantity <= 0
                   ? "#94a3b8"
                   : "linear-gradient(135deg, #e11d48 0%, #f97316 100%)",
                 color: "#fff",
@@ -427,18 +439,18 @@ export default function ProductDetailsPage() {
                 padding: "16px 24px",
                 fontWeight: "900",
                 fontSize: "16px",
-                cursor: product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
+                cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
                 width: "100%",
-                boxShadow: product.stockStatus === "Out of Stock" ? "none" : "0 6px 20px rgba(225,29,72,0.35)",
+                boxShadow: product.stockQuantity <= 0 ? "none" : "0 6px 20px rgba(225,29,72,0.35)",
                 letterSpacing: "0.5px",
               }}
             >
-              {product.stockStatus === "Out of Stock" ? "Unavailable" : "🛒 Buy Now"}
+              {product.stockQuantity <= 0 ? "Unavailable" : "🛒 Buy Now"}
             </button>
 
             <button
               onClick={handleAddToCart}
-              disabled={product.stockStatus === "Out of Stock"}
+              disabled={product.stockQuantity <= 0}
               style={{
                 background: "transparent",
                 color: "#e11d48",
@@ -447,11 +459,11 @@ export default function ProductDetailsPage() {
                 padding: "14px 24px",
                 fontWeight: "800",
                 fontSize: "15px",
-                cursor: product.stockStatus === "Out of Stock" ? "not-allowed" : "pointer",
+                cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
                 width: "100%",
               }}
             >
-              {product.stockStatus === "Out of Stock" ? "Out of Stock" : "+ Add to Cart"}
+              {product.stockQuantity > 0 ? "+ Add to Cart" : "স্টক শেষ"}
             </button>
           </div>
 

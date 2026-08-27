@@ -82,6 +82,18 @@ ProductSchema.index({ isSlider: 1 });
 ProductSchema.index({ isFeatured: 1, isTrending: 1, isNewArrival: 1 });
 ProductSchema.index({ createdAt: -1 });
 
+export function deriveStockStatus(qty) {
+  const n = Number(qty) || 0;
+  if (n <= 0) return "Out of Stock";
+  if (n <= 5) return "Limited Stock";
+  return "In Stock";
+}
+
+ProductSchema.pre("save", function (next) {
+  this.stockStatus = deriveStockStatus(this.stockQuantity);
+  next();
+});
+
 export const Product =
   mongoose.models.Product || mongoose.model("Product", ProductSchema);
 
