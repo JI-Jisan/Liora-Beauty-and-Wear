@@ -7,10 +7,12 @@ export async function GET(req, { params }) {
   try {
     await connectToDatabase();
     const { id } = await params;
+    
+    const isAdmin = !!getAdminFromRequest(req);
 
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
       const product = await Product.findById(id)
-        .select("-purchasePrice")
+        .select(isAdmin ? "" : "-purchasePrice")
         .populate({
           path: "category",
           select: "name ancestors",

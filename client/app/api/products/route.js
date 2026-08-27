@@ -11,6 +11,7 @@ export async function GET(req) {
   try {
     await connectToDatabase();
     const { searchParams } = new URL(req.url);
+    const isAdmin = !!getAdminFromRequest(req);
 
     const query = {};
     const category = searchParams.get("category");
@@ -39,7 +40,7 @@ export async function GET(req) {
     if (exclude && /^[0-9a-fA-F]{24}$/.test(exclude)) query._id = { $ne: exclude };
 
     const products = await Product.find(query)
-      .select("-purchasePrice")
+      .select(isAdmin ? "" : "-purchasePrice")
       .populate("category", "name")   // related products ও ক্যাটাগরি নাম ঠিক করবে
       .populate("brand", "name slug")
       .sort({ createdAt: -1 })
