@@ -118,14 +118,21 @@ const CounterSchema = new mongoose.Schema({
 
 export const Counter = mongoose.models.Counter || mongoose.model("Counter", CounterSchema);
 
-export async function nextOrderNumber() {
+export async function nextOrderIdentity() {
   const c = await Counter.findByIdAndUpdate(
-    'order',
+    "order",
     { $inc: { seq: 1 } },
     { new: true, upsert: true }
   );
-  const seq = c.seq < 500000 ? 500000 + c.seq : c.seq;
-  return `LIORA-${seq}`;
+
+  for (let i = 0; i < 6; i++) {
+    const n = 10000000 + Math.floor(Math.random() * 90000000);
+    const candidate = `LIORA-${n}`;
+    if (!(await Order.exists({ orderNumber: candidate }))) {
+      return { orderNumber: candidate, serial: c.seq };
+    }
+  }
+  return { orderNumber: `LIORA-${Date.now()}`, serial: c.seq };
 }
 
 // ---------- Order ----------
@@ -150,6 +157,7 @@ const OrderItemSchema = new mongoose.Schema(
 const OrderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, unique: true, index: true, sparse: true, trim: true },
+    serial: { type: Number, index: true },
     customerName: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
     address: { type: String, required: true, trim: true },

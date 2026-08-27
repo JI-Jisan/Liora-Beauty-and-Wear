@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Order, Product, Category, SiteSettings, nextOrderNumber } from "@/lib/models";
+import { Order, Product, Category, SiteSettings, nextOrderIdentity } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
 
 export const runtime = "nodejs";
@@ -162,6 +162,7 @@ export async function POST(req) {
     let order = null;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
+        const { orderNumber, serial } = await nextOrderIdentity();
         order = await Order.create({
           customerName,
           phone,
@@ -172,7 +173,8 @@ export async function POST(req) {
           deliveryCharge,
           subtotal,
           total: subtotal + deliveryCharge,
-          orderNumber: await nextOrderNumber(),
+          orderNumber,
+          serial,
           status: "Pending",
         });
         break;

@@ -262,7 +262,7 @@ export default function AdminOrders() {
                 <div className="jt-admin-order-head">
                   <div className="jt-admin-order-meta">
                     <span className="jt-order-num-tag">
-                      #{order.orderNumber || order._id}
+                      #{order.serial ? `${order.serial} | ` : ""}{order.orderNumber || order._id}
                     </span>
                     <span className="jt-order-date">
                       {order.createdAt
