@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { cld } from "@/lib/cloudinary";
 
-export default function VerifyOrderPage() {
+function VerifyOrderContent() {
   const sp = useSearchParams();
   const [order, setOrder] = useState(null);
   const [err, setErr] = useState("");
@@ -56,5 +56,13 @@ export default function VerifyOrderPage() {
         কিছু না মিললে ডেলিভারিম্যানকে জানান বা আমাদের কল করুন।
       </p>
     </main>
+  );
+}
+
+export default function VerifyOrderPage() {
+  return (
+    <Suspense fallback={<p style={{ padding: 40, textAlign: "center" }}>লোড হচ্ছে...</p>}>
+      <VerifyOrderContent />
+    </Suspense>
   );
 }
