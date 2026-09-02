@@ -50,17 +50,39 @@ export default function ContactPage() {
               <h3>Our Contact Information</h3>
               <div className="jt-contact-item">
                 <strong>📞 Phone Number:</strong>
-                <p>+880 1700-000000</p>
+                <p>
+                  <a href="tel:+8801837223147" style={{ color: "inherit" }}>
+                    +880 1837-223147
+                  </a>
+                </p>
               </div>
 
               <div className="jt-contact-item">
                 <strong>📧 Email Address:</strong>
-                <p>support@jisantrends.com</p>
+                <p>
+                  <a href="mailto:liorabeautyandwear@gmail.com" style={{ color: "inherit" }}>
+                    liorabeautyandwear@gmail.com
+                  </a>
+                </p>
               </div>
 
               <div className="jt-contact-item">
                 <strong>📍 Office Address:</strong>
-                <p>Dhaka, Bangladesh</p>
+                <p>Tejgaon, Dhaka, Bangladesh</p>
+              </div>
+
+              <div className="jt-contact-item">
+                <strong>🌐 Official Facebook:</strong>
+                <p>
+                  <a
+                    href="https://www.facebook.com/share/19YizuGAnM/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#e91e63", fontWeight: "600" }}
+                  >
+                    facebook.com/LioraBeautyAndWear
+                  </a>
+                </p>
               </div>
 
               <div className="jt-contact-item">
@@ -70,7 +92,7 @@ export default function ContactPage() {
 
               <div className="jt-contact-whatsapp-box">
                 <a
-                  href="https://wa.me/8801700000000"
+                  href="https://wa.me/8801837223147"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="jt-whatsapp-direct-btn"

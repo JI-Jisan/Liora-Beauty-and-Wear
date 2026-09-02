@@ -67,16 +67,30 @@ export default function Footer() {
             <h4>Contact Support</h4>
             <div className="jt-footer-contact-info">
               <p>
-                <strong>Facebook:</strong> /LioraBeautyAndWear
+                <strong>Facebook:</strong>{" "}
+                <a
+                  href="https://www.facebook.com/share/19YizuGAnM/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "inherit", textDecoration: "underline" }}
+                >
+                  Liora Beauty & Wear
+                </a>
               </p>
               <p>
-                <strong>Phone:</strong> +880 1700-000000
+                <strong>Phone:</strong>{" "}
+                <a href="tel:+8801837223147" style={{ color: "inherit" }}>
+                  +880 1837-223147
+                </a>
               </p>
               <p>
-                <strong>Email:</strong> support@liorabeautyandwear.com
+                <strong>Email:</strong>{" "}
+                <a href="mailto:liorabeautyandwear@gmail.com" style={{ color: "inherit" }}>
+                  liorabeautyandwear@gmail.com
+                </a>
               </p>
               <p>
-                <strong>Address:</strong> Dhaka, Bangladesh
+                <strong>Address:</strong> Tejgaon, Dhaka, Bangladesh
               </p>
               <p>
                 <strong>Hours:</strong> 10:00 AM - 10:00 PM (Daily)
