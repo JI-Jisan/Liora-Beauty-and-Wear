@@ -172,7 +172,11 @@ const OrderSchema = new mongoose.Schema(
     address: { type: String, required: true, trim: true },
     note: { type: String, default: "" },
     items: { type: [OrderItemSchema], required: true },
-    deliveryZone: { type: String, enum: ["inside", "outside"], default: "inside" },
+    deliveryZone: {
+      type: String,
+      enum: ["inside", "outside", "inside_dhaka", "dhaka_sub", "outside_dhaka"],
+      default: "inside_dhaka",
+    },
     deliveryCharge: { type: Number, default: 0, min: 0 },
     subtotal: { type: Number, required: true, min: 0 },
     total: { type: Number, required: true, min: 0 },
