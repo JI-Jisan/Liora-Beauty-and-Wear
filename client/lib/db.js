@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 
-const MONGO_URI =
-  process.env.MONGO_URI ||
-  "mongodb://jisan_trends:Jisan889886@ac-2e905xv-shard-00-00.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-01.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-02.6nzddbx.mongodb.net:27017/jisantrends?ssl=true&replicaSet=atlas-12gikm-shard-0&authSource=admin&retryWrites=true&w=majority";
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
+
+if (!MONGO_URI) {
+  throw new Error("Please define the MONGO_URI environment variable inside .env.local or Vercel Environment Variables");
+}
 
 let cached = global.mongoose;
 
