@@ -59,7 +59,9 @@ export async function POST(req) {
   };
 
   try {
+    console.log("STEP 1: route hit");
     await connectToDatabase();
+    console.log("STEP 2: db connected");
     const body = await req.json();
 
     const customerName = String(body.customerName || "").trim();
