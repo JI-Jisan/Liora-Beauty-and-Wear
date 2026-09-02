@@ -6052,3 +6052,17 @@ button {
 .plist { display: grid; gap: 12px; width: 100%; min-width: 0; }
 @media (min-width: 700px) { .plist { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
+/* Print Area Styles */
+.print-area { padding: 12px; color: #000; background: #fff; }
+.ph { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area {
+    position: absolute; left: 0; top: 0; width: 100%;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .print-area svg { page-break-inside: avoid; break-inside: avoid; }
+  @page { size: A5; margin: 8mm; }
+}

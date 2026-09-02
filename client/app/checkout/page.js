@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { getIdToken } from "@/components/AuthProvider";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -83,9 +84,13 @@ export default function CheckoutPage() {
     setSuccess("");
 
     try {
+      const token = await getIdToken();
       const res = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           customerName: formData.customerName,
           phone: formData.phone,

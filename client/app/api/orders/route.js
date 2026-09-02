@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { Order, Product, Category, SiteSettings, nextOrderIdentity } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
+import { getUserFromRequest } from "@/lib/firebaseAdmin";
 import crypto from "crypto";
 
 export const runtime = "nodejs";
@@ -159,6 +160,8 @@ export async function POST(req) {
     const threshold = Number(settings.freeDeliveryThreshold ?? 0);
     const deliveryCharge = threshold > 0 && subtotal >= threshold ? 0 : baseCharge;
 
+    const user = await getUserFromRequest(req);
+
     // ---- orderNumber, collision হলে ৩ বার retry ----
     let order = null;
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -177,6 +180,7 @@ export async function POST(req) {
           orderNumber,
           serial,
           accessToken: crypto.randomBytes(12).toString("hex"),
+          firebaseUid: user?.uid || null,
           status: "Pending",
         });
         break;

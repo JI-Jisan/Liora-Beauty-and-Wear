@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 import LayoutChrome from "@/components/LayoutChrome";
+import { AuthProvider } from "@/components/AuthProvider";
 
 export default function RootLayout({
   children,
@@ -20,11 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <CartProvider>
-          <div className="jt-root-wrapper">
-            <LayoutChrome>{children}</LayoutChrome>
-          </div>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <div className="jt-root-wrapper">
+              <LayoutChrome>{children}</LayoutChrome>
+            </div>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
