@@ -6090,51 +6090,7 @@ button {
 .print-area { padding: 12px; color: #000; background: #fff; }
 .ph { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 
-@media print {
-  /* Hide utility elements across all pages */
-  .no-print,
-  .no-print * {
-    display: none !important;
-  }
 
-  /* Reset body and html overflow to ensure multi-page printing works smoothly */
-  html, body {
-    overflow: visible !important;
-    height: auto !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-
-  /* Admin table print fix - prevent cutting off columns while keeping mobile swipe intact */
-  .admin-table-scroll {
-    overflow: visible !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    display: block !important;
-    background: transparent !important;
-  }
-  .admin-table-scroll table {
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    table-layout: auto !important;
-    display: table !important;
-  }
-  .admin-table-scroll th,
-  .admin-table-scroll td {
-    white-space: normal !important;
-  }
-
-  /* Only isolate print-area if specifically present */
-  body:has(.print-area) * { visibility: hidden; }
-  body:has(.print-area) .print-area,
-  body:has(.print-area) .print-area * { visibility: visible; }
-  body:has(.print-area) .print-area {
-    position: absolute; left: 0; top: 0; width: 100%;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  .print-area svg { page-break-inside: avoid; break-inside: avoid; }
-}
 
 /* Global Mobile Overflow Fix */
 html, body {
@@ -6247,6 +6203,157 @@ html, body {
     width: 100% !important;
     max-width: 100% !important;
     font-size: 14px !important;
+  }
+}
+
+/* =========================================================
+   GLOBAL MASTER PRINT STYLES (End of file to guarantee precedence)
+   ========================================================= */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  /* 1. Hide interactive non-printable elements */
+  .no-print,
+  .no-print *,
+  header,
+  footer,
+  nav,
+  button,
+  .jt-admin-top,
+  .jt-admin-sidebar,
+  .jt-admin-sidebar-overlay,
+  .jt-admin-menu-toggle-btn,
+  .jt-admin-floating-top-btn,
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  /* 2. Reset html, body, and all root wrappers to 100% width with equal margins */
+  html, body, .jt-root-wrapper, .admin-root, .jt-admin-dashboard {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .jt-admin-main,
+  .admin-wrap {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+  }
+
+  .jt-admin-grid {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .jt-admin-panel,
+  .jt-admin-panel-wide,
+  .admin-card {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+    page-break-inside: auto !important;
+  }
+
+  /* 3. Stat cards stretch 100% across the top with 2 equal columns matching the table */
+  .admin-stat-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 14px !important;
+  }
+
+  /* 4. Table fills 100% width cleanly so left gap equals right gap */
+  .admin-table-scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    display: block !important;
+    background: transparent !important;
+    border: none !important;
+    margin: 8px 0 0 0 !important;
+    padding: 0 !important;
+  }
+
+  .admin-table-scroll table {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+    display: table !important;
+  }
+
+  .admin-table-scroll th,
+  .admin-table-scroll td {
+    padding: 7px 8px !important;
+    font-size: 11.5px !important;
+    border: 1px solid #cbd5e1 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Product name wraps to multiple lines if long, allowing other columns to stay neat */
+  .admin-stock-name-cell,
+  .admin-table-scroll td:nth-child(3),
+  .admin-table-scroll td:first-child {
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  .admin-table-scroll td:not(.admin-stock-name-cell) {
+    white-space: nowrap !important;
+  }
+
+  /* 5. Keep elements visible & avoid breaking cards/rows across pages */
+  body, body * {
+    visibility: visible !important;
+  }
+
+  tr, .admin-card, .jt-stat-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Isolated print-area support if used */
+  body:has(.print-area) * { visibility: hidden; }
+  body:has(.print-area) .print-area,
+  body:has(.print-area) .print-area * { visibility: visible; }
+  body:has(.print-area) .print-area {
+    position: absolute; left: 0; top: 0; width: 100%;
   }
 }
 
