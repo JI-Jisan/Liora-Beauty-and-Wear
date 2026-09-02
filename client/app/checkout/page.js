@@ -7,18 +7,18 @@ import Header from "@/components/Header";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { getIdToken } from "@/components/AuthProvider";
+import { ZONES, getCharge } from "@/lib/delivery";
+import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cartItems, clearCart } = useCart();
 
-  const [deliveryZone, setDeliveryZone] = useState("inside");
+  const [deliveryZone, setDeliveryZone] = useState("inside_dhaka");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [rates, setRates] = useState({
-    deliveryInside: 65,
-    deliveryOutside: 110,
     freeDeliveryThreshold: 0,
   });
 
@@ -35,8 +35,6 @@ export default function CheckoutPage() {
       .then((d) => {
         if (!d) return;
         setRates({
-          deliveryInside: Number(d.deliveryInside ?? 65),
-          deliveryOutside: Number(d.deliveryOutside ?? 110),
           freeDeliveryThreshold: Number(d.freeDeliveryThreshold ?? 0),
         });
       })
@@ -50,12 +48,14 @@ export default function CheckoutPage() {
     [cartItems]
   );
 
-  const baseCharge =
-    deliveryZone === "outside" ? rates.deliveryOutside : rates.deliveryInside;
+  const baseCharge = getCharge(deliveryZone);
   const freeApplied =
     rates.freeDeliveryThreshold > 0 && subtotal >= rates.freeDeliveryThreshold;
   const deliveryCharge = freeApplied ? 0 : baseCharge;
   const total = subtotal + deliveryCharge;
+
+  const normalizedPhone = normalizeBdPhone(formData.phone);
+  const isPhoneValid = !formData.phone || isValidBdPhone(normalizedPhone);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,8 +70,9 @@ export default function CheckoutPage() {
       setError("কার্ট খালি");
       return;
     }
-    if (!/^01[3-9]\d{8}$/.test(formData.phone.trim())) {
-      setError("সঠিক ফোন নাম্বার দিন (যেমন 017XXXXXXXX)");
+    const cleanPhone = normalizeBdPhone(formData.phone);
+    if (!isValidBdPhone(cleanPhone)) {
+      setError("সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন 01712345678)");
       return;
     }
     if (!Number.isFinite(total) || total <= 0) {
@@ -93,9 +94,10 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           customerName: formData.customerName,
-          phone: formData.phone,
+          phone: cleanPhone,
           address: formData.address,
           note: formData.note,
+          zone: deliveryZone,
           deliveryZone,
           items: cartItems.map((item) => ({
             productId: item._id,
@@ -104,48 +106,45 @@ export default function CheckoutPage() {
         }),
       });
 
-      let result = null;
-      try {
-        result = await res.json();
-      } catch {
-        // সার্ভার HTML error page পাঠালে
-      }
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(result?.message || "অর্ডার সম্পন্ন হয়নি");
+        throw new Error(data.message || "অর্ডার সম্পন্ন হয়নি");
       }
 
-      setSuccess("অর্ডার সফলভাবে জমা হয়েছে! আমরা শীঘ্রই কল করব।");
       clearCart();
-      router.push(`/order/success?id=${result._id}&no=${result.orderNumber}&total=${result.total}`);
+      const orderId = data._id || data.orderNumber;
+      const orderNo = data.orderNumber || data._id;
+      const orderTotal = data.total || total;
+      router.push(`/order/success?id=${orderId}&no=${orderNo}&total=${orderTotal}`);
     } catch (err) {
-      console.error("Order submit error:", err);
-      setError(err.message || "কিছু একটা সমস্যা হয়েছে");
+      setError(err.message || "অর্ডার সম্পন্ন করতে সমস্যা হয়েছে");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <main className="jt-page">
+    <main>
       <Header />
 
       <section className="jt-checkout-page">
-        <div className="jt-checkout-box">
-          <h1>Quick Checkout</h1>
-          <p>No login required. Place your order with Cash on Delivery nationwide.</p>
+        <div className="jt-container">
+          <div className="jt-checkout-head">
+            <h2>Checkout</h2>
+            <p>আপনার নাম, মোবাইল নাম্বার এবং ডেলিভারি ঠিকানা দিন</p>
+          </div>
 
           {cartItems.length === 0 ? (
-            <div className="jt-empty-checkout-card">
-              <div className="jt-empty-icon">🛍️</div>
-              <h2>Your Shopping Cart is Empty</h2>
-              <p>Looks like you haven&apos;t added any products to your cart yet.</p>
-              <Link href="/products" className="jt-browse-products-btn">
-                Browse Products &amp; Shop Now &rarr;
+            <div className="jt-empty-checkout">
+              <h3>আপনার কার্ট খালি</h3>
+              <p>অর্ডার করার জন্য প্রথমে কিছু প্রোডাক্ট কার্টে যোগ করুন।</p>
+              <Link href="/products" className="jt-primary-btn">
+                শপিং চালিয়ে যান
               </Link>
             </div>
           ) : (
-            <div className="jt-checkout-layout">
+            <div className="jt-checkout-grid">
               <div className="jt-checkout-left">
                 <h3>Your Order ({cartItems.length} items)</h3>
                 <p style={{ textAlign: "left", marginTop: "-8px", marginBottom: "16px", fontSize: "14px", color: "#64748b" }}>
@@ -201,52 +200,72 @@ export default function CheckoutPage() {
                     autoComplete="tel"
                     inputMode="numeric"
                     maxLength={11}
-                    pattern="01[3-9][0-9]{8}"
-                    title="১১ ডিজিটের নাম্বার দিন, যেমন 017XXXXXXXX"
-                    placeholder="ফোন নাম্বার (Phone Number e.g. 017...)"
+                    placeholder="ফোন নম্বর (যেমন 017XXXXXXXX)"
                     value={formData.phone}
                     onChange={handleChange}
                     required
                   />
+                  {!isPhoneValid && (
+                    <p style={{ color: "#dc2626", fontSize: "12px", marginTop: "-6px", marginBottom: "8px", fontWeight: "600" }}>
+                      ⚠️ সঠিক ১১ ডিজিটের বাংলাদেশি নম্বর দিন (013-019)
+                    </p>
+                  )}
 
                   <input
                     type="text"
                     name="address"
                     autoComplete="street-address"
-                    minLength={10}
-                    placeholder="সম্পূর্ণ ডেলিভারি এড্রেস (Full Address)"
+                    minLength={8}
+                    placeholder="সম্পূর্ণ ডেলিভারি ঠিকানা (বাসা নং, রোড, এরিয়া, জেলা)"
                     value={formData.address}
                     onChange={handleChange}
                     required
                   />
 
-                  <div className="jt-delivery-options">
-                    <label className="jt-delivery-row">
-                      <div className="jt-delivery-left">
+                  <div className="jt-delivery-options" style={{ marginTop: "12px", marginBottom: "14px" }}>
+                    <label className="jt-delivery-row" style={{ display: "flex", justifyContent: "space-between", padding: "10px", border: deliveryZone === "inside_dhaka" ? "2px solid #e91e63" : "1px solid #cbd5e1", borderRadius: "8px", marginBottom: "8px", cursor: "pointer" }}>
+                      <div className="jt-delivery-left" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <input
                           type="radio"
                           name="delivery"
-                          checked={deliveryZone === "inside"}
-                          onChange={() => setDeliveryZone("inside")}
+                          checked={deliveryZone === "inside_dhaka"}
+                          onChange={() => setDeliveryZone("inside_dhaka")}
                         />
-                        <span>ঢাকা সিটির মধ্যে (Inside Dhaka)</span>
+                        <span style={{ fontSize: "13.5px" }}>{ZONES.inside_dhaka.label}</span>
                       </div>
-                      <strong>{rates.deliveryInside} Tk</strong>
+                      <strong>{ZONES.inside_dhaka.charge} Tk</strong>
                     </label>
 
-                    <label className="jt-delivery-row">
-                      <div className="jt-delivery-left">
+                    <label className="jt-delivery-row" style={{ display: "flex", justifyContent: "space-between", padding: "10px", border: deliveryZone === "dhaka_sub" ? "2px solid #e91e63" : "1px solid #cbd5e1", borderRadius: "8px", marginBottom: "8px", cursor: "pointer" }}>
+                      <div className="jt-delivery-left" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <input
                           type="radio"
                           name="delivery"
-                          checked={deliveryZone === "outside"}
-                          onChange={() => setDeliveryZone("outside")}
+                          checked={deliveryZone === "dhaka_sub"}
+                          onChange={() => setDeliveryZone("dhaka_sub")}
                         />
-                        <span>ঢাকা সিটির বাইরে (Outside Dhaka)</span>
+                        <span style={{ fontSize: "13.5px" }}>{ZONES.dhaka_sub.label}</span>
                       </div>
-                      <strong>{rates.deliveryOutside} Tk</strong>
+                      <strong>{ZONES.dhaka_sub.charge} Tk</strong>
+                    </label>
+
+                    <label className="jt-delivery-row" style={{ display: "flex", justifyContent: "space-between", padding: "10px", border: deliveryZone === "outside_dhaka" ? "2px solid #e91e63" : "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer" }}>
+                      <div className="jt-delivery-left" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <input
+                          type="radio"
+                          name="delivery"
+                          checked={deliveryZone === "outside_dhaka"}
+                          onChange={() => setDeliveryZone("outside_dhaka")}
+                        />
+                        <span style={{ fontSize: "13.5px" }}>{ZONES.outside_dhaka.label}</span>
+                      </div>
+                      <strong>{ZONES.outside_dhaka.charge} Tk</strong>
                     </label>
                   </div>
+
+                  <p style={{ fontSize: "12px", color: "#64748b", margin: "-4px 0 10px", textAlign: "left" }}>
+                    💡 ঠিকানা ঢাকা সিটির বাইরে হলে ডেলিভারি চার্জ সমন্বয় করা হতে পারে।
+                  </p>
 
                   <textarea
                     name="note"
@@ -259,7 +278,7 @@ export default function CheckoutPage() {
                   {error && <div style={{background:'#fdecec', color:'#c0392b', padding:12, borderRadius:8, marginBottom: "10px"}}>{error}</div>}
                   {success && <div style={{background:'#eafaf1', color:'#1e8449', padding:12, borderRadius:8, marginBottom: "10px"}}>{success}</div>}
 
-                  <button type="submit" className="jt-place-order-btn" disabled={submitting}>
+                  <button type="submit" className="jt-place-order-btn" disabled={submitting || (formData.phone && !isPhoneValid)}>
                     {submitting
                       ? "অর্ডার হচ্ছে, অপেক্ষা করুন..."
                       : `Place Cash on Delivery Order (${total} Tk)`}

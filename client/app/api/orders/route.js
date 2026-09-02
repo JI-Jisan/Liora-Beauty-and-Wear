@@ -49,12 +49,16 @@ export async function GET(req) {
   }
 }
 
+import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
+import { getCharge } from "@/lib/delivery";
+
 export async function POST(req) {
   const reserved = [];
-
   const rollback = async () => {
     for (const r of reserved) {
-      await Product.updateOne({ _id: r.id }, { $inc: { stockQuantity: r.qty } }).catch(() => {});
+      await Product.updateOne({ _id: r.id }, { $inc: { stockQuantity: r.qty } }).catch(
+        () => {}
+      );
     }
   };
 
@@ -65,19 +69,36 @@ export async function POST(req) {
     const body = await req.json();
 
     const customerName = String(body.customerName || "").trim();
-    const phone = String(body.phone || "").trim();
+    const phone = normalizeBdPhone(body.phone);
     const address = String(body.address || "").trim();
     const note = String(body.note || "").trim().slice(0, 300);
-    const deliveryZone = body.deliveryZone === "outside" ? "outside" : "inside";
+    const deliveryZone = body.zone || body.deliveryZone || "inside_dhaka";
 
     if (customerName.length < 2)
       return NextResponse.json({ message: "সঠিক নাম লিখুন" }, { status: 400 });
-    if (!/^01[3-9]\d{8}$/.test(phone))
+
+    if (!isValidBdPhone(phone)) {
       return NextResponse.json(
-        { message: "সঠিক ফোন নাম্বার দিন (যেমন 017XXXXXXXX)" },
+        { message: "সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন (যেমন 01712345678)" },
         { status: 400 }
       );
-    if (address.length < 10)
+    }
+
+    // অতিরিক্ত abuse guard: একই নম্বর থেকে ২৪ ঘণ্টায় ৩টির বেশি pending/processing অর্ডার প্রতিরোধ
+    const recentOrdersCount = await Order.countDocuments({
+      phone,
+      status: { $in: ["Pending", "Processing", "pending", "processing"] },
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    });
+
+    if (recentOrdersCount >= 3) {
+      return NextResponse.json(
+        { message: "আপনার একাধিক অর্ডার প্রসেসিং এ আছে। কনফার্ম করতে আমাদের কল করুন।" },
+        { status: 429 }
+      );
+    }
+
+    if (address.length < 8)
       return NextResponse.json({ message: "সম্পূর্ণ ঠিকানা লিখুন" }, { status: 400 });
     if (!Array.isArray(body.items) || body.items.length === 0)
       return NextResponse.json({ message: "কার্ট খালি" }, { status: 400 });
@@ -153,12 +174,9 @@ export async function POST(req) {
       }
     }
 
-    // ---- ডেলিভারি চার্জও সার্ভারেই ঠিক হবে ----
+    // ---- ডেলিভারি চার্জও সম্পূর্ণ সার্ভারেই নির্ধারিত হবে ----
     const settings = (await SiteSettings.findOne().lean()) || {};
-    const baseCharge =
-      deliveryZone === "outside"
-        ? Number(settings.deliveryOutside ?? 110)
-        : Number(settings.deliveryInside ?? 65);
+    const baseCharge = getCharge(deliveryZone);
     const threshold = Number(settings.freeDeliveryThreshold ?? 0);
     const deliveryCharge = threshold > 0 && subtotal >= threshold ? 0 : baseCharge;
 

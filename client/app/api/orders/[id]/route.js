@@ -29,7 +29,8 @@ export async function PUT(req, { params }) {
   try {
     await connectToDatabase();
     const { id } = await params;
-    const { status } = await req.json();
+    const body = await req.json();
+    const { status, deliveryCharge, address, note } = body;
 
     const order = await Order.findById(id);
     if (!order) {
@@ -61,7 +62,7 @@ export async function PUT(req, { params }) {
     }
 
     // ২. যদি Cancelled করার পর পুনরায় এক্টিভ স্ট্যাটাসে নেওয়া হয় -> স্টক আবার কমবে
-    if (status !== "Cancelled" && order.stockRestored) {
+    if (status && status !== "Cancelled" && order.stockRestored) {
       if (Array.isArray(order.items)) {
         for (const item of order.items) {
           if (item.productId) {
@@ -84,7 +85,14 @@ export async function PUT(req, { params }) {
       order.stockRestored = false;
     }
 
-    order.status = status;
+    if (typeof deliveryCharge === "number" && deliveryCharge >= 0) {
+      order.deliveryCharge = deliveryCharge;
+      order.total = (order.subtotal || 0) + deliveryCharge;
+    }
+    if (address && typeof address === "string") order.address = address.trim();
+    if (note !== undefined && typeof note === "string") order.note = note.trim();
+    if (status) order.status = status;
+
     await order.save();
 
     return NextResponse.json(order);
