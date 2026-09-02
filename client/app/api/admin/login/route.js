@@ -9,10 +9,10 @@ const attempts = new Map();
 function tooMany(ip) {
   const now = Date.now();
   const rec = attempts.get(ip) || { n: 0, t: now };
-  if (now - rec.t > 15 * 60 * 1000) { rec.n = 0; rec.t = now; }
+  if (now - rec.t > 3 * 60 * 1000) { rec.n = 0; rec.t = now; }
   rec.n++;
   attempts.set(ip, rec);
-  return rec.n > 8;
+  return rec.n > 30;
 }
 
 export async function POST(req) {
