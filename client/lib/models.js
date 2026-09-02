@@ -119,20 +119,27 @@ const CounterSchema = new mongoose.Schema({
 export const Counter = mongoose.models.Counter || mongoose.model("Counter", CounterSchema);
 
 export async function nextOrderIdentity() {
-  const c = await Counter.findByIdAndUpdate(
-    "order",
-    { $inc: { seq: 1 } },
-    { new: true, upsert: true }
-  );
+  let serial = 500000;
+  try {
+    const c = await Counter.findByIdAndUpdate(
+      "order",
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    serial = c?.seq || 500000;
+  } catch (e) {
+    console.error("Counter error:", e?.message);
+    serial = Date.now();
+  }
 
   for (let i = 0; i < 6; i++) {
     const n = 10000000 + Math.floor(Math.random() * 90000000);
     const candidate = `LIORA-${n}`;
     if (!(await Order.exists({ orderNumber: candidate }))) {
-      return { orderNumber: candidate, serial: c.seq };
+      return { orderNumber: candidate, serial };
     }
   }
-  return { orderNumber: `LIORA-${Date.now()}`, serial: c.seq };
+  return { orderNumber: `LIORA-${Date.now()}`, serial };
 }
 
 // ---------- Order ----------
