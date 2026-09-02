@@ -11,7 +11,7 @@ function getCleanValue(val, fallback) {
 const rawApiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 const apiKey = (rawApiKey && rawApiKey.startsWith("AIzaSy"))
   ? rawApiKey.replace(/^["']|["']$/g, "").trim()
-  : "AIzaSyBQbrA8ZVPcyhbvRbllCAMeABCBw0PRYFM";
+  : "AIzaSyBQbrA8ZVPcyhbvRblLCAmEABCBw0PRYFM";
 
 const firebaseConfig = {
   apiKey: apiKey,
