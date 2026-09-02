@@ -6141,6 +6141,22 @@ html, body {
   box-sizing: border-box !important;
 }
 
+/* টেবিল স্ক্রল র‍্যাপার */
+.admin-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+}
+.admin-table-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+.admin-table-scroll::-webkit-scrollbar-thumb {
+  background: #f43f5e;
+  border-radius: 10px;
+}
+
 @media (max-width: 768px) {
   /* বাড়তি padding মোবাইলে জায়গা খেয়ে ফেলে */
   .admin-root [style*="padding: 40"],
@@ -6150,26 +6166,42 @@ html, body {
     padding: 12px !important;
   }
 
-  /* fixed width container গুলো মুক্ত করা */
-  .admin-root [style*="width: 1"],
-  .admin-root [style*="maxWidth"],
-  .admin-root [style*="max-width"] {
+  /* fixed width container গুলো মুক্ত করা (টেবিল বাদে) */
+  .admin-root [style*="width: 1"]:not(table),
+  .admin-root [style*="maxWidth"]:not(table),
+  .admin-root [style*="max-width"]:not(table) {
     width: 100% !important;
     max-width: 100% !important;
   }
 
-  /* টেবিল যেন কাটার বদলে scroll হয় */
+  /* টেবিল আগের মতো অক্ষত থাকবে, কলাম স্বাভাবিক থাকবে */
   .admin-root table {
-    display: block !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
+    display: table !important;
     width: 100% !important;
-    -webkit-overflow-scrolling: touch;
+    min-width: 640px !important;
+    border-collapse: collapse;
+    white-space: normal !important;
   }
-  .admin-root table td,
-  .admin-root table th {
-    font-size: 12px !important;
-    padding: 6px 8px !important;
+  .admin-root th,
+  .admin-root td {
+    font-size: 11px !important;
+    padding: 7px 8px !important;
+    white-space: nowrap;
+  }
+  /* প্রথম কলাম (প্রোডাক্ট নাম) স্টিকি ও র‍্যাপযোগ্য */
+  .admin-root td:first-child,
+  .admin-root th:first-child {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 2;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+    white-space: normal;
+    min-width: 140px;
+  }
+  .admin-root thead th:first-child {
+    background: #f1f5f9;
+    z-index: 3;
   }
 
   /* stat card গুলো ২টা পাশাপাশি */
@@ -6200,4 +6232,11 @@ html, body {
     font-size: 14px !important; /* iOS এ auto-zoom ঠেকায় */
   }
 }
+
+@media (max-width: 640px) {
+  .admin-root .hide-sm {
+    display: none !important;
+  }
+}
+
 

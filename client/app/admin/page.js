@@ -1618,9 +1618,9 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Desktop: Table View */}
-              <div className="hidden md:block table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "700px" }}>
+              {/* Desktop & Mobile Table View */}
+              <div className="admin-table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "640px" }}>
                   <thead style={{ background: "#f1f5f9" }}>
                     <tr>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Date</th>
@@ -1629,7 +1629,7 @@ export default function AdminPage() {
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Qty</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Disc. %</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }} className="hide-sm">Disc. %</th>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Profit %</th>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Net Profit</th>
                     </tr>
@@ -1646,7 +1646,7 @@ export default function AdminPage() {
                           <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{item.buyPrice} Tk</td>
                           <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.sellPrice} Tk</td>
                           <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "700" }}>{item.qty}</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#ea580c", fontWeight: "700" }}>{item.discountPct}%</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#ea580c", fontWeight: "700" }} className="hide-sm">{item.discountPct}%</td>
                           <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#16a34a", fontWeight: "800" }}>{item.profitPct}%</td>
                           <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{item.rowProfit} Tk</td>
                         </tr>
@@ -1699,62 +1699,18 @@ export default function AdminPage() {
                 <StatCard label="Total Asset Value" value={`${totalStockValue} Tk`} tone="amber" icon="💰" />
               </div>
 
-              {/* Mobile: Product Card View */}
-              <div className="md:hidden" style={{ display: "grid", gap: "8px" }}>
-                {filteredStock.length === 0 ? (
-                  <p style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>No products found in this category.</p>
-                ) : (
-                  filteredStock.map((p) => {
-                    const qty = Number(p.stockQuantity || 0);
-                    const buyPrice = Number(p.purchasePrice || 0);
-                    const sellPrice = Number(p.offerPrice || p.originalPrice || 0);
-                    const catName = categories.find(c => c._id === (p.category?._id || p.category))?.name || "Uncategorized";
-                    return (
-                      <div key={p._id} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "10px", boxSizing: "border-box" }}>
-                        <p style={{ margin: 0, fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>{p.name}</p>
-                        <p style={{ margin: "2px 0 6px", fontSize: "11px", color: "#64748b" }}>{catName}</p>
-
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "6px", borderRadius: "8px" }}>
-                          <div>
-                            <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>কেনা</p>
-                            <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{buyPrice} Tk</p>
-                          </div>
-                          <div>
-                            <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>বিক্রি</p>
-                            <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{sellPrice} Tk</p>
-                          </div>
-                          <div>
-                            <p style={{ margin: 0, fontSize: "10px", color: "#2563eb" }}>স্টক</p>
-                            <p style={{ margin: "1px 0 0", fontSize: "13px", fontWeight: "800", color: qty === 0 ? "#dc2626" : "#2563eb" }}>{qty}</p>
-                          </div>
-                        </div>
-
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "6px", paddingTop: "6px", borderTop: "1px dashed #e2e8f0" }}>
-                          <span style={{ fontSize: "10px", fontWeight: "800", padding: "2px 6px", borderRadius: "20px", background: qty === 0 ? "#fee2e2" : qty <= 5 ? "#ffedd5" : "#ecfdf5", color: qty === 0 ? "#dc2626" : qty <= 5 ? "#c2410c" : "#166534" }}>
-                            {qty === 0 ? "Out of Stock" : qty <= 5 ? "Low Stock" : "In Stock"}
-                          </span>
-                          <span style={{ fontSize: "11px", fontWeight: "700", color: "#334155" }}>
-                            ভ্যালু: <strong style={{ color: "#2563eb" }}>{qty * buyPrice} Tk</strong>
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {/* Desktop: Table View */}
-              <div className="hidden md:block table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "700px" }}>
+              {/* Mobile & Desktop: Table View with Admin Table Scroll */}
+              <div className="admin-table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "640px" }}>
                   <thead style={{ background: "#f1f5f9" }}>
                     <tr>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Category</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }} className="hide-sm">Category</th>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>In Stock</th>
                       <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Status</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Asset Value</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }} className="hide-sm">Asset Value</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1779,7 +1735,7 @@ export default function AdminPage() {
                         return (
                           <tr key={item._id} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }} className="hide-sm">
                               {categories.find(c => c._id === (item.category?._id || item.category))?.name || "Unknown"}
                             </td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{buyPrice} Tk</td>
@@ -1790,7 +1746,7 @@ export default function AdminPage() {
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "800", color: statusColor, whiteSpace: "nowrap" }}>
                               {statusText}
                             </td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{assetValue} Tk</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }} className="hide-sm">{assetValue} Tk</td>
                           </tr>
                         );
                       })
