@@ -160,7 +160,13 @@ export async function POST(req) {
     const threshold = Number(settings.freeDeliveryThreshold ?? 0);
     const deliveryCharge = threshold > 0 && subtotal >= threshold ? 0 : baseCharge;
 
-    const user = await getUserFromRequest(req);
+    let user = null;
+    try {
+      user = await getUserFromRequest(req);
+    } catch (e) {
+      console.error("FIREBASE AUTH SKIP:", e?.message);
+      user = null;
+    }
 
     // ---- orderNumber, collision হলে ৩ বার retry ----
     let order = null;
@@ -189,6 +195,8 @@ export async function POST(req) {
         throw e;
       }
     }
+
+    if (!order) throw new Error("অর্ডার নাম্বার তৈরি করা যাচ্ছে না (nextOrderIdentity)");
 
     return NextResponse.json(
       {
