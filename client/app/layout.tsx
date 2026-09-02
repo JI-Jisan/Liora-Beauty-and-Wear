@@ -10,6 +10,12 @@ export const metadata: Metadata = {
     "Shop 100% authentic cosmetics, luxury perfumes, skincare, and trendy fashion wear in Bangladesh. Easy Cash on Delivery nationwide.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 import LayoutChrome from "@/components/LayoutChrome";
 import { AuthProvider } from "@/components/AuthProvider";
 

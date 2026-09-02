@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { API_BASE_URL, getAuthHeaders, getImageUrl } from "@/lib/api";
 import ProductForm from "@/components/admin/ProductForm";
 import CategoryManager from "@/components/admin/CategoryManager";
+import StatCard from "@/components/StatCard";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -712,30 +713,28 @@ export default function AdminPage() {
         </ul>
       </aside>
 
-      <section className="jt-admin-main">
-        {/* Modern Admin Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#ffffff", padding: "14px 16px", borderRadius: "16px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)", marginBottom: "24px" }}>
-          
+      <section className="jt-admin-main admin-wrap" style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", boxSizing: "border-box" }}>
+        {/* Sticky Admin Header */}
+        <header style={{ position: "sticky", top: 0, zIndex: 40, background: "rgba(255,255,255,0.96)", backdropFilter: "blur(8px)", borderBottom: "1px solid #e2e8f0", padding: "10px 12px", borderRadius: "14px", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
           <button
             type="button"
             onClick={() => setIsSidebarOpen(true)}
-            style={{ background: "#0f172a", color: "#ffffff", border: "none", padding: "8px 14px", borderRadius: "10px", fontWeight: "700", fontSize: "13px", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}
+            style={{ flexShrink: 0, background: "#0f172a", color: "#ffffff", border: "none", padding: "8px 12px", borderRadius: "8px", fontWeight: "700", fontSize: "13px", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
           >
-            ☰ Menu
+            ☰ <span className="hidden sm:inline">Menu</span>
           </button>
 
-          <h1 style={{ fontSize: "16px", margin: 0, fontWeight: "900", color: "#0f172a", textAlign: "center", letterSpacing: "0.5px" }}>
+          <h1 style={{ flex: 1, textAlign: "center", margin: 0, fontWeight: "900", color: "#0f172a", fontSize: "15px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", letterSpacing: "0.5px" }}>
             LIORA ADMIN
           </h1>
 
           <button
             onClick={handleLogout}
-            style={{ background: "#fee2e2", color: "#dc2626", border: "none", padding: "8px 14px", borderRadius: "10px", fontWeight: "800", fontSize: "13px", cursor: "pointer" }}
+            style={{ flexShrink: 0, background: "#fee2e2", color: "#dc2626", border: "none", padding: "8px 12px", borderRadius: "8px", fontWeight: "800", fontSize: "12px", cursor: "pointer" }}
           >
             Logout
           </button>
-
-        </div>
+        </header>
 
         <div className="jt-admin-grid">
           
@@ -1547,18 +1546,18 @@ export default function AdminPage() {
 
           {/* Analytics & Profit Reports Tab */}
           {activeTab === "reports" && (
-            <div className="jt-admin-panel jt-admin-panel-wide">
-              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
+            <div className="jt-admin-panel jt-admin-panel-wide admin-card">
+              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
                 <div>
-                  <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "20px", fontWeight: "800" }}>📊 Sales & Profit Report</h2>
-                  <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>আপনার ব্যবসার রিয়েল-টাইম লাভ-ক্ষতির হিসাব (সোয়াইপ করে সম্পূর্ণ টেবিল দেখুন)</p>
+                  <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>📊 Sales & Profit Report</h2>
+                  <p style={{ margin: 0, color: "#64748b", fontSize: "12px" }}>আপনার ব্যবসার রিয়েল-টাইম লাভ-ক্ষতির হিসাব</p>
                 </div>
                 
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
                   <select 
                     value={reportFilter} 
                     onChange={(e) => setReportFilter(e.target.value)}
-                    style={{ flex: 1, minWidth: "160px", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "13px" }}
+                    style={{ flex: 1, minWidth: "140px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "12px" }}
                   >
                     <option value="1">📅 Today (আজকের হিসাব)</option>
                     <option value="7">📅 Last 7 Days (উইকলি)</option>
@@ -1570,35 +1569,57 @@ export default function AdminPage() {
 
                   <button
                     onClick={() => window.print()}
-                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "10px 14px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px" }}
+                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "8px 12px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px" }}
                   >
-                    🖨️ Print PDF
+                    🖨️ Print
                   </button>
                 </div>
               </div>
 
-              {/* Summary Cards */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginBottom: "20px" }}>
-                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "12px 14px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#166534" }}>💵 Total Revenue</span>
-                  <h2 style={{ margin: "4px 0 0", color: "#15803d", fontSize: "20px", fontWeight: "800" }}>{totalRevenue} Tk</h2>
-                </div>
-                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "12px 14px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#991b1b" }}>📦 Total Cost</span>
-                  <h2 style={{ margin: "4px 0 0", color: "#b91c1c", fontSize: "20px", fontWeight: "800" }}>{totalCost} Tk</h2>
-                </div>
-                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "12px 14px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: "800", color: "#1e40af" }}>✨ Net Profit</span>
-                  <h2 style={{ margin: "4px 0 0", color: "#2563eb", fontSize: "20px", fontWeight: "800" }}>{totalProfit} Tk</h2>
-                </div>
-                <div style={{ background: "#fdf4ff", border: "1px solid #f9a8d4", padding: "12px 14px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#86198f" }}>📈 Margin</span>
-                  <h2 style={{ margin: "4px 0 0", color: "#a21caf", fontSize: "20px", fontWeight: "800" }}>{overallProfitPct}%</h2>
-                </div>
+              {/* Stat Cards - 2 cols on mobile */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
+                <StatCard label="Total Revenue" value={`${totalRevenue} Tk`} tone="green" icon="💵" />
+                <StatCard label="Total Cost" value={`${totalCost} Tk`} tone="red" icon="📦" />
+                <StatCard label="Net Profit" value={`${totalProfit} Tk`} tone="blue" icon="✨" />
+                <StatCard label="Margin" value={`${overallProfitPct}%`} tone="pink" icon="📈" />
               </div>
 
-              {/* Excel-like Table View */}
-              <div className="jt-table-scroll-wrap" style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", width: "100%", maxWidth: "100%", background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
+              {/* Mobile: Card View */}
+              <div className="md:hidden" style={{ display: "grid", gap: "8px" }}>
+                {soldItems.length === 0 ? (
+                  <p style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>No sales data found for the selected period.</p>
+                ) : (
+                  soldItems.map((item, idx) => (
+                    <div key={idx} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "10px", boxSizing: "border-box" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "11px", fontWeight: "800", color: "#2563eb", background: "#eff6ff", padding: "2px 6px", borderRadius: "6px" }}>
+                          {item.orderId}
+                        </span>
+                        <span style={{ fontSize: "11px", color: "#64748b" }}>{item.date}</span>
+                      </div>
+                      <p style={{ margin: "0 0 6px", fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>{item.name}</p>
+                      
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "6px", borderRadius: "8px" }}>
+                        <div>
+                          <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>কেনা</p>
+                          <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{item.buyPrice} Tk</p>
+                        </div>
+                        <div>
+                          <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>বিক্রি ({item.qty})</p>
+                          <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{item.sellPrice} Tk</p>
+                        </div>
+                        <div>
+                          <p style={{ margin: 0, fontSize: "10px", color: "#16a34a" }}>নিট লাভ</p>
+                          <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "800", color: "#16a34a" }}>{item.rowProfit} Tk</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop: Table View */}
+              <div className="hidden md:block table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "700px" }}>
                   <thead style={{ background: "#f1f5f9" }}>
                     <tr>
@@ -1639,21 +1660,21 @@ export default function AdminPage() {
 
           {/* Inventory & Stock Management Tab */}
           {activeTab === "stock" && (
-            <div className="jt-admin-panel jt-admin-panel-wide">
-              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
+            <div className="jt-admin-panel jt-admin-panel-wide admin-card">
+              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
                 <div>
-                  <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "20px", fontWeight: "800" }}>📋 Inventory & Stock Report</h2>
-                  <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>আপনার গোডাউনের রিয়েল-টাইম স্টক এবং ভ্যালুয়েশন রিপোর্ট</p>
+                  <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>📋 Inventory & Stock Report</h2>
+                  <p style={{ margin: 0, color: "#64748b", fontSize: "12px" }}>আপনার গোডাউনের রিয়েল-টাইম স্টক এবং ভ্যালুয়েশন রিপোর্ট</p>
                 </div>
                 
-                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
                   {/* Category Filter */}
                   <select 
                     value={stockCategoryFilter} 
                     onChange={(e) => setStockCategoryFilter(e.target.value)}
-                    style={{ flex: 1, minWidth: "160px", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "13px" }}
+                    style={{ flex: 1, minWidth: "140px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "12px" }}
                   >
-                    <option value="all">📁 All Categories (সব ক্যাটাগরি)</option>
+                    <option value="all">📁 All Categories</option>
                     {categories.map((cat) => (
                       <option key={cat._id} value={cat._id}>
                         {cat.name}
@@ -1663,35 +1684,67 @@ export default function AdminPage() {
 
                   <button
                     onClick={() => window.print()}
-                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "10px 14px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px" }}
+                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "8px 12px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px" }}
                   >
-                    🖨️ Print PDF
+                    🖨️ Print
                   </button>
                 </div>
               </div>
 
-              {/* Stock Summary Cards */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginBottom: "20px" }}>
-                <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", padding: "12px 14px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>📦 Total Items</span>
-                  <h2 style={{ margin: "4px 0 0", color: "#0f172a", fontSize: "20px", fontWeight: "800" }}>{filteredStock.length}</h2>
-                </div>
-                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "12px 14px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#1e40af" }}>🔢 Total Units</span>
-                  <h2 style={{ margin: "4px 0 0", color: "#2563eb", fontSize: "20px", fontWeight: "800" }}>{totalStockItems} Pcs</h2>
-                </div>
-                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "12px 14px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: "800", color: "#991b1b" }}>⚠️ Low / Out</span>
-                  <h2 style={{ margin: "4px 0 0", color: "#dc2626", fontSize: "20px", fontWeight: "800" }}>{lowStockCount + outOfStockCount}</h2>
-                </div>
-                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "12px 14px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#166534" }}>💰 Asset Value</span>
-                  <h2 style={{ margin: "4px 0 0", color: "#15803d", fontSize: "20px", fontWeight: "800" }}>{totalStockValue} Tk</h2>
-                </div>
+              {/* Stock Stat Cards - 2 cols on mobile */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
+                <StatCard label="Total Products" value={`${filteredStock.length} Items`} tone="blue" icon="📦" />
+                <StatCard label="Total Units" value={`${totalStockItems} Pcs`} tone="green" icon="🔢" />
+                <StatCard label="Low / Out Stock" value={`${lowStockCount + outOfStockCount} Items`} tone="red" icon="⚠️" />
+                <StatCard label="Total Asset Value" value={`${totalStockValue} Tk`} tone="amber" icon="💰" />
               </div>
 
-              {/* Excel-like Stock Table */}
-              <div className="jt-table-scroll-wrap" style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", width: "100%", maxWidth: "100%", background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
+              {/* Mobile: Product Card View */}
+              <div className="md:hidden" style={{ display: "grid", gap: "8px" }}>
+                {filteredStock.length === 0 ? (
+                  <p style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>No products found in this category.</p>
+                ) : (
+                  filteredStock.map((p) => {
+                    const qty = Number(p.stockQuantity || 0);
+                    const buyPrice = Number(p.purchasePrice || 0);
+                    const sellPrice = Number(p.offerPrice || p.originalPrice || 0);
+                    const catName = categories.find(c => c._id === (p.category?._id || p.category))?.name || "Uncategorized";
+                    return (
+                      <div key={p._id} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "10px", boxSizing: "border-box" }}>
+                        <p style={{ margin: 0, fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>{p.name}</p>
+                        <p style={{ margin: "2px 0 6px", fontSize: "11px", color: "#64748b" }}>{catName}</p>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "6px", borderRadius: "8px" }}>
+                          <div>
+                            <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>কেনা</p>
+                            <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{buyPrice} Tk</p>
+                          </div>
+                          <div>
+                            <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>বিক্রি</p>
+                            <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{sellPrice} Tk</p>
+                          </div>
+                          <div>
+                            <p style={{ margin: 0, fontSize: "10px", color: "#2563eb" }}>স্টক</p>
+                            <p style={{ margin: "1px 0 0", fontSize: "13px", fontWeight: "800", color: qty === 0 ? "#dc2626" : "#2563eb" }}>{qty}</p>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "6px", paddingTop: "6px", borderTop: "1px dashed #e2e8f0" }}>
+                          <span style={{ fontSize: "10px", fontWeight: "800", padding: "2px 6px", borderRadius: "20px", background: qty === 0 ? "#fee2e2" : qty <= 5 ? "#ffedd5" : "#ecfdf5", color: qty === 0 ? "#dc2626" : qty <= 5 ? "#c2410c" : "#166534" }}>
+                            {qty === 0 ? "Out of Stock" : qty <= 5 ? "Low Stock" : "In Stock"}
+                          </span>
+                          <span style={{ fontSize: "11px", fontWeight: "700", color: "#334155" }}>
+                            ভ্যালু: <strong style={{ color: "#2563eb" }}>{qty * buyPrice} Tk</strong>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Desktop: Table View */}
+              <div className="hidden md:block table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "700px" }}>
                   <thead style={{ background: "#f1f5f9" }}>
                     <tr>

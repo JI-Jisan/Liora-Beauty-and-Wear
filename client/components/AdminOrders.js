@@ -247,20 +247,40 @@ export default function AdminOrders() {
     <div className="jt-admin-orders-container">
       {/* Header Bar with Search & Filter Tabs */}
       <div className="jt-orders-header-bar">
-        <div className="jt-orders-search">
+        <div className="jt-orders-search" style={{ marginBottom: "10px" }}>
           <input
             type="text"
-            placeholder="Search by customer name, phone, or order ID..."
+            placeholder="Search by name, phone, or order ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px" }}
           />
         </div>
 
-        <div className="jt-orders-filter-tabs">
+        <div
+          className="jt-orders-filter-tabs"
+          style={{
+            display: "flex",
+            gap: "6px",
+            overflowX: "auto",
+            paddingBottom: "4px",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+          }}
+        >
           <button
             type="button"
             className={`jt-tab ${filterStatus === "All" ? "active" : ""}`}
             onClick={() => setFilterStatus("All")}
+            style={{
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+              padding: "6px 14px",
+              borderRadius: "20px",
+              fontSize: "12px",
+              fontWeight: "700",
+              cursor: "pointer",
+            }}
           >
             All ({orders.length})
           </button>
@@ -272,6 +292,15 @@ export default function AdminOrders() {
                 type="button"
                 className={`jt-tab ${filterStatus === st ? "active" : ""}`}
                 onClick={() => setFilterStatus(st)}
+                style={{
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
+                  padding: "6px 14px",
+                  borderRadius: "20px",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                }}
               >
                 {st} ({count})
               </button>
@@ -295,19 +324,16 @@ export default function AdminOrders() {
             const stColor = getStatusColor(order.status);
 
             return (
-              <div key={order._id} className="jt-admin-order-card">
+              <div key={order._id} className="jt-admin-order-card admin-card" style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
                 {/* Card Top: Order ID & Status Badge */}
-                <div className="jt-admin-order-head">
-                  <div className="jt-admin-order-meta">
-                    <span className="jt-order-num-tag">
+                <div className="jt-admin-order-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+                  <div className="jt-admin-order-meta" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px" }}>
+                    <span className="jt-order-num-tag" style={{ background: "#0f172a", color: "#fff", fontSize: "12px", padding: "4px 8px", borderRadius: "6px", fontWeight: "800" }}>
                       #{order.serial ? `${order.serial} | ` : ""}{order.orderNumber || order._id}
                     </span>
-                    <span className="jt-order-date">
+                    <span className="jt-order-date" style={{ fontSize: "11px", color: "#64748b" }}>
                       {order.createdAt
-                        ? new Date(order.createdAt).toLocaleString("en-US", {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })
+                        ? new Date(order.createdAt).toLocaleDateString("bn-BD")
                         : "Recent"}
                     </span>
                   </div>
@@ -318,6 +344,10 @@ export default function AdminOrders() {
                       background: stColor.bg,
                       color: stColor.color,
                       borderColor: stColor.border,
+                      fontSize: "11px",
+                      padding: "3px 8px",
+                      borderRadius: "6px",
+                      fontWeight: "800",
                     }}
                   >
                     {order.status}
@@ -334,11 +364,11 @@ export default function AdminOrders() {
                     <p>
                       <strong>Phone:</strong> {order.phone}
                     </p>
-                    <p>
+                    <p style={{ wordBreak: "break-word" }}>
                       <strong>Address:</strong> {order.address}
                     </p>
                     {order.note && (
-                      <p className="jt-order-note">
+                      <p className="jt-order-note" style={{ wordBreak: "break-word" }}>
                         <strong>Note:</strong> {order.note}
                       </p>
                     )}

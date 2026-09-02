@@ -6100,3 +6100,36 @@ button {
   .print-area svg { page-break-inside: avoid; break-inside: avoid; }
   @page { size: A5; margin: 8mm; }
 }
+
+/* Global Mobile Overflow Fix */
+html, body {
+  overflow-x: hidden;
+}
+
+/* টেবিল স্ক্রল করার সময় পরিষ্কার বোঝা যাবে */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+.table-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.table-scroll::-webkit-scrollbar-thumb {
+  background: #f43f5e;
+  border-radius: 10px;
+}
+
+/* মোবাইলে অ্যাডমিন পেজে বাড়তি প্যাডিং কমানো */
+@media (max-width: 640px) {
+  .admin-wrap {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  .admin-card {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+}
