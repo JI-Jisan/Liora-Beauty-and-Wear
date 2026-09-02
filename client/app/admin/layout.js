@@ -1,4 +1,3 @@
-import OverflowDebug from "@/components/OverflowDebug";
 
 export const metadata = {
   title: "Admin Panel | LIORA Beauty & Wear",
@@ -15,7 +14,6 @@ export const viewport = {
 export default function AdminLayout({ children }) {
   return (
     <div className="admin-root" style={{ minHeight: "100vh", background: "#faf7f5", width: "100%", overflowX: "hidden" }}>
-      <OverflowDebug />
       {children}
     </div>
   );

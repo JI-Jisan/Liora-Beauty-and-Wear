@@ -1548,7 +1548,7 @@ export default function AdminPage() {
 
           {/* Analytics & Profit Reports Tab */}
           {activeTab === "reports" && (
-            <div className="jt-admin-panel jt-admin-panel-wide admin-card">
+            <div className="print-area jt-admin-panel jt-admin-panel-wide admin-card">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
                 <div>
                   <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>📊 Sales & Profit Report</h2>
@@ -1579,7 +1579,7 @@ export default function AdminPage() {
               </div>
 
               {/* Stat Cards - 2 cols on mobile, 4 cols on print/desktop */}
-              <div className="admin-stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
+              <div className="stat-grid admin-stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
                 <StatCard label="Total Revenue" value={`${totalRevenue} Tk`} tone="green" icon="💵" />
                 <StatCard label="Total Cost" value={`${totalCost} Tk`} tone="red" icon="📦" />
                 <StatCard label="Net Profit" value={`${totalProfit} Tk`} tone="blue" icon="✨" />
@@ -1693,7 +1693,7 @@ export default function AdminPage() {
               ) : (
                 /* Desktop & Mobile Table View */
                 <div className="admin-table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "640px" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
                     <thead style={{ background: "#f1f5f9" }}>
                       <tr>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Date</th>
@@ -1734,7 +1734,7 @@ export default function AdminPage() {
 
           {/* Inventory & Stock Management Tab */}
           {activeTab === "stock" && (
-            <div className="jt-admin-panel jt-admin-panel-wide admin-card">
+            <div className="print-area jt-admin-panel jt-admin-panel-wide admin-card">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
                 <div>
                   <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>📋 Inventory & Stock Report</h2>
@@ -1766,7 +1766,7 @@ export default function AdminPage() {
               </div>
 
               {/* Stock Stat Cards - 2 cols on mobile, 4 cols on print/desktop */}
-              <div className="admin-stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
+              <div className="stat-grid admin-stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
                 <StatCard label="Total Products" value={`${filteredStock.length} Items`} tone="blue" icon="📦" />
                 <StatCard label="Total Units" value={`${totalStockItems} Pcs`} tone="green" icon="🔢" />
                 <StatCard label="Low / Out Stock" value={`${lowStockCount + outOfStockCount} Items`} tone="red" icon="⚠️" />
@@ -1871,7 +1871,7 @@ export default function AdminPage() {
               ) : (
                 /* Mobile & Desktop: Table View with Admin Table Scroll */
                 <div className="admin-table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "640px" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
                     <thead style={{ background: "#f1f5f9" }}>
                       <tr>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>

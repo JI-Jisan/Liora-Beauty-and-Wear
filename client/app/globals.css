@@ -6210,151 +6210,90 @@ html, body {
    GLOBAL MASTER PRINT STYLES (End of file to guarantee precedence)
    ========================================================= */
 @media print {
-  @page {
-    size: A4 portrait;
-    margin: 10mm;
+  @page { size: A4 portrait; margin: 10mm; }
+
+  /* debug outline / shadow বন্ধ */
+  * { outline: none !important; box-shadow: none !important; }
+
+  html, body {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* 1. Hide interactive non-printable elements */
-  .no-print,
-  .no-print *,
-  header,
-  footer,
-  nav,
-  button,
-  .jt-admin-top,
-  .jt-admin-sidebar,
-  .jt-admin-sidebar-overlay,
-  .jt-admin-menu-toggle-btn,
-  .jt-admin-floating-top-btn,
-  .mobile-bottom-nav {
+  /* navbar, sidebar, footer, button লুকাও */
+  nav, footer, aside, header, button,
+  .no-print, .admin-sidebar, .jt-admin-sidebar, .jt-admin-sidebar-overlay, .mobile-bottom-nav, .jt-admin-top, .jt-admin-floating-top-btn {
     display: none !important;
   }
 
-  /* 2. Reset html, body, and all root wrappers to 100% width with equal margins */
-  html, body, .jt-root-wrapper, .admin-root, .jt-admin-dashboard {
-    background: #ffffff !important;
-    color: #000000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+  /* Containers reset to full width */
+  .admin-root, .jt-admin-dashboard, .jt-admin-main, .admin-wrap, .jt-admin-grid {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    display: block !important;
-    overflow: visible !important;
-    height: auto !important;
-    min-height: auto !important;
-  }
-
-  .jt-admin-main,
-  .admin-wrap {
     margin: 0 !important;
     padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
     display: block !important;
     overflow: visible !important;
     box-sizing: border-box !important;
   }
 
-  .jt-admin-grid {
-    display: block !important;
+  /* report wrapper — দুই পাশে সমান গ্যাপ */
+  .print-area {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .jt-admin-panel,
-  .jt-admin-panel-wide,
-  .admin-card {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     border: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+    box-sizing: border-box !important;
     overflow: visible !important;
-    page-break-inside: auto !important;
+    display: block !important;
   }
 
-  /* 3. Stat cards stretch 100% across the top with 2 equal columns matching the table */
-  .admin-stat-grid {
+  /* stat card গুলো এক লাইনে ৪টা, কাটবে না */
+  .stat-grid {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
     width: 100% !important;
-    max-width: 100% !important;
-    margin-bottom: 14px !important;
   }
+  .stat-grid > * { min-width: 0 !important; padding: 6px 8px !important; }
 
-  /* 4. Table fills 100% width cleanly so left gap equals right gap */
-  .admin-table-scroll {
+  /* টেবিল পুরো পেজে fit */
+  .admin-table-scroll { overflow: visible !important; width: 100% !important; }
+
+  table {
     width: 100% !important;
     max-width: 100% !important;
-    overflow: visible !important;
-    display: block !important;
-    background: transparent !important;
-    border: none !important;
-    margin: 8px 0 0 0 !important;
-    padding: 0 !important;
-  }
-
-  .admin-table-scroll table {
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
+    table-layout: fixed !important;
     border-collapse: collapse !important;
-    table-layout: auto !important;
-    display: table !important;
   }
-
-  .admin-table-scroll th,
-  .admin-table-scroll td {
-    padding: 7px 8px !important;
-    font-size: 11.5px !important;
-    border: 1px solid #cbd5e1 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Product name wraps to multiple lines if long, allowing other columns to stay neat */
-  .admin-stock-name-cell,
-  .admin-table-scroll td:nth-child(3),
-  .admin-table-scroll td:first-child {
-    white-space: normal !important;
+  th, td {
+    font-size: 8.5pt !important;
+    padding: 3px 5px !important;
     word-break: break-word !important;
+    white-space: normal !important;
   }
 
-  .admin-table-scroll td:not(.admin-stock-name-cell) {
-    white-space: nowrap !important;
-  }
+  /* কলামের অনুপাত */
+  th:nth-child(1), td:nth-child(1) { width: 30% !important; text-align: left; }
+  th:nth-child(2), td:nth-child(2) { width: 13% !important; }
+  th:nth-child(3), td:nth-child(3) { width: 10% !important; }
+  th:nth-child(4), td:nth-child(4) { width: 10% !important; }
+  th:nth-child(5), td:nth-child(5) { width: 9%  !important; }
+  th:nth-child(6), td:nth-child(6) { width: 14% !important; }
+  th:nth-child(7), td:nth-child(7) { width: 14% !important; }
 
-  /* 5. Keep elements visible & avoid breaking cards/rows across pages */
-  body, body * {
-    visibility: visible !important;
-  }
+  tr { page-break-inside: avoid; }
+  thead { display: table-header-group; }
 
-  tr, .admin-card, .jt-stat-card {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Isolated print-area support if used */
-  body:has(.print-area) * { visibility: hidden; }
-  body:has(.print-area) .print-area,
-  body:has(.print-area) .print-area * { visibility: visible; }
-  body:has(.print-area) .print-area {
-    position: absolute; left: 0; top: 0; width: 100%;
-  }
+  body, body * { visibility: visible !important; }
 }
 
 
