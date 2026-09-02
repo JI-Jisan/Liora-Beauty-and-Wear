@@ -2,7 +2,6 @@ import Link from "next/link";
 import { connectToDatabase } from "@/lib/db";
 import { Brand } from "@/lib/models";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 
 export const revalidate = 60; // optionally revalidate every minute
 
@@ -50,7 +49,6 @@ export default async function BrandsPage() {
           </div>
         )}
       </div>
-      <Footer />
     </>
   );
 }

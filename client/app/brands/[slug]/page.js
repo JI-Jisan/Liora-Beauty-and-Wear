@@ -2,7 +2,6 @@
 
 import { useEffect, useState, use } from "react";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
 import { API_BASE_URL } from "@/lib/api";
 
@@ -52,8 +51,6 @@ export default function BrandProductsPage({ params }) {
           )}
         </div>
       </section>
-
-      <Footer />
     </main>
   );
 }
