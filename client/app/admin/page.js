@@ -25,6 +25,8 @@ export default function AdminPage() {
   const [reportFilter, setReportFilter] = useState("30"); // ডিফল্ট ৩০ দিন (মান্থলি)
   const [reportData, setReportData] = useState([]);
   const [stockCategoryFilter, setStockCategoryFilter] = useState("all");
+  const [stockViewMode, setStockViewMode] = useState("cards"); // 'cards' or 'table'
+  const [reportViewMode, setReportViewMode] = useState("cards"); // 'cards' or 'table'
 
   // Manage Products Advanced Controls State
   const [productSearch, setProductSearch] = useState("");
@@ -1618,43 +1620,115 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Desktop & Mobile Table View */}
-              <div className="admin-table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "640px" }}>
-                  <thead style={{ background: "#f1f5f9" }}>
-                    <tr>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Date</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Order ID</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Qty</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }} className="hide-sm">Disc. %</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Profit %</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Net Profit</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {soldItems.length === 0 ? (
-                      <tr><td colSpan="9" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
-                    ) : (
-                      soldItems.map((item, idx) => (
-                        <tr key={idx} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>{item.date}</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#2563eb", fontWeight: "700", whiteSpace: "nowrap" }}>{item.orderId}</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{item.buyPrice} Tk</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.sellPrice} Tk</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "700" }}>{item.qty}</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#ea580c", fontWeight: "700" }} className="hide-sm">{item.discountPct}%</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#16a34a", fontWeight: "800" }}>{item.profitPct}%</td>
-                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{item.rowProfit} Tk</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+              {/* View Mode Switcher */}
+              <div style={{ display: "flex", gap: "6px", background: "#e2e8f0", padding: "4px", borderRadius: "10px", width: "fit-content", marginBottom: "16px" }}>
+                <button
+                  type="button"
+                  onClick={() => setReportViewMode("cards")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: "800",
+                    border: "none",
+                    cursor: "pointer",
+                    background: reportViewMode === "cards" ? "#0f172a" : "transparent",
+                    color: reportViewMode === "cards" ? "#ffffff" : "#475569",
+                  }}
+                >
+                  📱 Cards View (মোবাইল ফ্রেন্ডলি)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReportViewMode("table")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: "800",
+                    border: "none",
+                    cursor: "pointer",
+                    background: reportViewMode === "table" ? "#0f172a" : "transparent",
+                    color: reportViewMode === "table" ? "#ffffff" : "#475569",
+                  }}
+                >
+                  📊 Table View (ফুল টেবিল)
+                </button>
               </div>
+
+              {reportViewMode === "cards" ? (
+                /* Cards View */
+                <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+                  {soldItems.length === 0 ? (
+                    <p style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>No sales data found for the selected period.</p>
+                  ) : (
+                    soldItems.map((item, idx) => (
+                      <div key={idx} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "12px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                          <span style={{ fontSize: "11px", fontWeight: "800", color: "#2563eb", background: "#eff6ff", padding: "3px 8px", borderRadius: "6px" }}>
+                            {item.orderId}
+                          </span>
+                          <span style={{ fontSize: "11px", color: "#64748b" }}>{item.date}</span>
+                        </div>
+                        <p style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: "800", color: "#0f172a", wordBreak: "break-word" }}>{item.name}</p>
+                        
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "8px", borderRadius: "10px", marginBottom: "8px" }}>
+                          <div>
+                            <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>কেনা</p>
+                            <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: "700" }}>{item.buyPrice} ৳</p>
+                          </div>
+                          <div>
+                            <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>বিক্রি ({item.qty}টি)</p>
+                            <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: "700" }}>{item.sellPrice} ৳</p>
+                          </div>
+                          <div>
+                            <p style={{ margin: 0, fontSize: "10px", color: "#16a34a" }}>নিট লাভ</p>
+                            <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: "900", color: "#16a34a" }}>{item.rowProfit} ৳</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                /* Desktop & Mobile Table View */
+                <div className="admin-table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "640px" }}>
+                    <thead style={{ background: "#f1f5f9" }}>
+                      <tr>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Date</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Order ID</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Qty</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Disc. %</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Profit %</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Net Profit</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {soldItems.length === 0 ? (
+                        <tr><td colSpan="9" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
+                      ) : (
+                        soldItems.map((item, idx) => (
+                          <tr key={idx} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>{item.date}</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#2563eb", fontWeight: "700", whiteSpace: "nowrap" }}>{item.orderId}</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{item.buyPrice} Tk</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.sellPrice} Tk</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "700" }}>{item.qty}</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#ea580c", fontWeight: "700" }}>{item.discountPct}%</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#16a34a", fontWeight: "800" }}>{item.profitPct}%</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{item.rowProfit} Tk</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
@@ -1699,61 +1773,172 @@ export default function AdminPage() {
                 <StatCard label="Total Asset Value" value={`${totalStockValue} Tk`} tone="amber" icon="💰" />
               </div>
 
-              {/* Mobile & Desktop: Table View with Admin Table Scroll */}
-              <div className="admin-table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "640px" }}>
-                  <thead style={{ background: "#f1f5f9" }}>
-                    <tr>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }} className="hide-sm">Category</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>In Stock</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Status</th>
-                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }} className="hide-sm">Asset Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStock.length === 0 ? (
-                      <tr><td colSpan="7" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No products found in this category.</td></tr>
-                    ) : (
-                      filteredStock.map((item, idx) => {
-                        const qty = Number(item.stockQuantity || 0);
-                        const buyPrice = Number(item.purchasePrice || 0);
-                        const assetValue = qty * buyPrice;
-                        
-                        let statusColor = "#16a34a"; // Green
-                        let statusText = "In Stock";
-                        if (qty === 0) {
-                          statusColor = "#dc2626"; // Red
-                          statusText = "Out of Stock";
-                        } else if (qty <= 5) {
-                          statusColor = "#ea580c"; // Orange
-                          statusText = "Low Stock";
-                        }
-
-                        return (
-                          <tr key={item._id} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }} className="hide-sm">
-                              {categories.find(c => c._id === (item.category?._id || item.category))?.name || "Unknown"}
-                            </td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{buyPrice} Tk</td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.offerPrice || item.originalPrice} Tk</td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "900", color: qty === 0 ? "#dc2626" : "#2563eb", fontSize: "14px" }}>
-                              {qty}
-                            </td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "800", color: statusColor, whiteSpace: "nowrap" }}>
-                              {statusText}
-                            </td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }} className="hide-sm">{assetValue} Tk</td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
+              {/* View Mode Switcher */}
+              <div style={{ display: "flex", gap: "6px", background: "#e2e8f0", padding: "4px", borderRadius: "10px", width: "fit-content", marginBottom: "16px" }}>
+                <button
+                  type="button"
+                  onClick={() => setStockViewMode("cards")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: "800",
+                    border: "none",
+                    cursor: "pointer",
+                    background: stockViewMode === "cards" ? "#0f172a" : "transparent",
+                    color: stockViewMode === "cards" ? "#ffffff" : "#475569",
+                  }}
+                >
+                  📱 Cards View (মোবাইল ফ্রেন্ডলি)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStockViewMode("table")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    fontWeight: "800",
+                    border: "none",
+                    cursor: "pointer",
+                    background: stockViewMode === "table" ? "#0f172a" : "transparent",
+                    color: stockViewMode === "table" ? "#ffffff" : "#475569",
+                  }}
+                >
+                  📊 Table View (ফুল টেবিল)
+                </button>
               </div>
+
+              {stockViewMode === "cards" ? (
+                /* Interactive Mobile Card View */
+                <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+                  {filteredStock.length === 0 ? (
+                    <p style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>No products found in this category.</p>
+                  ) : (
+                    filteredStock.map((p) => {
+                      const qty = Number(p.stockQuantity || 0);
+                      const buyPrice = Number(p.purchasePrice || 0);
+                      const sellPrice = Number(p.offerPrice || p.originalPrice || 0);
+                      const catName = categories.find(c => c._id === (p.category?._id || p.category))?.name || "Uncategorized";
+                      return (
+                        <div key={p._id} style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "14px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                          <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "6px" }}>
+                              <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "800", color: "#0f172a", flex: 1, wordBreak: "break-word" }}>{p.name}</h4>
+                              <span style={{ fontSize: "10px", fontWeight: "800", padding: "3px 8px", borderRadius: "12px", background: qty === 0 ? "#fee2e2" : qty <= 5 ? "#ffedd5" : "#ecfdf5", color: qty === 0 ? "#dc2626" : qty <= 5 ? "#c2410c" : "#166534", flexShrink: 0 }}>
+                                {qty === 0 ? "Out of Stock" : qty <= 5 ? "Low Stock" : "In Stock"}
+                              </span>
+                            </div>
+                            <p style={{ margin: "0 0 10px", fontSize: "11px", color: "#64748b" }}>📁 {catName}</p>
+
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", textAlign: "center", background: "#f8fafc", padding: "8px", borderRadius: "10px", marginBottom: "10px" }}>
+                              <div>
+                                <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>কেনা দাম</p>
+                                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>{buyPrice} ৳</p>
+                              </div>
+                              <div>
+                                <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>বিক্রি দাম</p>
+                                <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: "800", color: "#0f172a" }}>{sellPrice} ৳</p>
+                              </div>
+                              <div>
+                                <p style={{ margin: 0, fontSize: "10px", color: "#2563eb" }}>স্টক পরিমাণ</p>
+                                <p style={{ margin: "2px 0 0", fontSize: "14px", fontWeight: "900", color: qty === 0 ? "#dc2626" : "#2563eb" }}>{qty} Pcs</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "8px", borderTop: "1px solid #f1f5f9" }}>
+                            <span style={{ fontSize: "12px", color: "#475569" }}>
+                              মোট ভ্যালু: <strong style={{ color: "#0f172a" }}>{qty * buyPrice} ৳</strong>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingProduct(p);
+                                setActiveTab("products");
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
+                              style={{ background: "#0f172a", color: "#fff", border: "none", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
+                            >
+                              ✏️ Edit
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              ) : (
+                /* Mobile & Desktop: Table View with Admin Table Scroll */
+                <div className="admin-table-scroll" style={{ background: "#fff", border: "1px solid #cbd5e1", borderRadius: "12px" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "640px" }}>
+                    <thead style={{ background: "#f1f5f9" }}>
+                      <tr>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Category</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>In Stock</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Status</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Asset Value</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredStock.length === 0 ? (
+                        <tr><td colSpan="8" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No products found in this category.</td></tr>
+                      ) : (
+                        filteredStock.map((item, idx) => {
+                          const qty = Number(item.stockQuantity || 0);
+                          const buyPrice = Number(item.purchasePrice || 0);
+                          const assetValue = qty * buyPrice;
+                          
+                          let statusColor = "#16a34a"; // Green
+                          let statusText = "In Stock";
+                          if (qty === 0) {
+                            statusColor = "#dc2626"; // Red
+                            statusText = "Out of Stock";
+                          } else if (qty <= 5) {
+                            statusColor = "#ea580c"; // Orange
+                            statusText = "Low Stock";
+                          }
+
+                          return (
+                            <tr key={item._id} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
+                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
+                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>
+                                {categories.find(c => c._id === (item.category?._id || item.category))?.name || "Unknown"}
+                              </td>
+                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{buyPrice} Tk</td>
+                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.offerPrice || item.originalPrice} Tk</td>
+                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "900", color: qty === 0 ? "#dc2626" : "#2563eb", fontSize: "14px" }}>
+                                {qty}
+                              </td>
+                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "800", color: statusColor, whiteSpace: "nowrap" }}>
+                                {statusText}
+                              </td>
+                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{assetValue} Tk</td>
+                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingProduct(item);
+                                    setActiveTab("products");
+                                    window.scrollTo({ top: 0, behavior: "smooth" });
+                                  }}
+                                  style={{ background: "#0f172a", color: "#fff", border: "none", padding: "4px 10px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
+                                >
+                                  Edit
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
         </div>
