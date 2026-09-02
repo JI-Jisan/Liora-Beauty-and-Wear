@@ -142,6 +142,71 @@ export async function nextOrderIdentity() {
   return { orderNumber: `LIORA-${Date.now()}`, serial };
 }
 
+// ---------- Purchase Batch (প্রতিবার মাল কেনার রেকর্ড) ----------
+const PurchaseBatchSchema = new mongoose.Schema(
+  {
+    product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true, index: true },
+    productName: { type: String, required: true }, // snapshot
+    qty: { type: Number, required: true, min: 1 },
+    remaining: { type: Number, required: true, min: 0, index: true },
+    unitCost: { type: Number, required: true, min: 0 },
+    purchaseDate: { type: Date, default: Date.now, index: true },
+    ownerName: { type: String, required: true, default: "Owner" },   // টাকা কে দিয়েছে
+    locationName: { type: String, required: true, default: "Owner" }, // মাল কার কাছে আছে
+    supplier: { type: String, default: "" },
+    note: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+PurchaseBatchSchema.index({ product: 1, purchaseDate: 1 });
+
+// ---------- Expense (boosting, courier return, packaging ইত্যাদি) ----------
+const ExpenseSchema = new mongoose.Schema(
+  {
+    date: { type: Date, default: Date.now, index: true },
+    category: {
+      type: String,
+      required: true,
+      enum: [
+        "Facebook Boosting",
+        "Courier Return",
+        "Courier Charge",
+        "Packaging",
+        "Transport",
+        "Salary",
+        "Mobile/Internet",
+        "Other",
+      ],
+    },
+    amount: { type: Number, required: true, min: 0 },
+    paidBy: { type: String, required: true, default: "Owner" },
+    product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: null },
+    note: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+// ---------- Partner Ledger ----------
+const PartnerLedgerSchema = new mongoose.Schema(
+  {
+    partnerName: { type: String, required: true, index: true },
+    date: { type: Date, default: Date.now, index: true },
+    type: { type: String, required: true, enum: ["cost_payable", "profit_share", "payment", "adjustment"] },
+    amount: { type: Number, required: true }, // payable = ধনাত্মক, payment = ঋণাত্মক
+    order: { type: mongoose.Schema.Types.ObjectId, ref: "Order", default: null },
+    note: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+export const PurchaseBatch =
+  mongoose.models.PurchaseBatch || mongoose.model("PurchaseBatch", PurchaseBatchSchema);
+export const Expense =
+  mongoose.models.Expense || mongoose.model("Expense", ExpenseSchema);
+export const PartnerLedger =
+  mongoose.models.PartnerLedger || mongoose.model("PartnerLedger", PartnerLedgerSchema);
+
 // ---------- Order ----------
 const OrderItemSchema = new mongoose.Schema(
   {
@@ -154,6 +219,15 @@ const OrderItemSchema = new mongoose.Schema(
     quantity: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true, min: 0 },          // বিক্রয়মূল্য snapshot
     purchasePrice: { type: Number, default: 0, min: 0 },      // ক্রয়মূল্য snapshot
+    costAtSale: { type: Number, default: 0 },                 // প্রতি পিস কেনা দাম, বিক্রির মুহূর্তে
+    allocations: [
+      {
+        batch: { type: mongoose.Schema.Types.ObjectId, ref: "PurchaseBatch" },
+        qty: Number,
+        unitCost: Number,
+        ownerName: String,
+      },
+    ],
     originalPrice: { type: Number, default: 0, min: 0 },
     categoryName: { type: String, default: "" },
     image: { type: String, default: "" },
@@ -179,7 +253,10 @@ const OrderSchema = new mongoose.Schema(
     },
     deliveryCharge: { type: Number, default: 0, min: 0 },
     subtotal: { type: Number, required: true, min: 0 },
+    totalCost: { type: Number, default: 0 },                  // সব item এর কেনা দাম
     total: { type: Number, required: true, min: 0 },
+    shippedBy: { type: String, default: "" },                 // কে পাঠাচ্ছে
+    stockDeducted: { type: Boolean, default: false },         // double deduction ঠেকাতে
     status: {
       type: String,
       enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"],

@@ -67,6 +67,35 @@ export default function AdminOrders() {
     }
   };
 
+  const updateShippedBy = async (id, shippedBy) => {
+    try {
+      setUpdatingId(id);
+      setMessage("");
+
+      const res = await fetch(`${API_BASE_URL}/api/admin/orders/${id}/dispatch`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ shippedBy }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to reassign owner");
+      }
+
+      setOrders((prev) =>
+        prev.map((ord) => (ord._id === id ? { ...ord, shippedBy } : ord))
+      );
+      setMessage(`✅ প্রেরণকারী '${shippedBy}' হিসেবে স্টক রিঅ্যাসাইন হয়েছে!`);
+    } catch (error) {
+      console.error("Failed to update shippedBy:", error);
+      setMessage(`❌ ${error.message}`);
+    } finally {
+      setUpdatingId(null);
+      setTimeout(() => setMessage(""), 3500);
+    }
+  };
+
   const deleteOrder = async (id) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this order?"
@@ -351,9 +380,9 @@ export default function AdminOrders() {
                 </div>
 
                 {/* Bottom Actions Row */}
-                <div className="jt-admin-order-footer">
+                <div className="jt-admin-order-footer" style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center" }}>
                   <div className="jt-status-select-wrap">
-                    <label>Change Status:</label>
+                    <label>Status:</label>
                     <select
                       value={order.status}
                       disabled={updatingId === order._id}
@@ -364,6 +393,19 @@ export default function AdminOrders() {
                           {st}
                         </option>
                       ))}
+                    </select>
+                  </div>
+
+                  <div className="jt-status-select-wrap">
+                    <label>কে পাঠাচ্ছে:</label>
+                    <select
+                      value={order.shippedBy || "Owner"}
+                      disabled={updatingId === order._id}
+                      onChange={(e) => updateShippedBy(order._id, e.target.value)}
+                      style={{ borderColor: order.shippedBy === "Partner" ? "#8b5cf6" : "#cbd5e1" }}
+                    >
+                      <option value="Owner">আমি (Owner)</option>
+                      <option value="Partner">পার্টনার (Partner)</option>
                     </select>
                   </div>
 

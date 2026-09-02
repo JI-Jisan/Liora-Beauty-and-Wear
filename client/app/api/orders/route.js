@@ -51,6 +51,7 @@ export async function GET(req) {
 
 import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
 import { getCharge } from "@/lib/delivery";
+import { allocateFIFO, releaseAllocations, syncProductStock } from "@/lib/inventory";
 
 export async function POST(req) {
   const reserved = [];
@@ -105,46 +106,48 @@ export async function POST(req) {
     if (body.items.length > 50)
       return NextResponse.json({ message: "অনেক বেশি আইটেম" }, { status: 400 });
 
-    // ---- দাম ও স্টক: সম্পূর্ণ সার্ভার থেকে, ক্লায়েন্টের পাঠানো দাম উপেক্ষিত ----
+    // ---- দাম ও স্টক: সম্পূর্ণ সার্ভার থেকে FIFO ব্যাচ এলগোরিদম দ্বারা ----
     const items = [];
+    const doneAllocations = []; // rollback এর জন্য
     let subtotal = 0;
+    let totalCost = 0;
 
     for (const raw of body.items) {
       const qty = Number(raw.quantity);
       if (!Number.isInteger(qty) || qty < 1 || qty > MAX_QTY_PER_ITEM) {
-        await rollback();
+        await releaseAllocations(doneAllocations);
         return NextResponse.json({ message: "পরিমাণ সঠিক নয়" }, { status: 400 });
       }
 
       const productId = raw.productId || raw._id;
       if (!productId || !/^[0-9a-fA-F]{24}$/.test(String(productId))) {
-        await rollback();
+        await releaseAllocations(doneAllocations);
         return NextResponse.json({ message: "ভুল প্রোডাক্ট" }, { status: 400 });
       }
 
-      // atomic: স্টক থাকলে তবেই কমবে, তাই oversell অসম্ভব
-      const p = await Product.findOneAndUpdate(
-        { _id: productId, stockQuantity: { $gte: qty } },
-        { $inc: { stockQuantity: -qty } },
-        { new: true }
-      );
-
+      const p = await Product.findById(productId);
       if (!p) {
-        await rollback();
-        const exists = await Product.findById(productId).select("name").lean();
+        await releaseAllocations(doneAllocations);
+        return NextResponse.json({ message: "প্রোডাক্ট পাওয়া যায়নি" }, { status: 404 });
+      }
+
+      // FIFO allocation — পুরোনো batch আগে
+      const res = await allocateFIFO(p._id, qty, null);
+      if (!res.ok) {
+        await releaseAllocations(doneAllocations);
         return NextResponse.json(
           {
-            message: exists
-              ? `"${exists.name}" পর্যাপ্ত স্টকে নেই`
-              : "প্রোডাক্টটি আর পাওয়া যাচ্ছে না",
+            message: `"${p.name}" — পর্যাপ্ত স্টকে নেই (আছে ${res.available || 0} পিস)`,
           },
           { status: 409 }
         );
       }
-      reserved.push({ id: p._id, qty });
+
+      doneAllocations.push(...res.allocations);
 
       const price = Number(p.offerPrice ?? p.originalPrice ?? 0);
       subtotal += price * qty;
+      totalCost += (res.totalCost || res.avgCost * qty);
 
       let categoryName = "";
       if (p.category) {
@@ -157,21 +160,15 @@ export async function POST(req) {
         productName: p.name,
         quantity: qty,
         price,
-        purchasePrice: Number(p.purchasePrice ?? 0),
+        purchasePrice: res.avgCost,
+        costAtSale: res.avgCost,
+        allocations: res.allocations,
         originalPrice: Number(p.originalPrice ?? 0),
         categoryName,
         image: p.image || "",
       });
 
-      const newStatus =
-        p.stockQuantity === 0
-          ? "Out of Stock"
-          : p.stockQuantity <= 5
-          ? "Limited Stock"
-          : "In Stock";
-      if (newStatus !== p.stockStatus) {
-        await Product.updateOne({ _id: p._id }, { stockStatus: newStatus });
-      }
+      await syncProductStock(p._id, Product);
     }
 
     // ---- ডেলিভারি চার্জও সম্পূর্ণ সার্ভারেই নির্ধারিত হবে ----
@@ -202,7 +199,10 @@ export async function POST(req) {
           deliveryZone,
           deliveryCharge,
           subtotal,
+          totalCost,
           total: subtotal + deliveryCharge,
+          shippedBy: "Owner",
+          stockDeducted: true,
           orderNumber,
           serial,
           accessToken: crypto.randomBytes(12).toString("hex"),
@@ -216,7 +216,10 @@ export async function POST(req) {
       }
     }
 
-    if (!order) throw new Error("অর্ডার নাম্বার তৈরি করা যাচ্ছে না (nextOrderIdentity)");
+    if (!order) {
+      await releaseAllocations(doneAllocations);
+      throw new Error("অর্ডার তৈরি করা যায়নি");
+    }
 
     return NextResponse.json(
       {

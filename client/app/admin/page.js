@@ -819,6 +819,24 @@ export default function AdminPage() {
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Inventory</h3>
                 </div>
                 
+                {/* Stock In Batches Box */}
+                <div 
+                  onClick={() => { router.push("/admin/batches"); }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📦</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Stock In (Batches)</h3>
+                </div>
+
+                {/* Expenses Box */}
+                <div 
+                  onClick={() => { router.push("/admin/expenses"); }}
+                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>💸</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Expenses</h3>
+                </div>
+
                 {/* Branding Box */}
                 <div 
                   onClick={() => { setActiveTab("branding"); window.scrollTo(0,0); }}
