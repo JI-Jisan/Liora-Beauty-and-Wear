@@ -126,15 +126,25 @@ export default function AdminOrders() {
 
   const handlePrintInvoice = (order) => {
     // একটি নতুন উইন্ডো বা পপ-আপ ওপেন হবে
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    const printWindow = window.open('', '_blank', 'width=800,height=700');
+    if (!printWindow) {
+      alert("ব্রাউজার পপ-আপ ব্লক করেছে। ইনভয়েস প্রিন্ট করতে পপ-আপ অ্যালাউ (Allow Popups) করুন।");
+      return;
+    }
     
     // কুরিয়ারের জন্য সুন্দর ইনভয়েস ডিজাইন
     printWindow.document.write(`
+      <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="utf-8">
           <title>Invoice - ${order.orderNumber || order._id}</title>
           <style>
-            body { font-family: 'Arial', sans-serif; padding: 40px; color: #000; }
+            @media print {
+              body, body * { visibility: visible !important; }
+              @page { margin: 10mm; }
+            }
+            body { font-family: 'Arial', sans-serif; padding: 30px; color: #000; background: #fff; margin: 0; }
             .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 20px; margin-bottom: 20px; }
             .header h1 { margin: 0 0 5px; font-size: 28px; }
             .details-box { border: 1px solid #000; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
@@ -194,19 +204,18 @@ export default function AdminOrders() {
               Cash on Delivery (COD): ${order.total} Tk
             </div>
           </div>
-
-          <script>
-            // অটোমেটিক প্রিন্ট ডায়ালগ ওপেন হবে
-            window.onload = function() { 
-              window.print(); 
-              // প্রিন্ট শেষে উইন্ডো ক্লোজ হয়ে যাবে (ঐচ্ছিক)
-              // window.close(); 
-            }
-          </script>
         </body>
       </html>
     `);
     printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      try {
+        printWindow.print();
+      } catch (err) {
+        console.error("Print error:", err);
+      }
+    }, 350);
   };
 
   const filteredOrders = useMemo(() => {

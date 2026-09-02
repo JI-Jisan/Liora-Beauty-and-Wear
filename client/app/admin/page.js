@@ -717,7 +717,7 @@ export default function AdminPage() {
 
       <section className="jt-admin-main admin-wrap" style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", boxSizing: "border-box" }}>
         {/* Sticky Admin Header */}
-        <header style={{ position: "sticky", top: 0, zIndex: 40, background: "rgba(255,255,255,0.96)", backdropFilter: "blur(8px)", borderBottom: "1px solid #e2e8f0", padding: "10px 12px", borderRadius: "14px", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
+        <header className="no-print" style={{ position: "sticky", top: 0, zIndex: 40, background: "rgba(255,255,255,0.96)", backdropFilter: "blur(8px)", borderBottom: "1px solid #e2e8f0", padding: "10px 12px", borderRadius: "14px", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
           <button
             type="button"
             onClick={() => setIsSidebarOpen(true)}
@@ -1621,7 +1621,7 @@ export default function AdminPage() {
               </div>
 
               {/* View Mode Switcher */}
-              <div style={{ display: "flex", gap: "6px", background: "#e2e8f0", padding: "4px", borderRadius: "10px", width: "fit-content", marginBottom: "16px" }}>
+              <div className="no-print" style={{ display: "flex", gap: "6px", background: "#e2e8f0", padding: "4px", borderRadius: "10px", width: "fit-content", marginBottom: "16px" }}>
                 <button
                   type="button"
                   onClick={() => setReportViewMode("cards")}
@@ -1774,7 +1774,7 @@ export default function AdminPage() {
               </div>
 
               {/* View Mode Switcher */}
-              <div style={{ display: "flex", gap: "6px", background: "#e2e8f0", padding: "4px", borderRadius: "10px", width: "fit-content", marginBottom: "16px" }}>
+              <div className="no-print" style={{ display: "flex", gap: "6px", background: "#e2e8f0", padding: "4px", borderRadius: "10px", width: "fit-content", marginBottom: "16px" }}>
                 <button
                   type="button"
                   onClick={() => setStockViewMode("cards")}
@@ -1956,36 +1956,62 @@ export default function AdminPage() {
       {/* CSS For Seamless PDF Print Alignment */}
       <style jsx global>{`
         @media print {
-          /* প্রিন্ট করার সময় ফালতু জিনিস হাইড করা */
+          /* প্রিন্ট করার সময় অপ্রয়োজনীয় UI হাইড করা */
           .jt-admin-top, 
           .jt-admin-sidebar, 
           .jt-admin-menu-toggle-btn,
           .jt-admin-floating-top-btn,
+          header,
           footer,
           .mobile-bottom-nav,
           nav,
-          button {
+          button,
+          .no-print {
             display: none !important;
           }
           
-          /* মার্জিন ও প্যাডিং রিসেট করে পেজের শুরুতে আনা */
-          body {
+          /* মার্জিন, প্যাডিং ও ওভারফ্লো রিসেট */
+          html, body, .admin-root {
             background: #ffffff !important;
             margin: 0 !important;
             padding: 0 !important;
+            overflow: visible !important;
+            height: auto !important;
+            min-height: auto !important;
           }
           
           .jt-admin-main {
             margin: 0 !important;
             padding: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            overflow: visible !important;
           }
 
           .jt-admin-panel {
             box-shadow: none !important;
             border: none !important;
             margin: 0 !important;
-            padding: 20px 0 !important;
+            padding: 10px 0 !important;
+            page-break-inside: auto !important;
+            overflow: visible !important;
+          }
+
+          /* প্রিন্ট মোডে সব টেক্সট ও এলিমেন্ট নিশ্চিতভাবে দৃশ্যমান রাখা */
+          body, body * {
+            visibility: visible !important;
+          }
+
+          /* কার্ড ও টেবিল যেন মাঝপথে না ভাঙে */
+          tr, .admin-card, .jt-stat-card {
             page-break-inside: avoid;
+            break-inside: avoid;
+          }
+
+          /* সঠিক কালার ও ব্যাকগ্রাউন্ড প্রিন্ট করা */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
       `}</style>

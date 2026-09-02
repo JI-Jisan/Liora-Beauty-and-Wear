@@ -174,10 +174,11 @@ function OrderSuccessContent() {
       {/* CSS For Seamless PDF Print */}
       <style jsx global>{`
         @media print {
-          body * {
+          body:has(#printable-invoice) * {
             visibility: hidden;
           }
-          #printable-invoice, #printable-invoice * {
+          body:has(#printable-invoice) #printable-invoice,
+          body:has(#printable-invoice) #printable-invoice * {
             visibility: visible;
           }
           #printable-invoice {
