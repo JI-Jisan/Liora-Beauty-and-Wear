@@ -201,10 +201,10 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Orders POST error:", error);
+    console.error("ORDER ERROR:", error);
     await rollback();
     return NextResponse.json(
-      { message: "অর্ডার সম্পন্ন হয়নি, আবার চেষ্টা করুন" },
+      { message: error?.message || "অর্ডার সম্পন্ন হয়নি, আবার চেষ্টা করুন" },
       { status: 500 }
     );
   }
