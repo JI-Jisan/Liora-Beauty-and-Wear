@@ -745,105 +745,105 @@ export default function AdminPage() {
               <h2 style={{ marginBottom: "16px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>Welcome, Admin! 🚀</h2>
               
               {/* 2-Column Grid on Mobile */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px", width: "100%" }}>
                 
-                {/* Add Product Box */}
+                {/* Orders Box (High Priority) */}
                 <div 
-                  onClick={() => { setActiveTab("add-product"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  onClick={() => { setActiveTab("orders"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #fed7aa", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(249,115,22,0.08)" }}
                 >
-                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>➕</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Add Product</h3>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📦</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#c2410c", fontWeight: "800", textAlign: "center" }}>Recent Orders</h3>
                 </div>
 
                 {/* Manage Products Box */}
                 <div 
                   onClick={() => { setActiveTab("manage-products"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>🛍️</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Manage Products</h3>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Products ({products.length})</h3>
                 </div>
 
-                {/* Orders Box */}
+                {/* Add Product Box */}
                 <div 
-                  onClick={() => { setActiveTab("orders"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  onClick={() => { setActiveTab("add-product"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
-                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📦</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Orders</h3>
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>➕</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Add Product</h3>
                 </div>
 
                 {/* Profit Reports Box */}
                 <div 
                   onClick={() => { setActiveTab("reports"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>📈</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Reports</h3>
-                </div>
-
-                {/* Categories Box */}
-                <div 
-                  onClick={() => { setActiveTab("categories"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
-                >
-                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📁</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Categories</h3>
-                </div>
-
-                {/* Brands Box */}
-                <div 
-                  onClick={() => { router.push("/admin/brands"); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
-                >
-                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🏷️</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Brands</h3>
-                </div>
-
-                {/* Menus Box */}
-                <div 
-                  onClick={() => { router.push("/admin/menus"); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
-                >
-                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>☰</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Menus</h3>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Profit Reports</h3>
                 </div>
 
                 {/* Inventory Box */}
                 <div 
                   onClick={() => { setActiveTab("stock"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>📋</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Inventory</h3>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Inventory / Stock</h3>
                 </div>
-                
+
                 {/* Stock In Batches Box */}
                 <div 
                   onClick={() => { router.push("/admin/batches"); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>📦</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Stock In (Batches)</h3>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Stock In (Batches)</h3>
                 </div>
 
                 {/* Expenses Box */}
                 <div 
                   onClick={() => { router.push("/admin/expenses"); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>💸</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Expenses</h3>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Expenses</h3>
+                </div>
+
+                {/* Categories Box */}
+                <div 
+                  onClick={() => { setActiveTab("categories"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>📁</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Categories</h3>
+                </div>
+
+                {/* Brands Box */}
+                <div 
+                  onClick={() => { router.push("/admin/brands"); }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🏷️</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Brands</h3>
+                </div>
+
+                {/* Menus Box */}
+                <div 
+                  onClick={() => { router.push("/admin/menus"); }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>☰</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Menus</h3>
                 </div>
 
                 {/* Branding Box */}
                 <div 
                   onClick={() => { setActiveTab("branding"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "20px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gridColumn: "span 2", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gridColumn: "span 2", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>✨</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800" }}>Branding & Settings</h3>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Branding & Settings</h3>
                 </div>
 
               </div>
@@ -1547,18 +1547,18 @@ export default function AdminPage() {
 
           {/* Analytics & Profit Reports Tab */}
           {activeTab === "reports" && (
-            <div className="jt-admin-panel jt-admin-panel-wide" style={{ padding: "20px" }}>
-              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "10px" }}>
+            <div className="jt-admin-panel jt-admin-panel-wide">
+              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
                 <div>
-                  <h2 style={{ margin: "0 0 6px", color: "#0f172a", fontSize: "22px", fontWeight: "800" }}>📊 Sales & Profit Report</h2>
-                  <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>আপনার ব্যবসার রিয়েল-টাইম লাভ-ক্ষতির এক্সেল শিট ভিউ</p>
+                  <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "20px", fontWeight: "800" }}>📊 Sales & Profit Report</h2>
+                  <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>আপনার ব্যবসার রিয়েল-টাইম লাভ-ক্ষতির হিসাব (সোয়াইপ করে সম্পূর্ণ টেবিল দেখুন)</p>
                 </div>
                 
-                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
                   <select 
                     value={reportFilter} 
                     onChange={(e) => setReportFilter(e.target.value)}
-                    style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a" }}
+                    style={{ flex: 1, minWidth: "160px", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "13px" }}
                   >
                     <option value="1">📅 Today (আজকের হিসাব)</option>
                     <option value="7">📅 Last 7 Days (উইকলি)</option>
@@ -1570,64 +1570,64 @@ export default function AdminPage() {
 
                   <button
                     onClick={() => window.print()}
-                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "10px 18px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "10px 14px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px" }}
                   >
-                    🖨️ Download PDF / Print
+                    🖨️ Print PDF
                   </button>
                 </div>
               </div>
 
               {/* Summary Cards */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "14px", marginBottom: "24px" }}>
-                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "16px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#166534" }}>💵 Total Revenue (বিক্রি)</span>
-                  <h2 style={{ margin: "6px 0 0", color: "#15803d", fontSize: "22px" }}>{totalRevenue} Tk</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "12px 14px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#166534" }}>💵 Total Revenue</span>
+                  <h2 style={{ margin: "4px 0 0", color: "#15803d", fontSize: "20px", fontWeight: "800" }}>{totalRevenue} Tk</h2>
                 </div>
-                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "16px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#991b1b" }}>📦 Total Cost (কেনা দাম)</span>
-                  <h2 style={{ margin: "6px 0 0", color: "#b91c1c", fontSize: "22px" }}>{totalCost} Tk</h2>
+                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "12px 14px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#991b1b" }}>📦 Total Cost</span>
+                  <h2 style={{ margin: "4px 0 0", color: "#b91c1c", fontSize: "20px", fontWeight: "800" }}>{totalCost} Tk</h2>
                 </div>
-                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "16px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#1e40af" }}>✨ Net Profit (নিট লাভ)</span>
-                  <h2 style={{ margin: "6px 0 0", color: "#2563eb", fontSize: "22px" }}>{totalProfit} Tk</h2>
+                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "12px 14px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "800", color: "#1e40af" }}>✨ Net Profit</span>
+                  <h2 style={{ margin: "4px 0 0", color: "#2563eb", fontSize: "20px", fontWeight: "800" }}>{totalProfit} Tk</h2>
                 </div>
-                <div style={{ background: "#fdf4ff", border: "1px solid #f9a8d4", padding: "16px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#86198f" }}>📈 Total Profit % (মার্জিন)</span>
-                  <h2 style={{ margin: "6px 0 0", color: "#a21caf", fontSize: "22px" }}>{overallProfitPct}%</h2>
+                <div style={{ background: "#fdf4ff", border: "1px solid #f9a8d4", padding: "12px 14px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#86198f" }}>📈 Margin</span>
+                  <h2 style={{ margin: "4px 0 0", color: "#a21caf", fontSize: "20px", fontWeight: "800" }}>{overallProfitPct}%</h2>
                 </div>
               </div>
 
               {/* Excel-like Table View */}
-              <div style={{ overflowX: "auto", background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left", minWidth: "800px" }}>
+              <div className="jt-table-scroll-wrap" style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", width: "100%", maxWidth: "100%", background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "700px" }}>
                   <thead style={{ background: "#f1f5f9" }}>
                     <tr>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Date</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Order ID</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Qty</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Disc. %</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Profit %</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Net Profit</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Date</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Order ID</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Qty</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Disc. %</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Profit %</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Net Profit</th>
                     </tr>
                   </thead>
                   <tbody>
                     {soldItems.length === 0 ? (
-                      <tr><td colSpan="9" style={{ padding: "30px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
+                      <tr><td colSpan="9" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
                     ) : (
                       soldItems.map((item, idx) => (
                         <tr key={idx} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", color: "#475569" }}>{item.date}</td>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", color: "#2563eb", fontWeight: "700" }}>{item.orderId}</td>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b" }}>{item.buyPrice} Tk</td>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800" }}>{item.sellPrice} Tk</td>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "700" }}>{item.qty}</td>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", color: "#ea580c", fontWeight: "700" }}>{item.discountPct}%</td>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", color: "#16a34a", fontWeight: "800" }}>{item.profitPct}%</td>
-                          <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900" }}>{item.rowProfit} Tk</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>{item.date}</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#2563eb", fontWeight: "700", whiteSpace: "nowrap" }}>{item.orderId}</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{item.buyPrice} Tk</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.sellPrice} Tk</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "700" }}>{item.qty}</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#ea580c", fontWeight: "700" }}>{item.discountPct}%</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#16a34a", fontWeight: "800" }}>{item.profitPct}%</td>
+                          <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{item.rowProfit} Tk</td>
                         </tr>
                       ))
                     )}
@@ -1639,19 +1639,19 @@ export default function AdminPage() {
 
           {/* Inventory & Stock Management Tab */}
           {activeTab === "stock" && (
-            <div className="jt-admin-panel jt-admin-panel-wide" style={{ padding: "20px" }}>
-              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", flexWrap: "wrap", gap: "10px" }}>
+            <div className="jt-admin-panel jt-admin-panel-wide">
+              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
                 <div>
-                  <h2 style={{ margin: "0 0 6px", color: "#0f172a", fontSize: "22px", fontWeight: "800" }}>📋 Inventory & Stock Report</h2>
+                  <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "20px", fontWeight: "800" }}>📋 Inventory & Stock Report</h2>
                   <p style={{ margin: 0, color: "#64748b", fontSize: "13px" }}>আপনার গোডাউনের রিয়েল-টাইম স্টক এবং ভ্যালুয়েশন রিপোর্ট</p>
                 </div>
                 
-                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
                   {/* Category Filter */}
                   <select 
                     value={stockCategoryFilter} 
                     onChange={(e) => setStockCategoryFilter(e.target.value)}
-                    style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a" }}
+                    style={{ flex: 1, minWidth: "160px", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "13px" }}
                   >
                     <option value="all">📁 All Categories (সব ক্যাটাগরি)</option>
                     {categories.map((cat) => (
@@ -1663,50 +1663,50 @@ export default function AdminPage() {
 
                   <button
                     onClick={() => window.print()}
-                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "10px 18px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}
+                    style={{ background: "#0f172a", color: "#fff", border: "none", padding: "10px 14px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontSize: "13px" }}
                   >
-                    🖨️ Download PDF / Print
+                    🖨️ Print PDF
                   </button>
                 </div>
               </div>
 
               {/* Stock Summary Cards */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "14px", marginBottom: "24px" }}>
-                <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", padding: "16px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#475569" }}>📦 Total Products (ধরণ)</span>
-                  <h2 style={{ margin: "6px 0 0", color: "#0f172a", fontSize: "22px" }}>{filteredStock.length} Items</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+                <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", padding: "12px 14px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569" }}>📦 Total Items</span>
+                  <h2 style={{ margin: "4px 0 0", color: "#0f172a", fontSize: "20px", fontWeight: "800" }}>{filteredStock.length}</h2>
                 </div>
-                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "16px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#1e40af" }}>🔢 Total Units (মোট পিস)</span>
-                  <h2 style={{ margin: "6px 0 0", color: "#2563eb", fontSize: "22px" }}>{totalStockItems} Pcs</h2>
+                <div style={{ background: "#eff6ff", border: "1px solid #93c5fd", padding: "12px 14px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#1e40af" }}>🔢 Total Units</span>
+                  <h2 style={{ margin: "4px 0 0", color: "#2563eb", fontSize: "20px", fontWeight: "800" }}>{totalStockItems} Pcs</h2>
                 </div>
-                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "16px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#991b1b" }}>⚠️ Low / Out of Stock</span>
-                  <h2 style={{ margin: "6px 0 0", color: "#dc2626", fontSize: "22px" }}>{lowStockCount + outOfStockCount} Items</h2>
+                <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", padding: "12px 14px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "800", color: "#991b1b" }}>⚠️ Low / Out</span>
+                  <h2 style={{ margin: "4px 0 0", color: "#dc2626", fontSize: "20px", fontWeight: "800" }}>{lowStockCount + outOfStockCount}</h2>
                 </div>
-                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "16px", borderRadius: "10px" }}>
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#166534" }}>💰 Total Asset Value</span>
-                  <h2 style={{ margin: "6px 0 0", color: "#15803d", fontSize: "22px" }}>{totalStockValue} Tk</h2>
+                <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "12px 14px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: "700", color: "#166534" }}>💰 Asset Value</span>
+                  <h2 style={{ margin: "4px 0 0", color: "#15803d", fontSize: "20px", fontWeight: "800" }}>{totalStockValue} Tk</h2>
                 </div>
               </div>
 
               {/* Excel-like Stock Table */}
-              <div style={{ overflowX: "auto", background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", textAlign: "left", minWidth: "800px" }}>
+              <div className="jt-table-scroll-wrap" style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", width: "100%", maxWidth: "100%", background: "#fff", border: "1px solid #cbd5e1", borderRadius: "8px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left", minWidth: "700px" }}>
                   <thead style={{ background: "#f1f5f9" }}>
                     <tr>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155" }}>Category</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>In Stock (Qty)</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Status</th>
-                      <th style={{ padding: "12px 10px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Total Asset Value</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Category</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>In Stock</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Status</th>
+                      <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Asset Value</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredStock.length === 0 ? (
-                      <tr><td colSpan="7" style={{ padding: "30px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No products found in this category.</td></tr>
+                      <tr><td colSpan="7" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No products found in this category.</td></tr>
                     ) : (
                       filteredStock.map((item, idx) => {
                         const qty = Number(item.stockQuantity || 0);
@@ -1725,19 +1725,19 @@ export default function AdminPage() {
 
                         return (
                           <tr key={item._id} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
-                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
-                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", color: "#475569" }}>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>
                               {categories.find(c => c._id === (item.category?._id || item.category))?.name || "Unknown"}
                             </td>
-                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b" }}>{buyPrice} Tk</td>
-                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800" }}>{item.offerPrice || item.originalPrice} Tk</td>
-                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "900", color: qty === 0 ? "#dc2626" : "#2563eb", fontSize: "15px" }}>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{buyPrice} Tk</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.offerPrice || item.originalPrice} Tk</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "900", color: qty === 0 ? "#dc2626" : "#2563eb", fontSize: "14px" }}>
                               {qty}
                             </td>
-                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "800", color: statusColor }}>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "800", color: statusColor, whiteSpace: "nowrap" }}>
                               {statusText}
                             </td>
-                            <td style={{ padding: "10px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900" }}>{assetValue} Tk</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{assetValue} Tk</td>
                           </tr>
                         );
                       })

@@ -735,27 +735,61 @@ button {
 
 @media (max-width: 900px) {
   .jt-admin-dashboard {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
   }
 
   .jt-admin-sidebar {
     padding: 20px;
   }
 
-  .jt-admin-grid {
-    grid-template-columns: 1fr;
+  .jt-admin-main {
+    padding: 12px 10px 60px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
+  .jt-admin-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .jt-admin-panel,
   .jt-admin-panel-wide {
-    grid-column: span 1;
+    grid-column: span 1 !important;
+    padding: 14px 10px !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .jt-admin-product-form {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .jt-admin-product-form button {
-    grid-column: span 1;
+    grid-column: span 1 !important;
+  }
+
+  .jt-table-scroll-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+    margin-top: 10px !important;
+    border-radius: 8px !important;
+  }
+
+  .jt-table-scroll-wrap table {
+    min-width: 650px !important;
   }
 }
 .jt-admin-product-form label {

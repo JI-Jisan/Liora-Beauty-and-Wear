@@ -76,7 +76,7 @@ export default function BatchesPage() {
   const totalStockValue = batches.reduce((sum, b) => sum + (b.remaining || 0) * (b.unitCost || 0), 0);
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px", fontFamily: "system-ui, sans-serif" }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "16px 12px", boxSizing: "border-box", fontFamily: "system-ui, sans-serif" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h1 style={{ fontSize: "24px", fontWeight: "800", color: "#0f172a", margin: 0 }}>

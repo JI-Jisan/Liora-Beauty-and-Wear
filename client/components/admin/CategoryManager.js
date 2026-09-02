@@ -73,55 +73,60 @@ export default function CategoryManager() {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          padding: "10px 12px",
-          marginLeft: depth * 22,
+          gap: 6,
+          padding: "8px 10px",
+          marginLeft: Math.min(depth * 14, 28),
           background: depth === 0 ? "#fff7f8" : "#fff",
           border: "1px solid #f1e3e6",
           borderRadius: 8,
           marginBottom: 6,
+          boxSizing: "border-box",
         }}
       >
-        <span style={{ fontWeight: depth === 0 ? 700 : 500, flex: 1, fontSize: depth === 0 ? 15 : 14 }}>
-          {depth > 0 && <span style={{ color: "#cbd5e1", marginRight: 6 }}>└</span>}
+        <span style={{ fontWeight: depth === 0 ? 700 : 500, flex: 1, fontSize: depth === 0 ? 14 : 13, minWidth: "100px", wordBreak: "break-word" }}>
+          {depth > 0 && <span style={{ color: "#cbd5e1", marginRight: 4 }}>└</span>}
           {node.name}
           {node.children.length > 0 && (
-            <span style={{ color: "#94a3b8", fontSize: 12, marginLeft: 6 }}>({node.children.length})</span>
+            <span style={{ color: "#94a3b8", fontSize: 11, marginLeft: 4 }}>({node.children.length})</span>
           )}
         </span>
-        <button
-          type="button"
-          onClick={() => {
-            setParent(String(node._id));
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-          style={{
-            fontSize: 12,
-            padding: "4px 10px",
-            border: "1px solid #22c55e",
-            color: "#16a34a",
-            background: "#f0fdf4",
-            borderRadius: 6,
-            cursor: "pointer",
-          }}
-        >
-          + সাব
-        </button>
-        <button
-          type="button"
-          onClick={() => del(node._id, node.name)}
-          style={{
-            fontSize: 12,
-            padding: "4px 10px",
-            border: "1px solid #ef4444",
-            color: "#dc2626",
-            background: "#fef2f2",
-            borderRadius: 6,
-            cursor: "pointer",
-          }}
-        >
-          Delete
-        </button>
+        <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+          <button
+            type="button"
+            onClick={() => {
+              setParent(String(node._id));
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            style={{
+              fontSize: 11,
+              padding: "4px 8px",
+              border: "1px solid #22c55e",
+              color: "#16a34a",
+              background: "#f0fdf4",
+              borderRadius: 6,
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            + সাব
+          </button>
+          <button
+            type="button"
+            onClick={() => del(node._id, node.name)}
+            style={{
+              fontSize: 11,
+              padding: "4px 8px",
+              border: "1px solid #ef4444",
+              color: "#dc2626",
+              background: "#fef2f2",
+              borderRadius: 6,
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            Delete
+          </button>
+        </div>
       </div>
       {node.children.map((c) => (
         <Row key={c._id} node={c} depth={depth + 1} />
@@ -130,7 +135,7 @@ export default function CategoryManager() {
   );
 
   return (
-    <div style={{ background: "#fff", padding: 18, borderRadius: 12 }}>
+    <div style={{ background: "#fff", padding: "14px 10px", borderRadius: 12, boxSizing: "border-box", width: "100%" }}>
       <h3 style={{ marginTop: 0 }}>ক্যাটাগরি ম্যানেজ</h3>
       <form onSubmit={add} style={{ display: "grid", gap: 10, marginBottom: 18 }}>
         <input
