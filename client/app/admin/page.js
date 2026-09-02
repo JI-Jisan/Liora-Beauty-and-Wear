@@ -1549,13 +1549,13 @@ export default function AdminPage() {
           {/* Analytics & Profit Reports Tab */}
           {activeTab === "reports" && (
             <div className="jt-admin-panel jt-admin-panel-wide admin-card">
-              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
                 <div>
                   <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>📊 Sales & Profit Report</h2>
                   <p style={{ margin: 0, color: "#64748b", fontSize: "12px" }}>আপনার ব্যবসার রিয়েল-টাইম লাভ-ক্ষতির হিসাব</p>
                 </div>
                 
-                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
+                <div className="no-print" style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
                   <select 
                     value={reportFilter} 
                     onChange={(e) => setReportFilter(e.target.value)}
@@ -1578,8 +1578,8 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Stat Cards - 2 cols on mobile */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
+              {/* Stat Cards - 2 cols on mobile, 4 cols on print/desktop */}
+              <div className="admin-stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
                 <StatCard label="Total Revenue" value={`${totalRevenue} Tk`} tone="green" icon="💵" />
                 <StatCard label="Total Cost" value={`${totalCost} Tk`} tone="red" icon="📦" />
                 <StatCard label="Net Profit" value={`${totalProfit} Tk`} tone="blue" icon="✨" />
@@ -1735,13 +1735,13 @@ export default function AdminPage() {
           {/* Inventory & Stock Management Tab */}
           {activeTab === "stock" && (
             <div className="jt-admin-panel jt-admin-panel-wide admin-card">
-              <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "10px" }}>
                 <div>
                   <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>📋 Inventory & Stock Report</h2>
                   <p style={{ margin: 0, color: "#64748b", fontSize: "12px" }}>আপনার গোডাউনের রিয়েল-টাইম স্টক এবং ভ্যালুয়েশন রিপোর্ট</p>
                 </div>
                 
-                <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
+                <div className="no-print" style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>
                   {/* Category Filter */}
                   <select 
                     value={stockCategoryFilter} 
@@ -1765,8 +1765,8 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Stock Stat Cards - 2 cols on mobile */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
+              {/* Stock Stat Cards - 2 cols on mobile, 4 cols on print/desktop */}
+              <div className="admin-stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "8px", marginBottom: "16px" }}>
                 <StatCard label="Total Products" value={`${filteredStock.length} Items`} tone="blue" icon="📦" />
                 <StatCard label="Total Units" value={`${totalStockItems} Pcs`} tone="green" icon="🔢" />
                 <StatCard label="Low / Out Stock" value={`${lowStockCount + outOfStockCount} Items`} tone="red" icon="⚠️" />
@@ -1881,7 +1881,7 @@ export default function AdminPage() {
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>In Stock</th>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Status</th>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Asset Value</th>
-                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Action</th>
+                        <th className="no-print" style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1905,7 +1905,7 @@ export default function AdminPage() {
 
                           return (
                             <tr key={item._id} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
-                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
+                              <td className="admin-stock-name-cell" style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
                               <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>
                                 {categories.find(c => c._id === (item.category?._id || item.category))?.name || "Unknown"}
                               </td>
@@ -1918,7 +1918,7 @@ export default function AdminPage() {
                                 {statusText}
                               </td>
                               <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{assetValue} Tk</td>
-                              <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}>
+                              <td className="no-print" style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center" }}>
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -1956,9 +1956,15 @@ export default function AdminPage() {
       {/* CSS For Seamless PDF Print Alignment */}
       <style jsx global>{`
         @media print {
+          @page {
+            size: A4 portrait;
+            margin: 10mm;
+          }
+
           /* প্রিন্ট করার সময় অপ্রয়োজনীয় UI হাইড করা */
           .jt-admin-top, 
           .jt-admin-sidebar, 
+          .jt-admin-sidebar-overlay,
           .jt-admin-menu-toggle-btn,
           .jt-admin-floating-top-btn,
           header,
@@ -1970,31 +1976,100 @@ export default function AdminPage() {
             display: none !important;
           }
           
-          /* মার্জিন, প্যাডিং ও ওভারফ্লো রিসেট */
-          html, body, .admin-root {
+          /* মার্জিন, প্যাডিং ও ওভারফ্লো রিসেট — সম্পূর্ণ ১০০% উইডথ নিশ্চিত করা */
+          html, body, .admin-root, .jt-admin-dashboard {
             background: #ffffff !important;
             margin: 0 !important;
             padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
             overflow: visible !important;
             height: auto !important;
             min-height: auto !important;
+            display: block !important;
           }
           
-          .jt-admin-main {
+          .jt-admin-main,
+          .admin-wrap {
             margin: 0 !important;
             padding: 0 !important;
             max-width: 100% !important;
             width: 100% !important;
+            min-width: 0 !important;
             overflow: visible !important;
+            display: block !important;
           }
 
-          .jt-admin-panel {
+          .jt-admin-grid {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            gap: 0 !important;
+          }
+
+          .jt-admin-panel,
+          .jt-admin-panel-wide,
+          .admin-card {
             box-shadow: none !important;
             border: none !important;
             margin: 0 !important;
-            padding: 10px 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
             page-break-inside: auto !important;
             overflow: visible !important;
+            display: block !important;
+          }
+
+          /* ৪টি স্ট্যাট কার্ড পুরো পেইজ জুড়ে সুন্দরভাবে এক লাইনে দেখাবে */
+          .admin-stat-grid {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 10px !important;
+            width: 100% !important;
+            margin-bottom: 14px !important;
+          }
+
+          /* টেবিল যেন পুরো পেইজ জুড়ে ফুল উইডথে আসে এবং কোনো কলাম যেন না কাটে */
+          .admin-table-scroll {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: visible !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            display: block !important;
+            background: #ffffff !important;
+            margin-top: 10px !important;
+          }
+
+          .admin-table-scroll table {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            border-collapse: collapse !important;
+            table-layout: auto !important;
+            display: table !important;
+          }
+
+          .admin-table-scroll th,
+          .admin-table-scroll td {
+            padding: 7px 6px !important;
+            font-size: 11px !important;
+            border: 1px solid #cbd5e1 !important;
+          }
+
+          /* প্রোডাক্টের নামের সেল র‍্যাপ হবে যেন ডানদিকের বাকি কলামগুলো পেইজের বাইরে চলে না যায় */
+          .admin-stock-name-cell,
+          .admin-table-scroll td:nth-child(3),
+          .admin-table-scroll td:first-child {
+            white-space: normal !important;
+            word-break: break-word !important;
+          }
+
+          .admin-table-scroll td:not(.admin-stock-name-cell) {
+            white-space: nowrap !important;
           }
 
           /* প্রিন্ট মোডে সব টেক্সট ও এলিমেন্ট নিশ্চিতভাবে দৃশ্যমান রাখা */
@@ -2002,7 +2077,7 @@ export default function AdminPage() {
             visibility: visible !important;
           }
 
-          /* কার্ড ও টেবিল যেন মাঝপথে না ভাঙে */
+          /* কার্ড ও টেবিল রো যেন পেইজ ব্রেকের কারণে মাঝখানে না ভাঙে */
           tr, .admin-card, .jt-stat-card {
             page-break-inside: avoid;
             break-inside: avoid;

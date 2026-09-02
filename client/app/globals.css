@@ -6105,6 +6105,26 @@ button {
     color: #000000 !important;
   }
 
+  /* Admin table print fix - prevent cutting off columns while keeping mobile swipe intact */
+  .admin-table-scroll {
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    background: transparent !important;
+  }
+  .admin-table-scroll table {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    display: table !important;
+  }
+  .admin-table-scroll th,
+  .admin-table-scroll td {
+    white-space: normal !important;
+  }
+
   /* Only isolate print-area if specifically present */
   body:has(.print-area) * { visibility: hidden; }
   body:has(.print-area) .print-area,
