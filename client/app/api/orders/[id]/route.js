@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Order } from "@/lib/models";
+import { Order, Product } from "@/lib/models";
 
 export async function GET(req, { params }) {
   try {
@@ -31,11 +31,63 @@ export async function PUT(req, { params }) {
     const { id } = await params;
     const { status } = await req.json();
 
-    const updated = await Order.findByIdAndUpdate(id, { status }, { new: true });
-    if (!updated) {
+    const order = await Order.findById(id);
+    if (!order) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
-    return NextResponse.json(updated);
+
+    // ১. যদি স্ট্যাটাস Cancelled করা হয় এবং আগে স্টক ফেরত দেওয়া না হয়ে থাকে -> স্টক যোগ হবে
+    if (status === "Cancelled" && !order.stockRestored) {
+      if (Array.isArray(order.items)) {
+        for (const item of order.items) {
+          if (item.productId) {
+            const prod = await Product.findByIdAndUpdate(
+              item.productId,
+              {
+                $inc: { stockQuantity: item.quantity },
+              },
+              { new: true }
+            );
+
+            if (prod && prod.stockQuantity > 0 && prod.stockStatus === "Out of Stock") {
+              await Product.findByIdAndUpdate(item.productId, {
+                stockStatus: "In Stock",
+              });
+            }
+          }
+        }
+      }
+      order.stockRestored = true;
+    }
+
+    // ২. যদি Cancelled করার পর পুনরায় এক্টিভ স্ট্যাটাসে নেওয়া হয় -> স্টক আবার কমবে
+    if (status !== "Cancelled" && order.stockRestored) {
+      if (Array.isArray(order.items)) {
+        for (const item of order.items) {
+          if (item.productId) {
+            const prod = await Product.findByIdAndUpdate(
+              item.productId,
+              {
+                $inc: { stockQuantity: -item.quantity },
+              },
+              { new: true }
+            );
+
+            if (prod && prod.stockQuantity <= 0) {
+              await Product.findByIdAndUpdate(item.productId, {
+                stockStatus: "Out of Stock",
+              });
+            }
+          }
+        }
+      }
+      order.stockRestored = false;
+    }
+
+    order.status = status;
+    await order.save();
+
+    return NextResponse.json(order);
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
