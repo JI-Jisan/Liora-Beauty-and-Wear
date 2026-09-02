@@ -6133,3 +6133,71 @@ html, body {
     border-radius: 14px !important;
   }
 }
+
+/* ================= ADMIN MOBILE FIX ================= */
+.admin-root, .admin-root * {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 768px) {
+  /* বাড়তি padding মোবাইলে জায়গা খেয়ে ফেলে */
+  .admin-root [style*="padding: 40"],
+  .admin-root [style*="padding: 30"],
+  .admin-root [style*="padding:40"],
+  .admin-root [style*="padding:30"] {
+    padding: 12px !important;
+  }
+
+  /* fixed width container গুলো মুক্ত করা */
+  .admin-root [style*="width: 1"],
+  .admin-root [style*="maxWidth"],
+  .admin-root [style*="max-width"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* টেবিল যেন কাটার বদলে scroll হয় */
+  .admin-root table {
+    display: block !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-root table td,
+  .admin-root table th {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+  }
+
+  /* stat card গুলো ২টা পাশাপাশি */
+  .admin-root .stat-grid,
+  .admin-root [style*="grid-template-columns"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* flex row মোবাইলে wrap হবে */
+  .admin-root [style*="display: flex"],
+  .admin-root [style*="display:flex"] {
+    flex-wrap: wrap !important;
+  }
+
+  /* লম্বা লেখা (ঠিকানা, ইমেইল) ভেঙে বসবে */
+  .admin-root p, .admin-root h1, .admin-root h2, .admin-root span {
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+
+  .admin-root input,
+  .admin-root select,
+  .admin-root textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 14px !important; /* iOS এ auto-zoom ঠেকায় */
+  }
+}
+
