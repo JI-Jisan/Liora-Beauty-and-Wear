@@ -43,7 +43,25 @@ export async function GET(req) {
 
     const search = searchParams.get("search");
     if (search && search.trim()) {
-      query.name = { $regex: search.trim(), $options: "i" };
+      const words = search.trim().split(/\s+/).filter(Boolean);
+      if (words.length > 1) {
+        const wordRegexes = words.map(w => ({
+          $or: [
+            { name: { $regex: w, $options: "i" } },
+            { description: { $regex: w, $options: "i" } }
+          ]
+        }));
+        if (query.$and) {
+          query.$and.push(...wordRegexes);
+        } else {
+          query.$and = wordRegexes;
+        }
+      } else {
+        query.$or = [
+          { name: { $regex: search.trim(), $options: "i" } },
+          { description: { $regex: search.trim(), $options: "i" } }
+        ];
+      }
     }
 
     const exclude = searchParams.get("exclude");

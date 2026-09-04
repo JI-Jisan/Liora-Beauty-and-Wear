@@ -121,22 +121,7 @@ function ProductGridContent({
       .catch((err) => console.error(err));
   }, [activeCategory, activeBrand, type, activeSearchTerm, currentPage]);
 
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
-
-
-
-    if (activeSearchTerm.trim()) {
-      const keyword = activeSearchTerm.toLowerCase();
-      result = result.filter(
-        (product) =>
-          product.name.toLowerCase().includes(keyword) ||
-          product.category?.name?.toLowerCase().includes(keyword)
-      );
-    }
-
-    return result;
-  }, [products, categories, activeCategory, activeSearchTerm, type]);
+  const filteredProducts = products;
 
   return (
     <section ref={gridRef} className="jt-product-section" style={{ maxWidth: "1400px", margin: "0 auto", padding: "30px 20px 60px" }}>

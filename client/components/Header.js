@@ -23,7 +23,7 @@ export default function Header({
   const cartContext = useCart();
 
   const [localSearch, setLocalSearch] = useState("");
-  const [allProducts, setAllProducts] = useState([]);
+  const [liveSearchResults, setLiveSearchResults] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -34,16 +34,6 @@ export default function Header({
     cartContext?.cartCount !== undefined ? cartContext.cartCount : propsCartCount || 0;
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products`)
-      .then((res) => res.json())
-      .then((data) => {
-        setAllProducts(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => {
-        console.error("Live search product fetch error:", err);
-        setAllProducts([]);
-      });
-
     fetch(`${API_BASE_URL}/api/categories`)
       .then((res) => res.json())
       .then((data) => {
@@ -65,21 +55,25 @@ export default function Header({
   const currentSearchValue =
     propsSearchTerm !== undefined ? propsSearchTerm : localSearch;
 
-  const liveSearchResults = useMemo(() => {
-    const query = currentSearchValue.trim().toLowerCase();
-    if (!query) return [];
-    return allProducts.filter((product) => {
-      const catName =
-        typeof product.category === "object"
-          ? product.category?.name
-          : product.category || "";
-      return (
-        product.name?.toLowerCase().includes(query) ||
-        catName?.toLowerCase().includes(query) ||
-        product.description?.toLowerCase().includes(query)
-      );
-    });
-  }, [allProducts, currentSearchValue]);
+  useEffect(() => {
+    const q = currentSearchValue.trim();
+    if (!q) {
+      setLiveSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetch(`${API_BASE_URL}/api/products?search=${encodeURIComponent(q)}&limit=8`)
+        .then((res) => res.json())
+        .then((data) => {
+          const items = Array.isArray(data?.products) ? data.products : (Array.isArray(data) ? data : []);
+          setLiveSearchResults(items);
+        })
+        .catch(() => setLiveSearchResults([]));
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [currentSearchValue]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
