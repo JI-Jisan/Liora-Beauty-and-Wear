@@ -65,7 +65,7 @@ export async function POST(req) {
     const payload = buildPayload(body);          // whitelist, mass assignment নয়
 
     const product = await Product.create(payload);
-    return NextResponse.json(product, { status: 201 });
+    return NextResponse.json(product.toJSON(), { status: 201 });
   } catch (error) {
     console.error("Products POST:", error);
     const isValidation = error?.name === "ValidationError" || error?.message?.length < 120;

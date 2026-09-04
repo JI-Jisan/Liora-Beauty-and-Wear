@@ -85,7 +85,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
   };
 
   const submit = async (e) => {
-    e.preventDefault();
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
     if (saving) return;
 
     if (!form.image) return setError("মূল ছবি (Main Image) দিতে হবে");
@@ -117,9 +117,12 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       if (!res.ok) throw new Error(data?.message || "সেভ হয়নি");
 
       setForm(EMPTY);
-      onSaved?.(data);
-    } catch (e) {
-      setError(e.message);
+      if (typeof onSaved === "function") {
+        onSaved(data);
+      }
+    } catch (err) {
+      console.error("Product submit error:", err);
+      setError(err.message === "e is not a function" ? "Server Error: Unable to save product." : err.message);
     } finally {
       setSaving(false);
     }

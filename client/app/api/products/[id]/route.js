@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { Product } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
-
+import { buildPayload } from "@/lib/productPayload";
 export async function GET(req, { params }) {
   try {
     await connectToDatabase();
@@ -32,7 +32,6 @@ export async function GET(req, { params }) {
   }
 }
 
-import { buildPayload } from "@/lib/productPayload";
 
 export async function PUT(req, { params }) {
   const admin = getAdminFromRequest(req);
@@ -48,7 +47,7 @@ export async function PUT(req, { params }) {
     if (!updated) {
       return NextResponse.json({ message: "Product not found" }, { status: 404 });
     }
-    return NextResponse.json(updated);
+    return NextResponse.json(updated.toJSON());
   } catch (error) {
     const isValidation = error?.name === "ValidationError" || error?.message?.length < 120;
     return NextResponse.json(
