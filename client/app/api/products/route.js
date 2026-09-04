@@ -7,6 +7,10 @@ import { getAdminFromRequest } from "@/lib/adminGuard";
 
 export const runtime = "nodejs";
 
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function GET(req) {
   try {
     await connectToDatabase();
@@ -45,24 +49,44 @@ export async function GET(req) {
     if (search && search.trim()) {
       const cleanSearch = search.trim();
       const words = cleanSearch.split(/\s+/).filter(Boolean);
-      const noSpace = cleanSearch.replace(/\s+/g, '');
+      const noSpace = cleanSearch.replace(/\s+/g, "");
 
-      let searchCondition;
       if (words.length > 1) {
-        const nameWordConditions = words.map(w => ({ name: { $regex: w, $options: "i" } }));
-        const searchBranch = [{ $and: nameWordConditions }];
-        if (noSpace.length > 3 && noSpace !== cleanSearch) {
-          searchBranch.push({ name: { $regex: noSpace, $options: "i" } });
-        }
-        searchCondition = searchBranch.length > 1 ? { $or: searchBranch } : searchBranch[0];
-      } else {
-        searchCondition = { name: { $regex: cleanSearch, $options: "i" } };
-      }
+        // 1. Try exact phrase match first (e.g. "sun cream", "sun-cream", "suncream")
+        const phrasePattern = `(${words.map(escapeRegex).join("[\\s\\-_]+")}|\\b${escapeRegex(noSpace)}\\b)`;
+        const exactCondition = { name: { $regex: phrasePattern, $options: "i" } };
 
-      if (query.$and) {
-        query.$and.push(searchCondition);
+        const testQuery = { ...query };
+        if (testQuery.$and) {
+          testQuery.$and = [...testQuery.$and, exactCondition];
+        } else {
+          testQuery.$and = [exactCondition];
+        }
+
+        const countExact = await Product.countDocuments(testQuery);
+        if (countExact > 0) {
+          query.$and = testQuery.$and;
+        } else {
+          // Fallback: all individual whole words in name
+          const wordConditions = words.map((w) => ({
+            name: { $regex: `\\b${escapeRegex(w)}`, $options: "i" },
+          }));
+          if (query.$and) {
+            query.$and.push(...wordConditions);
+          } else {
+            query.$and = wordConditions;
+          }
+        }
       } else {
-        query.$and = [searchCondition];
+        // Single word: whole word boundary in name
+        const singleWordCondition = {
+          name: { $regex: `\\b${escapeRegex(cleanSearch)}`, $options: "i" },
+        };
+        if (query.$and) {
+          query.$and.push(singleWordCondition);
+        } else {
+          query.$and = [singleWordCondition];
+        }
       }
     }
 
