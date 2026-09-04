@@ -35,7 +35,9 @@ export async function GET(req) {
     if (type === "new") query.isNewArrival = true;
     if (type === "slider") query.isSlider = true;
 
-    const limit = Math.min(100, parseInt(searchParams.get("limit")) || 100);
+    const maxLimit = isAdmin ? 10000 : 1000;
+    const limitParam = parseInt(searchParams.get("limit"), 10);
+    const limit = limitParam ? Math.min(maxLimit, limitParam) : (isAdmin ? 10000 : 100);
     const exclude = searchParams.get("exclude");
     if (exclude && /^[0-9a-fA-F]{24}$/.test(exclude)) query._id = { $ne: exclude };
 
