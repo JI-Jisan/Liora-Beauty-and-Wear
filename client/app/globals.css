@@ -5839,7 +5839,7 @@ button {
 .jt-mini-progress-bar {
   width: 50px;
   height: 4px;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -5856,27 +5856,37 @@ button {
   font-weight: 700;
 }
 
-/* --- FEATURED CATEGORIES --- */
+/* --- FEATURED CATEGORIES HORIZONTAL SLIDER --- */
 .jt-featured-cats-section {
-  max-width: 1200px;
-  margin: 28px auto;
+  max-width: 1400px;
+  margin: 18px auto 28px;
   padding: 0 16px;
+  position: relative;
 }
 
-.jt-cats-header-wrap {
-  text-align: center;
-  margin-bottom: 24px;
+.jt-cats-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 0 4px;
+}
+
+.jt-cats-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .jt-crown-icon {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .jt-cats-header-title {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 900;
   font-family: Georgia, serif;
-  margin: 4px 0 6px;
+  margin: 0;
   color: #0f172a;
 }
 
@@ -5884,29 +5894,90 @@ button {
   color: #f43f5e;
 }
 
-.jt-cats-header-divider {
+.jt-cats-view-all-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f43f5e;
+  text-decoration: none;
+  background: #fff1f2;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #fecdd3;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.jt-cats-view-all-link:hover {
+  background: #f43f5e;
+  color: #ffffff;
+  border-color: #f43f5e;
+}
+
+/* Slider Wrapper */
+.jt-cats-slider-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.jt-cats-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  font-size: 18px;
+  color: #334155;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
 }
 
-.jt-divider-line {
-  width: 40px;
-  height: 2px;
-  background: #fecdd3;
+.jt-cats-nav-btn:hover {
+  background: #f43f5e;
+  color: #ffffff;
+  border-color: #f43f5e;
+  box-shadow: 0 6px 16px rgba(244, 63, 94, 0.25);
 }
 
-.jt-heart-icon {
-  font-size: 12px;
-  color: #f43f5e;
+.jt-cats-nav-prev {
+  left: -12px;
 }
 
-.jt-cats-circle-grid {
+.jt-cats-nav-next {
+  right: -12px;
+}
+
+@media (max-width: 768px) {
+  .jt-cats-nav-btn {
+    display: none;
+  }
+}
+
+.jt-cats-circle-slider {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 18px 24px;
+  align-items: flex-start;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 6px 4px 12px;
+  width: 100%;
+}
+
+.jt-cats-circle-slider::-webkit-scrollbar {
+  display: none;
 }
 
 .jt-circle-cat-card {
@@ -5915,7 +5986,9 @@ button {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  width: 110px;
+  min-width: 82px;
+  max-width: 92px;
+  flex-shrink: 0;
   transition: transform 0.2s ease;
 }
 
@@ -5925,12 +5998,12 @@ button {
 
 .jt-circle-avatar-wrap {
   position: relative;
-  width: 95px;
-  height: 95px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  padding: 3px;
+  padding: 2.5px;
   background: linear-gradient(135deg, #f43f5e, #fb7185);
-  box-shadow: 0 6px 18px rgba(244, 63, 94, 0.15);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.16);
 }
 
 .jt-circle-avatar-img {
@@ -5938,42 +6011,91 @@ button {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 2.5px solid #ffffff;
+  border: 2px solid #ffffff;
 }
 
 .jt-avatar-top-badge {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 26px;
-  height: 26px;
+  top: -2px;
+  right: -2px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #f43f5e;
   color: #ffffff;
-  font-size: 12px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .jt-circle-cat-info {
   text-align: center;
+  width: 100%;
 }
 
 .jt-circle-cat-info h4 {
   margin: 0 0 2px;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 700;
   color: #0f172a;
-  line-height: 1.2;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .jt-circle-cat-info span {
-  font-size: 11px;
-  color: #94a3b8;
-  font-weight: 600;
+  font-size: 10px;
+  color: #f43f5e;
+  font-weight: 700;
+  background: #fff1f2;
+  padding: 1px 6px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+/* "View All" Circle Card at end of slider */
+.jt-circle-view-all-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  min-width: 82px;
+  max-width: 92px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.jt-circle-view-all-card:hover {
+  transform: translateY(-4px);
+}
+
+.jt-circle-view-all-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fff1f2;
+  border: 2px dashed #f43f5e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #f43f5e;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.08);
+}
+
+.jt-circle-view-all-avatar span {
+  font-size: 20px;
+  margin-bottom: -2px;
+}
+
+.jt-circle-view-all-avatar strong {
+  font-size: 10px;
+  font-weight: 800;
 }
 
 /* --- MOBILE BOTTOM STICKY NAV --- */
