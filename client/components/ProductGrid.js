@@ -1,13 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, Suspense } from "react";
+import { useEffect, useMemo, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CategoryBar from "./CategoryBar";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { cld } from "@/lib/cloudinary";
 import { getDiscount, getSaved } from "@/lib/price";
 
+function getPaginationItems(current, total) {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  if (current <= 4) {
+    return [1, 2, 3, 4, 5, "...", total];
+  }
+  if (current >= total - 3) {
+    return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
+  }
+  return [1, "...", current - 1, current, current + 1, "...", total];
+}
 
 const getCategoryName = (category) => {
   if (!category) return "Beauty & Wear";
@@ -23,12 +35,29 @@ function ProductGridContent({
   title = "Products",
   brand = ""
 }) {
+  const gridRef = useRef(null);
   const searchParams = useSearchParams();
   const urlSearchTerm = searchParams ? searchParams.get("search") || "" : "";
   const activeSearchTerm = searchTerm || urlSearchTerm;
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const PAGE_SIZE = 24;
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
+      setCurrentPage(newPage);
+      if (gridRef.current) {
+        const top = gridRef.current.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+    }
+  };
+
   const urlCategoryParam = searchParams ? searchParams.get("category") || "" : "";
   const [selectedCategoryState, setSelectedCategoryState] = useState("all");
   const activeCategory = urlCategoryParam || selectedCategoryState;
@@ -37,22 +66,49 @@ function ProductGridContent({
 
   const handleSelectCategory = (cat) => {
     setSelectedCategoryState(cat);
+    setCurrentPage(1);
   };
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, activeBrand, activeSearchTerm, type]);
+
+  useEffect(() => {
+    setLoading(true);
     const qs = new URLSearchParams();
     if (activeCategory && activeCategory !== "all") qs.set('category', activeCategory);
     if (activeBrand) qs.set('brand', activeBrand);
     if (type && type !== "all") qs.set('type', type);
+    if (activeSearchTerm.trim()) qs.set('search', activeSearchTerm.trim());
+    
+    // Use pagination for main catalog or when type is all
+    qs.set('paginate', '1');
+    qs.set('page', String(currentPage));
+    qs.set('limit', String(PAGE_SIZE));
 
     fetch(`${API_BASE_URL}/api/products?${qs.toString()}`)
       .then((res) => res.json())
       .then((data) => {
-        setProducts(Array.isArray(data) ? data : []);
+        if (data && Array.isArray(data.products)) {
+          setProducts(data.products);
+          setTotalPages(data.totalPages || 1);
+          setTotalProducts(data.total || 0);
+        } else if (Array.isArray(data)) {
+          setProducts(data);
+          setTotalPages(1);
+          setTotalProducts(data.length);
+        } else {
+          setProducts([]);
+          setTotalPages(1);
+          setTotalProducts(0);
+        }
       })
       .catch((err) => {
         console.error("Products fetch error, using fallback:", err);
         setProducts([]);
+      })
+      .finally(() => {
+        setLoading(false);
       });
 
     fetch(`${API_BASE_URL}/api/categories`)
@@ -63,7 +119,7 @@ function ProductGridContent({
         }
       })
       .catch((err) => console.error(err));
-  }, [activeCategory, activeBrand, type]);
+  }, [activeCategory, activeBrand, type, activeSearchTerm, currentPage]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -83,7 +139,7 @@ function ProductGridContent({
   }, [products, categories, activeCategory, activeSearchTerm, type]);
 
   return (
-    <section className="jt-product-section" style={{ maxWidth: "1400px", margin: "0 auto", padding: "30px 20px 60px" }}>
+    <section ref={gridRef} className="jt-product-section" style={{ maxWidth: "1400px", margin: "0 auto", padding: "30px 20px 60px" }}>
       {type === "all" && (
         <CategoryBar
           categories={categories}
@@ -215,7 +271,119 @@ function ProductGridContent({
         })}
       </div>
 
-      {filteredProducts.length === 0 && (
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "16px",
+            marginTop: "50px",
+            padding: "20px 0",
+          }}
+        >
+          {totalProducts > 0 && (
+            <div style={{ fontSize: "14px", color: "#64748B", fontWeight: "600" }}>
+              Showing {((currentPage - 1) * PAGE_SIZE) + 1}–{Math.min(currentPage * PAGE_SIZE, totalProducts)} of {totalProducts.toLocaleString()} products
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              gap: "8px",
+            }}
+          >
+            {/* Prev Button */}
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage <= 1 || loading}
+              style={{
+                padding: "8px 16px",
+                fontSize: "14px",
+                fontWeight: "700",
+                color: currentPage <= 1 ? "#94a3b8" : "#1e293b",
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px",
+                cursor: currentPage <= 1 ? "not-allowed" : "pointer",
+                transition: "all 0.2s",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              }}
+            >
+              ← Prev
+            </button>
+
+            {/* Page Number Buttons */}
+            {getPaginationItems(currentPage, totalPages).map((item, idx) => {
+              if (item === "...") {
+                return (
+                  <span
+                    key={`ellipsis-${idx}`}
+                    style={{ padding: "0 6px", color: "#94a3b8", fontWeight: "700", userSelect: "none" }}
+                  >
+                    ...
+                  </span>
+                );
+              }
+
+              const isCurrent = item === currentPage;
+              return (
+                <button
+                  key={`page-${item}`}
+                  type="button"
+                  onClick={() => handlePageChange(item)}
+                  disabled={loading}
+                  style={{
+                    minWidth: "40px",
+                    height: "40px",
+                    padding: "0 10px",
+                    fontSize: "14px",
+                    fontWeight: isCurrent ? "800" : "600",
+                    color: isCurrent ? "#ffffff" : "#334155",
+                    background: isCurrent ? "linear-gradient(135deg, #be185d 0%, #9d174d 100%)" : "#ffffff",
+                    border: isCurrent ? "none" : "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    boxShadow: isCurrent ? "0 4px 10px rgba(190, 24, 93, 0.3)" : "0 1px 2px rgba(0,0,0,0.05)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {item}
+                </button>
+              );
+            })}
+
+            {/* Next Button */}
+            <button
+              type="button"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages || loading}
+              style={{
+                padding: "8px 16px",
+                fontSize: "14px",
+                fontWeight: "700",
+                color: currentPage >= totalPages ? "#94a3b8" : "#1e293b",
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px",
+                cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
+                transition: "all 0.2s",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              }}
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {filteredProducts.length === 0 && !loading && (
         <div
           style={{
             textAlign: "center",

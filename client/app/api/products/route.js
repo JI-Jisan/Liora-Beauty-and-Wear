@@ -35,21 +35,49 @@ export async function GET(req) {
     if (type === "new") query.isNewArrival = true;
     if (type === "slider") query.isSlider = true;
 
-    const maxLimit = isAdmin ? 10000 : 1000;
-    const limitParam = parseInt(searchParams.get("limit"), 10);
-    const limit = limitParam ? Math.min(maxLimit, limitParam) : (isAdmin ? 10000 : 100);
+    const search = searchParams.get("search");
+    if (search && search.trim()) {
+      query.name = { $regex: search.trim(), $options: "i" };
+    }
+
     const exclude = searchParams.get("exclude");
     if (exclude && /^[0-9a-fA-F]{24}$/.test(exclude)) query._id = { $ne: exclude };
 
-    const products = await Product.find(query)
-      .select(isAdmin ? "" : "-purchasePrice")
-      .populate("category", "name")   // related products ও ক্যাটাগরি নাম ঠিক করবে
-      .populate("brand", "name slug")
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
+    const isPaginated = searchParams.get("paginate") === "1";
+    const page = Math.max(1, parseInt(searchParams.get("page"), 10) || 1);
+    const maxLimit = isAdmin ? 10000 : 500;
+    const limitParam = parseInt(searchParams.get("limit"), 10);
+    const limit = limitParam ? Math.min(maxLimit, limitParam) : (isAdmin ? 10000 : 24);
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json(products);
+    const [products, total] = await Promise.all([
+      Product.find(query)
+        .select(isAdmin ? "" : "-purchasePrice")
+        .populate("category", "name")
+        .populate("brand", "name slug")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Product.countDocuments(query),
+    ]);
+
+    if (isPaginated) {
+      return NextResponse.json({
+        products,
+        total,
+        totalPages: Math.ceil(total / limit) || 1,
+        currentPage: page,
+        limit,
+      });
+    }
+
+    return NextResponse.json(products, {
+      headers: {
+        "X-Total-Count": String(total),
+        "X-Total-Pages": String(Math.ceil(total / limit) || 1),
+      },
+    });
   } catch (error) {
     console.error("Products GET:", error);
     return NextResponse.json({ message: "প্রোডাক্ট লোড হয়নি" }, { status: 500 });
