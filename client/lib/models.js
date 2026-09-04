@@ -64,7 +64,12 @@ const ProductSchema = new mongoose.Schema(
     images: {                                             // অতিরিক্ত ৩টা
       type: [String],
       default: [],
-      validate: [(v) => v.length <= 3, "সর্বোচ্চ ৩টি অতিরিক্ত ছবি দেওয়া যাবে"],
+      validate: {
+        validator: function (v) {
+          return !v || v.length <= 3;
+        },
+        message: "সর্বোচ্চ ৩টি অতিরিক্ত ছবি দেওয়া যাবে",
+      },
     },
     description: { type: String, default: "" },
     rating: { type: Number, default: 0, min: 0, max: 5 },
@@ -89,9 +94,8 @@ export function deriveStockStatus(qty) {
   return "In Stock";
 }
 
-ProductSchema.pre("save", function (next) {
+ProductSchema.pre("save", function () {
   this.stockStatus = deriveStockStatus(this.stockQuantity);
-  next();
 });
 
 export const Product =

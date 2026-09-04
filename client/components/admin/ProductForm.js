@@ -122,7 +122,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       }
     } catch (err) {
       console.error("Product submit error:", err);
-      setError(err.message === "e is not a function" ? "Server Error: Unable to save product." : err.message);
+      setError(err.message || "সেভ হয়নি");
     } finally {
       setSaving(false);
     }
