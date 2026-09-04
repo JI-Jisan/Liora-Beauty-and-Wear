@@ -43,24 +43,26 @@ export async function GET(req) {
 
     const search = searchParams.get("search");
     if (search && search.trim()) {
-      const words = search.trim().split(/\s+/).filter(Boolean);
+      const cleanSearch = search.trim();
+      const words = cleanSearch.split(/\s+/).filter(Boolean);
+      const noSpace = cleanSearch.replace(/\s+/g, '');
+
+      let searchCondition;
       if (words.length > 1) {
-        const wordRegexes = words.map(w => ({
-          $or: [
-            { name: { $regex: w, $options: "i" } },
-            { description: { $regex: w, $options: "i" } }
-          ]
-        }));
-        if (query.$and) {
-          query.$and.push(...wordRegexes);
-        } else {
-          query.$and = wordRegexes;
+        const nameWordConditions = words.map(w => ({ name: { $regex: w, $options: "i" } }));
+        const searchBranch = [{ $and: nameWordConditions }];
+        if (noSpace.length > 3 && noSpace !== cleanSearch) {
+          searchBranch.push({ name: { $regex: noSpace, $options: "i" } });
         }
+        searchCondition = searchBranch.length > 1 ? { $or: searchBranch } : searchBranch[0];
       } else {
-        query.$or = [
-          { name: { $regex: search.trim(), $options: "i" } },
-          { description: { $regex: search.trim(), $options: "i" } }
-        ];
+        searchCondition = { name: { $regex: cleanSearch, $options: "i" } };
+      }
+
+      if (query.$and) {
+        query.$and.push(searchCondition);
+      } else {
+        query.$and = [searchCondition];
       }
     }
 

@@ -1,14 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import ProductGrid from "@/components/ProductGrid";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 
-export default function ProductsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+function ProductsPageContent() {
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams ? searchParams.get("search") || "" : "";
+  const [searchTerm, setSearchTerm] = useState(urlSearch);
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    if (urlSearch !== undefined) {
+      setSearchTerm(urlSearch);
+    }
+  }, [urlSearch]);
 
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
@@ -50,7 +59,7 @@ export default function ProductsPage() {
               color: "#223a67",
             }}
           >
-            All Products
+            {searchTerm.trim() ? `Search: "${searchTerm.trim()}"` : "All Products"}
           </h1>
 
           <p
@@ -60,8 +69,9 @@ export default function ProductsPage() {
               fontSize: "16px",
             }}
           >
-            Browse all available products, filter by category, and add your favorite
-            items to cart.
+            {searchTerm.trim()
+              ? `Showing matching products for "${searchTerm.trim()}".`
+              : "Browse all available products, filter by category, and add your favorite items to cart."}
           </p>
         </div>
       </section>
@@ -71,4 +81,13 @@ export default function ProductsPage() {
       </div>
     </main>
   );
-}
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "80vh", padding: "60px 20px", textAlign: "center" }}>Loading products...</div>}>
+      <ProductsPageContent />
+    </Suspense>
+  );
+}
+

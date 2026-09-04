@@ -92,6 +92,7 @@ export default function Header({
     e.preventDefault();
     setIsSearchOpen(false);
     const query = currentSearchValue.trim();
+    onSearchChange?.(query);
     if (query) {
       router.push(`/products?search=${encodeURIComponent(query)}`);
     } else {
