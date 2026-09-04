@@ -21,9 +21,15 @@ export async function GET(req) {
     if (brand) {
       const isId = /^[0-9a-fA-F]{24}$/.test(brand);
       const doc = isId ? { _id: brand } : { slug: brand };
-      const b = await Brand.findOne(doc).select('_id');
-      if (!b) return NextResponse.json([]);
-      query.brand = b._id;
+      const b = await Brand.findOne(doc).select('_id name');
+      if (b) {
+        query.$or = [
+          { brand: b._id },
+          { name: { $regex: b.name, $options: "i" } }
+        ];
+      } else {
+        query.name = { $regex: brand.replace(/-/g, " "), $options: "i" };
+      }
     }
 
     if (category && mongoose.Types.ObjectId.isValid(category)) {
@@ -45,9 +51,9 @@ export async function GET(req) {
 
     const isPaginated = searchParams.get("paginate") === "1";
     const page = Math.max(1, parseInt(searchParams.get("page"), 10) || 1);
-    const maxLimit = isAdmin ? 10000 : 500;
+    const maxLimit = isAdmin ? 10000 : 1000;
     const limitParam = parseInt(searchParams.get("limit"), 10);
-    const limit = limitParam ? Math.min(maxLimit, limitParam) : (isAdmin ? 10000 : 24);
+    const limit = limitParam ? Math.min(maxLimit, limitParam) : (isAdmin ? 10000 : 100);
     const skip = (page - 1) * limit;
 
     const [products, total] = await Promise.all([

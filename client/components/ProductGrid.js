@@ -46,7 +46,7 @@ function ProductGridContent({
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(false);
-  const PAGE_SIZE = 24;
+  const PAGE_SIZE = 100;
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
