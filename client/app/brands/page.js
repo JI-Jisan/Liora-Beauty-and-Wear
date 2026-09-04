@@ -28,22 +28,36 @@ export default async function BrandsPage() {
             {brands.map(b => (
               <Link key={b._id} href={`/brands/${b.slug}`} style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-                padding: 16, border: '1px solid #f1f5f9', borderRadius: 12,
+                padding: '16px 12px', border: '1px solid #f1f5f9', borderRadius: 14,
                 textDecoration: 'none', color: '#1e293b', background: '#fff',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)', transition: 'transform 0.2s',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.03)', transition: 'all 0.2s ease',
               }}>
-                {b.logo ? (
-                  <img 
-                    src={b.logo.replace('/upload/', '/upload/f_auto,q_auto,w_200/')}
-                    alt={b.name} 
-                    width={70} 
-                    height={70}
-                    style={{ objectFit: 'contain' }} 
-                  />
-                ) : (
-                  <div style={{ width: 70, height: 70, background: '#f8fafc', borderRadius: 8 }} />
-                )}
-                <span style={{ fontSize: 13, fontWeight: 700, textAlign: 'center' }}>{b.name}</span>
+                <div style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 12,
+                  background: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  padding: 6,
+                }}>
+                  {b.logo ? (
+                    <img 
+                      src={b.logo.includes('/upload/') ? b.logo.replace('/upload/', '/upload/f_auto,q_auto,w_200/') : b.logo}
+                      alt={b.name} 
+                      width={64} 
+                      height={64}
+                      style={{ objectFit: 'contain', width: '100%', height: '100%' }} 
+                    />
+                  ) : (
+                    <span style={{ fontSize: 18, fontWeight: 800, color: '#64748b' }}>
+                      {b.name.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 700, textAlign: 'center', color: '#0f172a' }}>{b.name}</span>
               </Link>
             ))}
           </div>
