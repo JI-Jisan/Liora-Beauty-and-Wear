@@ -9,6 +9,7 @@ import CategoryManager from "@/components/admin/CategoryManager";
 import StatCard from "@/components/StatCard";
 import AdminStorefrontPOS from "@/components/admin/AdminStorefrontPOS";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
+import { useAuth } from "@/components/AuthProvider";
 
 // Helper to get selected category ID and all its descendant category IDs
 function getCategoryAndDescendantIds(selectedCatId, allCategories = []) {
@@ -213,20 +214,24 @@ export default function AdminPage() {
     }
   };
 
+  const { user: authUser, isAdmin, loading: authLoading } = useAuth();
+
   useEffect(() => {
+    if (authLoading) return;
+
     const isLoggedIn = localStorage.getItem("jt_admin_logged_in");
     const token = localStorage.getItem("jt_admin_token");
 
-    if (isLoggedIn !== "true" || !token) {
-      router.push("/admin/login");
-    } else {
+    if (isAdmin || (isLoggedIn === "true" && token)) {
       setIsAuthenticated(true);
       loadCategories();
       loadProducts();
       loadSettings();
       loadReports();
+    } else {
+      router.push("/admin/login");
     }
-  }, [router]);
+  }, [router, isAdmin, authLoading]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

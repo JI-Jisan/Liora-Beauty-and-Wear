@@ -43,12 +43,16 @@ export default function AccountDashboardPage() {
   const [profileMsg, setProfileMsg] = useState("");
   const [profileErr, setProfileErr] = useState("");
 
-  // Redirect if not logged in
+  // Redirect if not logged in; redirect to /admin if admin
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login?redirect=/account");
+    if (!loading) {
+      if (!user) {
+        router.push("/login?redirect=/account");
+      } else if (isAdmin) {
+        router.push("/admin");
+      }
     }
-  }, [user, loading, router]);
+  }, [user, isAdmin, loading, router]);
 
   // Load orders
   const fetchOrders = async () => {

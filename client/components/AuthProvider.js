@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const idToken = await firebaseUser.getIdToken();
+      const idToken = await firebaseUser.getIdToken(true);
       const res = await fetch("/api/auth/verify", {
         method: "POST",
         headers: {
