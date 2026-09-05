@@ -16,55 +16,13 @@ export default function ProductWatermark({ variant = "card" }) {
       }}
       aria-hidden="true"
     >
-      {/* 1. Subtle Center Diagonal Brand Watermark */}
+      {/* Official Brand Corner Badge - Leaves product 100% clean and visible while covering bottom watermark */}
       <div
         style={{
           position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%) rotate(-22deg)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          pointerEvents: "none",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "Georgia, 'Playfair Display', serif",
-            fontSize: isDetails ? "38px" : "20px",
-            fontWeight: "900",
-            letterSpacing: isDetails ? "6px" : "3.5px",
-            color: "rgba(244, 63, 94, 0.24)", // Subtle Liora Rose Watermark
-            textTransform: "uppercase",
-            lineHeight: 1,
-            textShadow: "0 1px 2px rgba(255,255,255,0.6)",
-          }}
-        >
-          LIORA
-        </span>
-        <span
-          style={{
-            fontSize: isDetails ? "11px" : "7px",
-            fontWeight: "800",
-            letterSpacing: isDetails ? "3px" : "1.8px",
-            color: "rgba(15, 23, 42, 0.20)",
-            textTransform: "uppercase",
-            marginTop: isDetails ? "4px" : "2px",
-          }}
-        >
-          BEAUTY &amp; WEAR
-        </span>
-      </div>
-
-      {/* 2. Official Brand Corner Badge (Covers any bottom corner competitor marks) */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: isDetails ? "14px" : "6px",
-          right: isDetails ? "14px" : "6px",
-          background: "rgba(255, 255, 255, 0.92)",
+          bottom: isDetails ? "12px" : "6px",
+          right: isDetails ? "12px" : "6px",
+          background: "rgba(255, 255, 255, 0.94)",
           backdropFilter: "blur(4px)",
           border: "1px solid rgba(244, 63, 94, 0.35)",
           borderRadius: "6px",
@@ -77,8 +35,8 @@ export default function ProductWatermark({ variant = "card" }) {
       >
         <span
           style={{
-            width: isDetails ? "7px" : "5px",
-            height: isDetails ? "7px" : "5px",
+            width: isDetails ? "6px" : "4px",
+            height: isDetails ? "6px" : "4px",
             borderRadius: "50%",
             background: "#f43f5e",
             display: "inline-block",
