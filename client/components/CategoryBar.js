@@ -9,7 +9,7 @@ export default function CategoryBar({
 
   return (
     <section className="jt-category-section" style={{ background: "transparent", padding: "10px 0 16px", width: "100%", maxWidth: "100%", boxSizing: "border-box", overflow: "hidden" }}>
-      <div className="jt-category-scroll" style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "6px", width: "100%", maxWidth: "100%", boxSizing: "border-box", WebkitOverflowScrolling: "touch" }}>
+      <div className="jt-category-scroll" style={{ display: "flex", flexWrap: "nowrap", gap: "8px", overflowX: "auto", paddingBottom: "6px", width: "100%", maxWidth: "100%", boxSizing: "border-box", WebkitOverflowScrolling: "touch" }}>
         <button
           type="button"
           onClick={() => onSelectCategory("all")}
@@ -23,6 +23,7 @@ export default function CategoryBar({
             fontSize: "14px",
             cursor: "pointer",
             whiteSpace: "nowrap",
+            flexShrink: 0,
             boxShadow: selectedCategory === "all" ? "0 4px 14px rgba(255, 77, 109, 0.25)" : "0 2px 6px rgba(0, 0, 0, 0.03)",
             transition: "all 0.2s ease",
           }}
@@ -49,6 +50,7 @@ export default function CategoryBar({
                 fontSize: "14px",
                 cursor: "pointer",
                 whiteSpace: "nowrap",
+                flexShrink: 0,
                 boxShadow: isActive ? "0 4px 14px rgba(255, 77, 109, 0.25)" : "0 2px 6px rgba(0, 0, 0, 0.03)",
                 transition: "all 0.2s ease",
               }}

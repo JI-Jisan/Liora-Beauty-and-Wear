@@ -1,314 +1,149 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useCart } from "@/context/CartContext";
-import PromoBanner from "@/components/PromoBanner";
+import { useEffect, useState } from "react";
+import Header from "@/components/Header";
 import FeaturedCategories from "@/components/FeaturedCategories";
 import ProductGrid from "@/components/ProductGrid";
+import PromoBanner from "@/components/PromoBanner";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import { API_BASE_URL } from "@/lib/api";
+import { useCart } from "@/context/CartContext";
 
-export default function AdminStorefrontPOS() {
-  const router = useRouter();
-  const { cartItems, cartCount, addToCart, openCart } = useCart();
+export default function AdminStorefrontPOS({ onBackToDashboard }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const { addToCart } = useCart();
 
-  const unitPrice = (item) => Number(item.offerPrice ?? item.price ?? 0);
-  const cartSubtotal = cartItems.reduce(
-    (sum, item) => sum + unitPrice(item) * (item.quantity || 1),
-    0
-  );
+  const [siteSettings, setSiteSettings] = useState({
+    brandName: "LIORA Beauty & Wear",
+    brandSubtitle: "Beauty. Style. You.",
+    heroTitle: "Beauty That Inspires Confidence & Style That Speaks Elegance",
+    heroText:
+      "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
+    offerText:
+      "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ✨ 100% Authentic Products",
+    promoSlides: [],
+  });
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/settings`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          setSiteSettings({
+            brandName: data.brandName || "LIORA Beauty & Wear",
+            brandSubtitle: data.brandSubtitle || "Beauty. Style. You.",
+            heroTitle:
+              data.heroTitle ||
+              "Beauty That Inspires Confidence & Style That Speaks Elegance",
+            heroText:
+              data.heroText ||
+              "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
+            offerText:
+              data.offerText ||
+              "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ✨ 100% Authentic Products",
+            promoSlides: data.promoSlides || [],
+          });
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
-    <div className="jt-admin-storefront-wrap" style={{ width: "100%", margin: "0 auto" }}>
-      {/* TOP POS CONTROL BANNER */}
+    <div style={{ width: "100%", minHeight: "100vh", background: "#fdf8f9" }}>
+      {/* Sleek Minimal Admin Bar at Very Top */}
       <div
         style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10001,
           background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
           color: "#ffffff",
-          padding: "16px 20px",
-          borderRadius: "16px",
-          marginBottom: "20px",
+          padding: "8px 16px",
           display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
           justifyContent: "space-between",
-          gap: "12px",
-          boxShadow: "0 4px 18px rgba(15, 23, 42, 0.15)",
+          alignItems: "center",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
         }}
       >
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <span style={{ fontSize: "20px" }}>🛍️</span>
-            <h3 style={{ margin: 0, fontSize: "17px", fontWeight: "800", color: "#fff" }}>
-              Offline Order Mode (Live Storefront View)
-            </h3>
-            <span
-              style={{
-                background: "#f43f5e",
-                color: "#fff",
-                fontSize: "11px",
-                fontWeight: "800",
-                padding: "2px 8px",
-                borderRadius: "12px",
-                textTransform: "uppercase",
-              }}
-            >
-              POS / Phone Orders
-            </span>
-          </div>
-          <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8" }}>
-            Browse and add products to cart exactly like a customer to create orders for phone or offline sales.
-          </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "16px" }}>🛍️</span>
+          <span style={{ fontSize: "13px", fontWeight: "800", color: "#f8fafc" }}>
+            Admin Storefront (Offline Orders)
+          </span>
         </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+        {onBackToDashboard && (
           <button
             type="button"
-            onClick={openCart}
-            style={{
-              background: "rgba(255, 255, 255, 0.12)",
-              color: "#fff",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              borderRadius: "50px",
-              padding: "8px 16px",
-              fontWeight: "700",
-              fontSize: "13px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            <span>🛍️ View Cart</span>
-            <span
-              style={{
-                background: "#f43f5e",
-                color: "#fff",
-                borderRadius: "12px",
-                padding: "1px 6px",
-                fontSize: "11px",
-                fontWeight: "800",
-              }}
-            >
-              {cartCount}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push("/checkout")}
+            onClick={onBackToDashboard}
             style={{
               background: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)",
-              color: "#fff",
+              color: "#ffffff",
               border: "none",
-              borderRadius: "50px",
-              padding: "9px 20px",
-              fontWeight: "800",
-              fontSize: "13.5px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              boxShadow: "0 4px 14px rgba(244, 63, 94, 0.35)",
-            }}
-          >
-            <span>⚡ Create Order / Checkout</span>
-            {cartSubtotal > 0 && <span>(৳{cartSubtotal})</span>}
-          </button>
-
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: "#ffffff",
-              color: "#0f172a",
-              border: "none",
-              borderRadius: "50px",
-              padding: "8px 14px",
-              fontWeight: "700",
+              borderRadius: "6px",
+              padding: "6px 14px",
               fontSize: "12px",
-              textDecoration: "none",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <span>🌐 Open Client Site ↗</span>
-          </a>
-        </div>
-      </div>
-
-      {/* POS SEARCH BAR */}
-      <div
-        style={{
-          background: "#ffffff",
-          padding: "12px 16px",
-          borderRadius: "14px",
-          border: "1px solid #e2e8f0",
-          marginBottom: "20px",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
-        }}
-      >
-        <span style={{ fontSize: "18px", color: "#f43f5e" }}>🔍</span>
-        <input
-          type="text"
-          placeholder="Search all products for offline customer..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            flex: 1,
-            border: "none",
-            outline: "none",
-            fontSize: "15px",
-            color: "#0f172a",
-            background: "transparent",
-          }}
-        />
-        {searchTerm.trim().length > 0 && (
-          <button
-            type="button"
-            onClick={() => setSearchTerm("")}
-            style={{
-              background: "#e2e8f0",
-              border: "none",
-              borderRadius: "50%",
-              width: "22px",
-              height: "22px",
+              fontWeight: "800",
+              cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              fontSize: "11px",
-              color: "#475569",
-              fontWeight: "700",
+              gap: "5px",
+              boxShadow: "0 2px 8px rgba(244, 63, 94, 0.4)",
             }}
           >
-            ✕
+            <span>⬅</span> Back to Admin Panel
           </button>
         )}
       </div>
 
-      {/* 1. PROMO BANNER */}
-      <PromoBanner />
-
-      {/* 2. FEATURED CATEGORIES CAROUSEL */}
-      <div style={{ marginTop: "16px", marginBottom: "24px" }}>
-        <FeaturedCategories />
-      </div>
-
-      {/* 3. ALL PRODUCTS GRID */}
-      <section style={{ marginBottom: "32px" }}>
-        <ProductGrid
+      {/* EXACT CLIENT HOME PAGE */}
+      <main className="jt-page" style={{ paddingTop: 0 }}>
+        <Header
           searchTerm={searchTerm}
-          onAddToCart={addToCart}
-          type="all"
-          title="All Products (Offline Catalog)"
+          onSearchChange={setSearchTerm}
+          brandName={siteSettings.brandName}
+          brandSubtitle={siteSettings.brandSubtitle}
         />
-      </section>
 
-      {/* 4. FEATURED PRODUCTS */}
-      <section style={{ marginBottom: "32px" }}>
-        <ProductGrid
-          onAddToCart={addToCart}
-          type="featured"
-          title="Featured Products"
-        />
-      </section>
+        <PromoBanner promoSlides={siteSettings.promoSlides} />
 
-      {/* 5. TRENDING PRODUCTS */}
-      <section style={{ marginBottom: "32px" }}>
-        <ProductGrid
-          onAddToCart={addToCart}
-          type="trending"
-          title="Trending Products"
-        />
-      </section>
+        <FeaturedCategories />
 
-      {/* 6. NEW ARRIVALS */}
-      <section style={{ marginBottom: "40px" }}>
-        <ProductGrid
-          onAddToCart={addToCart}
-          type="new"
-          title="New Arrivals"
-        />
-      </section>
+        <section id="shop-products">
+          <ProductGrid
+            searchTerm={searchTerm}
+            onAddToCart={addToCart}
+            type="all"
+            title="All Products"
+          />
+        </section>
 
-      {/* FLOATING BOTTOM CART BAR FOR ADMIN IF CART HAS ITEMS */}
-      {cartCount > 0 && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "20px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-            color: "#ffffff",
-            padding: "12px 24px",
-            borderRadius: "50px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            zIndex: 9999,
-            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.35)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            maxWidth: "92vw",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "20px" }}>🛍️</span>
-            <div>
-              <div style={{ fontSize: "14px", fontWeight: "800" }}>
-                {cartCount} item{cartCount > 1 ? "s" : ""} selected
-              </div>
-              <div style={{ fontSize: "12px", color: "#cbd5e1" }}>
-                Subtotal: <strong>৳{cartSubtotal}</strong>
-              </div>
-            </div>
-          </div>
+        <section id="view-offers">
+          <ProductGrid
+            onAddToCart={addToCart}
+            type="featured"
+            title="Featured Products"
+          />
+        </section>
 
-          <button
-            type="button"
-            onClick={openCart}
-            style={{
-              background: "rgba(255, 255, 255, 0.15)",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "50px",
-              padding: "8px 14px",
-              fontWeight: "700",
-              fontSize: "13px",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
-          >
-            View Cart
-          </button>
+        <section>
+          <ProductGrid
+            onAddToCart={addToCart}
+            type="trending"
+            title="Trending Products"
+          />
+        </section>
 
-          <button
-            type="button"
-            onClick={() => router.push("/checkout")}
-            style={{
-              background: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "50px",
-              padding: "8px 18px",
-              fontWeight: "800",
-              fontSize: "13.5px",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              boxShadow: "0 3px 12px rgba(244, 63, 94, 0.4)",
-            }}
-          >
-            Checkout Order →
-          </button>
-        </div>
-      )}
+        <section>
+          <ProductGrid
+            onAddToCart={addToCart}
+            type="new"
+            title="New Arrivals"
+          />
+        </section>
+
+        <WhatsAppButton />
+      </main>
     </div>
   );
 }

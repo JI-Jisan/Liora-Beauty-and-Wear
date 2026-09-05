@@ -596,6 +596,12 @@ export default function AdminPage() {
 
   if (!isAuthenticated) return null;
 
+  if (activeTab === "storefront") {
+    return (
+      <AdminStorefrontPOS onBackToDashboard={() => setActiveTab("dashboard")} />
+    );
+  }
+
   return (
     <main id="top" className="jt-admin-dashboard">
       {/* Backdrop Overlay for Slide-out Drawer */}
@@ -914,11 +920,6 @@ export default function AdminPage() {
 
               </div>
             </div>
-          )}
-
-          {/* Storefront / Offline POS Tab */}
-          {activeTab === "storefront" && (
-            <AdminStorefrontPOS />
           )}
 
           {/* Categories Tab */}
