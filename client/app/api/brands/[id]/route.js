@@ -5,6 +5,9 @@ import { getAdminFromRequest } from "@/lib/adminGuard";
 
 export const runtime = "nodejs";
 
+const slugify = (s) => s.toLowerCase().trim()
+  .replace(/[^a-z0-9\u0980-\u09FF]+/g, '-').replace(/^-|-$/g, '');
+
 export async function PUT(req, { params }) {
   const admin = getAdminFromRequest(req);
   if (!admin) {
@@ -14,6 +17,10 @@ export async function PUT(req, { params }) {
     await connectToDatabase();
     const { id } = await params;
     const body = await req.json();
+
+    if (body.name && !body.slug) {
+      body.slug = slugify(body.name);
+    }
 
     const updated = await Brand.findByIdAndUpdate(id, body, { new: true });
     if (!updated) {
