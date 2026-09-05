@@ -42,22 +42,25 @@ const MenuNode = ({ node, expandedIds, onToggle, onSelect }) => {
         {hasChildren && (
           <button
             type="button"
+            aria-label={isExpanded ? "Collapse category" : "Expand category"}
             onClick={(e) => {
               e.stopPropagation();
               onToggle(node._id);
             }}
             style={{
-              background: "transparent",
-              border: "none",
+              background: isExpanded ? "#fee2e2" : "#f1f5f9",
+              border: `1px solid ${isExpanded ? "#fecaca" : "#e2e8f0"}`,
               cursor: "pointer",
-              fontSize: "18px",
-              color: "#94a3b8",
+              fontSize: "16px",
+              fontWeight: 700,
+              color: isExpanded ? "#ef4444" : "#64748b",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: 32,
-              height: 32,
-              borderRadius: 4,
+              width: 30,
+              height: 30,
+              borderRadius: 6,
+              transition: "all 0.15s ease",
             }}
           >
             {isExpanded ? "−" : "+"}
@@ -101,11 +104,7 @@ export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
       .then((data) => {
         if (Array.isArray(data)) {
           setCategories(data);
-          const initialExpanded = {};
-          data.forEach((cat) => {
-            if (cat.level === 0) initialExpanded[cat._id] = true;
-          });
-          setExpandedIds(initialExpanded);
+          setExpandedIds({});
         }
       })
       .catch((err) => console.error("Drawer category fetch error:", err));
