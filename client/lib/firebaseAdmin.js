@@ -85,6 +85,17 @@ export async function verifyAuthAndRole(idToken) {
             role = "admin";
           }
         }
+
+        // Check {uid}/{uid}
+        if (role !== "admin") {
+          const directDoc = await firestore.collection(decodedToken.uid).doc(decodedToken.uid).get();
+          if (directDoc.exists) {
+            const dData = directDoc.data() || {};
+            if (dData.role === "admin" || dData.isAdmin === true) {
+              role = "admin";
+            }
+          }
+        }
       } catch (fsErr) {
         // Firestore might not be activated, safe to ignore
       }
