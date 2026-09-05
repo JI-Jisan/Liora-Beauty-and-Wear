@@ -78,20 +78,39 @@ export async function GET(req) {
     }
 
     if (category) {
+      let targetCat = null;
       if (mongoose.Types.ObjectId.isValid(category)) {
-        const kids = await Category.find({ ancestors: category }).select("_id").lean();
-        query.category = { $in: [new mongoose.Types.ObjectId(category), ...kids.map((k) => k._id)] };
-      } else {
-        const matchedCat = await Category.findOne({
+        targetCat = await Category.findById(category).select("_id").lean();
+      }
+      if (!targetCat) {
+        targetCat = await Category.findOne({
           $or: [
             { slug: category },
             { name: { $regex: new RegExp(`^${category.replace(/-/g, " ")}$`, "i") } }
           ]
         }).select("_id").lean();
-        if (matchedCat) {
-          const kids = await Category.find({ ancestors: matchedCat._id }).select("_id").lean();
-          query.category = { $in: [matchedCat._id, ...kids.map((k) => k._id)] };
+      }
+
+      if (targetCat) {
+        const allMatchingIds = new Set([String(targetCat._id)]);
+        let frontier = [targetCat._id];
+        for (let lvl = 0; lvl < 4 && frontier.length > 0; lvl++) {
+          const children = await Category.find({
+            $or: [
+              { parent: { $in: frontier } },
+              { ancestors: { $in: frontier } }
+            ]
+          }).select("_id").lean();
+          frontier = [];
+          for (const c of children) {
+            const cid = String(c._id);
+            if (!allMatchingIds.has(cid)) {
+              allMatchingIds.add(cid);
+              frontier.push(c._id);
+            }
+          }
         }
+        query.category = { $in: Array.from(allMatchingIds).map((id) => new mongoose.Types.ObjectId(id)) };
       }
     }
     if (type === "featured") query.isFeatured = true;

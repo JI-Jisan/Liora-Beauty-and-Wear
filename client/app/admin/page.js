@@ -8,6 +8,54 @@ import ProductForm from "@/components/admin/ProductForm";
 import CategoryManager from "@/components/admin/CategoryManager";
 import StatCard from "@/components/StatCard";
 import AdminStorefrontPOS from "@/components/admin/AdminStorefrontPOS";
+import { buildTree, flattenWithPath } from "@/lib/categoryTree";
+
+// Helper to get selected category ID and all its descendant category IDs
+function getCategoryAndDescendantIds(selectedCatId, allCategories = []) {
+  if (!selectedCatId || selectedCatId === "all") return null;
+
+  const targetIds = new Set();
+  const strSelected = String(selectedCatId).trim().toLowerCase();
+
+  // Find category by ID or name
+  const foundCat = allCategories.find(
+    (c) =>
+      String(c._id).toLowerCase() === strSelected ||
+      String(c.name).trim().toLowerCase() === strSelected
+  );
+
+  const rootId = foundCat ? String(foundCat._id) : String(selectedCatId);
+  targetIds.add(rootId);
+  if (foundCat?.name) {
+    targetIds.add(String(foundCat.name).trim().toLowerCase());
+  }
+
+  // Traverse tree to get all descendants (children, grandchildren, etc.)
+  const queue = [rootId];
+  const visited = new Set([rootId]);
+
+  while (queue.length > 0) {
+    const currentId = queue.shift();
+
+    allCategories.forEach((c) => {
+      const cId = String(c._id);
+      const parentId = c.parent ? String(c.parent?._id || c.parent) : null;
+      const hasInAncestors =
+        c.ancestors &&
+        Array.isArray(c.ancestors) &&
+        c.ancestors.some((a) => String(a?._id || a) === currentId);
+
+      if ((parentId === currentId || hasInAncestors) && !visited.has(cId)) {
+        visited.add(cId);
+        targetIds.add(cId);
+        if (c.name) targetIds.add(String(c.name).trim().toLowerCase());
+        queue.push(cId);
+      }
+    });
+  }
+
+  return targetIds;
+}
 
 export default function AdminPage() {
   const router = useRouter();
@@ -37,7 +85,13 @@ export default function AdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-
+  const categoryOptions = useMemo(() => {
+    try {
+      return flattenWithPath(buildTree(categories));
+    } catch {
+      return categories;
+    }
+  }, [categories]);
 
   const [settings, setSettings] = useState({
     brandName: "",
@@ -455,15 +509,25 @@ export default function AdminPage() {
     }
 
     if (productCategoryFilter && productCategoryFilter !== "all") {
-      result = result.filter((p) => {
-        if (!p) return false;
-        const catId = p.category?._id || p.category;
-        const catName = p.category?.name || p.category;
-        return (
-          catId === productCategoryFilter ||
-          catName === productCategoryFilter
-        );
-      });
+      const prodMatchingCategoryIds = getCategoryAndDescendantIds(
+        productCategoryFilter,
+        categories
+      );
+      if (prodMatchingCategoryIds) {
+        result = result.filter((p) => {
+          if (!p) return false;
+          const catId = String(p.category?._id || p.category || "");
+          const catName = p.category?.name
+            ? String(p.category.name).trim().toLowerCase()
+            : typeof p.category === "string"
+            ? p.category.trim().toLowerCase()
+            : "";
+          return (
+            prodMatchingCategoryIds.has(catId) ||
+            (catName && prodMatchingCategoryIds.has(catName))
+          );
+        });
+      }
     }
 
     if (productStockFilter && productStockFilter !== "all") {
@@ -489,6 +553,7 @@ export default function AdminPage() {
     productCategoryFilter,
     productStockFilter,
     productSortBy,
+    categories,
   ]);
 
   const totalPages =
@@ -576,12 +641,26 @@ export default function AdminPage() {
   let lowStockCount = 0;
   let totalStockValue = 0; // গোডাউনে মোট কত টাকার মাল আছে (কেনার দাম অনুযায়ী)
 
-  // products স্টেট থেকে ডেটা ফিল্টার করা
-  const filteredStock = (products || []).filter((p) => {
-    if (stockCategoryFilter === "all") return true;
-    const catId = p.category?._id || p.category;
-    return catId === stockCategoryFilter;
-  });
+  const stockMatchingCategoryIds = useMemo(() => {
+    return getCategoryAndDescendantIds(stockCategoryFilter, categories);
+  }, [stockCategoryFilter, categories]);
+
+  // products স্টেট থেকে ডেটা ফিল্টার করা (মেইন ক্যাটাগরি সিলেক্ট করলে তার ভেতরের সব সাবক্যাটাগরির প্রোডাক্টও অন্তর্ভুক্ত হবে)
+  const filteredStock = useMemo(() => {
+    return (products || []).filter((p) => {
+      if (!stockMatchingCategoryIds) return true;
+      const catId = String(p.category?._id || p.category || "");
+      const catName = p.category?.name
+        ? String(p.category.name).trim().toLowerCase()
+        : typeof p.category === "string"
+        ? p.category.trim().toLowerCase()
+        : "";
+      return (
+        stockMatchingCategoryIds.has(catId) ||
+        (catName && stockMatchingCategoryIds.has(catName))
+      );
+    });
+  }, [products, stockMatchingCategoryIds]);
 
   filteredStock.forEach((p) => {
     const qty = Number(p.stockQuantity || 0);
@@ -982,9 +1061,9 @@ export default function AdminPage() {
                   }}
                 >
                   <option value="all">All Categories</option>
-                  {categories.map((cat) => (
+                  {(categoryOptions?.length ? categoryOptions : categories).map((cat) => (
                     <option key={cat._id} value={cat._id}>
-                      {cat.name}
+                      {cat.path || cat.name}
                     </option>
                   ))}
                 </select>
@@ -1820,9 +1899,9 @@ export default function AdminPage() {
                     style={{ flex: 1, minWidth: "140px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "12px" }}
                   >
                     <option value="all">📁 All Categories</option>
-                    {categories.map((cat) => (
+                    {(categoryOptions?.length ? categoryOptions : categories).map((cat) => (
                       <option key={cat._id} value={cat._id}>
-                        {cat.name}
+                        {cat.path || cat.name}
                       </option>
                     ))}
                   </select>
@@ -1890,7 +1969,7 @@ export default function AdminPage() {
                       const qty = Number(p.stockQuantity || 0);
                       const buyPrice = Number(p.purchasePrice || 0);
                       const sellPrice = Number(p.offerPrice || p.originalPrice || 0);
-                      const catName = categories.find(c => c._id === (p.category?._id || p.category))?.name || "Uncategorized";
+                      const catName = categories.find(c => String(c._id) === String(p.category?._id || p.category))?.name || "Uncategorized";
                       return (
                         <div key={p._id} style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "14px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                           <div>
@@ -1978,7 +2057,7 @@ export default function AdminPage() {
                             <tr key={item._id} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
                               <td className="admin-stock-name-cell" style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
                               <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>
-                                {categories.find(c => c._id === (item.category?._id || item.category))?.name || "Unknown"}
+                                {categories.find(c => String(c._id) === String(item.category?._id || item.category))?.name || "Unknown"}
                               </td>
                               <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{buyPrice} Tk</td>
                               <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.offerPrice || item.originalPrice} Tk</td>
