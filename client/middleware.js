@@ -12,8 +12,11 @@ export async function middleware(req) {
     if (
       path.startsWith('/api/admin/login') ||
       path.startsWith('/api/admin/google-login') ||
+      path.startsWith('/api/auth/') ||
+      path.startsWith('/api/user/') ||
       path.startsWith('/api/my-orders') ||
       path.includes('/api/orders/track') ||
+      path.startsWith('/api/orders/view') ||
       (method === 'POST' && /^\/api\/orders\/?$/.test(path))
     ) {
       return NextResponse.next();

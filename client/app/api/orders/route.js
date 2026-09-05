@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Order, Product, Category, SiteSettings, nextOrderIdentity } from "@/lib/models";
+import { Order, Product, Category, SiteSettings, Customer, nextOrderIdentity } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
 import { getUserFromRequest } from "@/lib/firebaseAdmin";
 import crypto from "crypto";
@@ -8,8 +8,6 @@ import crypto from "crypto";
 export const runtime = "nodejs";
 
 const MAX_QTY_PER_ITEM = 20;
-
-
 
 export async function GET(req) {
   const admin = getAdminFromRequest(req);
@@ -64,10 +62,9 @@ export async function POST(req) {
   };
 
   try {
-    console.log("STEP 1: route hit");
     await connectToDatabase();
-    console.log("STEP 2: db connected");
     const body = await req.json();
+
 
     const customerName = String(body.customerName || "").trim();
     const phone = normalizeBdPhone(body.phone);
@@ -209,6 +206,21 @@ export async function POST(req) {
           firebaseUid: user?.uid || null,
           status: "Pending",
         });
+
+        if (user?.uid) {
+          Customer.findOneAndUpdate(
+            { firebaseUid: user.uid },
+            {
+              $set: {
+                phone,
+                address,
+                name: customerName,
+              },
+            },
+            { upsert: true }
+          ).catch((e) => console.error("Customer sync error:", e?.message));
+        }
+
         break;
       } catch (e) {
         if (e?.code === 11000 && attempt < 2) continue;

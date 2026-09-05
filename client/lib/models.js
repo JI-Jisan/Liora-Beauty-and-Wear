@@ -279,6 +279,22 @@ OrderSchema.index({ phone: 1 });
 export const Order =
   mongoose.models.Order || mongoose.model("Order", OrderSchema);
 
+// ---------- Customer / User ----------
+const CustomerSchema = new mongoose.Schema(
+  {
+    firebaseUid: { type: String, required: true, unique: true, index: true },
+    email: { type: String, lowercase: true, trim: true, index: true },
+    name: { type: String, default: "" },
+    phone: { type: String, default: "", index: true },
+    address: { type: String, default: "" },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
+  },
+  { timestamps: true }
+);
+
+export const Customer =
+  mongoose.models.Customer || mongoose.model("Customer", CustomerSchema);
+
 // ---------- SiteSettings ----------
 const SiteSettingsSchema = new mongoose.Schema(
   {
@@ -316,3 +332,4 @@ const SiteSettingsSchema = new mongoose.Schema(
 
 export const SiteSettings =
   mongoose.models.SiteSettings || mongoose.model("SiteSettings", SiteSettingsSchema);
+

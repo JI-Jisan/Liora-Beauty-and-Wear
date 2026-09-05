@@ -85,8 +85,11 @@ const MenuNode = ({ node, expandedIds, onToggle, onSelect }) => {
   );
 };
 
+import { useAuth } from "./AuthProvider";
+
 export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
   const router = useRouter();
+  const { user, isAdmin, profile, logout } = useAuth();
   const [categories, setCategories] = useState([]);
   const [expandedIds, setExpandedIds] = useState({});
   const [activeTab, setActiveTab] = useState("MENU"); // 'MENU' | 'CATEGORY'
@@ -206,29 +209,115 @@ export default function CategoryDrawer({ isOpen, onClose, onSelectCategory }) {
         <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
           {activeTab === "MENU" ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {menus.map((m) => (
-                <Link
-                  key={m._id}
-                  href={m.href}
-                  onClick={onClose}
-                  target={m.openInNew ? "_blank" : "_self"}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "16px 20px",
-                    borderBottom: "1px solid #f2f2f2",
-                    textDecoration: "none",
-                    color: "#222",
-                    fontWeight: 600,
-                    fontSize: 14,
-                    letterSpacing: 0.3,
-                  }}
-                >
-                  {m.icon && <span>{m.icon}</span>}
-                  {m.label}
-                </Link>
-              ))}
+              {menus.map((m) => {
+                const isAuthMenu =
+                  m.href === "/login" ||
+                  m.href === "/admin/login" ||
+                  m.label.toUpperCase().includes("LOGIN");
+
+                if (isAuthMenu) {
+                  if (user) {
+                    const accountLink = isAdmin ? "/admin" : "/account";
+                    const accountLabel = isAdmin
+                      ? "👑 ADMIN PANEL"
+                      : `👤 ${profile?.name || user?.displayName || "MY ACCOUNT & ORDERS"}`.toUpperCase();
+
+                    return (
+                      <div key={m._id || "auth-section"}>
+                        <Link
+                          href={accountLink}
+                          onClick={onClose}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "16px 20px",
+                            borderBottom: "1px solid #f2f2f2",
+                            textDecoration: "none",
+                            color: "#e91e63",
+                            fontWeight: 700,
+                            fontSize: 14,
+                            letterSpacing: 0.3,
+                          }}
+                        >
+                          {accountLabel}
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            logout();
+                            onClose();
+                          }}
+                          style={{
+                            width: "100%",
+                            textAlign: "left",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "14px 20px",
+                            border: "none",
+                            background: "none",
+                            borderBottom: "1px solid #f2f2f2",
+                            color: "#ef4444",
+                            fontWeight: 600,
+                            fontSize: 13,
+                            cursor: "pointer",
+                          }}
+                        >
+                          🚪 LOGOUT ({user.email?.split("@")[0]})
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={m._id}
+                      href="/login"
+                      onClick={onClose}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "16px 20px",
+                        borderBottom: "1px solid #f2f2f2",
+                        textDecoration: "none",
+                        color: "#222",
+                        fontWeight: 600,
+                        fontSize: 14,
+                        letterSpacing: 0.3,
+                      }}
+                    >
+                      <span>👤</span>
+                      LOGIN / REGISTER
+                    </Link>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={m._id}
+                    href={m.href}
+                    onClick={onClose}
+                    target={m.openInNew ? "_blank" : "_self"}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "16px 20px",
+                      borderBottom: "1px solid #f2f2f2",
+                      textDecoration: "none",
+                      color: "#222",
+                      fontWeight: 600,
+                      fontSize: 14,
+                      letterSpacing: 0.3,
+                    }}
+                  >
+                    {m.icon && <span>{m.icon}</span>}
+                    {m.label}
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div>

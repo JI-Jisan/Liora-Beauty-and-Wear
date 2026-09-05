@@ -6,13 +6,14 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
-import { getIdToken } from "@/components/AuthProvider";
+import { getIdToken, useAuth } from "@/components/AuthProvider";
 import { ZONES, getCharge } from "@/lib/delivery";
 import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cartItems, clearCart } = useCart();
+  const { user, profile } = useAuth();
 
   const [deliveryZone, setDeliveryZone] = useState("inside_dhaka");
   const [submitting, setSubmitting] = useState(false);
@@ -28,6 +29,17 @@ export default function CheckoutPage() {
     address: "",
     note: "",
   });
+
+  useEffect(() => {
+    if (profile || user) {
+      setFormData((prev) => ({
+        ...prev,
+        customerName: prev.customerName || profile?.name || user?.displayName || "",
+        phone: prev.phone || profile?.phone || "",
+        address: prev.address || profile?.address || "",
+      }));
+    }
+  }, [profile, user]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/settings`)

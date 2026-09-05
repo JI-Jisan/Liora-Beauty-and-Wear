@@ -9,6 +9,7 @@ import CategoryDrawer from "./CategoryDrawer";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { buildTree } from "@/lib/categoryTree";
 import useHideOnScroll from "@/lib/useHideOnScroll";
+import { useAuth } from "./AuthProvider";
 
 export default function Header({
   cartCount: propsCartCount,
@@ -21,6 +22,7 @@ export default function Header({
 }) {
   const router = useRouter();
   const cartContext = useCart();
+  const { user, isAdmin, profile } = useAuth();
 
   const [localSearch, setLocalSearch] = useState("");
   const [liveSearchResults, setLiveSearchResults] = useState([]);
@@ -277,9 +279,36 @@ export default function Header({
               <LioraLogo />
             </Link>
 
-            <button type="button" className="jt-cart-pill-btn" onClick={handleOpenCart}>
-              <span className="jt-cart-icon">🛍️</span> Cart ({cartCount})
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Link
+                href={user ? (isAdmin ? "/admin" : "/account") : "/login"}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  padding: "7px 12px",
+                  borderRadius: 20,
+                  background: isAdmin ? "#fef3c7" : "#f1f5f9",
+                  color: isAdmin ? "#b45309" : "#1e293b",
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  textDecoration: "none",
+                  border: "1px solid",
+                  borderColor: isAdmin ? "#fde68a" : "#e2e8f0",
+                  whiteSpace: "nowrap",
+                }}
+                title={user ? (isAdmin ? "Admin Dashboard" : "My Account & Orders") : "Login / Register"}
+              >
+                <span>{isAdmin ? "👑" : "👤"}</span>
+                <span>
+                  {user ? (isAdmin ? "Admin" : (profile?.name?.split(" ")[0] || "Account")) : "Login"}
+                </span>
+              </Link>
+
+              <button type="button" className="jt-cart-pill-btn" onClick={handleOpenCart}>
+                <span className="jt-cart-icon">🛍️</span> Cart ({cartCount})
+              </button>
+            </div>
           </div>
         </div>
 
@@ -398,6 +427,9 @@ export default function Header({
           </Link>
           <Link href="/products?filter=offers" className="jt-tab-pill">
             <span className="jt-tab-icon">🏷️</span> Offers
+          </Link>
+          <Link href="/order-tracking" className="jt-tab-pill">
+            <span className="jt-tab-icon">📦</span> Track Order
           </Link>
         </div>
       </div>

@@ -5,9 +5,15 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import CategoryDrawer from "./CategoryDrawer";
 
+import { useAuth } from "./AuthProvider";
+
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
+
+  const accountHref = user ? (isAdmin ? "/admin" : "/account") : "/login";
+  const isAccountActive = pathname?.startsWith("/admin") || pathname?.startsWith("/account") || pathname === "/login";
 
   return (
     <>
@@ -51,11 +57,13 @@ export default function MobileBottomNav() {
         </Link>
 
         <Link
-          href="/admin/login"
-          className={`jt-bottom-nav-item ${pathname?.startsWith("/admin") ? "active" : ""}`}
+          href={accountHref}
+          className={`jt-bottom-nav-item ${isAccountActive ? "active" : ""}`}
         >
           <span className="jt-bottom-nav-icon">👤</span>
-          <span className="jt-bottom-nav-label">Account</span>
+          <span className="jt-bottom-nav-label">
+            {user ? (isAdmin ? "Admin" : "Account") : "Login"}
+          </span>
         </Link>
       </nav>
     </>
