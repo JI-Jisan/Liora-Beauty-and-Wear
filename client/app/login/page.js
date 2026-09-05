@@ -51,12 +51,12 @@ function LoginFormContent() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const translateError = (code) => {
+  const translateError = (code, msg) => {
     switch (code) {
       case "auth/invalid-credential":
       case "auth/wrong-password":
       case "auth/user-not-found":
-        return "ভুল ইমেইল বা পাসওয়ার্ড প্রদান করা হয়েছে।";
+        return "ভুল ইমেইল বা পাসওয়ার্ড প্রদান করা হয়েছে। আপনার অ্যাকাউন্টটি Google দিয়ে খোলা থাকলে নিচের 'Google দিয়ে দ্রুত লগইন' বাটনে চাপুন।";
       case "auth/invalid-email":
         return "সঠিক ইমেইল অ্যাড্রেস প্রদান করুন।";
       case "auth/email-already-in-use":
@@ -67,8 +67,12 @@ function LoginFormContent() {
         return "অনেকবার ভুল চেষ্টা করা হয়েছে। কিছু সময় পর আবার চেষ্টা করুন।";
       case "auth/popup-closed-by-user":
         return "Google লগইন পপআপ বন্ধ করা হয়েছে।";
+      case "auth/unauthorized-domain":
+        return "ডোমেইন ভেরিফিকেশন আপডেট হচ্ছে। অনুগ্রহ করে ৩০ সেকেন্ড পর আবার চেষ্টা করুন।";
+      case "auth/network-request-failed":
+        return "ইন্টারনেট কানেকশন চেক করুন এবং পুনরায় চেষ্টা করুন।";
       default:
-        return "একটি ত্রুটি হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।";
+        return msg || "একটি ত্রুটি হয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।";
     }
   };
 
