@@ -7,6 +7,7 @@ import { API_BASE_URL, getAuthHeaders, getImageUrl } from "@/lib/api";
 import ProductForm from "@/components/admin/ProductForm";
 import CategoryManager from "@/components/admin/CategoryManager";
 import StatCard from "@/components/StatCard";
+import AdminStorefrontPOS from "@/components/admin/AdminStorefrontPOS";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -629,6 +630,21 @@ export default function AdminPage() {
             📊 Dashboard
           </li>
           <li
+            className={activeTab === "storefront" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("storefront");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            style={{
+              color: activeTab === "storefront" ? "#ffffff" : "#f43f5e",
+              fontWeight: "800",
+              background: activeTab === "storefront" ? undefined : "#fff1f2",
+            }}
+          >
+            🛒 Live Store (Offline POS)
+          </li>
+          <li
             className={activeTab === "categories" ? "active-tab" : ""}
             onClick={() => {
               setActiveTab("categories");
@@ -712,6 +728,20 @@ export default function AdminPage() {
           >
             📋 Inventory / Stock
           </li>
+          <li
+            onClick={() => {
+              window.open("/", "_blank");
+            }}
+            style={{
+              color: "#0284c7",
+              fontWeight: "700",
+              marginTop: "12px",
+              borderTop: "1px dashed #e2e8f0",
+              paddingTop: "12px",
+            }}
+          >
+            🌐 Open Client Site ↗
+          </li>
         </ul>
       </aside>
 
@@ -724,6 +754,31 @@ export default function AdminPage() {
             style={{ flexShrink: 0, background: "#0f172a", color: "#ffffff", border: "none", padding: "8px 12px", borderRadius: "8px", fontWeight: "700", fontSize: "13px", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
           >
             ☰ <span className="hidden sm:inline">Menu</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("storefront");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            style={{
+              flexShrink: 0,
+              background: activeTab === "storefront" ? "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)" : "#fff1f2",
+              color: activeTab === "storefront" ? "#ffffff" : "#e11d48",
+              border: "1px solid #fecdd3",
+              padding: "7px 12px",
+              borderRadius: "8px",
+              fontWeight: "800",
+              fontSize: "12px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+            }}
+          >
+            <span>🛒</span>
+            <span className="hidden sm:inline">Offline POS</span>
           </button>
 
           <h1 style={{ flex: 1, textAlign: "center", margin: 0, fontWeight: "900", color: "#0f172a", fontSize: "15px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", letterSpacing: "0.5px" }}>
@@ -748,6 +803,16 @@ export default function AdminPage() {
               {/* 2-Column Grid on Mobile */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px", width: "100%" }}>
                 
+                {/* Offline Storefront Box (High Priority for offline orders) */}
+                <div 
+                  onClick={() => { setActiveTab("storefront"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #fecdd3", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(244,63,94,0.12)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🛒</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#e11d48", fontWeight: "800", textAlign: "center" }}>Live Store (POS)</h3>
+                  <span style={{ fontSize: "11px", color: "#94a3b8", textAlign: "center", marginTop: "2px" }}>Browse & Take Orders</span>
+                </div>
+
                 {/* Orders Box (High Priority) */}
                 <div 
                   onClick={() => { setActiveTab("orders"); window.scrollTo(0,0); }}
@@ -849,6 +914,11 @@ export default function AdminPage() {
 
               </div>
             </div>
+          )}
+
+          {/* Storefront / Offline POS Tab */}
+          {activeTab === "storefront" && (
+            <AdminStorefrontPOS />
           )}
 
           {/* Categories Tab */}
