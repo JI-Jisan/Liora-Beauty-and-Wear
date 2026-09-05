@@ -31,6 +31,24 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    // Immediate check of client-side Firebase token claims and known admin email
+    let clientIsAdmin = false;
+    try {
+      const tokenResult = await firebaseUser.getIdTokenResult(true);
+      const email = (firebaseUser.email || "").toLowerCase().trim();
+      if (
+        tokenResult.claims?.role === "admin" ||
+        tokenResult.claims?.admin === true ||
+        email === "liorabeautyandwear@gmail.com" ||
+        email === "admin@jisantrends.com"
+      ) {
+        clientIsAdmin = true;
+        setRole("admin");
+      }
+    } catch (claimErr) {
+      console.warn("Claim check error:", claimErr);
+    }
+
     try {
       const idToken = await firebaseUser.getIdToken(true);
       const res = await fetch("/api/auth/verify", {
@@ -42,25 +60,35 @@ export function AuthProvider({ children }) {
 
       if (res.ok) {
         const data = await res.json();
-        setRole(data.role || "user");
+        const effectiveRole = data.role || (clientIsAdmin ? "admin" : "user");
+        setRole(effectiveRole);
         setProfile(data.user || null);
 
-        if (data.role === "admin" && data.token) {
+        if (effectiveRole === "admin" && data.token) {
           localStorage.setItem("jt_admin_logged_in", "true");
           localStorage.setItem("jt_admin_token", data.token);
-          localStorage.setItem("jt_admin_user", JSON.stringify(data.user));
-        } else {
+          localStorage.setItem(
+            "jt_admin_user",
+            JSON.stringify(
+              data.user || {
+                email: firebaseUser.email,
+                name: firebaseUser.displayName || "Admin",
+                role: "admin",
+              }
+            )
+          );
+        } else if (effectiveRole !== "admin") {
           // If not admin, ensure admin token is clean
           localStorage.removeItem("jt_admin_token");
           localStorage.removeItem("jt_admin_logged_in");
           localStorage.removeItem("jt_admin_user");
         }
       } else {
-        setRole("user");
+        setRole(clientIsAdmin ? "admin" : "user");
       }
     } catch (err) {
       console.error("Auth sync error:", err);
-      setRole("user");
+      setRole(clientIsAdmin ? "admin" : "user");
     }
   }, []);
 
