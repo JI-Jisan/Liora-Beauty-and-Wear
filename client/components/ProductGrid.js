@@ -34,6 +34,8 @@ function ProductGridContent({
   type = "all",
   title = "Products",
   brand = "",
+  category: propCategory = "",
+  collection = "",
   showCategoryBar = false,
 }) {
   const gridRef = useRef(null);
@@ -47,7 +49,7 @@ function ProductGridContent({
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(false);
-  const PAGE_SIZE = 100;
+  const PAGE_SIZE = 24;
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
@@ -61,8 +63,7 @@ function ProductGridContent({
 
   const urlCategoryParam = searchParams ? searchParams.get("category") || "" : "";
   const [selectedCategoryState, setSelectedCategoryState] = useState("all");
-  const activeCategory = urlCategoryParam || selectedCategoryState;
-  
+  const activeCategory = propCategory || urlCategoryParam || selectedCategoryState;
   const activeBrand = brand || (searchParams ? searchParams.get("brand") || "" : "");
 
   const handleSelectCategory = (cat) => {
@@ -79,6 +80,7 @@ function ProductGridContent({
     const qs = new URLSearchParams();
     if (activeCategory && activeCategory !== "all") qs.set('category', activeCategory);
     if (activeBrand) qs.set('brand', activeBrand);
+    if (collection) qs.set('collection', collection);
     if (type && type !== "all") qs.set('type', type);
     if (activeSearchTerm.trim()) qs.set('search', activeSearchTerm.trim());
     

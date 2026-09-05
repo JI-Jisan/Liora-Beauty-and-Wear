@@ -36,9 +36,63 @@ export async function GET(req) {
       }
     }
 
-    if (category && mongoose.Types.ObjectId.isValid(category)) {
-      const kids = await Category.find({ ancestors: category }).select("_id").lean();
-      query.category = { $in: [new mongoose.Types.ObjectId(category), ...kids.map((k) => k._id)] };
+    const collection = searchParams.get("collection");
+    if (collection) {
+      const col = collection.toLowerCase().trim();
+      if (col === "combo" || col === "combo-offer" || col === "combos") {
+        const comboCat = await Category.findOne({ name: /combo/i }).select("_id").lean();
+        const comboCatIds = comboCat ? [comboCat._id] : [];
+        if (comboCat) {
+          const kids = await Category.find({ ancestors: comboCat._id }).select("_id").lean();
+          comboCatIds.push(...kids.map(k => k._id));
+        }
+        query.$or = [
+          ...(comboCatIds.length ? [{ category: { $in: comboCatIds } }] : []),
+          { name: { $regex: /combo/i } }
+        ];
+      } else if (col === "clearance" || col === "clearance-sale") {
+        const clearCat = await Category.findOne({ name: /clearance/i }).select("_id").lean();
+        const clearCatIds = clearCat ? [clearCat._id] : [];
+        if (clearCat) {
+          const kids = await Category.find({ ancestors: clearCat._id }).select("_id").lean();
+          clearCatIds.push(...kids.map(k => k._id));
+        }
+        query.$or = [
+          ...(clearCatIds.length ? [{ category: { $in: clearCatIds } }] : []),
+          { name: { $regex: /clearance/i } },
+          { isFeatured: true }
+        ];
+      } else if (col === "flash-sales" || col === "flash-sale" || col === "flash") {
+        const flashCat = await Category.findOne({ name: /flash sale/i }).select("_id").lean();
+        const flashCatIds = flashCat ? [flashCat._id] : [];
+        if (flashCat) {
+          const kids = await Category.find({ ancestors: flashCat._id }).select("_id").lean();
+          flashCatIds.push(...kids.map(k => k._id));
+        }
+        query.$or = [
+          ...(flashCatIds.length ? [{ category: { $in: flashCatIds } }] : []),
+          { name: { $regex: /flash/i } },
+          { isFeatured: true }
+        ];
+      }
+    }
+
+    if (category) {
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        const kids = await Category.find({ ancestors: category }).select("_id").lean();
+        query.category = { $in: [new mongoose.Types.ObjectId(category), ...kids.map((k) => k._id)] };
+      } else {
+        const matchedCat = await Category.findOne({
+          $or: [
+            { slug: category },
+            { name: { $regex: new RegExp(`^${category.replace(/-/g, " ")}$`, "i") } }
+          ]
+        }).select("_id").lean();
+        if (matchedCat) {
+          const kids = await Category.find({ ancestors: matchedCat._id }).select("_id").lean();
+          query.category = { $in: [matchedCat._id, ...kids.map((k) => k._id)] };
+        }
+      }
     }
     if (type === "featured") query.isFeatured = true;
     if (type === "trending") query.isTrending = true;
