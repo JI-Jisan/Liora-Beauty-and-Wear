@@ -168,9 +168,13 @@ export async function POST(req) {
       await syncProductStock(p._id, Product);
     }
 
+    const district = String(body.district || "").trim() || (deliveryZone === "inside_dhaka" ? "Dhaka" : "Outside Dhaka");
+    const isDhaka = district.toLowerCase() === "dhaka" || district === "ঢাকা" || deliveryZone === "inside_dhaka";
+    const finalDeliveryZone = isDhaka ? "inside_dhaka" : "outside_dhaka";
+
     // ---- ডেলিভারি চার্জও সম্পূর্ণ সার্ভারেই নির্ধারিত হবে ----
     const settings = (await SiteSettings.findOne().lean()) || {};
-    const baseCharge = getCharge(deliveryZone);
+    const baseCharge = isDhaka ? 70 : 130;
     const threshold = Number(settings.freeDeliveryThreshold ?? 0);
     const deliveryCharge = threshold > 0 && subtotal >= threshold ? 0 : baseCharge;
 
@@ -182,6 +186,9 @@ export async function POST(req) {
       user = null;
     }
 
+    const firebaseUid = user?.uid || body.firebaseUid || null;
+    const customerEmail = (user?.email || body.customerEmail || "").toLowerCase().trim();
+
     // ---- orderNumber, collision হলে ৩ বার retry ----
     let order = null;
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -189,11 +196,13 @@ export async function POST(req) {
         const { orderNumber, serial } = await nextOrderIdentity();
         order = await Order.create({
           customerName,
+          customerEmail,
           phone,
+          district,
           address,
           note,
           items,
-          deliveryZone,
+          deliveryZone: finalDeliveryZone,
           deliveryCharge,
           subtotal,
           totalCost,
@@ -203,22 +212,34 @@ export async function POST(req) {
           orderNumber,
           serial,
           accessToken: crypto.randomBytes(12).toString("hex"),
-          firebaseUid: user?.uid || null,
+          firebaseUid,
           status: "Pending",
         });
 
-        if (user?.uid) {
+        if (firebaseUid) {
           Customer.findOneAndUpdate(
-            { firebaseUid: user.uid },
+            { firebaseUid },
             {
               $set: {
                 phone,
                 address,
                 name: customerName,
+                ...(customerEmail ? { email: customerEmail } : {}),
               },
             },
             { upsert: true }
           ).catch((e) => console.error("Customer sync error:", e?.message));
+        }
+
+        // Asynchronously send order confirmation email if customer email exists
+        if (customerEmail) {
+          import("@/lib/mailer")
+            .then(({ sendOrderConfirmationEmail }) => {
+              sendOrderConfirmationEmail(order).catch((err) =>
+                console.error("Async email dispatch error:", err?.message)
+              );
+            })
+            .catch(() => {});
         }
 
         break;

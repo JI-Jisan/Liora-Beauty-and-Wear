@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { getIdToken, useAuth } from "@/components/AuthProvider";
-import { ZONES, getCharge } from "@/lib/delivery";
+import { ZONES, BANGLADESH_DISTRICTS, getCharge } from "@/lib/delivery";
 import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
 
 export default function CheckoutPage() {
@@ -15,6 +15,7 @@ export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const { user, profile } = useAuth();
 
+  const [district, setDistrict] = useState("Dhaka");
   const [deliveryZone, setDeliveryZone] = useState("inside_dhaka");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -25,6 +26,7 @@ export default function CheckoutPage() {
 
   const [formData, setFormData] = useState({
     customerName: "",
+    customerEmail: "",
     phone: "",
     address: "",
     note: "",
@@ -35,11 +37,21 @@ export default function CheckoutPage() {
       setFormData((prev) => ({
         ...prev,
         customerName: prev.customerName || profile?.name || user?.displayName || "",
+        customerEmail: prev.customerEmail || profile?.email || user?.email || "",
         phone: prev.phone || profile?.phone || "",
         address: prev.address || profile?.address || "",
       }));
     }
   }, [profile, user]);
+
+  const handleDistrictChange = (selectedDistrict) => {
+    setDistrict(selectedDistrict);
+    if (selectedDistrict === "Dhaka") {
+      setDeliveryZone("inside_dhaka");
+    } else {
+      setDeliveryZone("outside_dhaka");
+    }
+  };
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/settings`)
@@ -106,11 +118,14 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           customerName: formData.customerName,
+          customerEmail: formData.customerEmail || profile?.email || user?.email || "",
           phone: cleanPhone,
+          district: district || "Dhaka",
           address: formData.address,
           note: formData.note,
           zone: deliveryZone,
           deliveryZone,
+          firebaseUid: user?.uid || null,
           items: cartItems.map((item) => ({
             productId: item._id,
             quantity: item.quantity || 1,
@@ -224,54 +239,112 @@ export default function CheckoutPage() {
                   )}
 
                   <input
+                    type="email"
+                    name="customerEmail"
+                    autoComplete="email"
+                    placeholder="ইমেইল অ্যাড্রেস (Email - অর্ডার নোটিফিকেশনের জন্য)"
+                    value={formData.customerEmail}
+                    onChange={handleChange}
+                  />
+
+                  <div style={{ marginBottom: "12px" }}>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "6px" }}>
+                      📍 ডেলিভারি জেলা (Select District) *
+                    </label>
+                    <select
+                      value={district}
+                      onChange={(e) => handleDistrictChange(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        borderRadius: "10px",
+                        border: "1.5px solid #cbd5e1",
+                        fontSize: "14.5px",
+                        fontWeight: "600",
+                        color: "#0f172a",
+                        backgroundColor: "#ffffff",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                      required
+                    >
+                      {BANGLADESH_DISTRICTS.map((d) => (
+                        <option key={d.id} value={d.nameEn}>
+                          {d.nameBn} ({d.nameEn}) {d.isInsideDhaka ? "— ঢাকা সিটি (৳৭০)" : "— ঢাকার বাইরে (৳১৩০)"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <input
                     type="text"
                     name="address"
                     autoComplete="street-address"
                     minLength={8}
-                    placeholder="সম্পূর্ণ ডেলিভারি ঠিকানা (বাসা নং, রোড, এরিয়া, জেলা)"
+                    placeholder="সম্পূর্ণ ডেলিভারি ঠিকানা (বাসা নং, রোড, এরিয়া/থানা)"
                     value={formData.address}
                     onChange={handleChange}
                     required
                   />
 
                   <div className="jt-delivery-options" style={{ marginTop: "12px", marginBottom: "14px" }}>
-                    <label className="jt-delivery-row" style={{ display: "flex", justifyContent: "space-between", padding: "10px", border: deliveryZone === "inside_dhaka" ? "2px solid #e91e63" : "1px solid #cbd5e1", borderRadius: "8px", marginBottom: "8px", cursor: "pointer" }}>
-                      <div className="jt-delivery-left" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <label
+                      className="jt-delivery-row"
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "12px 14px",
+                        border: deliveryZone === "inside_dhaka" ? "2px solid #e11d48" : "1px solid #cbd5e1",
+                        borderRadius: "10px",
+                        marginBottom: "10px",
+                        cursor: "pointer",
+                        backgroundColor: deliveryZone === "inside_dhaka" ? "#fff1f2" : "#ffffff",
+                      }}
+                    >
+                      <div className="jt-delivery-left" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <input
                           type="radio"
                           name="delivery"
                           checked={deliveryZone === "inside_dhaka"}
-                          onChange={() => setDeliveryZone("inside_dhaka")}
+                          onChange={() => {
+                            setDeliveryZone("inside_dhaka");
+                            setDistrict("Dhaka");
+                          }}
                         />
-                        <span style={{ fontSize: "13.5px" }}>{ZONES.inside_dhaka.label}</span>
+                        <span style={{ fontSize: "14px", fontWeight: "700", color: "#0f172a" }}>
+                          ঢাকা সিটির ভিতরে (Inside Dhaka)
+                        </span>
                       </div>
-                      <strong>{ZONES.inside_dhaka.charge} Tk</strong>
+                      <strong style={{ color: "#e11d48", fontSize: "15px" }}>70 Tk</strong>
                     </label>
 
-                    <label className="jt-delivery-row" style={{ display: "flex", justifyContent: "space-between", padding: "10px", border: deliveryZone === "dhaka_sub" ? "2px solid #e91e63" : "1px solid #cbd5e1", borderRadius: "8px", marginBottom: "8px", cursor: "pointer" }}>
-                      <div className="jt-delivery-left" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <input
-                          type="radio"
-                          name="delivery"
-                          checked={deliveryZone === "dhaka_sub"}
-                          onChange={() => setDeliveryZone("dhaka_sub")}
-                        />
-                        <span style={{ fontSize: "13.5px" }}>{ZONES.dhaka_sub.label}</span>
-                      </div>
-                      <strong>{ZONES.dhaka_sub.charge} Tk</strong>
-                    </label>
-
-                    <label className="jt-delivery-row" style={{ display: "flex", justifyContent: "space-between", padding: "10px", border: deliveryZone === "outside_dhaka" ? "2px solid #e91e63" : "1px solid #cbd5e1", borderRadius: "8px", cursor: "pointer" }}>
-                      <div className="jt-delivery-left" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <label
+                      className="jt-delivery-row"
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "12px 14px",
+                        border: deliveryZone === "outside_dhaka" ? "2px solid #e11d48" : "1px solid #cbd5e1",
+                        borderRadius: "10px",
+                        cursor: "pointer",
+                        backgroundColor: deliveryZone === "outside_dhaka" ? "#fff1f2" : "#ffffff",
+                      }}
+                    >
+                      <div className="jt-delivery-left" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <input
                           type="radio"
                           name="delivery"
                           checked={deliveryZone === "outside_dhaka"}
-                          onChange={() => setDeliveryZone("outside_dhaka")}
+                          onChange={() => {
+                            setDeliveryZone("outside_dhaka");
+                            if (district === "Dhaka") setDistrict("Gazipur");
+                          }}
                         />
-                        <span style={{ fontSize: "13.5px" }}>{ZONES.outside_dhaka.label}</span>
+                        <span style={{ fontSize: "14px", fontWeight: "700", color: "#0f172a" }}>
+                          ঢাকার বাইরে - সারা দেশ (Outside Dhaka)
+                        </span>
                       </div>
-                      <strong>{ZONES.outside_dhaka.charge} Tk</strong>
+                      <strong style={{ color: "#e11d48", fontSize: "15px" }}>130 Tk</strong>
                     </label>
                   </div>
 

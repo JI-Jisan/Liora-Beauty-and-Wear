@@ -25,22 +25,28 @@ export async function GET(req) {
       const cleanPhone = user.phone_number.replace(/^\+88/, "").trim();
       queryConditions.push({ phone: cleanPhone });
     }
+    if (user.email) {
+      queryConditions.push({ customerEmail: user.email.toLowerCase().trim() });
+    }
 
     const orders = await Order.find({
       $or: queryConditions,
       isDeleted: { $ne: true },
     })
       .select(
-        "orderNumber serial status total subtotal deliveryCharge items customerName phone address deliveryZone note createdAt accessToken"
+        "orderNumber serial status total subtotal deliveryCharge items customerName customerEmail phone district address deliveryZone note createdAt accessToken"
       )
       .sort({ createdAt: -1 })
       .limit(60)
       .lean();
 
-    // Ensure any orders that had null firebaseUid get claimed if matched by verified phone
-    if (customer?.phone) {
+    // Ensure any orders that had null firebaseUid get claimed if matched by verified phone or email
+    const claimOr = [];
+    if (customer?.phone) claimOr.push({ phone: customer.phone });
+    if (user.email) claimOr.push({ customerEmail: user.email.toLowerCase().trim() });
+    if (claimOr.length > 0) {
       Order.updateMany(
-        { phone: customer.phone, firebaseUid: null },
+        { firebaseUid: null, $or: claimOr },
         { $set: { firebaseUid: user.uid } }
       ).catch(() => {});
     }

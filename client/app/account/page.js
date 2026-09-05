@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth, getIdToken } from "@/components/AuthProvider";
 import { getImageUrl } from "@/lib/api";
+import { downloadInvoicePdf } from "@/lib/invoicePdf";
 
 const STATUS_STEPS = ["Pending", "Confirmed", "Shipped", "Delivered"];
 
@@ -665,13 +666,33 @@ export default function AccountDashboardPage() {
                           {isExpanded ? "▲ ট্র্যাকিং লুকান" : "▼ লাইভ ট্র্যাকিং দেখুন"}
                         </button>
 
-                        <div style={{ display: "flex", gap: 10 }}>
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                          <button
+                            type="button"
+                            onClick={() => downloadInvoicePdf(o)}
+                            style={{
+                              fontSize: 12,
+                              color: "#fff",
+                              fontWeight: 700,
+                              background: "linear-gradient(135deg, #e91e63, #9c27b0)",
+                              border: "none",
+                              padding: "6px 12px",
+                              borderRadius: 8,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                              boxShadow: "0 2px 6px rgba(233, 30, 99, 0.25)",
+                            }}
+                          >
+                            📥 ইনভয়েস (PDF)
+                          </button>
                           {o.accessToken && (
                             <Link
                               href={`/order/verify?no=${o.orderNumber}&k=${o.accessToken}`}
                               target="_blank"
                               style={{
-                                fontSize: 13,
+                                fontSize: 12,
                                 color: "#0f172a",
                                 textDecoration: "none",
                                 fontWeight: 600,
@@ -680,7 +701,7 @@ export default function AccountDashboardPage() {
                                 borderRadius: 8,
                               }}
                             >
-                              📄 চালান / রসিদ ↗
+                              📄 ওয়েব চালান ↗
                             </Link>
                           )}
                         </div>
@@ -846,6 +867,27 @@ export default function AccountDashboardPage() {
                         <p style={{ margin: "4px 0", fontWeight: "bold", color: "#e11d48" }}>
                           মোট বিল: ৳{order.total} (ক্যাশ অন ডেলিভারি)
                         </p>
+                        <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            onClick={() => downloadInvoicePdf(order)}
+                            style={{
+                              fontSize: 12,
+                              color: "#fff",
+                              fontWeight: 700,
+                              background: "linear-gradient(135deg, #e91e63, #9c27b0)",
+                              border: "none",
+                              padding: "6px 12px",
+                              borderRadius: 8,
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
+                            📥 ইনভয়েস ডাউনলোড (PDF)
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
+import { downloadInvoicePdf } from "@/lib/invoicePdf";
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -37,8 +38,10 @@ function OrderSuccessContent() {
     fetchOrder();
   }, [orderId]);
 
-  const handlePrint = () => {
-    window.print();
+  const handleDownloadInvoice = () => {
+    if (order) {
+      downloadInvoicePdf(order);
+    }
   };
 
   if (loading) {
@@ -138,9 +141,9 @@ function OrderSuccessContent() {
       {/* Action Buttons (Hidden on Print) */}
       <div className="no-print" style={{ display: "flex", gap: "14px", marginTop: "24px", justifyContent: "center" }}>
         <button
-          onClick={handlePrint}
+          onClick={handleDownloadInvoice}
           style={{
-            background: "#0f172a",
+            background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
             color: "#ffffff",
             border: "none",
             padding: "12px 24px",
@@ -149,10 +152,11 @@ function OrderSuccessContent() {
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: "8px"
+            gap: "8px",
+            boxShadow: "0 4px 14px rgba(15, 23, 42, 0.2)",
           }}
         >
-          📄 Download / Print Invoice
+          📥 Download Official Invoice (PDF)
         </button>
 
         <Link

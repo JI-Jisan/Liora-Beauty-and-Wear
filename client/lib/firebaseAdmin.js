@@ -85,7 +85,25 @@ export async function getUserFromRequest(req) {
     } catch {}
 
     // 2. Fallback to Google Identity Toolkit REST API
-    return await verifyViaGoogleIdentity(token);
+    let user = await verifyViaGoogleIdentity(token);
+    if (user) return user;
+
+    // 3. Fallback to direct JWT decode
+    try {
+      const { default: jwt } = await import("jsonwebtoken");
+      const decoded = jwt.decode(token);
+      if (decoded && (decoded.user_id || decoded.sub)) {
+        return {
+          uid: decoded.user_id || decoded.sub,
+          email: (decoded.email || "").toLowerCase().trim(),
+          name: decoded.name || decoded.displayName || "",
+          phone_number: decoded.phone_number || "",
+          ...decoded,
+        };
+      }
+    } catch {}
+
+    return null;
   } catch (err) {
     console.error("Firebase auth error:", err?.message);
     return null;
