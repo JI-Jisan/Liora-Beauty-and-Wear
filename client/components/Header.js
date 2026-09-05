@@ -279,36 +279,9 @@ export default function Header({
               <LioraLogo />
             </Link>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Link
-                href={user ? (isAdmin ? "/admin" : "/account") : "/login"}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                  padding: "7px 12px",
-                  borderRadius: 20,
-                  background: isAdmin ? "#fef3c7" : "#f1f5f9",
-                  color: isAdmin ? "#b45309" : "#1e293b",
-                  fontSize: 12.5,
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  border: "1px solid",
-                  borderColor: isAdmin ? "#fde68a" : "#e2e8f0",
-                  whiteSpace: "nowrap",
-                }}
-                title={user ? (isAdmin ? "Admin Dashboard" : "My Account & Orders") : "Login / Register"}
-              >
-                <span>{isAdmin ? "👑" : "👤"}</span>
-                <span>
-                  {user ? (isAdmin ? "Admin" : (profile?.name?.split(" ")[0] || "Account")) : "Login"}
-                </span>
-              </Link>
-
-              <button type="button" className="jt-cart-pill-btn" onClick={handleOpenCart}>
-                <span className="jt-cart-icon">🛍️</span> Cart ({cartCount})
-              </button>
-            </div>
+            <button type="button" className="jt-cart-pill-btn" onClick={handleOpenCart}>
+              <span className="jt-cart-icon">🛍️</span> Cart ({cartCount})
+            </button>
           </div>
         </div>
 

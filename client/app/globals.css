@@ -5312,7 +5312,7 @@ button {
   color: #ffffff;
   border: none;
   border-radius: 50px;
-  padding: 10px 20px;
+  padding: 10px 18px;
   font-weight: 800;
   font-size: 14px;
   cursor: pointer;
@@ -5321,6 +5321,16 @@ button {
   gap: 8px;
   box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3);
   transition: transform 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .jt-cart-pill-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    gap: 6px;
+  }
 }
 
 .jt-cart-pill-btn:hover {
