@@ -8,6 +8,7 @@ import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { cld } from "@/lib/cloudinary";
 import { getDiscount, getSaved } from "@/lib/price";
+import ProductWatermark from "@/components/ProductWatermark";
 
 
 // ─── Auto-sliding image carousel ────────────────────────────────────────────
@@ -45,6 +46,8 @@ function ProductImageCarousel({ product, fallback }) {
             }}
           />
         ))}
+
+        <ProductWatermark variant="details" />
 
         {gallery.length > 1 && (
           <div style={{ position: "absolute", bottom: 12, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 8 }}>

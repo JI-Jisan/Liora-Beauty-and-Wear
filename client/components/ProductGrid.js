@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CategoryBar from "./CategoryBar";
+import ProductWatermark from "./ProductWatermark";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { cld } from "@/lib/cloudinary";
 import { getDiscount, getSaved } from "@/lib/price";
@@ -219,6 +220,7 @@ function ProductGridContent({
                         e.currentTarget.src = fallbackUrl;
                       }}
                     />
+                    <ProductWatermark variant="card" />
                   </div>
                 </Link>
 
