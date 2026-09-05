@@ -5327,22 +5327,37 @@ button {
   transform: scale(1.03);
 }
 
-/* --- STICKY SEARCH BAR ROW (Ultra-smooth, zero layout shift) --- */
-.jt-header-search-bar-sticky {
-  position: -webkit-sticky;
-  position: sticky;
+/* --- MAIN HEADER SEARCH CONTAINER --- */
+.jt-header-search-container {
+  max-width: 1200px;
+  margin: 6px auto 10px;
+  padding: 0 16px;
+}
+
+/* --- FLOATING STICKY COMPACT BAR (Always pinned at top on scroll) --- */
+.jt-sticky-floating-bar {
+  position: fixed;
   top: 0;
-  z-index: 999;
-  background: #ffffff;
+  left: 0;
+  right: 0;
   width: 100%;
-  transition: box-shadow 0.25s ease;
+  z-index: 1000;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #fecdd3;
+  transform: translateY(-115%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
 }
 
-.jt-header-search-bar-sticky.is-stuck {
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+.jt-sticky-floating-bar.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.jt-header-search-inner {
+.jt-sticky-floating-inner {
   max-width: 1200px;
   margin: 0 auto;
   padding: 8px 16px;
@@ -5351,54 +5366,36 @@ button {
   gap: 10px;
   box-sizing: border-box;
   width: 100%;
-  transition: padding 0.25s ease;
 }
 
 @media (max-width: 480px) {
-  .jt-header-search-inner {
+  .jt-sticky-floating-inner {
     padding: 6px 10px;
     gap: 6px;
   }
 }
 
-/* STICKY HAMBURGER BUTTON (Animated) */
-.jt-sticky-hamburger-btn {
+.jt-sticky-bar-hamburger {
   background: none;
   border: none;
   font-size: 24px;
   color: #0f172a;
   cursor: pointer;
-  padding: 0;
-  margin: 0;
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
+  padding: 4px 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transform: scale(0.8);
-  transition: max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.22s ease,
-              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              padding 0.28s ease;
+  line-height: 1;
+  border-radius: 8px;
+  transition: color 0.2s ease;
 }
 
-.jt-header-search-bar-sticky.is-stuck .jt-sticky-hamburger-btn {
-  max-width: 38px;
-  opacity: 1;
-  padding: 4px 6px;
-  transform: scale(1);
-  pointer-events: auto;
-}
-
-.jt-sticky-hamburger-btn:hover {
+.jt-sticky-bar-hamburger:hover {
   color: #f43f5e;
 }
 
-/* STICKY CART PILL BUTTON (Animated, always visible on scroll, perfectly sized) */
-.jt-sticky-cart-pill {
+.jt-sticky-bar-cart {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -5406,34 +5403,17 @@ button {
   color: #ffffff;
   border: none;
   border-radius: 50px;
-  padding: 0;
-  margin: 0;
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
+  padding: 7px 12px;
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
   box-shadow: 0 3px 10px rgba(244, 63, 94, 0.28);
   white-space: nowrap;
   flex-shrink: 0;
-  transform: scale(0.8);
-  transition: max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.22s ease,
-              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              padding 0.28s ease;
+  transition: transform 0.2s ease;
 }
 
-.jt-header-search-bar-sticky.is-stuck .jt-sticky-cart-pill {
-  max-width: 120px;
-  opacity: 1;
-  padding: 7px 12px;
-  transform: scale(1);
-  pointer-events: auto;
-}
-
-.jt-sticky-cart-pill:hover {
+.jt-sticky-bar-cart:hover {
   transform: scale(1.04);
 }
 
@@ -5456,13 +5436,12 @@ button {
 }
 
 @media (max-width: 440px) {
-  .jt-sticky-cart-text {
+  .jt-sticky-bar-cart .jt-sticky-cart-text {
     display: none;
   }
-  .jt-header-search-bar-sticky.is-stuck .jt-sticky-cart-pill {
+  .jt-sticky-bar-cart {
     padding: 6px 8px;
     gap: 4px;
-    max-width: 52px;
   }
 }
 

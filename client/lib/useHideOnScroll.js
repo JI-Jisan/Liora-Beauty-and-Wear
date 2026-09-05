@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export default function useHideOnScroll(threshold = 70, releaseThreshold = 30) {
+export default function useHideOnScroll(threshold = 120, releaseThreshold = 90) {
   const [isStuck, setIsStuck] = useState(false);
 
   useEffect(() => {
@@ -29,3 +29,4 @@ export default function useHideOnScroll(threshold = 70, releaseThreshold = 30) {
 
   return isStuck;
 }
+
