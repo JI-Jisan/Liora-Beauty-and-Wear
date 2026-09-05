@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export default function useHideOnScroll(threshold = 50) {
-  const [collapsed, setCollapsed] = useState(false);
+export default function useHideOnScroll(threshold = 70, releaseThreshold = 30) {
+  const [isStuck, setIsStuck] = useState(false);
 
   useEffect(() => {
     let ticking = false;
@@ -12,10 +12,10 @@ export default function useHideOnScroll(threshold = 50) {
       ticking = true;
       requestAnimationFrame(() => {
         const y = window.scrollY || document.documentElement?.scrollTop || 0;
-        if (y > threshold) {
-          setCollapsed(true);
-        } else if (y < 25) {
-          setCollapsed(false);
+        if (y >= threshold) {
+          setIsStuck(true);
+        } else if (y <= releaseThreshold) {
+          setIsStuck(false);
         }
         ticking = false;
       });
@@ -25,7 +25,7 @@ export default function useHideOnScroll(threshold = 50) {
     onScroll();
 
     return () => window.removeEventListener("scroll", onScroll);
-  }, [threshold]);
+  }, [threshold, releaseThreshold]);
 
-  return collapsed;
+  return isStuck;
 }

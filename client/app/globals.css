@@ -5273,52 +5273,14 @@ button {
   color: #fda4af;
 }
 
-/* --- COLLAPSIBLE HEADER ROWS --- */
-.hdr-row {
-  display: grid;
-  grid-template-rows: 1fr;
-  opacity: 1;
-  transition: grid-template-rows 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.22s ease,
-              padding 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-              margin 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hdr-row > * {
-  overflow: hidden;
-  min-height: 0;
-}
-
-.hdr-row.hide {
-  grid-template-rows: 0fr !important;
-  opacity: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  border-top-width: 0 !important;
-  border-bottom-width: 0 !important;
-  border-bottom: none !important;
-  pointer-events: none !important;
-}
-
 .jt-header-new {
   background: #ffffff;
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.3s ease;
-}
-
-.jt-header-new.is-scrolled {
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  position: relative;
+  width: 100%;
 }
 
 .jt-header-logo-row {
   padding: 10px 16px 6px;
-  transition: padding 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .jt-header-logo-container {
@@ -5365,21 +5327,38 @@ button {
   transform: scale(1.03);
 }
 
-/* --- SEARCH BAR CONTAINER & COMPACT STICKY BAR --- */
-.jt-header-search-container {
-  max-width: 1200px;
-  margin: 6px auto 10px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* --- STICKY SEARCH BAR ROW (Ultra-smooth, zero layout shift) --- */
+.jt-header-search-bar-sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #ffffff;
+  width: 100%;
+  transition: box-shadow 0.25s ease;
 }
 
-.jt-header-search-container.collapsed {
+.jt-header-search-bar-sticky.is-stuck {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.jt-header-search-inner {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 8px 12px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  transition: padding 0.25s ease;
+}
+
+@media (max-width: 480px) {
+  .jt-header-search-inner {
+    padding: 6px 10px;
+    gap: 6px;
+  }
 }
 
 /* STICKY HAMBURGER BUTTON (Animated) */
@@ -5399,18 +5378,18 @@ button {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transform: translateX(-12px);
-  transition: max-width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+  transform: scale(0.8);
+  transition: max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.22s ease,
-              transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-              padding 0.32s ease;
+              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.28s ease;
 }
 
-.jt-header-search-container.collapsed .jt-sticky-hamburger-btn {
-  max-width: 44px;
+.jt-header-search-bar-sticky.is-stuck .jt-sticky-hamburger-btn {
+  max-width: 38px;
   opacity: 1;
   padding: 4px 6px;
-  transform: translateX(0);
+  transform: scale(1);
   pointer-events: auto;
 }
 
@@ -5418,7 +5397,7 @@ button {
   color: #f43f5e;
 }
 
-/* STICKY CART PILL BUTTON (Animated, always visible on scroll) */
+/* STICKY CART PILL BUTTON (Animated, always visible on scroll, perfectly sized) */
 .jt-sticky-cart-pill {
   display: inline-flex;
   align-items: center;
@@ -5436,21 +5415,21 @@ button {
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(244, 63, 94, 0.3);
+  box-shadow: 0 3px 10px rgba(244, 63, 94, 0.28);
   white-space: nowrap;
   flex-shrink: 0;
-  transform: translateX(12px);
-  transition: max-width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+  transform: scale(0.8);
+  transition: max-width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
               opacity 0.22s ease,
-              transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-              padding 0.32s ease;
+              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.28s ease;
 }
 
-.jt-header-search-container.collapsed .jt-sticky-cart-pill {
-  max-width: 130px;
+.jt-header-search-bar-sticky.is-stuck .jt-sticky-cart-pill {
+  max-width: 120px;
   opacity: 1;
   padding: 7px 12px;
-  transform: translateX(0);
+  transform: scale(1);
   pointer-events: auto;
 }
 
@@ -5480,12 +5459,14 @@ button {
   .jt-sticky-cart-text {
     display: none;
   }
-  .jt-header-search-container.collapsed .jt-sticky-cart-pill {
-    padding: 7px 9px;
+  .jt-header-search-bar-sticky.is-stuck .jt-sticky-cart-pill {
+    padding: 6px 8px;
     gap: 4px;
+    max-width: 52px;
   }
 }
 
+/* SEARCH FORM: Flexes cleanly without ever overflowing or overlapping */
 .jt-pill-search-form {
   position: relative;
   background: #fff5f7;
@@ -5494,25 +5475,29 @@ button {
   padding: 6px 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex: 1;
+  gap: 8px;
+  flex: 1 1 auto;
   min-width: 0;
   margin: 0;
+  box-sizing: border-box;
 }
 
 .jt-pill-search-icon {
   font-size: 16px;
   color: #f43f5e;
+  flex-shrink: 0;
 }
 
 .jt-pill-search-form input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
   border: none;
   background: transparent;
   font-size: 14px;
   outline: none;
   color: #0f172a;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
 .jt-pill-search-form input::placeholder {

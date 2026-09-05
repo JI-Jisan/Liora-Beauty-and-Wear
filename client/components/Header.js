@@ -108,7 +108,7 @@ export default function Header({
   const collapsed = useHideOnScroll();
 
   return (
-    <header className={`jt-header-new ${collapsed ? 'is-scrolled' : ''}`}>
+    <header className="jt-header-new">
       {/* Category Drawer Component */}
       <CategoryDrawer
         isOpen={isCategoryDrawerOpen}
@@ -116,7 +116,7 @@ export default function Header({
       />
 
       {/* TOP ANNOUNCEMENT BAR */}
-      <div className={`jt-top-announcement-bar hdr-row ${collapsed ? 'hide' : ''}`}>
+      <div className="jt-top-announcement-bar">
         <div className="jt-announcement-content">
           <span>🚚 Free Delivery on orders above ৳999</span>
           <span className="jt-announcement-divider">|</span>
@@ -125,7 +125,7 @@ export default function Header({
       </div>
 
       {/* MAIN LOGO & HEADER ROW */}
-      <div className={`jt-header-logo-row hdr-row ${collapsed ? 'hide' : ''}`}>
+      <div className="jt-header-logo-row">
         <div className="jt-header-logo-container">
           <button
             type="button"
@@ -147,137 +147,139 @@ export default function Header({
         </div>
       </div>
 
-      {/* SEARCH BAR ROW (STAYS STICKY WITH SMOOTH COMPACT ANIMATION ON SCROLL) */}
-      <div className={`jt-header-search-container ${collapsed ? 'collapsed' : ''}`}>
-        <button
-          type="button"
-          className="jt-sticky-hamburger-btn"
-          onClick={() => setIsCategoryDrawerOpen(true)}
-          title="Open Menu"
-          aria-label="Open Navigation Menu"
-          tabIndex={collapsed ? 0 : -1}
-        >
-          ☰
-        </button>
+      {/* STICKY SEARCH BAR ROW (STICKS TO TOP: 0 SMOOTHLY WITHOUT PAGE JUMP) */}
+      <div className={`jt-header-search-bar-sticky ${collapsed ? 'is-stuck' : ''}`}>
+        <div className="jt-header-search-inner">
+          <button
+            type="button"
+            className="jt-sticky-hamburger-btn"
+            onClick={() => setIsCategoryDrawerOpen(true)}
+            title="Open Menu"
+            aria-label="Open Navigation Menu"
+            tabIndex={collapsed ? 0 : -1}
+          >
+            ☰
+          </button>
 
-        <form
-          className="jt-pill-search-form"
-          onSubmit={handleSearchSubmit}
-          ref={searchWrapperRef}
-        >
-          <span className="jt-pill-search-icon">🔍</span>
-          <input
-            type="text"
-            placeholder="Search for products..."
-            value={currentSearchValue}
-            onFocus={() => setIsSearchOpen(true)}
-            onChange={(e) => {
-              const val = e.target.value;
-              setLocalSearch(val);
-              onSearchChange?.(val);
-              setIsSearchOpen(true);
-            }}
-          />
-          {currentSearchValue.trim().length > 0 && (
-            <button
-              type="button"
-              className="jt-clear-search-btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                setLocalSearch("");
-                onSearchChange?.("");
-                setIsSearchOpen(false);
+          <form
+            className="jt-pill-search-form"
+            onSubmit={handleSearchSubmit}
+            ref={searchWrapperRef}
+          >
+            <span className="jt-pill-search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search for products..."
+              value={currentSearchValue}
+              onFocus={() => setIsSearchOpen(true)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setLocalSearch(val);
+                onSearchChange?.(val);
+                setIsSearchOpen(true);
               }}
-              title="Clear search"
-              aria-label="Clear search"
-            >
-              ✕
-            </button>
-          )}
+            />
+            {currentSearchValue.trim().length > 0 && (
+              <button
+                type="button"
+                className="jt-clear-search-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLocalSearch("");
+                  onSearchChange?.("");
+                  setIsSearchOpen(false);
+                }}
+                title="Clear search"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
 
-          {/* INSTANT LIVE SEARCH POPUP DROPDOWN */}
-          {isSearchOpen && currentSearchValue.trim().length > 0 && (
-            <div className="jt-live-search-dropdown">
-              {liveSearchResults.length > 0 ? (
-                <>
-                  <div className="jt-live-search-header">
-                    <span>Matching Products ({liveSearchResults.length})</span>
-                  </div>
+            {/* INSTANT LIVE SEARCH POPUP DROPDOWN */}
+            {isSearchOpen && currentSearchValue.trim().length > 0 && (
+              <div className="jt-live-search-dropdown">
+                {liveSearchResults.length > 0 ? (
+                  <>
+                    <div className="jt-live-search-header">
+                      <span>Matching Products ({liveSearchResults.length})</span>
+                    </div>
 
-                  <div className="jt-live-search-list">
-                    {liveSearchResults.map((product) => {
-                      const imageSrc =
-                        getImageUrl(product.image) ||
-                        "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&auto=format&fit=crop&q=80";
+                    <div className="jt-live-search-list">
+                      {liveSearchResults.map((product) => {
+                        const imageSrc =
+                          getImageUrl(product.image) ||
+                          "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&auto=format&fit=crop&q=80";
 
-                      const catName =
-                        typeof product.category === "object"
-                          ? product.category?.name
-                          : product.category || "Beauty & Wear";
+                        const catName =
+                          typeof product.category === "object"
+                            ? product.category?.name
+                            : product.category || "Beauty & Wear";
 
-                      return (
-                        <div
-                          key={product._id}
-                          className="jt-live-search-item"
-                          onClick={() => handleSelectProduct(product._id)}
-                        >
-                          <img
-                            src={imageSrc}
-                            alt={product.name}
-                            className="jt-live-search-thumb"
-                            onError={(e) => {
-                              e.currentTarget.src =
-                                "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&auto=format&fit=crop&q=80";
-                            }}
-                          />
+                        return (
+                          <div
+                            key={product._id}
+                            className="jt-live-search-item"
+                            onClick={() => handleSelectProduct(product._id)}
+                          >
+                            <img
+                              src={imageSrc}
+                              alt={product.name}
+                              className="jt-live-search-thumb"
+                              onError={(e) => {
+                                e.currentTarget.src =
+                                  "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&auto=format&fit=crop&q=80";
+                              }}
+                            />
 
-                          <div className="jt-live-search-info">
-                            <h5 className="jt-live-search-title">{product.name}</h5>
-                            <span className="jt-live-search-cat">{catName}</span>
-                            <p className="jt-live-search-price">
-                              {product.offerPrice} Tk
-                              {product.originalPrice && (
-                                <span>{product.originalPrice} Tk</span>
-                              )}
-                            </p>
+                            <div className="jt-live-search-info">
+                              <h5 className="jt-live-search-title">{product.name}</h5>
+                              <span className="jt-live-search-cat">{catName}</span>
+                              <p className="jt-live-search-price">
+                                {product.offerPrice} Tk
+                                {product.originalPrice && (
+                                  <span>{product.originalPrice} Tk</span>
+                                )}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
 
-                  <div
-                    className="jt-live-search-footer"
-                    onClick={handleSearchSubmit}
-                  >
-                    View all results for &quot;{currentSearchValue}&quot; &rarr;
+                    <div
+                      className="jt-live-search-footer"
+                      onClick={handleSearchSubmit}
+                    >
+                      View all results for &quot;{currentSearchValue}&quot; &rarr;
+                    </div>
+                  </>
+                ) : (
+                  <div className="jt-live-search-empty">
+                    No products found for &quot;{currentSearchValue}&quot;
                   </div>
-                </>
-              ) : (
-                <div className="jt-live-search-empty">
-                  No products found for &quot;{currentSearchValue}&quot;
-                </div>
-              )}
-            </div>
-          )}
-        </form>
+                )}
+              </div>
+            )}
+          </form>
 
-        <button
-          type="button"
-          className="jt-sticky-cart-pill"
-          onClick={handleOpenCart}
-          title="Open Shopping Cart"
-          aria-label={`Open Cart (${cartCount})`}
-          tabIndex={collapsed ? 0 : -1}
-        >
-          <span className="jt-sticky-cart-icon">🛍️</span>
-          <span className="jt-sticky-cart-text">Cart</span>
-          <span className="jt-sticky-cart-badge">{cartCount}</span>
-        </button>
+          <button
+            type="button"
+            className="jt-sticky-cart-pill"
+            onClick={handleOpenCart}
+            title="Open Shopping Cart"
+            aria-label={`Open Cart (${cartCount})`}
+            tabIndex={collapsed ? 0 : -1}
+          >
+            <span className="jt-sticky-cart-icon">🛍️</span>
+            <span className="jt-sticky-cart-text">Cart</span>
+            <span className="jt-sticky-cart-badge">{cartCount}</span>
+          </button>
+        </div>
       </div>
 
       {/* HORIZONTAL PILL NAV TABS STRIP */}
-      <div className={`jt-header-tabs-strip hdr-row ${collapsed ? 'hide' : ''}`}>
+      <div className="jt-header-tabs-strip">
         <div className="jt-tabs-strip-inner" style={{
           display: 'flex', gap: 8, flexWrap: 'nowrap',
           overflowX: 'auto', WebkitOverflowScrolling: 'touch',
