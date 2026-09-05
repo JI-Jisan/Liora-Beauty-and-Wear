@@ -33,7 +33,8 @@ function ProductGridContent({
   searchTerm = "",
   type = "all",
   title = "Products",
-  brand = ""
+  brand = "",
+  showCategoryBar = false,
 }) {
   const gridRef = useRef(null);
   const searchParams = useSearchParams();
@@ -125,7 +126,7 @@ function ProductGridContent({
 
   return (
     <section ref={gridRef} className="jt-product-section" style={{ maxWidth: "1400px", margin: "0 auto", width: "100%", boxSizing: "border-box", overflowX: "hidden" }}>
-      {type === "all" && (
+      {showCategoryBar && type === "all" && (
         <CategoryBar
           categories={categories}
           selectedCategory={activeCategory}
