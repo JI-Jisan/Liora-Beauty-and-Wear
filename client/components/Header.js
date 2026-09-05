@@ -108,10 +108,7 @@ export default function Header({
   const collapsed = useHideOnScroll();
 
   return (
-    <header className="jt-header-new" style={{
-      position: 'sticky', top: 0, zIndex: 50, background: '#fff',
-      boxShadow: collapsed ? '0 2px 10px rgba(0,0,0,.06)' : 'none'
-    }}>
+    <header className={`jt-header-new ${collapsed ? 'is-scrolled' : ''}`}>
       {/* Category Drawer Component */}
       <CategoryDrawer
         isOpen={isCategoryDrawerOpen}
@@ -135,6 +132,7 @@ export default function Header({
             className="jt-hamburger-btn"
             onClick={() => setIsCategoryDrawerOpen(true)}
             title="Open Menu"
+            aria-label="Open Navigation Menu"
           >
             ☰
           </button>
@@ -149,16 +147,21 @@ export default function Header({
         </div>
       </div>
 
-      {/* SEARCH BAR ROW */}
-      <div className="jt-header-search-container" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px' }}>
-        {collapsed && (
-          <button onClick={() => setIsCategoryDrawerOpen(true)} aria-label="Menu"
-            style={{ fontSize: 20, background: 'none', border: 'none', padding: 4, cursor: "pointer", color: "#334155" }}>☰</button>
-        )}
+      {/* SEARCH BAR ROW (STAYS STICKY WITH SMOOTH COMPACT ANIMATION ON SCROLL) */}
+      <div className={`jt-header-search-container ${collapsed ? 'collapsed' : ''}`}>
+        <button
+          type="button"
+          className="jt-sticky-hamburger-btn"
+          onClick={() => setIsCategoryDrawerOpen(true)}
+          title="Open Menu"
+          aria-label="Open Navigation Menu"
+          tabIndex={collapsed ? 0 : -1}
+        >
+          ☰
+        </button>
 
         <form
           className="jt-pill-search-form"
-          style={{ flex: 1, margin: 0 }}
           onSubmit={handleSearchSubmit}
           ref={searchWrapperRef}
         >
@@ -175,7 +178,13 @@ export default function Header({
               setIsSearchOpen(true);
             }}
           />
-          <button type="button" className="jt-filter-icon-btn" onClick={() => setIsCategoryDrawerOpen(true)}>
+          <button
+            type="button"
+            className="jt-filter-icon-btn"
+            onClick={() => setIsCategoryDrawerOpen(true)}
+            title="Browse Categories"
+            aria-label="Browse Categories"
+          >
             🎛️
           </button>
 
@@ -238,19 +247,26 @@ export default function Header({
                   </div>
                 </>
               ) : (
-                  <div className="jt-live-search-empty">
+                <div className="jt-live-search-empty">
                   No products found for &quot;{currentSearchValue}&quot;
                 </div>
               )}
             </div>
           )}
         </form>
-        
-        {collapsed && (
-          <button type="button" onClick={handleOpenCart} aria-label="Cart" style={{ fontSize: 20, padding: 4, background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}>
-            🛒{cartCount > 0 && <sup style={{ fontSize: 11, background: '#ff4d6d', color: '#fff', borderRadius: '50%', padding: '2px 5px', position: 'absolute', top: -4, right: -4, fontWeight: 700 }}>{cartCount}</sup>}
-          </button>
-        )}
+
+        <button
+          type="button"
+          className="jt-sticky-cart-pill"
+          onClick={handleOpenCart}
+          title="Open Shopping Cart"
+          aria-label={`Open Cart (${cartCount})`}
+          tabIndex={collapsed ? 0 : -1}
+        >
+          <span className="jt-sticky-cart-icon">🛍️</span>
+          <span className="jt-sticky-cart-text">Cart</span>
+          <span className="jt-sticky-cart-badge">{cartCount}</span>
+        </button>
       </div>
 
       {/* HORIZONTAL PILL NAV TABS STRIP */}
