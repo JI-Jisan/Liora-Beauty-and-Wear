@@ -5519,18 +5519,28 @@ button {
   color: #94a3b8;
 }
 
-.jt-filter-icon-btn {
-  background: none;
+.jt-clear-search-btn {
+  background: #e2e8f0;
   border: none;
-  font-size: 18px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
   cursor: pointer;
-  padding: 4px;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.jt-filter-icon-btn:hover {
-  opacity: 1;
+.jt-clear-search-btn:hover {
+  background: #cbd5e1;
+  color: #0f172a;
 }
 
 /* --- TABS STRIP --- */

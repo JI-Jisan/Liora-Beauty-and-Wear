@@ -178,15 +178,22 @@ export default function Header({
               setIsSearchOpen(true);
             }}
           />
-          <button
-            type="button"
-            className="jt-filter-icon-btn"
-            onClick={() => setIsCategoryDrawerOpen(true)}
-            title="Browse Categories"
-            aria-label="Browse Categories"
-          >
-            🎛️
-          </button>
+          {currentSearchValue.trim().length > 0 && (
+            <button
+              type="button"
+              className="jt-clear-search-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLocalSearch("");
+                onSearchChange?.("");
+                setIsSearchOpen(false);
+              }}
+              title="Clear search"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
 
           {/* INSTANT LIVE SEARCH POPUP DROPDOWN */}
           {isSearchOpen && currentSearchValue.trim().length > 0 && (
