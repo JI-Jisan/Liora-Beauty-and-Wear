@@ -8,8 +8,8 @@ export default function CategoryBar({
   const displayCategories = categories;
 
   return (
-    <section className="jt-category-section" style={{ background: "transparent", padding: "16px 0 24px" }}>
-      <div className="jt-category-scroll" style={{ display: "flex", gap: "10px", overflowX: "auto", paddingBottom: "6px" }}>
+    <section className="jt-category-section" style={{ background: "transparent", padding: "10px 0 16px", width: "100%", maxWidth: "100%", boxSizing: "border-box", overflow: "hidden" }}>
+      <div className="jt-category-scroll" style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "6px", width: "100%", maxWidth: "100%", boxSizing: "border-box", WebkitOverflowScrolling: "touch" }}>
         <button
           type="button"
           onClick={() => onSelectCategory("all")}

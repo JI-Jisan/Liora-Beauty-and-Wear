@@ -4084,47 +4084,59 @@ button {
     gap: 20px 12px;
   }
 
+  .jt-product-section {
+    padding: 16px 8px 40px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
   .jt-product-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .jt-product-card {
-    padding: 10px !important;
-    border-radius: 14px !important;
+    padding: 8px !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
-  .jt-product-image-wrap {
-    height: 140px !important;
-    border-radius: 10px !important;
-  }
-
+  .jt-product-card h3,
   .jt-product-card h4 {
-    font-size: 13px !important;
-    min-height: 34px !important;
+    font-size: 12px !important;
+    height: 32px !important;
     line-height: 1.25 !important;
   }
 
+  .jt-card-cat-subtitle {
+    font-size: 11px !important;
+    height: 15px !important;
+    margin-bottom: 4px !important;
+  }
+
   .jt-price {
-    font-size: 15px !important;
-    margin: 0 0 8px !important;
+    font-size: 14px !important;
+    margin: 0 0 2px !important;
   }
 
   .jt-price span {
+    font-size: 11px !important;
+  }
+
+  .jt-product-card button,
+  .jt-add-to-cart-btn {
+    padding: 8px 6px !important;
     font-size: 12px !important;
-  }
-
-  .jt-discount-badge {
-    font-size: 10px !important;
-    padding: 4px 8px !important;
-    top: 14px !important;
-    right: 14px !important;
-  }
-
-  .jt-product-card button {
-    padding: 9px 10px !important;
-    font-size: 13px !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 

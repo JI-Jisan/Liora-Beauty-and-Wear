@@ -124,7 +124,7 @@ function ProductGridContent({
   const filteredProducts = products;
 
   return (
-    <section ref={gridRef} className="jt-product-section" style={{ maxWidth: "1400px", margin: "0 auto", padding: "30px 20px 60px" }}>
+    <section ref={gridRef} className="jt-product-section" style={{ maxWidth: "1400px", margin: "0 auto", width: "100%", boxSizing: "border-box", overflowX: "hidden" }}>
       {type === "all" && (
         <CategoryBar
           categories={categories}
@@ -182,6 +182,8 @@ function ProductGridContent({
                 display: "flex",
                 flexDirection: "column",
                 height: "100%",
+                width: "100%",
+                minWidth: 0,
                 boxSizing: "border-box",
                 justifyContent: "space-between"
               }}
