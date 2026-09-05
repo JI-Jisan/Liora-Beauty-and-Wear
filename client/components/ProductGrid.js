@@ -178,78 +178,91 @@ function ProductGridContent({
             <div
               key={product._id}
               className="jt-product-card"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                boxSizing: "border-box",
+                justifyContent: "space-between"
+              }}
             >
-
-
-              <Link href={`/products/${product._id}`} className="jt-product-link">
-                <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: 10, background: "#f8fafc" }}>
-                  {getDiscount(product) > 0 && (
-                    <div style={{
-                      position: 'absolute', top: 10, left: 10, zIndex: 2,
-                      background: 'linear-gradient(135deg,#ff3b6b,#e11d48)',
-                      color: '#fff', borderRadius: 10, padding: '5px 9px',
-                      lineHeight: 1, textAlign: 'center',
-                      boxShadow: '0 4px 12px rgba(225,29,72,.35)'
-                    }}>
-                      <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-.3px' }}>
-                        {getDiscount(product)}%
+              <div>
+                <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none", display: "block" }}>
+                  <div style={{ position: "relative", width: "100%", paddingBottom: "100%", overflow: "hidden", borderRadius: 10, background: "#ffffff", border: "1px solid #f1f5f9" }}>
+                    {getDiscount(product) > 0 && (
+                      <div style={{
+                        position: 'absolute', top: 8, left: 8, zIndex: 2,
+                        background: 'linear-gradient(135deg,#ff3b6b,#e11d48)',
+                        color: '#fff', borderRadius: 8, padding: '4px 7px',
+                        lineHeight: 1, textAlign: 'center',
+                        boxShadow: '0 4px 10px rgba(225,29,72,.3)'
+                      }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '-.3px' }}>
+                          {getDiscount(product)}%
+                        </div>
+                        <div style={{ fontSize: 8, fontWeight: 700, opacity: .95, marginTop: 2 }}>
+                          OFF
+                        </div>
                       </div>
-                      <div style={{ fontSize: 9, fontWeight: 700, opacity: .95, marginTop: 2 }}>
-                        OFF
-                      </div>
-                    </div>
-                  )}
-                  <img
-                    src={cld(imageSrc, 500, 500)}
-                    alt={product.name}
-                    loading="lazy"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                    onError={(e) => {
-                      e.currentTarget.src = fallbackUrl;
-                    }}
-                  />
-                </div>
-              </Link>
+                    )}
+                    <img
+                      src={cld(imageSrc, 500, 500)}
+                      alt={product.name}
+                      loading="lazy"
+                      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain", background: "#ffffff", padding: "4px", boxSizing: "border-box", display: "block" }}
+                      onError={(e) => {
+                        e.currentTarget.src = fallbackUrl;
+                      }}
+                    />
+                  </div>
+                </Link>
 
-              <div className="jt-product-content">
-                <div>
+                <div style={{ marginTop: 8 }}>
                   <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none" }}>
-                    <h3 style={{ fontSize: 14, margin: "8px 0 4px", lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minHeight: 38, color: "inherit" }}>
+                    <h3 style={{ fontSize: 13.5, margin: "6px 0 2px", lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", height: 38, color: "#0f172a", fontWeight: 700 }}>
                       {product.name}
                     </h3>
                   </Link>
 
-                  <p className="jt-card-cat-subtitle">
+                  <p className="jt-card-cat-subtitle" style={{ fontSize: 12, color: "#64748b", margin: "0 0 6px", height: 18, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {catName}
                   </p>
                 </div>
+              </div>
 
-                <div>
-                  <p className="jt-price" style={{ margin: "0 0 4px" }}>
-                    {product.offerPrice} Tk
-                    {product.originalPrice && (
-                      <span>{product.originalPrice} Tk</span>
-                    )}
-                  </p>
-                  {getSaved(product) > 0 && (
-                    <div style={{ fontSize: 11, color: '#16a34a', fontWeight: 700, marginBottom: 8 }}>
-                      ৳{getSaved(product)} সাশ্রয়
-                    </div>
+              <div style={{ marginTop: "auto", paddingTop: 4 }}>
+                <p className="jt-price" style={{ margin: "0 0 2px", fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
+                  {product.offerPrice} Tk
+                  {product.originalPrice && (
+                    <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through", marginLeft: 6 }}>
+                      {product.originalPrice} Tk
+                    </span>
                   )}
+                </p>
 
-                  <button
-                    type="button"
-                    onClick={() => onAddToCart(product)}
-                    disabled={product.stockStatus === "Out of Stock"}
-                    className={`jt-add-to-cart-btn ${
-                      product.stockStatus === "Out of Stock" ? "disabled" : ""
-                    }`}
-                  >
-                    {product.stockStatus === "Out of Stock"
-                      ? "Out of Stock"
-                      : "Add to Cart"}
-                  </button>
+                <div style={{ minHeight: 18, marginBottom: 8, display: "flex", alignItems: "center" }}>
+                  {getSaved(product) > 0 ? (
+                    <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
+                      ৳{getSaved(product)} সাশ্রয়
+                    </span>
+                  ) : (
+                    <span style={{ visibility: "hidden", fontSize: 11 }}>সাশ্রয়</span>
+                  )}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => onAddToCart(product)}
+                  disabled={product.stockStatus === "Out of Stock"}
+                  className={`jt-add-to-cart-btn ${
+                    product.stockStatus === "Out of Stock" ? "disabled" : ""
+                  }`}
+                  style={{ width: "100%", boxSizing: "border-box" }}
+                >
+                  {product.stockStatus === "Out of Stock"
+                    ? "Out of Stock"
+                    : "Add to Cart"}
+                </button>
               </div>
             </div>
           );
