@@ -118,7 +118,7 @@ async function run() {
     const markup = getMarkup(oldOffer);
 
     const newOffer = oldOffer + markup;
-    const newOriginal = oldOriginal + markup;
+    const newOriginal = Math.max(oldOriginal, newOffer);
     const newPurchase = Math.round(newOffer * 0.75);
     const newDiscountBadge = newOriginal > newOffer
       ? String(Math.round(((newOriginal - newOffer) / newOriginal) * 100))
