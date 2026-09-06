@@ -18,6 +18,7 @@ export async function syncProductStock(productId, ProductModel = Product) {
   await ProductModel.findByIdAndUpdate(productId, {
     stockQuantity: total,
     stockStatus: status,
+    inStock: total > 0 && status !== "Out of Stock",
   });
   return total;
 }

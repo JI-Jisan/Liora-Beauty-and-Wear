@@ -36,6 +36,7 @@ export function buildPayload(body) {
     offerPrice,
     stockQuantity,
     stockStatus: deriveStockStatus(stockQuantity),
+    inStock: stockQuantity > 0 && deriveStockStatus(stockQuantity) !== "Out of Stock",
     discountBadge: originalPrice > offerPrice ? String(Math.round(((originalPrice - offerPrice) / originalPrice) * 100)) : "",
     image: String(body.image || "").trim(),
     images,

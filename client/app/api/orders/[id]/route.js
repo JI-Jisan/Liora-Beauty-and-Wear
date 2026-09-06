@@ -53,6 +53,7 @@ export async function PUT(req, { params }) {
             if (prod && prod.stockQuantity > 0 && prod.stockStatus === "Out of Stock") {
               await Product.findByIdAndUpdate(item.productId, {
                 stockStatus: "In Stock",
+                inStock: true,
               });
             }
           }
@@ -77,6 +78,7 @@ export async function PUT(req, { params }) {
             if (prod && prod.stockQuantity <= 0) {
               await Product.findByIdAndUpdate(item.productId, {
                 stockStatus: "Out of Stock",
+                inStock: false,
               });
             }
           }

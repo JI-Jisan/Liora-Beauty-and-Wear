@@ -54,6 +54,7 @@ const ProductSchema = new mongoose.Schema(
     originalPrice: { type: Number, required: true, min: 0 },
     offerPrice: { type: Number, required: true, min: 0 },
     stockQuantity: { type: Number, required: true, default: 0, min: 0 },
+    inStock: { type: Boolean, default: true, index: true },
     discountBadge: { type: String, default: "" },
     stockStatus: {
       type: String,
@@ -82,6 +83,7 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ProductSchema.index({ inStock: -1, isFeatured: -1, createdAt: -1 });
 ProductSchema.index({ category: 1 });
 ProductSchema.index({ isSlider: 1 });
 ProductSchema.index({ isFeatured: 1, isTrending: 1, isNewArrival: 1 });
@@ -96,6 +98,7 @@ export function deriveStockStatus(qty) {
 
 ProductSchema.pre("save", function () {
   this.stockStatus = deriveStockStatus(this.stockQuantity);
+  this.inStock = this.stockQuantity > 0 && this.stockStatus !== "Out of Stock";
 });
 
 export const Product =

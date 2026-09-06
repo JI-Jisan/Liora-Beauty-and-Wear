@@ -178,7 +178,7 @@ export async function GET(req) {
         .select(isAdmin ? "" : "-purchasePrice")
         .populate("category", "name")
         .populate("brand", "name slug")
-        .sort({ createdAt: -1 })
+        .sort({ inStock: -1, isFeatured: -1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),

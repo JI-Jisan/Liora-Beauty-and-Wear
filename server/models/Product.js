@@ -39,6 +39,11 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    inStock: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
     discountBadge: {
       type: String,
       default: "",
