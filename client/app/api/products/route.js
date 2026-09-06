@@ -113,14 +113,31 @@ export async function GET(req) {
         query.category = { $in: Array.from(allMatchingIds).map((id) => new mongoose.Types.ObjectId(id)) };
       }
     }
-    if (type === "featured") query.isFeatured = true;
-    if (type === "trending" || type === "hot") query.isTrending = true;
-    if (type === "new") query.isNewArrival = true;
-    if (type === "slider") query.isSlider = true;
-
-    // Ensure customer-facing curated sections only show active in-stock items
-    if (!isAdmin && type && type !== "all") {
-      query.inStock = true;
+    if (type === "featured") {
+      query.isFeatured = true;
+      if (!isAdmin) query.inStock = true;
+    } else if (type === "trending" || type === "hot") {
+      if (!isAdmin) {
+        query.inStock = true;
+        // Exclude products already shown in Featured to avoid repetitive duplicate sections
+        query.isFeatured = { $ne: true };
+      }
+      query.$or = [
+        { isTrending: true },
+        { discountBadge: { $in: ["20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "67", "68", "70", "72", "75"] } }
+      ];
+    } else if (type === "new") {
+      if (!isAdmin) {
+        query.inStock = true;
+        // Exclude products already shown in Featured or Hot Deals to keep New Arrivals fresh and unique
+        query.isFeatured = { $ne: true };
+        query.isTrending = { $ne: true };
+        query.discountBadge = { $nin: ["20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "67", "68", "70", "72", "75"] };
+      }
+      query.isNewArrival = true;
+    } else if (type === "slider") {
+      query.isSlider = true;
+      if (!isAdmin) query.inStock = true;
     }
 
     const search = searchParams.get("search");
@@ -182,9 +199,11 @@ export async function GET(req) {
       Product.find(query)
         .select(isAdmin ? "" : "-purchasePrice")
         .populate("category", "name")
-        .populate("brand", "name slug")
-        .sort({ inStock: -1, isFeatured: -1, createdAt: -1 })
-        .skip(skip)
+        .sort(
+          type && type !== "all"
+            ? { createdAt: -1 }
+            : { inStock: -1, isFeatured: -1, createdAt: -1 }
+        )
         .limit(limit)
         .lean(),
       Product.countDocuments(query),
