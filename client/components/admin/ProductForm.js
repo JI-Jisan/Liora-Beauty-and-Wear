@@ -268,10 +268,10 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       <Card title="ডিসপ্লে সেটিংস" desc="হোম পেজে কোথায় দেখাবে">
         <div style={{ display: 'grid', gap: 10 }}>
           {[
-            ['isFeatured', 'Featured', 'ফিচার্ড সেকশনে'],
-            ['isTrending', 'Trending', 'ট্রেন্ডিং সেকশনে'],
-            ['isNewArrival', 'New Arrival', 'নতুন পণ্য সেকশনে'],
-            ['isSlider', 'Slider', 'হোম স্লাইডারে']
+            ['isFeatured', '⭐ Featured', 'ফিচার্ড সেকশনে দেখাবে'],
+            ['isTrending', '🔥 Hot Deals / Trending', 'হোমপেজে "Hot Items & Deals" সেকশনে দেখাবে'],
+            ['isNewArrival', '✨ New Arrival', 'নতুন পণ্য সেকশনে দেখাবে'],
+            ['isSlider', '🖼️ Slider', 'হোম স্লাইডারে দেখাবে']
           ].map(([key, title, sub]) => (
             <label key={key} style={{
               display: 'flex', alignItems: 'center', gap: 12, padding: '11px 12px',

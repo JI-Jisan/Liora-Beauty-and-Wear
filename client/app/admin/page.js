@@ -1166,7 +1166,7 @@ export default function AdminPage() {
                               {product.stockStatus}
                             </span>
                             {product.isFeatured && <span className="jt-flag-tag featured">⭐ Featured</span>}
-                            {product.isTrending && <span className="jt-flag-tag trending">🔥 Trending</span>}
+                            {product.isTrending && <span className="jt-flag-tag trending">🔥 Hot Deals</span>}
                             {product.isNewArrival && <span className="jt-flag-tag new-arrival">✨ New</span>}
                           </div>
 
