@@ -1,48 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff758f"/>
-      <stop offset="50%" stop-color="#ff4d6d"/>
-      <stop offset="100%" stop-color="#a4133c"/>
-    </linearGradient>
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="60%" stop-color="#fff0f3"/>
-      <stop offset="100%" stop-color="#ffe3e8"/>
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#590d22" flood-opacity="0.35"/>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,600&amp;family=Montserrat:wght@700&amp;family=Great+Vibes&amp;display=swap');
+      .top-sub {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: 12px;
+        fill: #0f172a;
+        text-anchor: middle;
+      }
+      .brand-main {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 130px;
+        font-weight: 800;
+        letter-spacing: 8px;
+        fill: #ff4d6d;
+        text-anchor: middle;
+      }
+      .script-text {
+        font-family: 'Great Vibes', cursive, serif;
+        font-size: 78px;
+        font-style: italic;
+        fill: #ff4d6d;
+        text-anchor: middle;
+      }
+    </style>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#000000" flood-opacity="0.08"/>
     </filter>
   </defs>
 
-  <!-- Background circle with gradient -->
-  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
-  
-  <!-- Subtle inner border -->
-  <rect x="20" y="20" width="472" height="472" rx="112" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="6"/>
+  <!-- Clean white rounded badge so it is visible in both dark and light browser tabs -->
+  <rect x="16" y="16" width="480" height="480" rx="100" fill="#ffffff" stroke="#ffccd5" stroke-width="8" filter="url(#shadow)"/>
 
-  <!-- Decorative sparkling star top-right -->
-  <path d="M 370 120 Q 370 145 395 145 Q 370 145 370 170 Q 370 145 345 145 Q 370 145 370 120 Z" fill="#ffffff" opacity="0.9"/>
-  <circle cx="370" cy="145" r="4" fill="#ffffff"/>
+  <!-- Top Tracking Subtitle -->
+  <text x="256" y="125" class="top-sub">BEAUTY &amp; WEAR</text>
 
-  <!-- Elegant 'L' letter with serif and flourish -->
-  <g filter="url(#glow)">
-    <!-- Main stem -->
-    <path d="M 175 140 
-             C 175 125, 205 125, 235 120 
-             L 235 340 
-             L 330 340 
-             C 365 340, 370 345, 375 365 
-             C 365 375, 345 378, 320 378 
-             L 175 378 
-             C 155 378, 145 368, 150 350 
-             C 155 335, 175 338, 195 338 
-             L 195 160 
-             C 175 160, 160 155, 155 145 
-             Z" 
-          fill="url(#goldGrad)"/>
-  </g>
+  <!-- Main Brand Title LIORA -->
+  <text x="256" y="260" class="brand-main">LIORA</text>
 
-  <!-- Small diamond dot -->
-  <polygon points="370,360 377,367 370,374 363,367" fill="#ffffff" opacity="0.95"/>
+  <!-- Left Ornamental Line with Diamond -->
+  <path d="M 40 315 L 130 315" stroke="#ff4d6d" stroke-width="3" />
+  <polygon points="40,315 48,310 56,315 48,320" fill="#ff4d6d" />
+
+  <!-- Bottom Script Text: Beauty & Wear -->
+  <text x="256" y="340" class="script-text">Beauty &amp; Wear</text>
+
+  <!-- Right Ornamental Line with Diamond -->
+  <path d="M 382 315 L 472 315" stroke="#ff4d6d" stroke-width="3" />
+  <polygon points="472,315 464,310 456,315 464,320" fill="#ff4d6d" />
 </svg>
