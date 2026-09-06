@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff758f"/>
+      <stop offset="50%" stop-color="#ff4d6d"/>
+      <stop offset="100%" stop-color="#a4133c"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#fff0f3"/>
+      <stop offset="100%" stop-color="#ffe3e8"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#590d22" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background circle with gradient -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle inner border -->
+  <rect x="20" y="20" width="472" height="472" rx="112" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="6"/>
+
+  <!-- Decorative sparkling star top-right -->
+  <path d="M 370 120 Q 370 145 395 145 Q 370 145 370 170 Q 370 145 345 145 Q 370 145 370 120 Z" fill="#ffffff" opacity="0.9"/>
+  <circle cx="370" cy="145" r="4" fill="#ffffff"/>
+
+  <!-- Elegant 'L' letter with serif and flourish -->
+  <g filter="url(#glow)">
+    <!-- Main stem -->
+    <path d="M 175 140 
+             C 175 125, 205 125, 235 120 
+             L 235 340 
+             L 330 340 
+             C 365 340, 370 345, 375 365 
+             C 365 375, 345 378, 320 378 
+             L 175 378 
+             C 155 378, 145 368, 150 350 
+             C 155 335, 175 338, 195 338 
+             L 195 160 
+             C 175 160, 160 155, 155 145 
+             Z" 
+          fill="url(#goldGrad)"/>
+  </g>
+
+  <!-- Small diamond dot -->
+  <polygon points="370,360 377,367 370,374 363,367" fill="#ffffff" opacity="0.95"/>
+</svg>

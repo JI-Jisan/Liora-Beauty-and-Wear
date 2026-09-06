@@ -8,6 +8,13 @@ export const metadata: Metadata = {
   title: "LIORA Beauty & Wear | Beauty. Style. You.",
   description:
     "Shop 100% authentic cosmetics, luxury perfumes, skincare, and trendy fashion wear in Bangladesh. Easy Cash on Delivery nationwide.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
 export const viewport = {
