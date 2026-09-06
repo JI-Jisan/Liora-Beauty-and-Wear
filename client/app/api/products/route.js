@@ -114,9 +114,14 @@ export async function GET(req) {
       }
     }
     if (type === "featured") query.isFeatured = true;
-    if (type === "trending") query.isTrending = true;
+    if (type === "trending" || type === "hot") query.isTrending = true;
     if (type === "new") query.isNewArrival = true;
     if (type === "slider") query.isSlider = true;
+
+    // Ensure customer-facing curated sections only show active in-stock items
+    if (!isAdmin && type && type !== "all") {
+      query.inStock = true;
+    }
 
     const search = searchParams.get("search");
     if (search && search.trim()) {

@@ -34,10 +34,15 @@ function ProductGridContent({
   searchTerm = "",
   type = "all",
   title = "Products",
+  subtitle = "",
+  badge = "",
+  badgeBg = "",
   brand = "",
   category: propCategory = "",
   collection = "",
   showCategoryBar = false,
+  limit: propLimit = 24,
+  showPagination = true,
 }) {
   const gridRef = useRef(null);
   const searchParams = useSearchParams();
@@ -50,7 +55,7 @@ function ProductGridContent({
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(false);
-  const PAGE_SIZE = 24;
+  const PAGE_SIZE = propLimit || 24;
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
@@ -123,9 +128,13 @@ function ProductGridContent({
         }
       })
       .catch((err) => console.error(err));
-  }, [activeCategory, activeBrand, type, activeSearchTerm, currentPage]);
+  }, [activeCategory, activeBrand, type, activeSearchTerm, currentPage, PAGE_SIZE]);
 
   const filteredProducts = products;
+
+  if (filteredProducts.length === 0 && !loading && type !== "all") {
+    return null;
+  }
 
   return (
     <section ref={gridRef} className="jt-product-section" style={{ maxWidth: "1400px", margin: "0 auto", width: "100%", boxSizing: "border-box", overflowX: "hidden" }}>
@@ -137,9 +146,30 @@ function ProductGridContent({
         />
       )}
 
-      <div className="jt-section-head" style={{ textAlign: "center", marginBottom: "32px" }}>
-        <h3 style={{ fontSize: "38px", color: "#0F172A", fontFamily: "Georgia, serif", margin: "0 0 8px", fontWeight: "900" }}>{title}</h3>
-        <p style={{ color: "#64748B", fontSize: "16px", margin: 0 }}>Explore authentic cosmetics, skincare, luxury watches & trendy fashion wear</p>
+      <div className="jt-section-head" style={{ textAlign: "center", marginBottom: "32px", padding: "0 16px" }}>
+        {badge && (
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            background: badgeBg || "linear-gradient(135deg, #ff4d6d 0%, #ff758f 100%)",
+            color: "#ffffff",
+            padding: "5px 16px",
+            borderRadius: "999px",
+            fontSize: "12px",
+            fontWeight: "800",
+            letterSpacing: "0.8px",
+            textTransform: "uppercase",
+            marginBottom: "12px",
+            boxShadow: "0 4px 12px rgba(255, 77, 109, 0.25)"
+          }}>
+            {badge}
+          </div>
+        )}
+        <h3 style={{ fontSize: "36px", color: "#0F172A", fontFamily: "Georgia, serif", margin: "0 0 8px", fontWeight: "900" }}>{title}</h3>
+        <p style={{ color: "#64748B", fontSize: "15px", margin: 0, maxWidth: "640px", marginLeft: "auto", marginRight: "auto" }}>
+          {subtitle || "Explore authentic cosmetics, skincare, luxury watches & trendy fashion wear"}
+        </p>
       </div>
 
       <div className="jt-product-grid">
@@ -277,7 +307,7 @@ function ProductGridContent({
       </div>
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {showPagination && totalPages > 1 && (
         <div
           style={{
             display: "flex",

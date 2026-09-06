@@ -76,36 +76,63 @@ export default function HomePage() {
 
       <FeaturedCategories />
 
-      <section id="shop-products">
-        <ProductGrid
-          searchTerm={searchTerm}
-          onAddToCart={addToCart}
-          type="all"
-          title="All Products"
-        />
-      </section>
-
-      <section id="view-offers">
+      {/* 1. FEATURED PRODUCTS ⭐ */}
+      <section id="view-offers" style={{ padding: "30px 0 10px" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="featured"
-          title="Featured Products"
+          title="Featured Collection"
+          subtitle="Hand-picked premium selections curated for you"
+          badge="⭐ Curated Picks"
+          badgeBg="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+          limit={8}
+          showCategoryBar={false}
+          showPagination={false}
         />
       </section>
 
-      <section>
+      {/* 2. 🔥 HOT ITEMS / HOT DEALS (RIGHT AFTER FEATURED) */}
+      <section id="hot-items" style={{ padding: "24px 0", background: "linear-gradient(180deg, #fff5f7 0%, #ffffff 100%)", borderRadius: "24px", margin: "10px auto 30px", maxWidth: "1440px" }}>
         <ProductGrid
           onAddToCart={addToCart}
-          type="trending"
-          title="Trending Products"
+          type="hot"
+          title="🔥 Hot Items & Deals"
+          subtitle="Trending beauty essentials and biggest discounts selling fast"
+          badge="🔥 Hot Deals"
+          badgeBg="linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)"
+          limit={8}
+          showCategoryBar={false}
+          showPagination={false}
         />
       </section>
 
-      <section>
+      {/* 3. NEW ARRIVALS */}
+      <section id="new-arrivals" style={{ padding: "20px 0" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="new"
           title="New Arrivals"
+          subtitle="Fresh additions of 100% authentic cosmetics and skincare"
+          badge="✨ Just Arrived"
+          badgeBg="linear-gradient(135deg, #ec4899 0%, #be185d 100%)"
+          limit={8}
+          showCategoryBar={false}
+          showPagination={false}
+        />
+      </section>
+
+      {/* 4. ALL PRODUCTS (FULL CATALOG WITH CATEGORY FILTER & PAGINATION) */}
+      <section id="shop-products" style={{ padding: "20px 0 60px" }}>
+        <ProductGrid
+          searchTerm={searchTerm}
+          onAddToCart={addToCart}
+          type="all"
+          title="Explore All Products"
+          subtitle="Browse our complete collection of authentic beauty & wear essentials"
+          badge="🛍️ Catalog"
+          badgeBg="linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)"
+          showCategoryBar={true}
+          showPagination={true}
         />
       </section>
 
