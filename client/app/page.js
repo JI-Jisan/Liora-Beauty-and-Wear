@@ -6,6 +6,12 @@ import FeaturedCategories from "../components/FeaturedCategories";
 import ProductGrid from "../components/ProductGrid";
 import WhatsAppButton from "../components/WhatsAppButton";
 import PromoBanner from "../components/PromoBanner";
+import TrustBadgesBar from "../components/TrustBadgesBar";
+import FlashSaleLive from "../components/FlashSaleLive";
+import ShopByConcern from "../components/ShopByConcern";
+import CuratedCombos from "../components/CuratedCombos";
+import BrandScroller from "../components/BrandScroller";
+import CustomerLove from "../components/CustomerLove";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 
@@ -72,12 +78,23 @@ export default function HomePage() {
         brandSubtitle={siteSettings.brandSubtitle}
       />
 
+      {/* 1. CAMPAIGN PROMO SLIDER BANNER */}
       <PromoBanner promoSlides={siteSettings.promoSlides} />
 
+      {/* 2. 🛡️ 4-PILLAR TRUST BADGES (100% AUTHENTIC, COD, 24-48H, EASY RETURN) */}
+      <TrustBadgesBar />
+
+      {/* 3. FEATURED CIRCLE CATEGORIES SLIDER */}
       <FeaturedCategories />
 
-      {/* 1. FEATURED PRODUCTS ⭐ */}
-      <section id="view-offers" style={{ padding: "30px 0 10px" }}>
+      {/* 4. ⚡ FLASH SALE DEALS WITH LIVE COUNTDOWN TIMER */}
+      <FlashSaleLive onAddToCart={addToCart} />
+
+      {/* 5. 🎯 SHOP BY CONCERN (ACNE, GLOW, DARK SPOTS, SUN, DRY SKIN, HAIR) */}
+      <ShopByConcern />
+
+      {/* 6. ⭐ FEATURED COLLECTION (CURATED PICKS) */}
+      <section id="view-offers" style={{ padding: "10px 0" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="featured"
@@ -91,8 +108,8 @@ export default function HomePage() {
         />
       </section>
 
-      {/* 2. 🔥 HOT ITEMS / HOT DEALS (RIGHT AFTER FEATURED) */}
-      <section id="hot-items" style={{ padding: "24px 0", background: "linear-gradient(180deg, #fff5f7 0%, #ffffff 100%)", borderRadius: "24px", margin: "10px auto 30px", maxWidth: "1440px" }}>
+      {/* 7. 🔥 HOT ITEMS / HOT DEALS */}
+      <section id="hot-items" style={{ padding: "20px 0", background: "linear-gradient(180deg, #fff5f7 0%, #ffffff 100%)", borderRadius: "24px", margin: "10px auto 26px", maxWidth: "1440px" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="hot"
@@ -106,8 +123,11 @@ export default function HomePage() {
         />
       </section>
 
-      {/* 3. NEW ARRIVALS */}
-      <section id="new-arrivals" style={{ padding: "20px 0" }}>
+      {/* 8. 🎁 CURATED COMBOS & STUDENT BUDGET BUNDLES */}
+      <CuratedCombos onAddToCart={addToCart} />
+
+      {/* 9. ✨ NEW ARRIVALS */}
+      <section id="new-arrivals" style={{ padding: "10px 0" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="new"
@@ -121,7 +141,13 @@ export default function HomePage() {
         />
       </section>
 
-      {/* 4. ALL PRODUCTS (FULL CATALOG WITH CATEGORY FILTER & PAGINATION) */}
+      {/* 10. 🏷️ TOP AUTHENTIC BRANDS SHOWCASE */}
+      <BrandScroller />
+
+      {/* 11. 💬 REAL CUSTOMER LOVE & TESTIMONIALS */}
+      <CustomerLove />
+
+      {/* 12. 🛍️ ALL PRODUCTS (FULL CATALOG WITH CATEGORY FILTER & PAGINATION) */}
       <section id="shop-products" style={{ padding: "20px 0 60px" }}>
         <ProductGrid
           searchTerm={searchTerm}
