@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 export default async function sitemap() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://liora-beauty-and-wear-seven.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.liorabeautyandwear.com";
 
   const staticRoutes = [
     "",

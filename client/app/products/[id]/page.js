@@ -311,7 +311,7 @@ export default function ProductDetailsPage() {
 
   const brandName =
     typeof product.brand === "object" ? product.brand?.name : product.brand || "LIORA";
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://liora-beauty-and-wear-seven.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.liorabeautyandwear.com";
   const productUrl = `${siteUrl}/products/${product._id}`;
   const mainImage = product.image
     ? (product.image.startsWith("http") ? product.image : `${siteUrl}${product.image}`)
