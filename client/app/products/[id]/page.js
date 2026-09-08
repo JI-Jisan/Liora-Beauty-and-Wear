@@ -211,6 +211,19 @@ export default function ProductDetailsPage() {
     }
   };
 
+  useEffect(() => {
+    if (product?.name) {
+      document.title = `${product.name} - Price in Bangladesh | LIORA Beauty & Wear`;
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement("meta");
+        metaDesc.name = "description";
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.content = `Buy 100% authentic ${product.name} at best price in Bangladesh from LIORA Beauty & Wear. Cash on Delivery available nationwide.`;
+    }
+  }, [product?.name]);
+
   if (loading) {
     return (
       <main style={{ background: "#fdf8f5", minHeight: "100vh" }}>
@@ -296,8 +309,88 @@ export default function ProductDetailsPage() {
   const catName = typeof product.category === "object" ? product.category?.name : product.category || "";
   const fallbackUrl = getFallbackProductImage(catName, product.name);
 
+  const brandName =
+    typeof product.brand === "object" ? product.brand?.name : product.brand || "LIORA";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://liora-beauty-and-wear-seven.vercel.app";
+  const productUrl = `${siteUrl}/products/${product._id}`;
+  const mainImage = product.image
+    ? (product.image.startsWith("http") ? product.image : `${siteUrl}${product.image}`)
+    : fallbackUrl;
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: [mainImage],
+    description:
+      product.description ||
+      `Buy 100% authentic ${product.name} at best price in Bangladesh on LIORA Beauty & Wear.`,
+    sku: String(product._id),
+    mpn: String(product._id),
+    brand: {
+      "@type": "Brand",
+      name: brandName,
+    },
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "BDT",
+      price: Number(product.offerPrice || product.originalPrice || 0),
+      priceValidUntil: "2027-12-31",
+      itemCondition: "https://schema.org/NewCondition",
+      availability:
+        product.inStock !== false
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      seller: {
+        "@type": "Organization",
+        name: "LIORA Beauty & Wear",
+      },
+    },
+    ...(product.rating > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: product.rating,
+        reviewCount: product.reviewCount || 1,
+      },
+    }),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Products",
+        item: `${siteUrl}/products`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: productUrl,
+      },
+    ],
+  };
+
   return (
     <main className="jt-details-page-wrap">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <Header
         brandName={siteSettings.brandName}
         brandSubtitle={siteSettings.brandSubtitle}
