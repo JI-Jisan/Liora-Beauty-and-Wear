@@ -43,6 +43,9 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
+  verification: {
+    google: "llyiJThwVTT8mmTN2qLuQAAcb5lO_9ejDLjHOGx8vN0",
+  },
 };
 
 export const viewport = {
@@ -81,6 +84,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="google-site-verification" content="llyiJThwVTT8mmTN2qLuQAAcb5lO_9ejDLjHOGx8vN0" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
