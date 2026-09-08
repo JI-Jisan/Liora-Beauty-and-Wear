@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import FeaturedCategories from "../components/FeaturedCategories";
 import ProductGrid from "../components/ProductGrid";
-import WhatsAppButton from "../components/WhatsAppButton";
 import PromoBanner from "../components/PromoBanner";
 import TrustBadgesBar from "../components/TrustBadgesBar";
 import FlashSaleLive from "../components/FlashSaleLive";
@@ -161,8 +160,6 @@ export default function HomePage() {
           showPagination={true}
         />
       </section>
-
-      <WhatsAppButton />
     </main>
   );
 }

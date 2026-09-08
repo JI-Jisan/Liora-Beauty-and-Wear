@@ -23,6 +23,8 @@ const orderSchema = new mongoose.Schema(
     orderNumber: { type: String, unique: true, sparse: true, trim: true, index: true },
     customerName: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true, index: true },
+    district: { type: String, default: "Dhaka", trim: true },
+    thana: { type: String, default: "", trim: true },
     address: { type: String, required: true, trim: true },
     note: { type: String, default: "" },
 

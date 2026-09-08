@@ -1,7 +1,6 @@
 "use client";
 
 import Header from "@/components/Header";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import Link from "next/link";
 
 const BLOG_POSTS = [
@@ -154,8 +153,6 @@ export default function BlogPage() {
           ))}
         </div>
       </section>
-
-      <WhatsAppButton />
     </main>
   );
 }

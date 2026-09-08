@@ -4,20 +4,108 @@ const Product = require("../models/Product");
 const upload = require("../middleware/upload");
 const adminAuth = require("../middleware/adminAuth");
 const Category = require("../models/Category");
+const Brand = require("../models/Brand");
 const SiteSettings = require("../models/SiteSettings");
 
 // GET all products
 router.get("/", async (req, res) => {
   try {
-    const query = {};
-    if (req.query.category) {
+    const conditions = [];
+
+    // Filter by Category (includes descendants)
+    if (req.query.category && req.query.category !== "all") {
       const kids = await Category.find({ ancestors: req.query.category }).select("_id").lean();
-      query.category = { $in: [req.query.category, ...kids.map(k => k._id)] };
+      conditions.push({ category: { $in: [req.query.category, ...kids.map((k) => k._id)] } });
     }
-    const products = await Product.find(query).populate("category", "name").lean();
+
+    // Filter by Brand (accepts ObjectId or slug/name)
+    if (req.query.brand && req.query.brand !== "all") {
+      if (req.query.brand.match(/^[0-9a-fA-F]{24}$/)) {
+        conditions.push({ brand: req.query.brand });
+      } else {
+        const matchedBrand = await Brand.findOne({
+          $or: [{ slug: req.query.brand }, { name: new RegExp(`^${req.query.brand}$`, "i") }],
+        }).select("_id").lean();
+        if (matchedBrand) {
+          conditions.push({ brand: matchedBrand._id });
+        }
+      }
+    }
+
+    // Filter by Type
+    if (req.query.type && req.query.type !== "all") {
+      if (req.query.type === "featured") conditions.push({ isFeatured: true });
+      else if (req.query.type === "trending") conditions.push({ isTrending: true });
+      else if (req.query.type === "new-arrivals" || req.query.type === "new") conditions.push({ isNewArrival: true });
+      else if (req.query.type === "flash-sale" || req.query.type === "sale") conditions.push({ offerPrice: { $gt: 0 } });
+    }
+
+    // Search by name, description, category name, or brand name
+    if (req.query.search && req.query.search.trim()) {
+      const cleanSearch = req.query.search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const searchRegex = new RegExp(cleanSearch, "i");
+
+      const matchingCategories = await Category.find({ name: searchRegex }).select("_id").lean();
+      const catIds = matchingCategories.map((c) => c._id);
+
+      const matchingBrands = await Brand.find({ name: searchRegex }).select("_id").lean();
+      const brandIds = matchingBrands.map((b) => b._id);
+
+      const searchOr = [
+        { name: searchRegex },
+        { description: searchRegex },
+      ];
+      if (catIds.length > 0) {
+        searchOr.push({ category: { $in: catIds } });
+      }
+      if (brandIds.length > 0) {
+        searchOr.push({ brand: { $in: brandIds } });
+      }
+
+      conditions.push({ $or: searchOr });
+    }
+
+    const finalQuery = conditions.length > 0 ? { $and: conditions } : {};
+
+    const isPaginated = req.query.paginate === "1" || req.query.paginate === "true";
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = parseInt(req.query.limit) || (isPaginated ? 24 : 0);
+
+    let productQuery = Product.find(finalQuery)
+      .populate("category", "name ancestors")
+      .populate("brand", "name slug")
+      .sort({ createdAt: -1 });
+
+    if (isPaginated) {
+      const total = await Product.countDocuments(finalQuery);
+      const pageSize = limit > 0 ? limit : 24;
+      const totalPages = Math.ceil(total / pageSize) || 1;
+      const products = await productQuery
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .lean();
+
+      return res.json({
+        products,
+        total,
+        totalPages,
+        currentPage: page,
+      });
+    }
+
+    if (limit > 0) {
+      productQuery = productQuery.limit(limit);
+    }
+
+    const products = await productQuery.lean();
     res.json(products);
   } catch (error) {
-    res.json([]);
+    console.error("Product fetch error:", error);
+    if (req.query.paginate === "1" || req.query.paginate === "true") {
+      res.json({ products: [], total: 0, totalPages: 1, currentPage: 1 });
+    } else {
+      res.json([]);
+    }
   }
 });
 

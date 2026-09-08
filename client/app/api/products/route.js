@@ -144,44 +144,47 @@ export async function GET(req) {
     if (search && search.trim()) {
       const cleanSearch = search.trim();
       const words = cleanSearch.split(/\s+/).filter(Boolean);
-      const noSpace = cleanSearch.replace(/\s+/g, "");
 
+      const matchingCats = await Category.find({ name: { $regex: escapeRegex(cleanSearch), $options: "i" } }).select("_id").lean();
+      const matchingCatIds = matchingCats.map((c) => c._id);
+
+      const matchingBrands = await Brand.find({ name: { $regex: escapeRegex(cleanSearch), $options: "i" } }).select("_id").lean();
+      const matchingBrandIds = matchingBrands.map((b) => b._id);
+
+      const directOrConditions = [
+        { name: { $regex: escapeRegex(cleanSearch), $options: "i" } },
+        { description: { $regex: escapeRegex(cleanSearch), $options: "i" } },
+      ];
+      if (matchingCatIds.length > 0) {
+        directOrConditions.push({ category: { $in: matchingCatIds } });
+      }
+      if (matchingBrandIds.length > 0) {
+        directOrConditions.push({ brand: { $in: matchingBrandIds } });
+      }
+
+      let searchCondition = null;
       if (words.length > 1) {
-        // 1. Try exact phrase match first (e.g. "sun cream", "sun-cream", "suncream")
-        const phrasePattern = `(${words.map(escapeRegex).join("[\\s\\-_]+")}|\\b${escapeRegex(noSpace)}\\b)`;
-        const exactCondition = { name: { $regex: phrasePattern, $options: "i" } };
+        const wordConditions = words.map((w) => {
+          const reg = { $regex: escapeRegex(w), $options: "i" };
+          return {
+            $or: [{ name: reg }, { description: reg }],
+          };
+        });
 
-        const testQuery = { ...query };
-        if (testQuery.$and) {
-          testQuery.$and = [...testQuery.$and, exactCondition];
-        } else {
-          testQuery.$and = [exactCondition];
-        }
-
-        const countExact = await Product.countDocuments(testQuery);
-        if (countExact > 0) {
-          query.$and = testQuery.$and;
-        } else {
-          // Fallback: all individual whole words in name
-          const wordConditions = words.map((w) => ({
-            name: { $regex: `\\b${escapeRegex(w)}`, $options: "i" },
-          }));
-          if (query.$and) {
-            query.$and.push(...wordConditions);
-          } else {
-            query.$and = wordConditions;
-          }
-        }
-      } else {
-        // Single word: whole word boundary in name
-        const singleWordCondition = {
-          name: { $regex: `\\b${escapeRegex(cleanSearch)}`, $options: "i" },
+        searchCondition = {
+          $or: [
+            ...directOrConditions,
+            { $and: wordConditions },
+          ],
         };
-        if (query.$and) {
-          query.$and.push(singleWordCondition);
-        } else {
-          query.$and = [singleWordCondition];
-        }
+      } else {
+        searchCondition = { $or: directOrConditions };
+      }
+
+      if (query.$and) {
+        query.$and.push(searchCondition);
+      } else {
+        query.$and = [searchCondition];
       }
     }
 
@@ -204,6 +207,7 @@ export async function GET(req) {
             ? { createdAt: -1 }
             : { inStock: -1, isFeatured: -1, createdAt: -1 }
         )
+        .skip(isPaginated ? skip : 0)
         .limit(limit)
         .lean(),
       Product.countDocuments(query),

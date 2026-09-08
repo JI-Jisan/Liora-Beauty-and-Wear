@@ -3,7 +3,6 @@
 import { use, useEffect, useState } from "react";
 import Header from "@/components/Header";
 import ProductGrid from "@/components/ProductGrid";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { useCart } from "@/context/CartContext";
 
 const CAMPAIGN_METADATA = {
@@ -165,8 +164,6 @@ export default function CollectionPage({ params }) {
           hideHeader={true}
         />
       </section>
-
-      <WhatsAppButton />
     </main>
   );
 }

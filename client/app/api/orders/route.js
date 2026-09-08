@@ -49,6 +49,7 @@ export async function GET(req) {
 
 import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
 import { getCharge } from "@/lib/delivery";
+import { isLocationInsideDhaka } from "@/lib/bdLocations";
 import { allocateFIFO, releaseAllocations, syncProductStock } from "@/lib/inventory";
 
 export async function POST(req) {
@@ -168,8 +169,9 @@ export async function POST(req) {
       await syncProductStock(p._id, Product);
     }
 
-    const district = String(body.district || "").trim() || (deliveryZone === "inside_dhaka" ? "Dhaka" : "Outside Dhaka");
-    const isDhaka = district.toLowerCase() === "dhaka" || district === "ঢাকা" || deliveryZone === "inside_dhaka";
+    const district = String(body.district || "").trim() || "Dhaka";
+    const thana = String(body.thana || "").trim();
+    const isDhaka = isLocationInsideDhaka(district, thana);
     const finalDeliveryZone = isDhaka ? "inside_dhaka" : "outside_dhaka";
 
     // ---- ডেলিভারি চার্জও সম্পূর্ণ সার্ভারেই নির্ধারিত হবে ----
@@ -199,6 +201,7 @@ export async function POST(req) {
           customerEmail,
           phone,
           district,
+          thana,
           address,
           note,
           items,
@@ -222,6 +225,8 @@ export async function POST(req) {
             {
               $set: {
                 phone,
+                district,
+                thana,
                 address,
                 name: customerName,
                 ...(customerEmail ? { email: customerEmail } : {}),

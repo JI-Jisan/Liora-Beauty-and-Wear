@@ -299,8 +299,6 @@ export default function ProductDetailsPage() {
   return (
     <main className="jt-details-page-wrap">
       <Header
-        searchTerm=""
-        onSearchChange={() => {}}
         brandName={siteSettings.brandName}
         brandSubtitle={siteSettings.brandSubtitle}
         showProductTabs={true}

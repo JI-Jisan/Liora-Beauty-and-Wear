@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import CategoryBar from "./CategoryBar";
 import ProductWatermark from "./ProductWatermark";
@@ -31,7 +31,7 @@ const getCategoryName = (category) => {
 
 function ProductGridContent({
   onAddToCart,
-  searchTerm = "",
+  searchTerm: propSearchTerm,
   type = "all",
   title = "Products",
   subtitle = "",
@@ -47,7 +47,7 @@ function ProductGridContent({
   const gridRef = useRef(null);
   const searchParams = useSearchParams();
   const urlSearchTerm = searchParams ? searchParams.get("search") || "" : "";
-  const activeSearchTerm = searchTerm || urlSearchTerm;
+  const activeSearchTerm = propSearchTerm !== undefined ? propSearchTerm : urlSearchTerm;
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -77,18 +77,36 @@ function ProductGridContent({
     setCurrentPage(1);
   };
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeCategory, activeBrand, activeSearchTerm, type]);
+  const [debouncedSearch, setDebouncedSearch] = useState(activeSearchTerm);
 
   useEffect(() => {
-    setLoading(true);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(activeSearchTerm);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [activeSearchTerm]);
+
+  const filterKey = `${activeCategory}_${activeBrand}_${debouncedSearch}_${type}_${collection}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (prevFilterKey !== filterKey) {
+    setPrevFilterKey(filterKey);
+    setCurrentPage(1);
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+    queueMicrotask(() => {
+      if (isMounted) {
+        setLoading(true);
+      }
+    });
+
     const qs = new URLSearchParams();
     if (activeCategory && activeCategory !== "all") qs.set('category', activeCategory);
     if (activeBrand) qs.set('brand', activeBrand);
     if (collection) qs.set('collection', collection);
     if (type && type !== "all") qs.set('type', type);
-    if (activeSearchTerm.trim()) qs.set('search', activeSearchTerm.trim());
+    if (debouncedSearch && debouncedSearch.trim()) qs.set('search', debouncedSearch.trim());
     
     // Use pagination for main catalog or when type is all
     qs.set('paginate', '1');
@@ -98,6 +116,7 @@ function ProductGridContent({
     fetch(`${API_BASE_URL}/api/products?${qs.toString()}`)
       .then((res) => res.json())
       .then((data) => {
+        if (!isMounted) return;
         if (data && Array.isArray(data.products)) {
           setProducts(data.products);
           setTotalPages(data.totalPages || 1);
@@ -113,22 +132,30 @@ function ProductGridContent({
         }
       })
       .catch((err) => {
+        if (!isMounted) return;
         console.error("Products fetch error, using fallback:", err);
         setProducts([]);
       })
       .finally(() => {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       });
 
     fetch(`${API_BASE_URL}/api/categories`)
       .then((res) => res.json())
       .then((data) => {
+        if (!isMounted) return;
         if (Array.isArray(data)) {
           setCategories(data);
         }
       })
       .catch((err) => console.error(err));
-  }, [activeCategory, activeBrand, type, activeSearchTerm, currentPage, PAGE_SIZE]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeCategory, activeBrand, type, collection, debouncedSearch, currentPage, PAGE_SIZE]);
 
   const filteredProducts = products;
 

@@ -252,6 +252,7 @@ const OrderSchema = new mongoose.Schema(
     customerEmail: { type: String, default: "", lowercase: true, trim: true, index: true },
     phone: { type: String, required: true, trim: true },
     district: { type: String, default: "Dhaka", trim: true },
+    thana: { type: String, default: "", trim: true },
     address: { type: String, required: true, trim: true },
     note: { type: String, default: "" },
     items: { type: [OrderItemSchema], required: true },

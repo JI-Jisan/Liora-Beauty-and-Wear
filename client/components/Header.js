@@ -30,7 +30,6 @@ export default function Header({
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
-  const searchWrapperRef = useRef(null);
 
   const cartCount =
     cartContext?.cartCount !== undefined ? cartContext.cartCount : propsCartCount || 0;
@@ -60,8 +59,10 @@ export default function Header({
   useEffect(() => {
     const q = currentSearchValue.trim();
     if (!q) {
-      setLiveSearchResults([]);
-      return;
+      const emptyTimer = setTimeout(() => {
+        setLiveSearchResults([]);
+      }, 0);
+      return () => clearTimeout(emptyTimer);
     }
 
     const timer = setTimeout(() => {
@@ -111,7 +112,15 @@ export default function Header({
       className="jt-pill-search-form"
       onSubmit={handleSearchSubmit}
     >
-      <span className="jt-pill-search-icon">🔍</span>
+      <button
+        type="submit"
+        className="jt-pill-search-icon"
+        style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "inline-flex", alignItems: "center" }}
+        title="Search"
+        aria-label="Search"
+      >
+        🔍
+      </button>
       <input
         type="text"
         placeholder="Search for products..."
@@ -133,6 +142,9 @@ export default function Header({
             setLocalSearch("");
             onSearchChange?.("");
             setIsSearchOpen(false);
+            if (typeof window !== "undefined" && window.location.pathname === "/products") {
+              router.replace("/products");
+            }
           }}
           title="Clear search"
           aria-label="Clear search"
