@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { CartProvider } from "@/context/CartContext";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.liorabeautyandwear.com";
+const siteUrl = "https://www.liorabeautyandwear.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
