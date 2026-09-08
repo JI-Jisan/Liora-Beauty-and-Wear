@@ -6,6 +6,8 @@ import { buildPayload } from "@/lib/productPayload";
 import { getAdminFromRequest } from "@/lib/adminGuard";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -214,19 +216,27 @@ export async function GET(req) {
     ]);
 
     if (isPaginated) {
-      return NextResponse.json({
-        products,
-        total,
-        totalPages: Math.ceil(total / limit) || 1,
-        currentPage: page,
-        limit,
-      });
+      return NextResponse.json(
+        {
+          products,
+          total,
+          totalPages: Math.ceil(total / limit) || 1,
+          currentPage: page,
+          limit,
+        },
+        {
+          headers: {
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          },
+        }
+      );
     }
 
     return NextResponse.json(products, {
       headers: {
         "X-Total-Count": String(total),
         "X-Total-Pages": String(Math.ceil(total / limit) || 1),
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
       },
     });
   } catch (error) {

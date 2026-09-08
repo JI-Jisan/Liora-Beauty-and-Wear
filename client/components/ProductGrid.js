@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import CategoryBar from "./CategoryBar";
 import ProductWatermark from "./ProductWatermark";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
@@ -44,22 +44,35 @@ function ProductGridContent({
   limit: propLimit = 24,
   showPagination = true,
 }) {
+  const router = useRouter();
   const gridRef = useRef(null);
   const searchParams = useSearchParams();
+  const urlPage = parseInt(searchParams ? searchParams.get("page") : null, 10) || 1;
   const urlSearchTerm = searchParams ? searchParams.get("search") || "" : "";
   const activeSearchTerm = propSearchTerm !== undefined ? propSearchTerm : urlSearchTerm;
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(urlPage);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(false);
   const PAGE_SIZE = propLimit || 24;
 
+  const [prevUrlPage, setPrevUrlPage] = useState(urlPage);
+  if (prevUrlPage !== urlPage) {
+    setPrevUrlPage(urlPage);
+    setCurrentPage(urlPage);
+  }
+
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
       setCurrentPage(newPage);
+      if (typeof window !== "undefined") {
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.set("page", String(newPage));
+        router.push(`?${currentParams.toString()}`, { scroll: false });
+      }
       if (gridRef.current) {
         const top = gridRef.current.getBoundingClientRect().top + window.scrollY - 80;
         window.scrollTo({ top, behavior: "smooth" });
@@ -113,7 +126,7 @@ function ProductGridContent({
     qs.set('page', String(currentPage));
     qs.set('limit', String(PAGE_SIZE));
 
-    fetch(`${API_BASE_URL}/api/products?${qs.toString()}`)
+    fetch(`${API_BASE_URL}/api/products?${qs.toString()}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (!isMounted) return;
@@ -295,24 +308,26 @@ function ProductGridContent({
               </div>
 
               <div style={{ marginTop: "auto", paddingTop: 4 }}>
-                <p className="jt-price" style={{ margin: "0 0 2px", fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
-                  {product.offerPrice} Tk
-                  {product.originalPrice && (
-                    <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through", marginLeft: 6 }}>
-                      {product.originalPrice} Tk
-                    </span>
-                  )}
-                </p>
+                <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none", display: "block" }}>
+                  <p className="jt-price" style={{ margin: "0 0 2px", fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
+                    {product.offerPrice} Tk
+                    {product.originalPrice && (
+                      <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through", marginLeft: 6 }}>
+                        {product.originalPrice} Tk
+                      </span>
+                    )}
+                  </p>
 
-                <div style={{ minHeight: 18, marginBottom: 8, display: "flex", alignItems: "center" }}>
-                  {getSaved(product) > 0 ? (
-                    <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
-                      ৳{getSaved(product)} সাশ্রয়
-                    </span>
-                  ) : (
-                    <span style={{ visibility: "hidden", fontSize: 11 }}>সাশ্রয়</span>
-                  )}
-                </div>
+                  <div style={{ minHeight: 18, marginBottom: 8, display: "flex", alignItems: "center" }}>
+                    {getSaved(product) > 0 ? (
+                      <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
+                        ৳{getSaved(product)} সাশ্রয়
+                      </span>
+                    ) : (
+                      <span style={{ visibility: "hidden", fontSize: 11 }}>সাশ্রয়</span>
+                    )}
+                  </div>
+                </Link>
 
                 <button
                   type="button"
@@ -364,7 +379,7 @@ function ProductGridContent({
             <button
               type="button"
               onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage <= 1 || loading}
+              disabled={currentPage <= 1}
               style={{
                 padding: "8px 16px",
                 fontSize: "14px",
@@ -400,7 +415,6 @@ function ProductGridContent({
                   key={`page-${item}`}
                   type="button"
                   onClick={() => handlePageChange(item)}
-                  disabled={loading}
                   style={{
                     minWidth: "40px",
                     height: "40px",
@@ -425,7 +439,7 @@ function ProductGridContent({
             <button
               type="button"
               onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages || loading}
+              disabled={currentPage >= totalPages}
               style={{
                 padding: "8px 16px",
                 fontSize: "14px",
