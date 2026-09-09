@@ -38,11 +38,7 @@ async function handleAuth(req) {
         const isAdmin =
           decoded.role === "admin" ||
           decoded.admin === true ||
-          allowedEnvEmails.includes(cleanEmail) ||
-          cleanEmail === "liorabeautyandwear@gmail.com" ||
-          cleanEmail === "admin@jisantrends.com" ||
-          cleanEmail === "jahidulislam01910889@gmail.com" ||
-          cleanEmail === "jisan22205101743@diu.edu.bd";
+          allowedEnvEmails.includes(cleanEmail);
 
         verified = {
           decodedToken: {
@@ -76,14 +72,7 @@ async function handleAuth(req) {
         .map((e) => e.trim())
         .filter(Boolean);
 
-      const isKnown =
-        allowedEnvEmails.includes(cleanEmail) ||
-        cleanEmail === "liorabeautyandwear@gmail.com" ||
-        cleanEmail === "admin@jisantrends.com" ||
-        cleanEmail === "jahidulislam01910889@gmail.com" ||
-        cleanEmail === "jisan22205101743@diu.edu.bd";
-
-      if (isKnown) {
+      if (allowedEnvEmails.includes(cleanEmail)) {
         effectiveRole = "admin";
       } else {
         const [adminRec, adminCust] = await Promise.all([

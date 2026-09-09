@@ -146,7 +146,7 @@ export async function verifyAuthAndRole(idToken) {
       role = "admin";
     }
 
-    // 2. Check Firestore (users, admins, or {uid} collection)
+    // 2. Check Firestore (admins collection by UID or email, users collection by UID)
     if (role !== "admin") {
       try {
         const app = await getFirebaseAdminApp();
@@ -154,22 +154,22 @@ export async function verifyAuthAndRole(idToken) {
           const { getFirestore } = await import("firebase-admin/firestore");
           const firestore = getFirestore(app);
 
-          // Check users/{uid}
-          const userDoc = await firestore.collection("users").doc(decodedToken.uid).get();
-          if (userDoc.exists && (userDoc.data()?.role === "admin" || userDoc.data()?.isAdmin === true)) {
-            role = "admin";
-          }
-
           // Check admins/{uid}
-          if (role !== "admin") {
-            const adminDoc = await firestore.collection("admins").doc(decodedToken.uid).get();
-            if (adminDoc.exists) role = "admin";
+          const adminUidDoc = await firestore.collection("admins").doc(decodedToken.uid).get();
+          if (adminUidDoc.exists) role = "admin";
+
+          // Check admins/{email}
+          if (role !== "admin" && cleanEmail) {
+            const adminEmailDoc = await firestore.collection("admins").doc(cleanEmail).get();
+            if (adminEmailDoc.exists) role = "admin";
           }
 
-          // Check {uid}/{uid}
+          // Check users/{uid}
           if (role !== "admin") {
-            const directDoc = await firestore.collection(decodedToken.uid).doc(decodedToken.uid).get();
-            if (directDoc.exists && directDoc.data()?.role === "admin") role = "admin";
+            const userDoc = await firestore.collection("users").doc(decodedToken.uid).get();
+            if (userDoc.exists && (userDoc.data()?.role === "admin" || userDoc.data()?.isAdmin === true)) {
+              role = "admin";
+            }
           }
         }
       } catch (fsErr) {
@@ -177,7 +177,7 @@ export async function verifyAuthAndRole(idToken) {
       }
     }
 
-    // 3. Check Known Emails, Environment, and MongoDB Admin/Customer collections
+    // 3. Optional: Environment variable and MongoDB Admin collection
     if (role !== "admin" && decodedToken.email) {
       const cleanEmail = decodedToken.email.toLowerCase().trim();
       const allowedEnvEmails = (process.env.ADMIN_EMAILS || "")
@@ -186,14 +186,7 @@ export async function verifyAuthAndRole(idToken) {
         .map((e) => e.trim())
         .filter(Boolean);
 
-      const isKnownAdmin =
-        allowedEnvEmails.includes(cleanEmail) ||
-        cleanEmail === "liorabeautyandwear@gmail.com" ||
-        cleanEmail === "admin@jisantrends.com" ||
-        cleanEmail === "jahidulislam01910889@gmail.com" ||
-        cleanEmail === "jisan22205101743@diu.edu.bd";
-
-      if (isKnownAdmin) {
+      if (allowedEnvEmails.includes(cleanEmail)) {
         role = "admin";
       } else {
         try {

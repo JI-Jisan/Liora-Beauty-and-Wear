@@ -27,14 +27,24 @@ export async function POST(req) {
     const { Customer } = await import("@/lib/models");
     const adminCustomer = await Customer.findOne({ email: cleanEmail, role: "admin" });
 
+    // Check Firestore admins collection
+    let firestoreAdmin = false;
+    try {
+      const { getApps, initializeApp, cert } = await import("firebase-admin/app");
+      const { getFirestore } = await import("firebase-admin/firestore");
+      const app = getApps().length ? getApps()[0] : null;
+      if (app) {
+        const db = getFirestore(app);
+        const doc = await db.collection("admins").doc(cleanEmail).get();
+        if (doc.exists) firestoreAdmin = true;
+      }
+    } catch {}
+
     const isAuthorized =
       admin ||
       adminCustomer ||
-      allowedEnvEmails.includes(cleanEmail) ||
-      cleanEmail === "liorabeautyandwear@gmail.com" ||
-      cleanEmail === "admin@jisantrends.com" ||
-      cleanEmail === "jahidulislam01910889@gmail.com" ||
-      cleanEmail === "jisan22205101743@diu.edu.bd";
+      firestoreAdmin ||
+      allowedEnvEmails.includes(cleanEmail);
 
     if (!isAuthorized) {
       return NextResponse.json(

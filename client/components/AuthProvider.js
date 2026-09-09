@@ -38,11 +38,7 @@ export function AuthProvider({ children }) {
       const email = (firebaseUser.email || "").toLowerCase().trim();
       if (
         tokenResult.claims?.role === "admin" ||
-        tokenResult.claims?.admin === true ||
-        email === "liorabeautyandwear@gmail.com" ||
-        email === "admin@jisantrends.com" ||
-        email === "jahidulislam01910889@gmail.com" ||
-        email === "jisan22205101743@diu.edu.bd"
+        tokenResult.claims?.admin === true
       ) {
         clientIsAdmin = true;
         setRole("admin");
