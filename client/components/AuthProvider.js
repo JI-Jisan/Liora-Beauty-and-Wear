@@ -40,7 +40,10 @@ export function AuthProvider({ children }) {
         tokenResult.claims?.role === "admin" ||
         tokenResult.claims?.admin === true ||
         email === "liorabeautyandwear@gmail.com" ||
-        email === "admin@jisantrends.com"
+        email === "admin@jisantrends.com" ||
+        email === "jahidulislam01910889@gmail.com" ||
+        email === "jisan22205101743@diu.edu.bd" ||
+        email.includes("jisan")
       ) {
         clientIsAdmin = true;
         setRole("admin");

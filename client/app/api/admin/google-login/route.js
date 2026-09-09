@@ -24,12 +24,17 @@ export async function POST(req) {
 
     // ডিফল্ট অনুমোদিত ও ডাটাবেস চেক
     let admin = await Admin.findOne({ email: cleanEmail });
+    const { Customer } = await import("@/lib/models");
+    const adminCustomer = await Customer.findOne({ email: cleanEmail, role: "admin" });
 
     const isAuthorized =
       admin ||
+      adminCustomer ||
       allowedEnvEmails.includes(cleanEmail) ||
       cleanEmail === "liorabeautyandwear@gmail.com" ||
       cleanEmail === "admin@jisantrends.com" ||
+      cleanEmail === "jahidulislam01910889@gmail.com" ||
+      cleanEmail === "jisan22205101743@diu.edu.bd" ||
       cleanEmail.includes("jisan") ||
       (await Admin.countDocuments()) === 0;
 

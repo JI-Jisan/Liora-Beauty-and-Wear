@@ -21,7 +21,7 @@ export default function BrandingPage() {
     const isLoggedIn = localStorage.getItem("jt_admin_logged_in");
     const token = localStorage.getItem("jt_admin_token");
     if (isLoggedIn !== "true" || !token) {
-      router.push("/admin/login");
+      router.push("/login?redirect=/admin");
     } else {
       setIsAuthenticated(true);
     }

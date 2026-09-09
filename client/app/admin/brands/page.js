@@ -39,7 +39,7 @@ export default function AdminBrands() {
 
     if (res.status === 401) {
       setMsg("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
-      setTimeout(() => router.push("/admin/login"), 1200);
+      setTimeout(() => router.push("/login?redirect=/admin"), 1200);
       return;
     }
 
@@ -59,7 +59,7 @@ export default function AdminBrands() {
     });
     if (res.status === 401) {
       setMsg("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
-      setTimeout(() => router.push("/admin/login"), 1200);
+      setTimeout(() => router.push("/login?redirect=/admin"), 1200);
       return;
     }
     load();
@@ -84,7 +84,7 @@ export default function AdminBrands() {
 
       if (res.status === 401) {
         setMsg("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
-        setTimeout(() => router.push("/admin/login"), 1200);
+        setTimeout(() => router.push("/login?redirect=/admin"), 1200);
         return;
       }
 
@@ -114,7 +114,7 @@ export default function AdminBrands() {
     });
     if (res.status === 401) {
       setMsg("সেশন শেষ হয়ে গেছে। আবার লগইন করুন।");
-      setTimeout(() => router.push("/admin/login"), 1200);
+      setTimeout(() => router.push("/login?redirect=/admin"), 1200);
       return;
     }
     const d = await res.json();

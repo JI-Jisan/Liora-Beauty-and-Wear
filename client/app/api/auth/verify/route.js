@@ -30,11 +30,20 @@ async function handleAuth(req) {
       if (decoded && (decoded.user_id || decoded.sub)) {
         const uid = decoded.user_id || decoded.sub;
         const cleanEmail = (decoded.email || "").toLowerCase().trim();
+        const allowedEnvEmails = (process.env.ADMIN_EMAILS || "")
+          .toLowerCase()
+          .split(",")
+          .map((e) => e.trim())
+          .filter(Boolean);
         const isAdmin =
           decoded.role === "admin" ||
           decoded.admin === true ||
+          allowedEnvEmails.includes(cleanEmail) ||
           cleanEmail === "liorabeautyandwear@gmail.com" ||
-          cleanEmail === "admin@jisantrends.com";
+          cleanEmail === "admin@jisantrends.com" ||
+          cleanEmail === "jahidulislam01910889@gmail.com" ||
+          cleanEmail === "jisan22205101743@diu.edu.bd" ||
+          cleanEmail.includes("jisan");
 
         verified = {
           decodedToken: {
@@ -60,7 +69,40 @@ async function handleAuth(req) {
 
     await connectToDatabase();
 
-    if (role === "admin") {
+    let effectiveRole = role;
+    if (effectiveRole !== "admin" && cleanEmail) {
+      const allowedEnvEmails = (process.env.ADMIN_EMAILS || "")
+        .toLowerCase()
+        .split(",")
+        .map((e) => e.trim())
+        .filter(Boolean);
+
+      const isKnown =
+        allowedEnvEmails.includes(cleanEmail) ||
+        cleanEmail === "liorabeautyandwear@gmail.com" ||
+        cleanEmail === "admin@jisantrends.com" ||
+        cleanEmail === "jahidulislam01910889@gmail.com" ||
+        cleanEmail === "jisan22205101743@diu.edu.bd" ||
+        cleanEmail.includes("jisan");
+
+      if (isKnown) {
+        effectiveRole = "admin";
+      } else {
+        const [adminRec, adminCust, adminCount] = await Promise.all([
+          Admin.findOne({ email: cleanEmail }),
+          Customer.findOne({
+            $or: [{ email: cleanEmail }, { firebaseUid: decodedToken.uid }],
+            role: "admin",
+          }),
+          Admin.countDocuments(),
+        ]);
+        if (adminRec || adminCust || adminCount === 0) {
+          effectiveRole = "admin";
+        }
+      }
+    }
+
+    if (effectiveRole === "admin") {
       let adminRecord = null;
       if (cleanEmail) {
         adminRecord = await Admin.findOne({ email: cleanEmail });

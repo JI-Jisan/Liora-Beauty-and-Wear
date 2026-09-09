@@ -41,7 +41,8 @@ function LoginFormContent() {
       if (role === "admin") {
         router.push("/admin");
       } else {
-        router.push(redirectUrl);
+        const dest = redirectUrl.startsWith("/admin") ? "/account" : redirectUrl;
+        router.push(dest);
       }
     }
   }, [user, role, authLoading, router, redirectUrl]);
@@ -112,11 +113,13 @@ function LoginFormContent() {
         }
         router.push("/admin");
       } else {
-        router.push(redirectUrl);
+        const dest = redirectUrl.startsWith("/admin") ? "/account" : redirectUrl;
+        router.push(dest);
       }
     } catch (err) {
       console.error("Post-auth error:", err);
-      router.push(redirectUrl);
+      const dest = redirectUrl.startsWith("/admin") ? "/account" : redirectUrl;
+      router.push(dest);
     }
   };
 

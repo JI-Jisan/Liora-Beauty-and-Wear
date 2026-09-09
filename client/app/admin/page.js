@@ -113,7 +113,7 @@ export default function AdminPage() {
     localStorage.removeItem("jt_admin_logged_in");
     localStorage.removeItem("jt_admin_token");
     localStorage.removeItem("jt_admin_user");
-    router.push("/admin/login");
+    router.push("/login");
   };
 
   const uploadToCloudinary = async (file) => {
@@ -229,7 +229,7 @@ export default function AdminPage() {
       loadSettings();
       loadReports();
     } else {
-      router.push("/admin/login");
+      router.push("/login?redirect=/admin");
     }
   }, [router, isAdmin, authLoading]);
 
