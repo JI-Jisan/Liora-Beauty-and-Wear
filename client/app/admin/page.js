@@ -60,6 +60,7 @@ function getCategoryAndDescendantIds(selectedCatId, allCategories = []) {
 
 export default function AdminPage() {
   const router = useRouter();
+  const { user: authUser, isAdmin, loading: authLoading, logout } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -109,11 +110,20 @@ export default function AdminPage() {
     flashDurationHours: 6,
   });
 
-  const handleLogout = () => {
-    localStorage.removeItem("jt_admin_logged_in");
-    localStorage.removeItem("jt_admin_token");
-    localStorage.removeItem("jt_admin_user");
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      if (logout) {
+        await logout();
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("jt_admin_logged_in");
+      localStorage.removeItem("jt_admin_token");
+      localStorage.removeItem("jt_admin_user");
+      window.location.href = "/login";
+    }
   };
 
   const uploadToCloudinary = async (file) => {
@@ -166,11 +176,12 @@ export default function AdminPage() {
 
   const loadProducts = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/products`, {
+      const res = await fetch(`${API_BASE_URL}/api/products?limit=10000`, {
         headers: getAuthHeaders(),
       });
       const data = await res.json();
-      setProducts(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : (Array.isArray(data?.products) ? data.products : []);
+      setProducts(list);
     } catch (err) {
       console.error(err);
     }
@@ -213,8 +224,6 @@ export default function AdminPage() {
       console.error(err);
     }
   };
-
-  const { user: authUser, isAdmin, loading: authLoading } = useAuth();
 
   useEffect(() => {
     if (authLoading) return;

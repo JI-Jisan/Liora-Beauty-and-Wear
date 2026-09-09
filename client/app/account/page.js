@@ -174,7 +174,7 @@ export default function AccountDashboardPage() {
 
   const handleLogout = async () => {
     await logout();
-    router.push("/login");
+    window.location.href = "/login";
   };
 
   if (loading || !user) {

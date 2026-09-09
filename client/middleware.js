@@ -39,7 +39,7 @@ export async function middleware(req) {
     const token = authHeader.split(' ')[1];
     // আপনার .env ফাইলে থাকা সিক্রেট কি, না থাকলে ডিফল্ট কি
     const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET || "myverysecurejwtsecret123"
     );
 
     try {

@@ -195,9 +195,9 @@ export async function GET(req) {
 
     const isPaginated = searchParams.get("paginate") === "1";
     const page = Math.max(1, parseInt(searchParams.get("page"), 10) || 1);
-    const maxLimit = isAdmin ? 10000 : 1000;
+    const maxLimit = 20000;
     const limitParam = parseInt(searchParams.get("limit"), 10);
-    const limit = limitParam ? Math.min(maxLimit, limitParam) : (isAdmin ? 10000 : 100);
+    const limit = limitParam ? Math.min(maxLimit, limitParam) : (isAdmin ? 20000 : 100);
     const skip = (page - 1) * limit;
 
     const [products, total] = await Promise.all([
