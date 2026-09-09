@@ -34,9 +34,7 @@ export async function POST(req) {
       cleanEmail === "liorabeautyandwear@gmail.com" ||
       cleanEmail === "admin@jisantrends.com" ||
       cleanEmail === "jahidulislam01910889@gmail.com" ||
-      cleanEmail === "jisan22205101743@diu.edu.bd" ||
-      cleanEmail.includes("jisan") ||
-      (await Admin.countDocuments()) === 0;
+      cleanEmail === "jisan22205101743@diu.edu.bd";
 
     if (!isAuthorized) {
       return NextResponse.json(

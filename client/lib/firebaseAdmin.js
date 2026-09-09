@@ -191,8 +191,7 @@ export async function verifyAuthAndRole(idToken) {
         cleanEmail === "liorabeautyandwear@gmail.com" ||
         cleanEmail === "admin@jisantrends.com" ||
         cleanEmail === "jahidulislam01910889@gmail.com" ||
-        cleanEmail === "jisan22205101743@diu.edu.bd" ||
-        cleanEmail.includes("jisan");
+        cleanEmail === "jisan22205101743@diu.edu.bd";
 
       if (isKnownAdmin) {
         role = "admin";
@@ -201,16 +200,15 @@ export async function verifyAuthAndRole(idToken) {
           const { connectToDatabase } = await import("@/lib/db");
           const { Admin, Customer } = await import("@/lib/models");
           await connectToDatabase();
-          const [adminRecord, adminCustomer, adminCount] = await Promise.all([
+          const [adminRecord, adminCustomer] = await Promise.all([
             Admin.findOne({ email: cleanEmail }),
             Customer.findOne({
               $or: [{ email: cleanEmail }, { firebaseUid: decodedToken.uid }],
               role: "admin",
             }),
-            Admin.countDocuments(),
           ]);
 
-          if (adminRecord || adminCustomer || adminCount === 0) {
+          if (adminRecord || adminCustomer) {
             role = "admin";
           }
         } catch (dbErr) {

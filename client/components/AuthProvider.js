@@ -42,8 +42,7 @@ export function AuthProvider({ children }) {
         email === "liorabeautyandwear@gmail.com" ||
         email === "admin@jisantrends.com" ||
         email === "jahidulislam01910889@gmail.com" ||
-        email === "jisan22205101743@diu.edu.bd" ||
-        email.includes("jisan")
+        email === "jisan22205101743@diu.edu.bd"
       ) {
         clientIsAdmin = true;
         setRole("admin");

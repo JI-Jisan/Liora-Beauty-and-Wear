@@ -228,10 +228,16 @@ export default function AdminPage() {
   useEffect(() => {
     if (authLoading) return;
 
-    const isLoggedIn = localStorage.getItem("jt_admin_logged_in");
-    const token = localStorage.getItem("jt_admin_token");
+    // If a logged-in Firebase user is NOT an admin, immediately kick out to /account!
+    if (authUser && !isAdmin) {
+      localStorage.removeItem("jt_admin_logged_in");
+      localStorage.removeItem("jt_admin_token");
+      localStorage.removeItem("jt_admin_user");
+      router.push("/account");
+      return;
+    }
 
-    if (isAdmin || (isLoggedIn === "true" && token)) {
+    if (isAdmin) {
       setIsAuthenticated(true);
       loadCategories();
       loadProducts();
@@ -240,7 +246,7 @@ export default function AdminPage() {
     } else {
       router.push("/login?redirect=/admin");
     }
-  }, [router, isAdmin, authLoading]);
+  }, [router, isAdmin, authUser, authLoading]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
