@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { connectToDatabase } from "@/lib/db";
-import { Admin } from "@/lib/models";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
 export async function POST(req) {
   try {
-    await connectToDatabase();
     const body = await req.json();
     const { email, name } = body;
 
@@ -15,36 +13,28 @@ export async function POST(req) {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // অ্যাডমিন হিসেবে অনুমোদিত ইমেইলের তালিকা
+    // অ্যাডমিন হিসেবে অনুমোদিত ইমেইলের তালিকা (Environment variable)
     const allowedEnvEmails = (process.env.ADMIN_EMAILS || "")
       .toLowerCase()
       .split(",")
       .map((e) => e.trim())
       .filter(Boolean);
 
-    // ডিফল্ট অনুমোদিত ও ডাটাবেস চেক
-    let admin = await Admin.findOne({ email: cleanEmail });
-    const { Customer } = await import("@/lib/models");
-    const adminCustomer = await Customer.findOne({ email: cleanEmail, role: "admin" });
-
     // Check Firestore admins collection
     let firestoreAdmin = false;
     try {
-      const { getApps, initializeApp, cert } = await import("firebase-admin/app");
-      const { getFirestore } = await import("firebase-admin/firestore");
-      const app = getApps().length ? getApps()[0] : null;
+      const app = await getFirebaseAdminApp();
       if (app) {
+        const { getFirestore } = await import("firebase-admin/firestore");
         const db = getFirestore(app);
         const doc = await db.collection("admins").doc(cleanEmail).get();
         if (doc.exists) firestoreAdmin = true;
       }
-    } catch {}
+    } catch (fsErr) {
+      console.warn("Firestore check warning:", fsErr?.message);
+    }
 
-    const isAuthorized =
-      admin ||
-      adminCustomer ||
-      firestoreAdmin ||
-      allowedEnvEmails.includes(cleanEmail);
+    const isAuthorized = firestoreAdmin || allowedEnvEmails.includes(cleanEmail);
 
     if (!isAuthorized) {
       return NextResponse.json(
@@ -53,22 +43,13 @@ export async function POST(req) {
       );
     }
 
-    // যদি ডাটাবেসে না থাকে, তবে স্বয়ংক্রিয়ভাবে অ্যাডমিন রেকর্ড তৈরি
-    if (!admin) {
-      admin = await Admin.create({
-        email: cleanEmail,
-        name: name || "Liora Admin",
-        password: "firebase_oauth_managed",
-      });
-    }
-
     const jwtSecret = process.env.JWT_SECRET || "myverysecurejwtsecret123";
 
     const token = jwt.sign(
       {
-        id: admin._id,
-        email: admin.email,
-        name: admin.name,
+        email: cleanEmail,
+        name: name || "Liora Admin",
+        role: "admin",
       },
       jwtSecret,
       { expiresIn: "7d" }
@@ -78,9 +59,9 @@ export async function POST(req) {
       message: "Admin Google Login successful",
       token,
       admin: {
-        id: admin._id,
-        email: admin.email,
-        name: admin.name,
+        email: cleanEmail,
+        name: name || "Liora Admin",
+        role: "admin",
       },
     });
   } catch (error) {

@@ -7,7 +7,7 @@ const DEFAULT_SERVICE_ACCOUNT = {
 const FIREBASE_API_KEY =
   process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyBQbrA8ZVPcyhbvRblLCAmEABCBw0PRYFM";
 
-async function getFirebaseAdminApp() {
+export async function getFirebaseAdminApp() {
   try {
     const projectId = process.env.FIREBASE_PROJECT_ID || DEFAULT_SERVICE_ACCOUNT.projectId;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL || DEFAULT_SERVICE_ACCOUNT.clientEmail;
@@ -136,6 +136,8 @@ export async function verifyAuthAndRole(idToken) {
       return null;
     }
 
+    const cleanEmail = (decodedToken.email || "").toLowerCase().trim();
+
     // 1. Check Custom Claims
     let role = "user";
     if (
@@ -177,9 +179,8 @@ export async function verifyAuthAndRole(idToken) {
       }
     }
 
-    // 3. Optional: Environment variable and MongoDB Admin collection
-    if (role !== "admin" && decodedToken.email) {
-      const cleanEmail = decodedToken.email.toLowerCase().trim();
+    // 3. Optional: Environment variable (ADMIN_EMAILS)
+    if (role !== "admin" && cleanEmail) {
       const allowedEnvEmails = (process.env.ADMIN_EMAILS || "")
         .toLowerCase()
         .split(",")
@@ -188,25 +189,6 @@ export async function verifyAuthAndRole(idToken) {
 
       if (allowedEnvEmails.includes(cleanEmail)) {
         role = "admin";
-      } else {
-        try {
-          const { connectToDatabase } = await import("@/lib/db");
-          const { Admin, Customer } = await import("@/lib/models");
-          await connectToDatabase();
-          const [adminRecord, adminCustomer] = await Promise.all([
-            Admin.findOne({ email: cleanEmail }),
-            Customer.findOne({
-              $or: [{ email: cleanEmail }, { firebaseUid: decodedToken.uid }],
-              role: "admin",
-            }),
-          ]);
-
-          if (adminRecord || adminCustomer) {
-            role = "admin";
-          }
-        } catch (dbErr) {
-          console.error("DB Admin check error:", dbErr?.message);
-        }
       }
     }
 

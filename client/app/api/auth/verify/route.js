@@ -74,40 +74,17 @@ async function handleAuth(req) {
 
       if (allowedEnvEmails.includes(cleanEmail)) {
         effectiveRole = "admin";
-      } else {
-        const [adminRec, adminCust] = await Promise.all([
-          Admin.findOne({ email: cleanEmail }),
-          Customer.findOne({
-            $or: [{ email: cleanEmail }, { firebaseUid: decodedToken.uid }],
-            role: "admin",
-          }),
-        ]);
-        if (adminRec || adminCust) {
-          effectiveRole = "admin";
-        }
       }
     }
 
     if (effectiveRole === "admin") {
-      let adminRecord = null;
-      if (cleanEmail) {
-        adminRecord = await Admin.findOne({ email: cleanEmail });
-        if (!adminRecord) {
-          adminRecord = await Admin.create({
-            email: cleanEmail,
-            name: displayName || "Liora Admin",
-            password: "firebase_oauth_managed",
-          });
-        }
-      }
-
       const jwtSecret = process.env.JWT_SECRET || "myverysecurejwtsecret123";
       const adminToken = jwt.sign(
         {
-          id: adminRecord?._id || decodedToken.uid,
+          id: decodedToken.uid,
           uid: decodedToken.uid,
           email: cleanEmail,
-          name: adminRecord?.name || displayName || "Admin",
+          name: displayName || "Admin",
           role: "admin",
         },
         jwtSecret,
@@ -122,7 +99,7 @@ async function handleAuth(req) {
         user: {
           uid: decodedToken.uid,
           email: cleanEmail,
-          name: adminRecord?.name || displayName || "Admin",
+          name: displayName || "Admin",
           role: "admin",
         },
       });

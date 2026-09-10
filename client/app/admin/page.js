@@ -8,6 +8,7 @@ import ProductForm from "@/components/admin/ProductForm";
 import CategoryManager from "@/components/admin/CategoryManager";
 import StatCard from "@/components/StatCard";
 import AdminStorefrontPOS from "@/components/admin/AdminStorefrontPOS";
+import AdminUserManager from "@/components/admin/AdminUserManager";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -834,6 +835,16 @@ export default function AdminPage() {
             📋 Inventory / Stock
           </li>
           <li
+            className={activeTab === "users" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("users");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          >
+            👥 Admin & Users
+          </li>
+          <li
             onClick={() => {
               window.open("/", "_blank");
             }}
@@ -1011,13 +1022,29 @@ export default function AdminPage() {
                 {/* Branding Box */}
                 <div 
                   onClick={() => { setActiveTab("branding"); window.scrollTo(0,0); }}
-                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gridColumn: "span 2", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>✨</div>
-                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Branding & Settings</h3>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Branding</h3>
+                </div>
+
+                {/* Admin & Users Box */}
+                <div 
+                  onClick={() => { setActiveTab("users"); window.scrollTo(0,0); }}
+                  style={{ background: "#ffffff", padding: "18px 10px", borderRadius: "16px", border: "1px solid #e2e8f0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>👥</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Admin & Users</h3>
                 </div>
 
               </div>
+            </div>
+          )}
+
+          {/* Admin & Users Tab */}
+          {activeTab === "users" && (
+            <div id="users-section" className="jt-admin-panel">
+              <AdminUserManager />
             </div>
           )}
 
