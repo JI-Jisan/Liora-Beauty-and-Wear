@@ -80,7 +80,7 @@ export default function HomePage() {
       />
 
       {/* 1. CAMPAIGN PROMO SLIDER BANNER */}
-      <PromoBanner promoSlides={siteSettings.promoSlides} />
+      <PromoBanner promoSlides={siteSettings.promoSlides} heroImage={siteSettings.heroImage} />
 
       {/* 2. 🛡️ 4-PILLAR TRUST BADGES (100% AUTHENTIC, COD, 24-48H, EASY RETURN) */}
       <TrustBadgesBar />
