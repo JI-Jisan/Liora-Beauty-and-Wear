@@ -148,13 +148,15 @@ export default function AdminUserManager() {
     <div style={{ padding: "8px 0 32px 0", maxWidth: 1100, margin: "0 auto" }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
-          <span style={{ fontSize: 28 }}>👥</span>
-          <div>
-            <h2 style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", margin: 0 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 8 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0, marginTop: 2 }}>
+            👥
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#0f172a", margin: "0 0 6px 0", lineHeight: 1.3 }}>
               অ্যাডমিন ও ইউজার পারমিশন কন্ট্রোল
             </h2>
-            <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: 14 }}>
+            <p style={{ margin: 0, color: "#64748b", fontSize: 13, lineHeight: 1.5 }}>
               Firebase-এ যুক্ত ইউজারদের তালিকা দেখুন এবং যেকোনো ইমেইলকে এক ক্লিকে অ্যাডমিন অনুমোদন বা বাতিল করুন।
             </p>
           </div>

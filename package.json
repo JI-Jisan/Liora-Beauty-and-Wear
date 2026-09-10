@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "jose": "^6.2.10"
+    "jose": "4.15.9"
+  },
+  "overrides": {
+    "jose": "4.15.9"
   }
 }

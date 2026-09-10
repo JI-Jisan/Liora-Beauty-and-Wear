@@ -16,60 +16,94 @@ export async function GET(req) {
       return NextResponse.json({ message: "Firebase Admin ইনিশিয়ালাইজ করা যায়নি" }, { status: 500 });
     }
 
-    const { getAuth } = await import("firebase-admin/auth");
-    const { getFirestore } = await import("firebase-admin/firestore");
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // 1. Fetch Firestore admins collection (does NOT depend on jwks-rsa/jose)
+    const adminMap = new Map();
+    try {
+      const { getFirestore } = await import("firebase-admin/firestore");
+      const db = getFirestore(app);
+      const adminDocs = await db.collection("admins").get();
+      adminDocs.forEach((doc) => {
+        const data = doc.data() || {};
+        const docId = doc.id.toLowerCase();
+        adminMap.set(docId, data);
+        if (data.email) adminMap.set(data.email.toLowerCase(), data);
+        if (data.uid) adminMap.set(data.uid, data);
+      });
+    } catch (fsErr) {
+      console.warn("Firestore admins fetch warning:", fsErr?.message);
+    }
 
-    // 1. Fetch Firestore admins collection
-    const adminDocs = await db.collection("admins").get();
-    const adminMap = new Map(); // email or uid -> data
-    adminDocs.forEach((doc) => {
-      adminMap.set(doc.id.toLowerCase(), doc.data());
-      const data = doc.data();
-      if (data?.email) {
-        adminMap.set(data.email.toLowerCase(), data);
-      }
-      if (data?.uid) {
-        adminMap.set(data.uid, data);
-      }
-    });
+    const users = [];
+    const knownEmails = new Map();
 
-    // 2. Fetch all Firebase Auth users
-    const listResult = await auth.listUsers(1000);
-    const users = listResult.users.map((u) => {
-      const cleanEmail = (u.email || "").toLowerCase();
-      const hasAdminClaim =
-        u.customClaims?.role === "admin" || u.customClaims?.admin === true;
-      const hasFirestoreDoc =
-        adminMap.has(cleanEmail) || adminMap.has(u.uid);
+    // 2. Fetch all Firebase Auth users (safely wrapped)
+    try {
+      const { getAuth } = await import("firebase-admin/auth");
+      const auth = getAuth(app);
+      const listResult = await auth.listUsers(1000);
+      listResult.users.forEach((u) => {
+        const cleanEmail = (u.email || "").toLowerCase();
+        const hasAdminClaim =
+          u.customClaims?.role === "admin" || u.customClaims?.admin === true;
+        const hasFirestoreDoc =
+          adminMap.has(cleanEmail) || adminMap.has(u.uid);
 
-      const isAdmin = hasAdminClaim || hasFirestoreDoc;
+        const isAdmin = hasAdminClaim || hasFirestoreDoc;
+        const userObj = {
+          uid: u.uid,
+          email: u.email || "",
+          displayName: u.displayName || "",
+          photoURL: u.photoURL || "",
+          creationTime: u.metadata?.creationTime || "",
+          lastSignInTime: u.metadata?.lastSignInTime || "",
+          role: isAdmin ? "admin" : "user",
+          isAdmin,
+        };
+        users.push(userObj);
+        if (cleanEmail) knownEmails.set(cleanEmail, userObj);
+      });
+    } catch (authErr) {
+      console.warn("Firebase Auth listUsers warning, falling back to DB:", authErr?.message);
+    }
 
-      return {
-        uid: u.uid,
-        email: u.email || "",
-        displayName: u.displayName || "",
-        photoURL: u.photoURL || "",
-        creationTime: u.metadata?.creationTime || "",
-        lastSignInTime: u.metadata?.lastSignInTime || "",
-        role: isAdmin ? "admin" : "user",
-        isAdmin,
-      };
-    });
+    // 3. Fallback / Merge with MongoDB Customer collection
+    try {
+      const { connectToDatabase } = await import("@/lib/db");
+      const { Customer } = await import("@/lib/models");
+      await connectToDatabase();
+      const dbCustomers = await Customer.find({}).sort({ createdAt: -1 }).limit(1000).lean();
+      dbCustomers.forEach((c) => {
+        const cEmail = (c.email || "").toLowerCase().trim();
+        if (cEmail && !knownEmails.has(cEmail)) {
+          const isAdmin = adminMap.has(cEmail) || (c.firebaseUid && adminMap.has(c.firebaseUid));
+          const userObj = {
+            uid: c.firebaseUid || c._id?.toString() || "",
+            email: cEmail,
+            displayName: c.name || "",
+            photoURL: "",
+            creationTime: c.createdAt ? new Date(c.createdAt).toISOString() : "",
+            lastSignInTime: "",
+            role: isAdmin ? "admin" : "user",
+            isAdmin,
+          };
+          users.push(userObj);
+          knownEmails.set(cEmail, userObj);
+        }
+      });
+    } catch (dbErr) {
+      console.warn("Customer DB fallback warning:", dbErr?.message);
+    }
 
-    // 3. Include any pre-authorized emails from Firestore admins that might not have logged in yet
-    const existingEmails = new Set(users.map((u) => u.email.toLowerCase()).filter(Boolean));
-    adminDocs.forEach((doc) => {
-      const docId = doc.id.toLowerCase();
-      if (docId.includes("@") && !existingEmails.has(docId)) {
-        existingEmails.add(docId);
+    // 4. Include any pre-authorized emails from Firestore admins that might not be in auth or customer list yet
+    adminMap.forEach((data, key) => {
+      if (key.includes("@") && !knownEmails.has(key)) {
+        knownEmails.set(key, true);
         users.push({
-          uid: doc.data()?.uid || "",
-          email: docId,
+          uid: data?.uid || "",
+          email: key,
           displayName: "Pre-authorized Admin",
           photoURL: "",
-          creationTime: doc.data()?.updatedAt || "",
+          creationTime: data?.updatedAt || "",
           lastSignInTime: "",
           role: "admin",
           isAdmin: true,
@@ -124,26 +158,31 @@ export async function POST(req) {
       return NextResponse.json({ message: "Firebase Admin ইনিশিয়ালাইজ করা যায়নি" }, { status: 500 });
     }
 
-    const { getAuth } = await import("firebase-admin/auth");
     const { getFirestore } = await import("firebase-admin/firestore");
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Look up user in Firebase Auth
+    // Look up user in Firebase Auth safely
     let firebaseUser = null;
+    let auth = null;
     try {
+      const { getAuth } = await import("firebase-admin/auth");
+      auth = getAuth(app);
       firebaseUser = await auth.getUserByEmail(cleanEmail);
-    } catch {
-      // User might not be registered yet (pre-authorizing)
+    } catch (authErr) {
+      console.warn("Auth user lookup note:", authErr?.message);
     }
 
     if (targetRole === "admin") {
       // 1. Set Custom Claims in Firebase Auth if account exists
-      if (firebaseUser) {
-        await auth.setCustomUserClaims(firebaseUser.uid, {
-          role: "admin",
-          admin: true,
-        });
+      if (auth && firebaseUser) {
+        try {
+          await auth.setCustomUserClaims(firebaseUser.uid, {
+            role: "admin",
+            admin: true,
+          });
+        } catch (claimErr) {
+          console.warn("setCustomUserClaims note:", claimErr?.message);
+        }
       }
 
       // 2. Set doc in Firestore admins collection by email and UID
@@ -170,11 +209,15 @@ export async function POST(req) {
       });
     } else {
       // Revoke admin role
-      if (firebaseUser) {
-        await auth.setCustomUserClaims(firebaseUser.uid, {
-          role: "user",
-          admin: false,
-        });
+      if (auth && firebaseUser) {
+        try {
+          await auth.setCustomUserClaims(firebaseUser.uid, {
+            role: "user",
+            admin: false,
+          });
+        } catch (claimErr) {
+          console.warn("revoke setCustomUserClaims note:", claimErr?.message);
+        }
       }
 
       // Remove from Firestore admins collection
