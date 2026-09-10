@@ -11,6 +11,8 @@ import ShopByConcern from "../components/ShopByConcern";
 import CuratedCombos from "../components/CuratedCombos";
 import BrandScroller from "../components/BrandScroller";
 import CustomerLove from "../components/CustomerLove";
+import DualMiniBanners from "../components/DualMiniBanners";
+import MiddleStripBanner from "../components/MiddleStripBanner";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 
@@ -25,7 +27,7 @@ export default function HomePage() {
     heroText:
       "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
     offerText:
-      "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ✨ 100% Authentic Products",
+      "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1999 Tk   ✨ 100% Authentic Products",
     promoSlides: [],
 
     flashTitle: "Limited Time Special Offer",
@@ -52,7 +54,7 @@ export default function HomePage() {
           heroImage: data.heroImage || "/hero-banner-main.jpg",
           offerText:
             data.offerText ||
-            "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ✨ 100% Authentic Products",
+            "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1999 Tk   ✨ 100% Authentic Products",
           promoSlides: data.promoSlides || [],
           flashTitle: data.flashTitle || "Limited Time Special Offer",
           flashSubtitle:
@@ -89,10 +91,13 @@ export default function HomePage() {
       {/* 4. ⚡ FLASH SALE DEALS WITH LIVE COUNTDOWN TIMER */}
       <FlashSaleLive onAddToCart={addToCart} />
 
-      {/* 5. 🎯 SHOP BY CONCERN (ACNE, GLOW, DARK SPOTS, SUN, DRY SKIN, HAIR) */}
+      {/* 5. 🎯 DUAL MINI PROMO BANNERS (KOREAN SKINCARE & LUXURY PERFUMES) */}
+      <DualMiniBanners />
+
+      {/* 6. 🌿 SHOP BY CONCERN (ACNE, GLOW, DARK SPOTS, SUN, DRY SKIN, HAIR) */}
       <ShopByConcern />
 
-      {/* 6. ⭐ FEATURED COLLECTION (CURATED PICKS) */}
+      {/* 7. ⭐ FEATURED COLLECTION (CURATED PICKS) */}
       <section id="view-offers" style={{ padding: "10px 0" }}>
         <ProductGrid
           onAddToCart={addToCart}
@@ -107,7 +112,10 @@ export default function HomePage() {
         />
       </section>
 
-      {/* 7. 🔥 HOT ITEMS / HOT DEALS */}
+      {/* 8. 🚚 MIDDLE STRIP CAMPAIGN BANNER (100% AUTHENTIC & FREE DELIVERY) */}
+      <MiddleStripBanner />
+
+      {/* 9. 🔥 HOT ITEMS / HOT DEALS */}
       <section id="hot-items" style={{ padding: "20px 0", background: "linear-gradient(180deg, #fff5f7 0%, #ffffff 100%)", borderRadius: "24px", margin: "10px auto 26px", maxWidth: "1440px" }}>
         <ProductGrid
           onAddToCart={addToCart}

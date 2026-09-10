@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
     "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
   heroImage: "/hero-banner-main.jpg",
   offerText:
-    "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1500 Tk   ✨ 100% Authentic Products",
+    "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1999 Tk   ✨ 100% Authentic Products",
   promoSlides: [
     {
       badge: "Exclusive",

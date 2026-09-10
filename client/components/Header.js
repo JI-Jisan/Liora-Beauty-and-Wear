@@ -268,7 +268,7 @@ export default function Header({
         {/* TOP ANNOUNCEMENT BAR */}
         <div className="jt-top-announcement-bar">
           <div className="jt-announcement-content">
-            <span>🚚 Free Delivery on orders above ৳999</span>
+            <span>🚚 Free Delivery on orders above ৳1999</span>
             <span className="jt-announcement-divider">|</span>
             <span>🛡️ 100% Authentic Products</span>
           </div>
