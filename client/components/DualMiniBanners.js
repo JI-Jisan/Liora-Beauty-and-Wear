@@ -8,13 +8,13 @@ export default function DualMiniBanners() {
       id: "mini-k-beauty",
       title: "K-Beauty Essentials - Flat 20% OFF",
       image: "/banners/mini_korean_skin.jpg",
-      link: "/products?search=korean",
+      link: "/products?category=Serum",
     },
     {
-      id: "mini-royal-mists",
-      title: "Royal Body Mists - Up to 30% OFF",
-      image: "/banners/mini_luxury_mist.jpg",
-      link: "/products?search=perfume",
+      id: "mini-makeup-glam",
+      title: "Authentic Makeup & Lipsticks - Flat 25% OFF",
+      image: "/banners/mini_makeup_glam.jpg",
+      link: "/products?category=Lipsticks",
     },
   ];
 

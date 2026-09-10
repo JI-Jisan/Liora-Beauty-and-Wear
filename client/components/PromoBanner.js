@@ -15,19 +15,19 @@ const DEFAULT_CAMPAIGN_BANNERS = [
     id: "banner-korean-skincare",
     title: "Glowing Korean Skincare - Up to 30% OFF",
     image: "/banners/hero_korean_skincare.jpg",
-    link: "/products?search=skincare",
+    link: "/products?category=Serum",
   },
   {
-    id: "banner-luxury-perfume",
-    title: "Exclusive Luxury Perfumes - Royal Scents",
-    image: "/banners/hero_luxury_perfume.jpg",
-    link: "/products?search=perfume",
+    id: "banner-sunscreen-glow",
+    title: "Sun Defense & Glow - SPF 50+ Hydration",
+    image: "/banners/hero_sunscreen_glow.jpg",
+    link: "/products?category=Sunscreen",
   },
   {
     id: "banner-makeup-glam",
     title: "Authentic Makeup & Glam - Flat 25% OFF",
     image: "/banners/hero_makeup_glam.jpg",
-    link: "/products?search=makeup",
+    link: "/products?category=Lipsticks",
   },
 ];
 
