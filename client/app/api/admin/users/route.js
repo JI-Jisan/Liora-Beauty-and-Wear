@@ -148,11 +148,6 @@ export async function POST(req) {
     const cleanEmail = email.trim().toLowerCase();
     const targetRole = role === "admin" ? "admin" : "user";
 
-    // Safety check: Prevent self-demotion
-    if (targetRole === "user" && admin.email && admin.email.toLowerCase() === cleanEmail) {
-      return NextResponse.json({ message: "আপনি নিজের অ্যাডমিন এক্সেস বাতিল করতে পারবেন না।" }, { status: 400 });
-    }
-
     const app = await getFirebaseAdminApp();
     if (!app) {
       return NextResponse.json({ message: "Firebase Admin ইনিশিয়ালাইজ করা যায়নি" }, { status: 500 });
