@@ -27,12 +27,12 @@ export default function TrustBadgesBar() {
       color: "#92400e",
     },
     {
-      icon: "🔄",
-      title: "7 Days Easy Return",
-      subtitle: "Hassle-Free Policy",
-      bg: "#fff1f2",
-      border: "#fecdd3",
-      color: "#9f1239",
+      icon: "📦",
+      title: "Safe Packaging",
+      subtitle: "Damage-Proof Sealed",
+      bg: "#fdf2f8",
+      border: "#fbcfe8",
+      color: "#9d174d",
     },
   ];
 

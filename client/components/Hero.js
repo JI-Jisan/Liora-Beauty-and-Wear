@@ -115,10 +115,10 @@ export default function Hero({
         </div>
 
         <div className="jt-trust-item">
-          <span className="jt-trust-icon">🔄</span>
+          <span className="jt-trust-icon">📦</span>
           <div className="jt-trust-text-box">
-            <strong>Easy Returns</strong>
-            <span>&amp; Refunds</span>
+            <strong>Safe Packaging</strong>
+            <span>&amp; Sealed Delivery</span>
           </div>
         </div>
       </div>
