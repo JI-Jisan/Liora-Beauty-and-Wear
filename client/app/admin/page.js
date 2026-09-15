@@ -781,6 +781,21 @@ export default function AdminPage() {
             ☰ Menus
           </li>
           <li
+            onClick={() => {
+              router.push("/admin/marketing");
+            }}
+            style={{
+              background: "linear-gradient(135deg, #e11d48, #be123c)",
+              color: "#ffffff",
+              fontWeight: "800",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(225, 29, 72, 0.3)",
+              margin: "6px 0",
+            }}
+          >
+            ⚡ Facebook Auto Promoter
+          </li>
+          <li
             className={activeTab === "add-product" ? "active-tab" : ""}
             onClick={() => {
               setActiveTab("add-product");
@@ -943,6 +958,17 @@ export default function AdminPage() {
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>📦</div>
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#c2410c", fontWeight: "800", textAlign: "center" }}>Recent Orders</h3>
                 </div>
+
+                {/* Facebook Auto Promoter Box (High Priority) */}
+                <div 
+                  onClick={() => { router.push("/admin/marketing"); }}
+                  style={{ background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)", padding: "18px 10px", borderRadius: "16px", border: "1px solid #fecdd3", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 10px rgba(225,29,72,0.12)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>⚡</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#e11d48", fontWeight: "800", textAlign: "center" }}>FB Auto Promoter</h3>
+                  <span style={{ fontSize: "11px", color: "#be123c", textAlign: "center", marginTop: "2px", fontWeight: "600" }}>AI Banners & Posts</span>
+                </div>
+
 
                 {/* Manage Products Box */}
                 <div 

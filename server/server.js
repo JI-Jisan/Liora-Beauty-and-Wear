@@ -52,11 +52,14 @@ app.get("/", (req, res) => {
   res.send("Jisan Trends API is running...");
 });
 
+const marketingRoutes = require("./routes/marketingRoutes");
+
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/marketing", marketingRoutes);
 
 const PORT = process.env.PORT || 5001;
 

@@ -332,6 +332,12 @@ const SiteSettingsSchema = new mongoose.Schema(
     deliveryInside: { type: Number, default: 65 },
     deliveryOutside: { type: Number, default: 110 },
     freeDeliveryThreshold: { type: Number, default: 0 }, // 0 = ফ্রি ডেলিভারি বন্ধ
+
+    // Facebook Auto-Pilot Settings
+    fbPageId: { type: String, default: "61593176967507" },
+    fbPageAccessToken: { type: String, default: "" },
+    fbAppId: { type: String, default: "974777838976699" },
+    fbAppSecret: { type: String, default: "832fb1c79860a989e060efb7be11a45b" },
   },
   { timestamps: true }
 );
