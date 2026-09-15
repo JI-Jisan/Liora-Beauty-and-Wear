@@ -110,6 +110,7 @@ export default function AdminMarketingPage() {
 
   // 3. Load Preview for a single product
   async function loadProductPreview(productId, theme = null) {
+    setActiveProduct(productId);
     setPreviewLoading(true);
     setCopied(false);
     setSinglePostSuccess(null);
@@ -119,13 +120,15 @@ export default function AdminMarketingPage() {
       const json = await res.json();
       if (json.success) {
         setPreviewData(json);
-        setActiveProduct(productId);
         if (!theme) {
           setSelectedTheme(json.theme || "teal");
         }
+      } else {
+        setErrorMsg(json.error || "Failed to load product preview.");
       }
     } catch (err) {
       console.error("Preview failed:", err);
+      setErrorMsg("Network error loading product preview.");
     } finally {
       setPreviewLoading(false);
     }

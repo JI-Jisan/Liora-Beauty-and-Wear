@@ -99,6 +99,8 @@ export async function GET(req, { params }) {
 
       const caption = generateFBCaption(product, product.brand?.name || "LIORA");
       const bannerBuffer = await generateProductBanner(product, theme);
+      const isSvg = bannerBuffer.toString("utf8", 0, 100).includes("<svg");
+      const mime = isSvg ? "image/svg+xml" : "image/png";
 
       return NextResponse.json({
         success: true,
@@ -111,7 +113,7 @@ export async function GET(req, { params }) {
         },
         theme: theme || pickSmartTheme(product.name, product.category?.name),
         caption,
-        bannerBase64: `data:image/png;base64,${bannerBuffer.toString("base64")}`,
+        bannerBase64: `data:${mime};base64,${bannerBuffer.toString("base64")}`,
       });
     }
 
@@ -130,11 +132,13 @@ export async function GET(req, { params }) {
       }
 
       const bannerBuffer = await generateProductBanner(product, theme);
-      const filename = `banner_${product.slug || product._id}.png`;
+      const isSvg = bannerBuffer.toString("utf8", 0, 100).includes("<svg");
+      const contentType = isSvg ? "image/svg+xml" : "image/png";
+      const filename = `banner_${product.slug || product._id}.${isSvg ? "svg" : "png"}`;
 
       return new NextResponse(bannerBuffer, {
         headers: {
-          "Content-Type": "image/png",
+          "Content-Type": contentType,
           "Content-Disposition": `attachment; filename="${filename}"`,
         },
       });
@@ -295,8 +299,10 @@ export async function POST(req, { params }) {
       const bannerBuffer = await generateProductBanner(product, theme);
       const caption = customCaption || generateFBCaption(product, product.brand?.name || "LIORA");
 
+      const prodImg = product.image || (product.images && product.images[0]) || "";
       const fbResult = await publishPhotoToFacebook({
         imageBuffer: bannerBuffer,
+        imageUrl: prodImg,
         caption,
         pageId,
         pageAccessToken,

@@ -130,17 +130,22 @@ export async function getProductBuffer(imageUrl) {
 }
 
 export async function cleanTransparentCutout(buffer) {
-  const sharp = await getSharp();
-  const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] < 110) {
-      data[i + 3] = 0;
+  try {
+    const sharp = await getSharp();
+    if (!sharp) return buffer;
+    const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 110) {
+        data[i + 3] = 0;
+      }
     }
+    return await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+      .trim()
+      .png()
+      .toBuffer();
+  } catch (err) {
+    return buffer;
   }
-  return await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
-    .trim()
-    .png()
-    .toBuffer();
 }
 
 export function pickSmartTheme(productName = "", categoryName = "") {
@@ -198,7 +203,6 @@ export function extractVolume(name = "") {
 }
 
 export async function generateProductBanner(product, customThemeKey = null) {
-  const sharp = await getSharp();
   const width = 1080;
   const height = 1080;
 
@@ -216,27 +220,12 @@ export async function generateProductBanner(product, customThemeKey = null) {
     throw new Error(`Product "${product.name}" does not have an image.`);
   }
 
-  // 1. Fetch & AI Background Removal & auto-grounding
+  // 1. Fetch Product Buffer
   const rawProduct = await getProductBuffer(imageUrl);
-  const trimmed = await cleanTransparentCutout(rawProduct);
 
-  const maxHeroWidth = 470;
-  const maxHeroHeight = 670;
   const floorY = 830;
   const centerX = 615;
-
-  const { data: resizedBuffer, info: resizedInfo } = await sharp(trimmed)
-    .resize({
-      width: maxHeroWidth,
-      height: maxHeroHeight,
-      fit: "inside",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-    .toBuffer({ resolveWithObject: true });
-
-  const productTop = floorY - resizedInfo.height;
-  const productLeft = Math.round(centerX - resizedInfo.width / 2);
-  const shadowRadiusX = Math.round(resizedInfo.width * 0.48);
+  const shadowRadiusX = 225;
   const shadowRadiusY = 25;
 
   const titleLines = formatBannerTitle(product.name);
@@ -246,8 +235,17 @@ export async function generateProductBanner(product, customThemeKey = null) {
   const safeVolume = escapeXml(volume);
   const leftMargin = 75;
 
-  const backgroundSvg = `
-  <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+  // Determine mime type for embedding
+  let imgMime = "image/jpeg";
+  if (imageUrl.toLowerCase().includes(".png") || (rawProduct[0] === 0x89 && rawProduct[1] === 0x50)) {
+    imgMime = "image/png";
+  } else if (imageUrl.toLowerCase().includes(".webp") || (rawProduct[0] === 0x52 && rawProduct[1] === 0x49)) {
+    imgMime = "image/webp";
+  }
+  const embeddedDataUri = `data:${imgMime};base64,${rawProduct.toString("base64")}`;
+
+  const renderSvg = (withEmbeddedImage = true) => `
+  <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="baseBg" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="${theme.bgDark}" />
@@ -276,6 +274,12 @@ export async function generateProductBanner(product, customThemeKey = null) {
     <rect width="${width}" height="${height}" fill="url(#baseBg)" />
     <rect width="${width}" height="${height}" fill="url(#spotlightGlow)" />
     <ellipse cx="${centerX}" cy="${floorY + 8}" rx="${shadowRadiusX}" ry="${shadowRadiusY}" fill="url(#pedestalShadow)" />
+
+    ${
+      withEmbeddedImage
+        ? `<image href="${embeddedDataUri}" x="${centerX - 235}" y="${floorY - 650}" width="470" height="650" preserveAspectRatio="xMidYMid meet" />`
+        : ""
+    }
 
     <text x="${leftMargin}" y="190" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="30" fill="#FFFFFF" letter-spacing="4">${safeBrand}</text>
     <line x1="${leftMargin}" y1="206" x2="${leftMargin + 45}" y2="206" stroke="${theme.accent}" stroke-width="3" stroke-linecap="round" />
@@ -316,18 +320,42 @@ export async function generateProductBanner(product, customThemeKey = null) {
   </svg>
   `;
 
-  const bgBuffer = Buffer.from(backgroundSvg);
+  // Try Sharp if available, otherwise return vector SVG buffer
+  try {
+    const sharp = await getSharp();
+    if (sharp) {
+      const trimmed = await cleanTransparentCutout(rawProduct);
+      const { data: resizedBuffer, info: resizedInfo } = await sharp(trimmed)
+        .resize({
+          width: 470,
+          height: 670,
+          fit: "inside",
+          background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+        .toBuffer({ resolveWithObject: true });
 
-  return await sharp(bgBuffer)
-    .composite([
-      {
-        input: resizedBuffer,
-        top: productTop,
-        left: productLeft,
-      },
-    ])
-    .png()
-    .toBuffer();
+      const productTop = floorY - resizedInfo.height;
+      const productLeft = Math.round(centerX - resizedInfo.width / 2);
+
+      const bgBuffer = Buffer.from(renderSvg(false));
+      return await sharp(bgBuffer)
+        .composite([
+          {
+            input: resizedBuffer,
+            top: productTop,
+            left: productLeft,
+          },
+        ])
+        .png()
+        .toBuffer();
+    }
+  } catch (err) {
+    // Sharp failed or not supported in environment -> use pure SVG
+    console.warn("Sharp banner generation fallback to SVG:", err.message);
+  }
+
+  // Pure SVG fallback (always succeeds, zero C++ library dependencies!)
+  return Buffer.from(renderSvg(true));
 }
 
 export async function batchGenerateBrandPromotions({ brandQuery, limit = 100 }) {
@@ -412,16 +440,25 @@ export async function batchGenerateBrandPromotions({ brandQuery, limit = 100 }) 
   };
 }
 
-export async function publishPhotoToFacebook({ imageBuffer, caption, pageId, pageAccessToken }) {
+export async function publishPhotoToFacebook({ imageBuffer, imageUrl, caption, pageId, pageAccessToken }) {
   if (!pageId || !pageAccessToken) {
     throw new Error("Facebook Page ID and Page Access Token are required.");
   }
 
-  const blob = new Blob([imageBuffer], { type: "image/png" });
+  const isSvg = imageBuffer && imageBuffer.toString("utf8", 0, 100).includes("<svg");
+
   const formData = new FormData();
-  formData.append("source", blob, "promotion_banner.png");
   formData.append("caption", caption);
   formData.append("access_token", pageAccessToken);
+
+  if (isSvg && imageUrl) {
+    formData.append("url", imageUrl);
+  } else if (imageBuffer) {
+    const blob = new Blob([imageBuffer], { type: isSvg ? "image/svg+xml" : "image/png" });
+    formData.append("source", blob, isSvg ? "promotion_banner.svg" : "promotion_banner.png");
+  } else if (imageUrl) {
+    formData.append("url", imageUrl);
+  }
 
   const res = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
     method: "POST",
@@ -542,8 +579,10 @@ export async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit =
     try {
       const bannerBuffer = await generateProductBanner(product);
       const caption = generateFBCaption(product, brandDoc?.name || "LIORA");
+      const prodImg = product.image || (product.images && product.images[0]) || "";
       const fbResult = await publishPhotoToFacebook({
         imageBuffer: bannerBuffer,
+        imageUrl: prodImg,
         caption,
         pageId,
         pageAccessToken,
