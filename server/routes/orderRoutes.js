@@ -41,7 +41,7 @@ router.get("/track", async (req, res) => {
 });
 
 const PUBLIC_ORDER_FIELDS =
-  "orderNumber status subtotal deliveryCharge total createdAt customerName " +
+  "orderNumber status subtotal deliveryCharge discount total createdAt customerName " +
   "items.productName items.quantity items.price items.image";
 
 router.get("/:id", async (req, res) => {

@@ -15,7 +15,7 @@ export async function GET(req) {
 
     const order = await Order.findOne({ orderNumber: no, accessToken: k })
       .select(
-        "orderNumber status total subtotal deliveryCharge createdAt customerName " +
+        "orderNumber status total subtotal deliveryCharge discount createdAt customerName " +
         "items.productName items.quantity items.price items.image"
       )
       .lean();

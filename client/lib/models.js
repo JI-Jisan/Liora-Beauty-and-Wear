@@ -261,6 +261,7 @@ const OrderSchema = new mongoose.Schema(
       default: "inside_dhaka",
     },
     deliveryCharge: { type: Number, default: 0, min: 0 },
+    discount: { type: Number, default: 0, min: 0 },
     subtotal: { type: Number, required: true, min: 0 },
     totalCost: { type: Number, default: 0 },                  // সব item এর কেনা দাম
     total: { type: Number, required: true, min: 0 },

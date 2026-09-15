@@ -131,10 +131,21 @@ function OrderSuccessContent() {
               <span>{order.deliveryCharge} Tk</span>
             </div>
           )}
+          {((Number(order?.discount) > 0) || ((order?.subtotal || 0) + (order?.deliveryCharge || 0) > (order?.total || 0))) && (
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "13px", color: "#16a34a", fontWeight: "700" }}>
+              <span>Special Discount:</span>
+              <span>- {Number(order?.discount) || ((order?.subtotal || 0) + (order?.deliveryCharge || 0) - (order?.total || 0))} Tk</span>
+            </div>
+          )}
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "800", color: "#0f172a", marginTop: "10px" }}>
             <span>Total Payable (COD):</span>
             <span style={{ color: "#e11d48" }}>{order?.total} Tk</span>
           </div>
+          {((Number(order?.discount) > 0) || ((order?.subtotal || 0) + (order?.deliveryCharge || 0) > (order?.total || 0))) && (
+            <div style={{ marginTop: "8px", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "6px 10px", borderRadius: "6px", fontSize: "12px", color: "#16a34a", fontWeight: "700", textAlign: "center" }}>
+              🎉 You Saved {Number(order?.discount) || ((order?.subtotal || 0) + (order?.deliveryCharge || 0) - (order?.total || 0))} Tk on this order!
+            </div>
+          )}
         </div>
       </div>
 

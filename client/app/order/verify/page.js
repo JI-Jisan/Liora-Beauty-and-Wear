@@ -47,9 +47,19 @@ function VerifyOrderContent() {
       <div style={{ marginTop: 16, padding: 14, background: "#f8fafc", borderRadius: 14 }}>
         <p style={{ margin: 0 }}>সাবটোটাল: {order.subtotal} Tk</p>
         <p style={{ margin: "4px 0" }}>ডেলিভারি: {order.deliveryCharge} Tk</p>
+        {((Number(order.discount) > 0) || ((order.subtotal || 0) + (order.deliveryCharge || 0) > (order.total || 0))) && (
+          <p style={{ margin: "4px 0", color: "#16a34a", fontWeight: 700 }}>
+            স্পেশাল ছাড়: -{Number(order.discount) || ((order.subtotal || 0) + (order.deliveryCharge || 0) - (order.total || 0))} Tk
+          </p>
+        )}
         <p style={{ margin: 0, fontWeight: 900, fontSize: 18, color: "#e11d48" }}>
           মোট: {order.total} Tk
         </p>
+        {((Number(order.discount) > 0) || ((order.subtotal || 0) + (order.deliveryCharge || 0) > (order.total || 0))) && (
+          <p style={{ margin: "6px 0 0", color: "#16a34a", fontSize: 13, fontWeight: 700 }}>
+            🎉 এই অর্ডারে আপনি {Number(order.discount) || ((order.subtotal || 0) + (order.deliveryCharge || 0) - (order.total || 0))} টাকা সেভ করেছেন!
+          </p>
+        )}
       </div>
 
       <p style={{ marginTop: 14, fontSize: 13, color: "#64748b" }}>

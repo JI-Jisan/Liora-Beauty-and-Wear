@@ -153,10 +153,21 @@ export default function OrderSuccessPage() {
                       <span>Delivery Charge:</span>
                       <strong>{order.deliveryCharge} Tk</strong>
                     </div>
+                    {((Number(order.discount) > 0) || ((order.subtotal || 0) + (order.deliveryCharge || 0) > (order.total || 0))) && (
+                      <div className="jt-breakdown-row" style={{ color: "#16a34a", fontWeight: "700" }}>
+                        <span>Special Discount:</span>
+                        <strong>- {Number(order.discount) || ((order.subtotal || 0) + (order.deliveryCharge || 0) - (order.total || 0))} Tk</strong>
+                      </div>
+                    )}
                     <div className="jt-breakdown-row jt-breakdown-total">
                       <span>Total Amount (COD):</span>
                       <strong>{order.total} Tk</strong>
                     </div>
+                    {((Number(order.discount) > 0) || ((order.subtotal || 0) + (order.deliveryCharge || 0) > (order.total || 0))) && (
+                      <div style={{ marginTop: "8px", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "6px 10px", borderRadius: "6px", fontSize: "12px", color: "#16a34a", fontWeight: "700", textAlign: "center" }}>
+                        🎉 You Saved {Number(order.discount) || ((order.subtotal || 0) + (order.deliveryCharge || 0) - (order.total || 0))} Tk on this order!
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

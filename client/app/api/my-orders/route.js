@@ -34,7 +34,7 @@ export async function GET(req) {
       isDeleted: { $ne: true },
     })
       .select(
-        "orderNumber serial status total subtotal deliveryCharge items customerName customerEmail phone district address deliveryZone note createdAt accessToken"
+        "orderNumber serial status total subtotal deliveryCharge discount items customerName customerEmail phone district address deliveryZone note createdAt accessToken"
       )
       .sort({ createdAt: -1 })
       .limit(60)

@@ -25,8 +25,14 @@ export async function downloadInvoicePdf(order) {
   const address = order.address || "";
   const subtotal = Number(order.subtotal) || 0;
   const deliveryCharge = Number(order.deliveryCharge) || 0;
-  const discount = Number(order.discount) || 0;
-  const total = Number(order.total) || Math.max(0, subtotal + deliveryCharge - discount);
+  const rawDiscount = Number(order.discount) || 0;
+  const total =
+    order.total !== undefined && order.total !== null && !isNaN(order.total)
+      ? Number(order.total)
+      : Math.max(0, subtotal + deliveryCharge - rawDiscount);
+  // Auto-detect discount if subtotal + deliveryCharge > total even if not explicitly stored
+  const computedDiscount = Math.max(0, subtotal + deliveryCharge - total);
+  const discount = rawDiscount > 0 ? rawDiscount : computedDiscount;
   const status = order.status || "Pending";
   const items = Array.isArray(order.items) ? order.items : [];
 
@@ -192,54 +198,72 @@ export async function downloadInvoicePdf(order) {
   });
 
   // 6. Summary Block (Subtotal, Delivery, Discount, Total)
-  tableY += 4;
+  const summaryStartY = tableY + 5;
   const summaryX = 120;
+  let currentSummaryY = summaryStartY;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...textMuted);
-  doc.text("Subtotal:", summaryX, tableY + 5);
+  doc.text("Subtotal:", summaryX, currentSummaryY + 5);
   doc.setTextColor(...darkNavy);
-  doc.text(`Tk ${subtotal.toLocaleString()}`, 191, tableY + 5, { align: "right" });
+  doc.text(`Tk ${subtotal.toLocaleString()}`, 191, currentSummaryY + 5, { align: "right" });
 
-  tableY += 6;
+  currentSummaryY += 6;
   doc.setTextColor(...textMuted);
-  doc.text("Delivery Charge:", summaryX, tableY + 5);
+  doc.text("Delivery Charge:", summaryX, currentSummaryY + 5);
   doc.setTextColor(...darkNavy);
-  doc.text(`Tk ${deliveryCharge.toLocaleString()}`, 191, tableY + 5, { align: "right" });
+  doc.text(`Tk ${deliveryCharge.toLocaleString()}`, 191, currentSummaryY + 5, { align: "right" });
 
   if (discount > 0) {
-    tableY += 6;
-    doc.setTextColor(...primaryColor);
-    doc.text("Discount:", summaryX, tableY + 5);
-    doc.text(`-Tk ${discount.toLocaleString()}`, 191, tableY + 5, { align: "right" });
+    currentSummaryY += 6;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(22, 163, 74); // Vibrant Emerald Green #16a34a
+    doc.text("Special Discount:", summaryX, currentSummaryY + 5);
+    doc.text(`- Tk ${discount.toLocaleString()}`, 191, currentSummaryY + 5, { align: "right" });
   }
 
-  tableY += 7;
+  currentSummaryY += 7;
   // Total Highlight Box
   doc.setFillColor(255, 241, 242); // Rose-50
-  doc.roundedRect(summaryX - 4, tableY, 80, 10, 2, 2, "F");
+  doc.roundedRect(summaryX - 4, currentSummaryY, 80, 10, 2, 2, "F");
   doc.setDrawColor(...primaryColor);
   doc.setLineWidth(0.5);
-  doc.roundedRect(summaryX - 4, tableY, 80, 10, 2, 2, "D");
+  doc.roundedRect(summaryX - 4, currentSummaryY, 80, 10, 2, 2, "D");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10.5);
   doc.setTextColor(...primaryColor);
-  doc.text("Total Payable:", summaryX, tableY + 6.5);
-  doc.text(`Tk ${total.toLocaleString()}`, 191, tableY + 6.5, { align: "right" });
+  doc.text("Total Payable:", summaryX, currentSummaryY + 6.5);
+  doc.text(`Tk ${total.toLocaleString()}`, 191, currentSummaryY + 6.5, { align: "right" });
 
-  // 7. Policy & Note Box
+  if (discount > 0) {
+    currentSummaryY += 12;
+    // Customer Happiness Badge: "You Saved Tk 50 on this order!"
+    doc.setFillColor(240, 253, 244); // Green-50
+    doc.roundedRect(summaryX - 4, currentSummaryY, 80, 7.5, 2, 2, "F");
+    doc.setDrawColor(34, 197, 94); // Green-500
+    doc.setLineWidth(0.3);
+    doc.roundedRect(summaryX - 4, currentSummaryY, 80, 7.5, 2, 2, "D");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(22, 163, 74);
+    doc.text(`You Saved Tk ${discount.toLocaleString()} on this order!`, summaryX + 36, currentSummaryY + 5, { align: "center" });
+  }
+
+  // 7. Policy & Note Box (Left side)
+  const termsY = summaryStartY + 2;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8.5);
   doc.setTextColor(...darkNavy);
-  doc.text("TERMS & CONDITIONS:", 14, tableY - 5);
+  doc.text("TERMS & CONDITIONS:", 14, termsY);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...textMuted);
-  doc.text("• Please check product authenticity and condition in front of delivery rider.", 14, tableY);
-  doc.text("• For any return or exchange, please notify us within 24 hours with unbroken seal.", 14, tableY + 4);
-  doc.text("• Track your live order progress anytime at liorabeautyandwear.com/order-tracking", 14, tableY + 8);
+  doc.text("• Please check product authenticity and condition in front of delivery rider.", 14, termsY + 5);
+  doc.text("• For any return or exchange, please notify us within 24 hours with unbroken seal.", 14, termsY + 9.5);
+  doc.text("• Track your live order progress anytime at liorabeautyandwear.com/order-tracking", 14, termsY + 14);
 
   // 8. Footer Bar
   const footerY = 280;
