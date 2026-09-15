@@ -171,6 +171,22 @@ export async function GET(req, { params }) {
       });
     }
 
+    // 7. /api/marketing/image-proxy?url=...
+    if (action === "image-proxy") {
+      const targetUrl = url.searchParams.get("url");
+      if (!targetUrl) return new NextResponse("url is required", { status: 400 });
+      const imgRes = await fetch(targetUrl);
+      const arrayBuffer = await imgRes.arrayBuffer();
+      const contentType = imgRes.headers.get("content-type") || "image/jpeg";
+      return new NextResponse(Buffer.from(arrayBuffer), {
+        headers: {
+          "Content-Type": contentType,
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+    }
+
     return NextResponse.json({ success: false, error: `Unknown marketing endpoint: ${action}` }, { status: 404 });
   } catch (err) {
     console.error("Marketing API GET error:", err);
