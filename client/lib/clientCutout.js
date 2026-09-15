@@ -80,6 +80,30 @@ export async function removeStudioBackgroundClient(imageUrl) {
           }
         }
 
+        // Center integrity check: Protect white products from being hollowed out
+        let centerTotal = 0;
+        let centerTransparent = 0;
+        const cX1 = Math.floor(width * 0.35);
+        const cX2 = Math.floor(width * 0.65);
+        const cY1 = Math.floor(height * 0.30);
+        const cY2 = Math.floor(height * 0.70);
+
+        for (let y = cY1; y <= cY2; y++) {
+          for (let x = cX1; x <= cX2; x++) {
+            centerTotal++;
+            if (visited[y * width + x]) {
+              centerTransparent++;
+            }
+          }
+        }
+
+        const hollowRatio = centerTransparent / centerTotal;
+        if (hollowRatio > 0.35) {
+          // White product body detected: Abort cutout to preserve full solid product!
+          resolve(null);
+          return;
+        }
+
         // Apply transparency
         for (let p = 0; p < width * height; p++) {
           if (visited[p]) {
