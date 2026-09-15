@@ -1,12 +1,28 @@
-import sharp from "sharp";
 import https from "https";
 import http from "http";
 import fs from "fs";
 import path from "path";
-import AdmZip from "adm-zip";
 import mongoose from "mongoose";
 import { Product, Brand, Category, SiteSettings } from "./models.js";
 import { connectToDatabase } from "./db.js";
+
+let _sharp = null;
+export async function getSharp() {
+  if (!_sharp) {
+    const mod = await import("sharp");
+    _sharp = mod.default || mod;
+  }
+  return _sharp;
+}
+
+let _admZip = null;
+export async function getAdmZip() {
+  if (!_admZip) {
+    const mod = await import("adm-zip");
+    _admZip = mod.default || mod;
+  }
+  return _admZip;
+}
 
 // 5 Luxury Spotlight Themes (Shajgoj-inspired Luxury Aesthetics)
 export const THEMES = {
@@ -114,6 +130,7 @@ export async function getProductBuffer(imageUrl) {
 }
 
 export async function cleanTransparentCutout(buffer) {
+  const sharp = await getSharp();
   const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   for (let i = 0; i < data.length; i += 4) {
     if (data[i + 3] < 110) {
@@ -181,6 +198,7 @@ export function extractVolume(name = "") {
 }
 
 export async function generateProductBanner(product, customThemeKey = null) {
+  const sharp = await getSharp();
   const width = 1080;
   const height = 1080;
 
@@ -344,6 +362,7 @@ export async function batchGenerateBrandPromotions({ brandQuery, limit = 100 }) 
   const results = [];
   let summaryText = `==========================================================\nLIORA BEAUTY & WEAR - AUTO PROMOTIONS BATCH: ${brandDoc?.name || brandQuery}\nTotal Products: ${products.length}\nGenerated: ${new Date().toLocaleString()}\n==========================================================\n\n`;
 
+  const AdmZip = await getAdmZip();
   const zip = new AdmZip();
 
   for (let i = 0; i < products.length; i++) {
