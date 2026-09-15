@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import AdminOrders from "@/components/AdminOrders";
+import { downloadInvoicePdf } from "@/lib/invoicePdf";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, getAuthHeaders, getImageUrl } from "@/lib/api";
 import ProductForm from "@/components/admin/ProductForm";
@@ -645,8 +646,8 @@ export default function AdminPage() {
 
       soldItems.push({
         date: new Date(order.createdAt).toLocaleDateString(),
-        orderId: order.orderNumber,
-        name: item.name,
+        orderId: order.orderNumber || order._id,
+        name: item.productName || item.name || "Product Item",
         category: item.categoryName || "Product", // ক্যাটাগরি নাম
         buyPrice,
         sellPrice,
@@ -654,6 +655,7 @@ export default function AdminPage() {
         discountPct,
         profitPct,
         rowProfit,
+        order: order,
       });
     });
   });
@@ -1805,7 +1807,7 @@ export default function AdminPage() {
                       </div>
                       <p style={{ margin: "0 0 6px", fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>{item.name}</p>
                       
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "6px", borderRadius: "8px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "6px", borderRadius: "8px", marginBottom: "8px" }}>
                         <div>
                           <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>কেনা</p>
                           <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{item.buyPrice} Tk</p>
@@ -1818,6 +1820,50 @@ export default function AdminPage() {
                           <p style={{ margin: 0, fontSize: "10px", color: "#16a34a" }}>নিট লাভ</p>
                           <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "800", color: "#16a34a" }}>{item.rowProfit} Tk</p>
                         </div>
+                      </div>
+
+                      {/* Action buttons on card */}
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button
+                          type="button"
+                          onClick={() => downloadInvoicePdf(item.order)}
+                          style={{
+                            flex: 1,
+                            background: "#e11d48",
+                            color: "#fff",
+                            border: "none",
+                            padding: "6px 8px",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            fontWeight: "800",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "3px",
+                          }}
+                        >
+                          📥 Download PDF
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab("orders");
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          style={{
+                            background: "#2563eb",
+                            color: "#fff",
+                            border: "none",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            fontSize: "11px",
+                            fontWeight: "800",
+                            cursor: "pointer",
+                          }}
+                        >
+                          ✏️ Edit
+                        </button>
                       </div>
                     </div>
                   ))
@@ -1876,7 +1922,7 @@ export default function AdminPage() {
                         </div>
                         <p style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: "800", color: "#0f172a", wordBreak: "break-word" }}>{item.name}</p>
                         
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "8px", borderRadius: "10px", marginBottom: "8px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "8px", borderRadius: "10px", marginBottom: "10px" }}>
                           <div>
                             <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>কেনা</p>
                             <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: "700" }}>{item.buyPrice} ৳</p>
@@ -1889,6 +1935,49 @@ export default function AdminPage() {
                             <p style={{ margin: 0, fontSize: "10px", color: "#16a34a" }}>নিট লাভ</p>
                             <p style={{ margin: "2px 0 0", fontSize: "13px", fontWeight: "900", color: "#16a34a" }}>{item.rowProfit} ৳</p>
                           </div>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <button
+                            type="button"
+                            onClick={() => downloadInvoicePdf(item.order)}
+                            style={{
+                              flex: 1,
+                              background: "#e11d48",
+                              color: "#fff",
+                              border: "none",
+                              padding: "7px 10px",
+                              borderRadius: "6px",
+                              fontSize: "11px",
+                              fontWeight: "800",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            📥 Download PDF
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveTab("orders");
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            style={{
+                              background: "#2563eb",
+                              color: "#fff",
+                              border: "none",
+                              padding: "7px 12px",
+                              borderRadius: "6px",
+                              fontSize: "11px",
+                              fontWeight: "800",
+                              cursor: "pointer",
+                            }}
+                          >
+                            ✏️ Edit
+                          </button>
                         </div>
                       </div>
                     ))
@@ -1909,11 +1998,12 @@ export default function AdminPage() {
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Disc. %</th>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Profit %</th>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Net Profit</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>Invoice / Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {soldItems.length === 0 ? (
-                        <tr><td colSpan="9" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
+                        <tr><td colSpan="10" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
                       ) : (
                         soldItems.map((item, idx) => (
                           <tr key={idx} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
@@ -1926,6 +2016,50 @@ export default function AdminPage() {
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#ea580c", fontWeight: "700" }}>{item.discountPct}%</td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", color: "#16a34a", fontWeight: "800" }}>{item.profitPct}%</td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#2563eb", fontWeight: "900", whiteSpace: "nowrap" }}>{item.rowProfit} Tk</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", whiteSpace: "nowrap" }}>
+                              <div style={{ display: "flex", gap: "5px", justifyContent: "center" }}>
+                                <button
+                                  type="button"
+                                  title="Download Official PDF Invoice"
+                                  onClick={() => downloadInvoicePdf(item.order)}
+                                  style={{
+                                    background: "#e11d48",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    padding: "5px 10px",
+                                    borderRadius: "6px",
+                                    fontSize: "11px",
+                                    fontWeight: "800",
+                                    cursor: "pointer",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "3px",
+                                  }}
+                                >
+                                  📥 PDF
+                                </button>
+                                <button
+                                  type="button"
+                                  title="Edit Order in Orders Tab"
+                                  onClick={() => {
+                                    setActiveTab("orders");
+                                    window.scrollTo({ top: 0, behavior: "smooth" });
+                                  }}
+                                  style={{
+                                    background: "#2563eb",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    padding: "5px 10px",
+                                    borderRadius: "6px",
+                                    fontSize: "11px",
+                                    fontWeight: "800",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  ✏️ Edit
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         ))
                       )}
