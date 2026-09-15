@@ -6,11 +6,14 @@ export async function GET(req) {
   try {
     await connectToDatabase();
     
-    // শুধুমাত্র সফল বা ডেলিভারড অর্ডারগুলোর হিসাব ধরা ভালো
-    const orders = await Order.find({ status: { $ne: "Cancelled" } }).sort({ createdAt: -1 });
+    // শুধুমাত্র সফল বা ডেলিভারড (Delivered/Completed) অর্ডারের হিসাব
+    const orders = await Order.find({
+      status: { $in: ["Delivered", "delivered", "Completed", "completed"] },
+      isDeleted: { $ne: true },
+    }).sort({ createdAt: -1 });
 
     let totalRevenue = 0; // মোট বিক্রি
-    let totalCost = 0;    // মোট কেনার খরচ (যদি প্রোডাক্টে purchasePrice থাকে)
+    let totalCost = 0;    // মোট কেনার খরচ
     let totalOrders = orders.length;
 
     orders.forEach(order => {
@@ -18,7 +21,7 @@ export async function GET(req) {
       
       if (order.items && Array.isArray(order.items)) {
         order.items.forEach(item => {
-          const buyPrice = item.purchasePrice || 0;
+          const buyPrice = item.purchasePrice || item.costAtSale || 0;
           const qty = item.quantity || 1;
           totalCost += (buyPrice * qty);
         });

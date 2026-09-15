@@ -613,6 +613,10 @@ export default function AdminPage() {
 
   const now = new Date();
   const filteredOrders = reportData.filter((order) => {
+    // শুধুমাত্র Delivered বা Completed অর্ডার লাভ হিসেবে হিসাব হবে
+    const isDelivered = ["delivered", "completed"].includes(String(order.status || "").toLowerCase());
+    if (!isDelivered) return false;
+
     if (reportFilter === "all") return true;
     const days = parseInt(reportFilter);
     const cutoffDate = new Date();
@@ -622,8 +626,8 @@ export default function AdminPage() {
 
   filteredOrders.forEach((order) => {
     (order.items || []).forEach((item) => {
-      const buyPrice = Number(item.purchasePrice || 0);
-      const sellPrice = Number(item.offerPrice || item.price || 0);
+      const buyPrice = Number(item.purchasePrice || item.costAtSale || 0);
+      const sellPrice = Number(item.price !== undefined && item.price !== null ? item.price : (item.offerPrice || 0));
       const origPrice = Number(item.originalPrice || sellPrice);
       const qty = Number(item.quantity || 1);
 
@@ -1750,6 +1754,9 @@ export default function AdminPage() {
                 <div>
                   <h2 style={{ margin: "0 0 4px", color: "#0f172a", fontSize: "18px", fontWeight: "800" }}>📊 Sales & Profit Report</h2>
                   <p style={{ margin: 0, color: "#64748b", fontSize: "12px" }}>আপনার ব্যবসার রিয়েল-টাইম লাভ-ক্ষতির হিসাব</p>
+                  <span style={{ display: "inline-block", background: "#dcfce7", color: "#15803d", fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "12px", marginTop: "4px" }}>
+                    ✓ লাভ শুধুমাত্র ডেলিভারড (Delivered) অর্ডারে হিসাবকৃত
+                  </span>
                 </div>
                 
                 <div className="no-print" style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", width: "100%" }}>

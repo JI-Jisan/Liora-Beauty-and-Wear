@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
+import QRCode from "qrcode";
 
-export function downloadInvoicePdf(order) {
+export async function downloadInvoicePdf(order) {
   if (!order) return;
 
   const doc = new jsPDF({
@@ -24,7 +25,8 @@ export function downloadInvoicePdf(order) {
   const address = order.address || "";
   const subtotal = Number(order.subtotal) || 0;
   const deliveryCharge = Number(order.deliveryCharge) || 0;
-  const total = Number(order.total) || subtotal + deliveryCharge;
+  const discount = Number(order.discount) || 0;
+  const total = Number(order.total) || Math.max(0, subtotal + deliveryCharge - discount);
   const status = order.status || "Pending";
   const items = Array.isArray(order.items) ? order.items : [];
 
@@ -94,13 +96,51 @@ export function downloadInvoicePdf(order) {
   doc.text(`Customer Name: ${customerName}`, 19, 59);
   doc.text(`Phone Number: ${phone}`, 19, 64);
   doc.text(`District: ${district}`, 19, 69);
-  doc.text(`Address: ${address.slice(0, 80)}`, 19, 74);
+  doc.text(`Address: ${address.slice(0, 50)}`, 19, 74);
+  if (address.length > 50) {
+    doc.text(address.slice(50, 100), 19, 78);
+  }
 
   doc.setFont("helvetica", "bold");
-  doc.text("PAYMENT METHOD:", 120, 53);
+  doc.text("PAYMENT METHOD:", 114, 53);
   doc.setFont("helvetica", "normal");
-  doc.text("Cash on Delivery (COD)", 120, 59);
-  doc.text("Currency: BDT (Tk)", 120, 64);
+  doc.text("Cash on Delivery (COD)", 114, 59);
+  doc.text("Currency: BDT (Tk)", 114, 64);
+
+  // QR Code Generation & Embedding (Offline Base64 PNG)
+  try {
+    const siteUrl =
+      typeof window !== "undefined" && window.location?.origin
+        ? window.location.origin
+        : "https://liorabeautyandwear.com";
+
+    const verifyUrl = order.accessToken
+      ? `${siteUrl}/order/verify?no=${encodeURIComponent(orderNo)}&k=${encodeURIComponent(order.accessToken)}`
+      : `${siteUrl}/order-tracking?query=${encodeURIComponent(orderNo)}`;
+
+    const qrDataUrl = await QRCode.toDataURL(verifyUrl, {
+      margin: 1,
+      width: 140,
+      color: {
+        dark: "#0f172a",
+        light: "#ffffff",
+      },
+    });
+
+    // White card background for QR Code
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(165, 48, 28, 30, 2, 2, "F");
+    doc.setDrawColor(...borderLine);
+    doc.roundedRect(165, 48, 28, 30, 2, 2, "D");
+
+    doc.addImage(qrDataUrl, "PNG", 167, 49.5, 24, 24);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6);
+    doc.setTextColor(...primaryColor);
+    doc.text("SCAN TO VERIFY", 179, 76, { align: "center" });
+  } catch (qrErr) {
+    console.warn("Could not generate QR code for PDF invoice:", qrErr);
+  }
 
   // 4. Products Table Header
   let tableY = 88;
@@ -151,7 +191,7 @@ export function downloadInvoicePdf(order) {
     tableY += 7.5;
   });
 
-  // 6. Summary Block (Subtotal, Delivery, Total)
+  // 6. Summary Block (Subtotal, Delivery, Discount, Total)
   tableY += 4;
   const summaryX = 120;
 
@@ -167,6 +207,13 @@ export function downloadInvoicePdf(order) {
   doc.text("Delivery Charge:", summaryX, tableY + 5);
   doc.setTextColor(...darkNavy);
   doc.text(`Tk ${deliveryCharge.toLocaleString()}`, 191, tableY + 5, { align: "right" });
+
+  if (discount > 0) {
+    tableY += 6;
+    doc.setTextColor(...primaryColor);
+    doc.text("Discount:", summaryX, tableY + 5);
+    doc.text(`-Tk ${discount.toLocaleString()}`, 191, tableY + 5, { align: "right" });
+  }
 
   tableY += 7;
   // Total Highlight Box
