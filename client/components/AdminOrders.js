@@ -685,88 +685,74 @@ export default function AdminOrders() {
 
                   {/* Items List */}
                   <div className="jt-order-items-box">
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                       <h5 style={{ margin: 0 }}>Ordered Items</h5>
-                      <span style={{ fontSize: "10px", color: "#64748b" }}>💡 মাউস রাখলে কেনার দাম দেখা যাবে</span>
+                      <span style={{ fontSize: "11px", color: "#15803d", fontWeight: "700" }}>✓ কেনার দাম ও লাভ সরাসরি দৃশ্যমান</span>
                     </div>
 
                     <div className="jt-order-items-table">
                       {order.items && order.items.length > 0 ? (
                         order.items.map((item, idx) => {
                           const costPrice = Number(item.purchasePrice || item.costAtSale || 0);
-                          const isHovered =
-                            hoveredCardItem?.orderId === order._id &&
-                            hoveredCardItem?.itemIdx === idx;
+                          const unitPrice = Number(item.price) || 0;
+                          const unitProfit = unitPrice - costPrice;
+                          const qty = Number(item.quantity) || 1;
 
                           return (
                             <div
                               key={idx}
                               className="jt-order-item-row"
-                              style={{ position: "relative", alignItems: "center" }}
+                              style={{ alignItems: "flex-start", padding: "8px 0", borderBottom: "1px solid #f1f5f9" }}
                             >
-                              {/* Product Thumbnail & Name with Hover Tooltip */}
-                              <div
-                                style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, cursor: "help", position: "relative" }}
-                                onMouseEnter={() => setHoveredCardItem({ orderId: order._id, itemIdx: idx })}
-                                onMouseLeave={() => setHoveredCardItem(null)}
-                              >
+                              {/* Product Thumbnail & Details */}
+                              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", flex: 1, minWidth: 0 }}>
                                 {item.image ? (
                                   <img
                                     src={item.image}
                                     alt={item.productName}
-                                    style={{ width: "32px", height: "32px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }}
+                                    style={{ width: "38px", height: "38px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0", flexShrink: 0, marginTop: "2px" }}
                                   />
                                 ) : (
-                                  <div style={{ width: "32px", height: "32px", background: "#f1f5f9", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px" }}>
+                                  <div style={{ width: "38px", height: "38px", background: "#f1f5f9", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", flexShrink: 0, marginTop: "2px" }}>
                                     🛍️
                                   </div>
                                 )}
-                                <span className="jt-item-title" style={{ textDecoration: "underline dotted #cbd5e1" }}>
-                                  {item.productName}
-                                </span>
 
-                                {/* Cost Price Hover Card */}
-                                {isHovered && (
-                                  <div
-                                    style={{
-                                      position: "absolute",
-                                      bottom: "100%",
-                                      left: "0",
-                                      zIndex: 100,
-                                      background: "#0f172a",
-                                      color: "#fff",
-                                      padding: "10px 14px",
-                                      borderRadius: "10px",
-                                      boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
-                                      fontSize: "12px",
-                                      lineHeight: "1.5",
-                                      minWidth: "220px",
-                                      pointerEvents: "none",
-                                      marginBottom: "6px",
-                                    }}
-                                  >
-                                    <div style={{ fontWeight: "bold", borderBottom: "1px solid #334155", paddingBottom: "4px", marginBottom: "6px", color: "#f8fafc" }}>
-                                      📦 {item.productName}
-                                    </div>
-                                    <div style={{ color: "#4ade80", fontWeight: "bold" }}>
-                                      💰 কেনার দাম (Cost Price): ৳{costPrice}
-                                    </div>
-                                    <div style={{ color: "#cbd5e1" }}>
-                                      🏷️ বিক্রয় মূল্য: ৳{item.price}
-                                    </div>
-                                    <div style={{ color: item.price >= costPrice ? "#38bdf8" : "#f87171", fontWeight: "bold", marginTop: "2px" }}>
-                                      📈 সম্ভাব্য লাভ: {item.price >= costPrice ? `+৳${(item.price - costPrice) * (item.quantity || 1)}` : `-৳${(costPrice - item.price) * (item.quantity || 1)} (লস)`}
-                                    </div>
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <span className="jt-item-title" style={{ display: "block", fontWeight: "700", color: "#0f172a", wordBreak: "break-word", fontSize: "13px" }}>
+                                    {item.productName || item.name}
+                                  </span>
+
+                                  {/* Clean, Non-Clipping Inline Badges */}
+                                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center", marginTop: "4px" }}>
+                                    <span style={{ background: "#dcfce7", color: "#15803d", fontSize: "11px", fontWeight: "800", padding: "1px 7px", borderRadius: "5px", border: "1px solid #bbf7d0" }}>
+                                      💰 কেনা: ৳{costPrice}
+                                    </span>
+                                    <span style={{
+                                      background: unitProfit >= 0 ? "#eff6ff" : "#fef2f2",
+                                      color: unitProfit >= 0 ? "#1d4ed8" : "#dc2626",
+                                      fontSize: "11px",
+                                      fontWeight: "800",
+                                      padding: "1px 7px",
+                                      borderRadius: "5px",
+                                      border: unitProfit >= 0 ? "1px solid #bfdbfe" : "1px solid #fecaca"
+                                    }}>
+                                      {unitProfit >= 0
+                                        ? `📈 লাভ: +৳${unitProfit * qty}`
+                                        : `⚠️ লস: -৳${Math.abs(unitProfit * qty)}`}
+                                    </span>
                                   </div>
-                                )}
+                                </div>
                               </div>
 
-                              <span className="jt-item-qty">
-                                {item.quantity} × {item.price} Tk
-                              </span>
-                              <strong className="jt-item-total">
-                                {item.quantity * item.price} Tk
-                              </strong>
+                              <div style={{ textAlign: "right", marginLeft: "10px", flexShrink: 0 }}>
+                                <span className="jt-item-qty" style={{ display: "block", fontSize: "12px", color: "#64748b" }}>
+                                  {qty} × {unitPrice} Tk
+                                </span>
+                                <strong className="jt-item-total" style={{ fontSize: "13px", color: "#0f172a" }}>
+                                  {qty * unitPrice} Tk
+                                </strong>
+                              </div>
                             </div>
                           );
                         })
@@ -1080,68 +1066,33 @@ export default function AdminOrders() {
 
                         return (
                           <tr key={idx} style={{ borderBottom: "1px solid #e2e8f0", background: idx % 2 === 0 ? "#fff" : "#fafafa" }}>
-                            {/* Product Name & Photo with Interactive Hover Card */}
-                            <td style={{ padding: "10px 12px", position: "relative" }}>
-                              <div
-                                style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "help" }}
-                                onMouseEnter={() => setHoveredCardItem({ orderId: "modal", itemIdx: idx })}
-                                onMouseLeave={() => setHoveredCardItem(null)}
-                              >
+                            {/* Product Name & Photo with permanent inline details */}
+                            <td style={{ padding: "10px 12px" }}>
+                              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
                                 {item.image ? (
                                   <img
                                     src={item.image}
                                     alt={item.productName}
-                                    style={{ width: "38px", height: "38px", objectFit: "cover", borderRadius: "6px", border: "1px solid #cbd5e1" }}
+                                    style={{ width: "38px", height: "38px", objectFit: "cover", borderRadius: "6px", border: "1px solid #cbd5e1", flexShrink: 0, marginTop: "2px" }}
                                   />
                                 ) : (
-                                  <div style={{ width: "38px", height: "38px", background: "#e2e8f0", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>
+                                  <div style={{ width: "38px", height: "38px", background: "#e2e8f0", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", flexShrink: 0, marginTop: "2px" }}>
                                     🧴
                                   </div>
                                 )}
                                 <div>
-                                  <div style={{ fontWeight: "700", color: "#0f172a" }}>
+                                  <div style={{ fontWeight: "700", color: "#0f172a", fontSize: "13px" }}>
                                     {item.productName}
                                   </div>
-                                  <div style={{ fontSize: "11px", color: "#16a34a", fontWeight: "700" }}>
-                                    কেনার দাম: ৳{costPrice}
+                                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "4px" }}>
+                                    <span style={{ background: "#dcfce7", color: "#15803d", fontSize: "11px", fontWeight: "800", padding: "1px 6px", borderRadius: "4px", border: "1px solid #bbf7d0" }}>
+                                      💰 কেনা দাম: ৳{costPrice}
+                                    </span>
+                                    <span style={{ background: "#f1f5f9", color: "#475569", fontSize: "11px", fontWeight: "700", padding: "1px 6px", borderRadius: "4px" }}>
+                                      🏷️ রেগুলার: ৳{item.originalPrice || item.price}
+                                    </span>
                                   </div>
                                 </div>
-
-                                {/* Floating Rich Tooltip */}
-                                {hoveredCardItem?.orderId === "modal" && hoveredCardItem?.itemIdx === idx && (
-                                  <div
-                                    style={{
-                                      position: "absolute",
-                                      bottom: "105%",
-                                      left: "20px",
-                                      zIndex: 1100,
-                                      background: "#0f172a",
-                                      color: "#ffffff",
-                                      padding: "12px 16px",
-                                      borderRadius: "10px",
-                                      boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-                                      fontSize: "12px",
-                                      minWidth: "260px",
-                                      lineHeight: "1.6",
-                                    }}
-                                  >
-                                    <div style={{ fontWeight: "800", color: "#f8fafc", borderBottom: "1px solid #334155", paddingBottom: "6px", marginBottom: "6px" }}>
-                                      {item.productName}
-                                    </div>
-                                    <div style={{ color: "#4ade80", fontWeight: "800", fontSize: "13px" }}>
-                                      💰 কেনার আসল দাম: ৳{costPrice}
-                                    </div>
-                                    <div style={{ color: "#cbd5e1" }}>
-                                      🏷️ রেগুলার প্রাইস: ৳{item.originalPrice || item.price}
-                                    </div>
-                                    <div style={{ color: unitProfit >= 0 ? "#38bdf8" : "#f87171", fontWeight: "bold" }}>
-                                      📊 প্রতি পিসে লাভ/ক্ষতি: {unitProfit >= 0 ? `+৳${unitProfit}` : `-৳${Math.abs(unitProfit)} (লস)`}
-                                    </div>
-                                    <div style={{ fontSize: "10px", color: "#94a3b8", marginTop: "4px", borderTop: "1px dashed #334155", paddingTop: "4px" }}>
-                                      * কাছের মানুষকে ডিসকাউন্ট দিতে কেনার দাম ৳{costPrice} টাকার চেয়ে বেশি যেকোনো দাম বসান।
-                                    </div>
-                                  </div>
-                                )}
                               </div>
                             </td>
 
