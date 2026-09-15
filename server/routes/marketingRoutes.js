@@ -172,7 +172,7 @@ router.get('/fb-config', async (req, res) => {
     }
     res.json({
       success: true,
-      fbPageId: settings.fbPageId || '61593176967507',
+      fbPageId: settings.fbPageId || '1213659151838727',
       hasToken: !!settings.fbPageAccessToken,
       tokenMasked: settings.fbPageAccessToken ? `${settings.fbPageAccessToken.slice(0, 10)}...${settings.fbPageAccessToken.slice(-6)}` : '',
       fbAppId: settings.fbAppId || '974777838976699'
@@ -189,22 +189,54 @@ router.post('/fb-config', async (req, res) => {
     if (!settings) settings = new SiteSettings();
 
     if (fbPageId) settings.fbPageId = fbPageId.trim();
-    if (fbPageAccessToken) settings.fbPageAccessToken = fbPageAccessToken.trim();
-    await settings.save();
+    let inputToken = fbPageAccessToken ? fbPageAccessToken.trim() : settings.fbPageAccessToken;
+    
+    // Auto-extract access_token if user pasted the entire browser address bar URL
+    if (inputToken && inputToken.includes("access_token=")) {
+      const match = inputToken.match(/access_token=([^&]+)/);
+      if (match) {
+        inputToken = decodeURIComponent(match[1]);
+      }
+    }
+    settings.fbPageAccessToken = inputToken;
 
-    // Verify token with Graph API
     let pageName = 'Liora Beauty & Wear';
     let verified = false;
+
+    // 1. Check if token is a User Token that can provide Page Token from /me/accounts
     try {
-      const verifyRes = await fetch(`https://graph.facebook.com/v20.0/${settings.fbPageId}?fields=id,name&access_token=${settings.fbPageAccessToken}`);
-      const verifyData = await verifyRes.json();
-      if (verifyData && verifyData.id) {
-        pageName = verifyData.name;
-        verified = true;
+      const accountsRes = await fetch(
+        `https://graph.facebook.com/v20.0/me/accounts?access_token=${inputToken}`
+      );
+      const accountsData = await accountsRes.json();
+      if (accountsData && Array.isArray(accountsData.data) && accountsData.data.length > 0) {
+        const matchedPage = accountsData.data.find((p) => p.id === settings.fbPageId) || accountsData.data[0];
+        if (matchedPage && matchedPage.access_token) {
+          settings.fbPageAccessToken = matchedPage.access_token;
+          if (matchedPage.id) settings.fbPageId = matchedPage.id;
+          pageName = matchedPage.name;
+          verified = true;
+        }
       }
     } catch (e) {
-      console.warn('Facebook token verification test warning:', e.message);
+      console.warn('Accounts lookup failed, checking page directly:', e.message);
     }
+
+    // 2. If not verified via /me/accounts, test directly on Page ID
+    if (!verified && settings.fbPageAccessToken) {
+      try {
+        const verifyRes = await fetch(`https://graph.facebook.com/v20.0/${settings.fbPageId}?fields=id,name&access_token=${settings.fbPageAccessToken}`);
+        const verifyData = await verifyRes.json();
+        if (verifyData && verifyData.id) {
+          pageName = verifyData.name || pageName;
+          verified = true;
+        }
+      } catch (e) {
+        console.warn('Facebook token verification test warning:', e.message);
+      }
+    }
+
+    await settings.save();
 
     res.json({
       success: true,

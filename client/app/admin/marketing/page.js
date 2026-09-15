@@ -21,7 +21,7 @@ export default function AdminMarketingPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   // Facebook Integration State
-  const [fbConfig, setFbConfig] = useState({ fbPageId: "61593176967507", hasToken: false, tokenMasked: "" });
+  const [fbConfig, setFbConfig] = useState({ fbPageId: "1213659151838727", hasToken: false, tokenMasked: "" });
   const [inputToken, setInputToken] = useState("");
   const [savingToken, setSavingToken] = useState(false);
   const [tokenSavedMsg, setTokenSavedMsg] = useState("");
@@ -141,7 +141,7 @@ export default function AdminMarketingPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fbPageId: fbConfig.fbPageId || "61593176967507",
+          fbPageId: fbConfig.fbPageId || "1213659151838727",
           fbPageAccessToken: inputToken.trim()
         })
       });
