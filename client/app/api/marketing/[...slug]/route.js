@@ -113,6 +113,8 @@ export async function GET(req, { params }) {
         },
         theme: theme || pickSmartTheme(product.name, product.category?.name),
         caption,
+        isSvg,
+        sharpError: global.__lastSharpError || null,
         bannerBase64: `data:${mime};base64,${bannerBuffer.toString("base64")}`,
       });
     }

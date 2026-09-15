@@ -446,6 +446,7 @@ export async function generateProductBanner(product, customThemeKey = null) {
         .toBuffer();
     }
   } catch (err) {
+    global.__lastSharpError = err.stack || err.message;
     console.warn("Sharp banner generation fallback to SVG:", err.message);
   }
 
