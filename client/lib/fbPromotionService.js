@@ -340,6 +340,11 @@ export async function generateProductBanner(product, customThemeKey = null) {
       <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%">
         <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#000000" flood-opacity="0.6" />
       </filter>
+
+      <!-- Smart White Background Removal Filter for studio product shots -->
+      <filter id="removeStudioBg" color-interpolation-filters="sRGB" x="0%" y="0%" width="100%" height="100%">
+        <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -3.3 -3.3 -3.3 0 9.2" />
+      </filter>
     </defs>
 
     <rect width="${width}" height="${height}" fill="url(#bgGrad)" />
@@ -403,7 +408,7 @@ export async function generateProductBanner(product, customThemeKey = null) {
 
     ${
       !withComposite && productBase64
-        ? `<image href="${productBase64}" x="${Math.round(centerX - heroW / 2)}" y="${floorY - heroH}" width="${heroW}" height="${heroH}" preserveAspectRatio="xMidYMid meet" />`
+        ? `<image href="${productBase64}" x="${Math.round(centerX - heroW / 2)}" y="${floorY - heroH}" width="${heroW}" height="${heroH}" preserveAspectRatio="xMidYMid meet" filter="url(#removeStudioBg)" />`
         : ""
     }
 
