@@ -27,6 +27,10 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "sharp": "^0.35.4",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0"
+  },
+  "optionalDependencies": {
     "@img/sharp-linux-x64": "^0.35.4"
   },
   "overrides": {

@@ -129,16 +129,98 @@ export async function getProductBuffer(imageUrl) {
   }
 }
 
+// Connected Border BFS Flood Fill Background Removal
+export function removeStudioBackground(data, width, height) {
+  const visited = new Uint8Array(width * height);
+  const queue = new Int32Array(width * height);
+  let head = 0;
+  let tail = 0;
+
+  function isBorderBg(idx) {
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const brightness = (r + g + b) / 3;
+    const diff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
+    return brightness >= 232 && diff <= 24;
+  }
+
+  // Seed from outer boundary pixels
+  for (let x = 0; x < width; x++) {
+    const topIdx = (0 * width + x) * 4;
+    const botIdx = ((height - 1) * width + x) * 4;
+    if (!visited[x] && isBorderBg(topIdx)) {
+      visited[x] = 1;
+      queue[tail++] = x;
+    }
+    const botP = (height - 1) * width + x;
+    if (!visited[botP] && isBorderBg(botIdx)) {
+      visited[botP] = 1;
+      queue[tail++] = botP;
+    }
+  }
+
+  for (let y = 0; y < height; y++) {
+    const leftP = y * width;
+    const rightP = y * width + (width - 1);
+    if (!visited[leftP] && isBorderBg(leftP * 4)) {
+      visited[leftP] = 1;
+      queue[tail++] = leftP;
+    }
+    if (!visited[rightP] && isBorderBg(rightP * 4)) {
+      visited[rightP] = 1;
+      queue[tail++] = rightP;
+    }
+  }
+
+  // BFS expansion
+  while (head < tail) {
+    const p = queue[head++];
+    const px = p % width;
+    const py = Math.floor(p / width);
+
+    // Check 4 adjacent neighbors
+    const neighbors = [
+      px > 0 ? p - 1 : -1,
+      px < width - 1 ? p + 1 : -1,
+      py > 0 ? p - width : -1,
+      py < height - 1 ? p + width : -1,
+    ];
+
+    for (const n of neighbors) {
+      if (n !== -1 && !visited[n] && isBorderBg(n * 4)) {
+        visited[n] = 1;
+        queue[tail++] = n;
+      }
+    }
+  }
+
+  // Apply transparency to connected background pixels
+  for (let p = 0; p < width * height; p++) {
+    if (visited[p]) {
+      const idx = p * 4;
+      data[idx + 3] = 0;
+    }
+  }
+}
+
 export async function cleanTransparentCutout(buffer) {
   try {
     const sharp = await getSharp();
     if (!sharp) return buffer;
     const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    
+    // First, check if already has transparent background
+    let alphaCount = 0;
     for (let i = 0; i < data.length; i += 4) {
-      if (data[i + 3] < 110) {
-        data[i + 3] = 0;
-      }
+      if (data[i + 3] < 120) alphaCount++;
     }
+
+    if (alphaCount < data.length * 0.05) {
+      // Image has solid white/studio background: run smart border BFS flood-fill removal
+      removeStudioBackground(data, info.width, info.height);
+    }
+
     return await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
       .trim()
       .png()
@@ -223,10 +305,8 @@ export async function generateProductBanner(product, customThemeKey = null) {
   // 1. Fetch Product Buffer
   const rawProduct = await getProductBuffer(imageUrl);
 
-  const floorY = 830;
-  const centerX = 615;
-  const shadowRadiusX = 225;
-  const shadowRadiusY = 25;
+  const floorY = 870;
+  const centerX = 640;
 
   const titleLines = formatBannerTitle(product.name);
   const safeBrand = escapeXml(brandName);
@@ -235,100 +315,116 @@ export async function generateProductBanner(product, customThemeKey = null) {
   const safeVolume = escapeXml(volume);
   const leftMargin = 75;
 
-  // Determine mime type for embedding
-  let imgMime = "image/jpeg";
-  if (imageUrl.toLowerCase().includes(".png") || (rawProduct[0] === 0x89 && rawProduct[1] === 0x50)) {
-    imgMime = "image/png";
-  } else if (imageUrl.toLowerCase().includes(".webp") || (rawProduct[0] === 0x52 && rawProduct[1] === 0x49)) {
-    imgMime = "image/webp";
-  }
-  const embeddedDataUri = `data:${imgMime};base64,${rawProduct.toString("base64")}`;
-
-  const renderSvg = (withEmbeddedImage = true) => `
+  const renderSvg = ({ productBase64 = "", heroW = 480, heroH = 720, withComposite = false }) => `
   <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="baseBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="${theme.bgDark}" />
-        <stop offset="60%" stop-color="${theme.bgMid}" />
+        <stop offset="50%" stop-color="${theme.bgMid}" />
         <stop offset="100%" stop-color="${theme.bgDark}" />
       </linearGradient>
 
-      <radialGradient id="spotlightGlow" cx="60%" cy="50%" r="58%">
+      <radialGradient id="spotlightGlow" cx="60%" cy="52%" r="56%">
         <stop offset="0%" stop-color="${theme.spotlight}" stop-opacity="${theme.glowOpacity}" />
-        <stop offset="45%" stop-color="${theme.spotlight}" stop-opacity="0.38" />
+        <stop offset="42%" stop-color="${theme.spotlight}" stop-opacity="0.36" />
         <stop offset="75%" stop-color="${theme.bgMid}" stop-opacity="0.12" />
         <stop offset="100%" stop-color="${theme.bgDark}" stop-opacity="0" />
       </radialGradient>
 
-      <radialGradient id="pedestalShadow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#000000" stop-opacity="0.65" />
-        <stop offset="35%" stop-color="#000000" stop-opacity="0.3" />
+      <radialGradient id="floorShadow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#000000" stop-opacity="0.85" />
+        <stop offset="45%" stop-color="#000000" stop-opacity="0.45" />
         <stop offset="100%" stop-color="#000000" stop-opacity="0" />
       </radialGradient>
 
-      <filter id="boxShadow" x="-10%" y="-10%" width="120%" height="130%">
-        <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000000" flood-opacity="0.5" />
+      <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="130%">
+        <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#000000" flood-opacity="0.6" />
       </filter>
     </defs>
 
-    <rect width="${width}" height="${height}" fill="url(#baseBg)" />
+    <rect width="${width}" height="${height}" fill="url(#bgGrad)" />
     <rect width="${width}" height="${height}" fill="url(#spotlightGlow)" />
-    <ellipse cx="${centerX}" cy="${floorY + 8}" rx="${shadowRadiusX}" ry="${shadowRadiusY}" fill="url(#pedestalShadow)" />
 
-    ${
-      withEmbeddedImage
-        ? `<image href="${embeddedDataUri}" x="${centerX - 235}" y="${floorY - 650}" width="470" height="650" preserveAspectRatio="xMidYMid meet" />`
-        : ""
-    }
+    <!-- Floor Shadow Underneath Cutout Product -->
+    <ellipse cx="${centerX}" cy="${floorY + 10}" rx="${Math.round(heroW * 0.48)}" ry="26" fill="url(#floorShadow)" />
 
-    <text x="${leftMargin}" y="190" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="30" fill="#FFFFFF" letter-spacing="4">${safeBrand}</text>
-    <line x1="${leftMargin}" y1="206" x2="${leftMargin + 45}" y2="206" stroke="${theme.accent}" stroke-width="3" stroke-linecap="round" />
+    <!-- TOP HEADER: LIORA OFFICIAL LOGO & BRANDING -->
+    <g transform="translate(75, 65)">
+      <text x="0" y="20" font-family="'Playfair Display', Georgia, serif" font-weight="800" font-size="28" fill="#FFFFFF" letter-spacing="6">LIORA</text>
+      <text x="145" y="20" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="${theme.accent}" letter-spacing="4">BEAUTY &amp; WEAR</text>
+      <line x1="0" y1="32" x2="310" y2="32" stroke="${theme.accent}" stroke-opacity="0.5" stroke-width="1.5" />
+    </g>
 
-    <text x="${leftMargin}" y="248" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="13.5" fill="${theme.accent}" letter-spacing="2.5">${safeCat}</text>
+    <!-- TOP RIGHT: 100% ORIGINAL AUTHENTIC BADGE -->
+    <g transform="translate(950, 85)" filter="url(#cardShadow)">
+      <circle cx="0" cy="0" r="48" fill="${theme.ribbon}" stroke="#ffffff" stroke-width="2" />
+      <text x="0" y="-8" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="14" fill="#FFFFFF">100%</text>
+      <text x="0" y="10" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="11" fill="#FFFFFF" letter-spacing="1.5">ORIGINAL</text>
+      <text x="0" y="25" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="9" fill="#ffffff" letter-spacing="1">AUTHENTIC</text>
+    </g>
 
-    <text x="${leftMargin}" y="292" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="0.5">${titleLines[0] || ""}</text>
+    <!-- LEFT PRODUCT INFO -->
+    <!-- Brand Name -->
+    <text x="${leftMargin}" y="195" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="28" fill="#FFFFFF" letter-spacing="5">${safeBrand}</text>
+    <line x1="${leftMargin}" y1="212" x2="${leftMargin + 60}" y2="212" stroke="${theme.accent}" stroke-width="3.5" stroke-linecap="round" />
+
+    <!-- Category -->
+    <text x="${leftMargin}" y="250" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="14" fill="${theme.accent}" letter-spacing="2.5">${safeCat}</text>
+
+    <!-- Product Title -->
+    <text x="${leftMargin}" y="298" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="0.5">${titleLines[0] || ""}</text>
     ${
       titleLines[1]
-        ? `<text x="${leftMargin}" y="334" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="0.5">${titleLines[1]}</text>`
+        ? `<text x="${leftMargin}" y="338" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="26" fill="rgba(255,255,255,0.85)">${titleLines[1]}</text>`
         : ""
     }
 
-    <g transform="translate(${leftMargin}, ${titleLines[1] ? 390 : 350})" filter="url(#boxShadow)">
-      <rect width="250" height="190" rx="16" fill="${theme.cardBg}" stroke="${theme.cardBorder}" stroke-width="1.8" />
-      <line x1="55" y1="36" x2="195" y2="36" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" />
-      <text x="125" y="41" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="20" fill="rgba(255,255,255,0.7)" text-decoration="line-through">${originalPrice} TK</text>
-      <text x="125" y="116" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="60" fill="#FFFFFF" letter-spacing="-1">${offerPrice}</text>
-      <path d="M 0 140 Q 0 136 0 136 L 250 136 L 250 174 Q 250 190 234 190 L 16 190 Q 0 190 0 174 Z" fill="${theme.ribbon}" />
-      <text x="125" y="169" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="15" fill="#FFFFFF" letter-spacing="1.5">SAVE ${saveAmount} TAKA</text>
+    <!-- PRICE CARD (Glassmorphism Card) -->
+    <g transform="translate(${leftMargin}, ${titleLines[1] ? 395 : 360})" filter="url(#cardShadow)">
+      <rect width="260" height="195" rx="18" fill="${theme.cardBg}" stroke="${theme.cardBorder}" stroke-width="2" />
+      
+      <!-- Regular Price Strikethrough -->
+      <text x="130" y="42" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="18" fill="rgba(255,255,255,0.65)" text-decoration="line-through">৳ ${originalPrice} TK</text>
+      <line x1="65" y1="36" x2="195" y2="36" stroke="#ef4444" stroke-width="2" />
+
+      <!-- Offer Price -->
+      <text x="130" y="116" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="62" fill="#FFFFFF" letter-spacing="-1">৳ ${offerPrice}</text>
+
+      <!-- Save Ribbon -->
+      <path d="M 0 144 Q 0 140 0 140 L 260 140 L 260 177 Q 260 195 242 195 L 18 195 Q 0 195 0 177 Z" fill="${theme.ribbon}" />
+      <text x="130" y="173" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="15" fill="#FFFFFF" letter-spacing="1.5">SAVE ৳ ${saveAmount} TAKA</text>
     </g>
 
-    <g transform="translate(${leftMargin}, ${titleLines[1] ? 615 : 575})">
-      <text x="125" y="0" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14.5" fill="rgba(255,255,255,0.9)">${safeSub}</text>
-      ${
-        volume
-          ? `<rect x="85" y="16" width="80" height="26" rx="13" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.25)" stroke-width="1" />
-             <text x="125" y="34" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="12" fill="#FFFFFF">${safeVolume}</text>`
-          : ""
-      }
+    <!-- TRUST BADGES -->
+    <g transform="translate(${leftMargin}, ${titleLines[1] ? 635 : 600})">
+      <rect x="0" y="0" width="260" height="44" rx="10" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="130" y="27" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="13.5" fill="#FFFFFF">🚚 Cash on Home Delivery</text>
     </g>
 
-    <g transform="translate(930, 480)" filter="url(#boxShadow)">
-      <circle cx="0" cy="0" r="42" fill="${theme.ribbon}" />
-      <text x="0" y="-6" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="13" fill="#FFFFFF">100%</text>
-      <text x="0" y="12" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="10.5" fill="#FFFFFF" letter-spacing="1">ORIGINAL</text>
+    ${
+      !withComposite && productBase64
+        ? `<image href="${productBase64}" x="${Math.round(centerX - heroW / 2)}" y="${floorY - heroH}" width="${heroW}" height="${heroH}" preserveAspectRatio="xMidYMid meet" />`
+        : ""
+    }
+
+    <!-- FOOTER WEBSITE BAR -->
+    <g transform="translate(75, 985)">
+      <rect x="0" y="0" width="930" height="52" rx="12" fill="rgba(0,0,0,0.5)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="30" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" fill="#FFFFFF">🌐 Order: liorabeautyandwear.com</text>
+      <text x="900" y="32" text-anchor="end" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" fill="${theme.accent}">📱 WhatsApp / Call: 01837223147</text>
     </g>
   </svg>
   `;
 
-  // Try Sharp if available, otherwise return vector SVG buffer
+  // Try Sharp if available
   try {
     const sharp = await getSharp();
     if (sharp) {
       const trimmed = await cleanTransparentCutout(rawProduct);
       const { data: resizedBuffer, info: resizedInfo } = await sharp(trimmed)
         .resize({
-          width: 470,
-          height: 670,
+          width: 500,
+          height: 740,
           fit: "inside",
           background: { r: 0, g: 0, b: 0, alpha: 0 },
         })
@@ -337,7 +433,7 @@ export async function generateProductBanner(product, customThemeKey = null) {
       const productTop = floorY - resizedInfo.height;
       const productLeft = Math.round(centerX - resizedInfo.width / 2);
 
-      const bgBuffer = Buffer.from(renderSvg(false));
+      const bgBuffer = Buffer.from(renderSvg({ withComposite: true, heroW: resizedInfo.width, heroH: resizedInfo.height }));
       return await sharp(bgBuffer)
         .composite([
           {
@@ -350,12 +446,19 @@ export async function generateProductBanner(product, customThemeKey = null) {
         .toBuffer();
     }
   } catch (err) {
-    // Sharp failed or not supported in environment -> use pure SVG
     console.warn("Sharp banner generation fallback to SVG:", err.message);
   }
 
-  // Pure SVG fallback (always succeeds, zero C++ library dependencies!)
-  return Buffer.from(renderSvg(true));
+  // Fallback: Embed base64 product
+  let imgMime = "image/jpeg";
+  if (imageUrl.toLowerCase().includes(".png") || (rawProduct[0] === 0x89 && rawProduct[1] === 0x50)) {
+    imgMime = "image/png";
+  } else if (imageUrl.toLowerCase().includes(".webp") || (rawProduct[0] === 0x52 && rawProduct[1] === 0x49)) {
+    imgMime = "image/webp";
+  }
+  const embeddedDataUri = `data:${imgMime};base64,${rawProduct.toString("base64")}`;
+
+  return Buffer.from(renderSvg({ productBase64: embeddedDataUri, withComposite: false, heroW: 480, heroH: 720 }));
 }
 
 export async function batchGenerateBrandPromotions({ brandQuery, limit = 100 }) {
