@@ -570,93 +570,42 @@ export async function publishPhotoToFacebook({ imageBuffer, imageUrl, caption, p
 
   const isSvg = imageBuffer && imageBuffer.toString("utf8", 0, 100).includes("<svg");
 
-  // ─── Step 1: Upload photo as unpublished ─────────────────────────────────
-  const uploadForm = new FormData();
-  uploadForm.append("access_token", pageAccessToken);
-  uploadForm.append("published", "false"); // upload only, don't post yet
+  // Post photo directly with story creation (creates timeline post + increments page post count)
+  const formData = new FormData();
+  formData.append("caption", caption);
+  formData.append("access_token", pageAccessToken);
 
   if (isSvg && imageUrl) {
-    uploadForm.append("url", imageUrl);
+    formData.append("url", imageUrl);
   } else if (imageBuffer) {
     const blob = new Blob([imageBuffer], { type: "image/png" });
-    uploadForm.append("source", blob, "promotion_banner.png");
+    formData.append("source", blob, "promotion_banner.png");
   } else if (imageUrl) {
-    uploadForm.append("url", imageUrl);
+    formData.append("url", imageUrl);
   }
 
-  const uploadRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
+  const res = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
     method: "POST",
-    body: uploadForm,
+    body: formData,
   });
 
-  const uploadData = await uploadRes.json();
-  console.log("[FB Upload] response:", JSON.stringify(uploadData));
-  if (uploadData.error) {
-    throw new Error(`Photo Upload Error: ${uploadData.error.message} (code ${uploadData.error.code})`);
+  const data = await res.json();
+  console.log("[FB Photos] response:", JSON.stringify(data));
+
+  if (data.error) {
+    throw new Error(`Photo Upload Error: ${data.error.message} (code ${data.error.code})`);
   }
 
-  const photoId = uploadData.id;
-  console.log("[FB Upload] photoId:", photoId);
-
-  // ─── Step 2: Publish as a feed post with the attached photo ───────────────
-  const feedRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/feed`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: caption,
-      attached_media: [{ media_fbid: photoId }],
-      access_token: pageAccessToken,
-    }),
-  });
-
-  const feedData = await feedRes.json();
-  console.log("[FB Feed] response:", JSON.stringify(feedData));
-
-  if (feedData.error) {
-    const feedErrMsg = `Feed Error: ${feedData.error.message} (code ${feedData.error.code})`;
-    console.warn("[FB Feed] failed, trying fallback photos method. Error:", feedErrMsg);
-
-    // Fallback: publish directly as photo with story enabled
-    const fallbackForm = new FormData();
-    fallbackForm.append("caption", caption);
-    fallbackForm.append("access_token", pageAccessToken);
-    fallbackForm.append("published", "true");
-    if (imageBuffer) {
-      const blob2 = new Blob([imageBuffer], { type: "image/png" });
-      fallbackForm.append("source", blob2, "promotion_banner.png");
-    } else if (imageUrl) {
-      fallbackForm.append("url", imageUrl);
-    }
-    const fallbackRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
-      method: "POST",
-      body: fallbackForm,
-    });
-    const fallbackData = await fallbackRes.json();
-    console.log("[FB Fallback] response:", JSON.stringify(fallbackData));
-    if (fallbackData.error) {
-      throw new Error(`${feedErrMsg} | Fallback Error: ${fallbackData.error.message}`);
-    }
-    return {
-      success: true,
-      photoId: fallbackData.id,
-      postId: fallbackData.post_id || fallbackData.id,
-      postUrl: fallbackData.post_id
-        ? `https://www.facebook.com/${fallbackData.post_id}`
-        : `https://www.facebook.com/${fallbackData.id}`,
-      method: "photos_fallback",
-      feedError: feedErrMsg,
-    };
-  }
-
-  const postId = feedData.id;
+  const postId = data.post_id || data.id;
   return {
     success: true,
-    photoId,
+    photoId: data.id,
     postId,
-    postUrl: `https://www.facebook.com/${postId}`,
+    postUrl: data.post_id
+      ? `https://www.facebook.com/${data.post_id}`
+      : `https://www.facebook.com/${data.id}`,
     method: "feed_with_media",
   };
-}
 
 // Global in-memory autopilot job
 if (!global.__lioraAutoPilotJob) {
