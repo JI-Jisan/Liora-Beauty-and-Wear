@@ -703,14 +703,21 @@ export async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit =
       "6a9ab9d4c63dd531aa8db269", "6a9ab9dbc63dd531aa8db286", "6a9ab9cec63dd531aa8db257", "6a9ab9d5c63dd531aa8db26e", "6a9ab9dbc63dd531aa8db28a",
       "6a9ab9d6c63dd531aa8db273", "6a9ab9d2c63dd531aa8db25d", "6a9ab9d8c63dd531aa8db277", "6a9ab9dbc63dd531aa8db28c", "6a9ab9d8c63dd531aa8db27b",
       "6a9ab9d2c63dd531aa8db262", "6a9ab9d9c63dd531aa8db280", "6a9ab9cec63dd531aa8db255", "6a9ab9dac63dd531aa8db283", "6a9ab9d3c63dd531aa8db265",
-      "6a9ab9dec63dd531aa8db28f", "6a9ab9dec63dd531aa8db28e", "6a9ab9cec63dd531aa8db256", "6a9ab9d4c63dd531aa8db268", "6a9ab9dbc63dd531aa8db287"
+      "6a9ab9dec63dd531aa8db28f", "6a9ab9dec63dd531aa8db28e", "6a9ab9cec63dd531aa8db256", "6a9ab9d4c63dd531aa8db268", "6a9ab9dbc63dd531aa8db287",
+      // Batch 12 (30 items)
+      "6a9ab9e6c63dd531aa8db2b5", "6a9ab9e8c63dd531aa8db2be", "6a9ab9e3c63dd531aa8db2a0", "6a9ab9e6c63dd531aa8db2b3", "6a9ab9edc63dd531aa8db2c8",
+      "6a9ab9e2c63dd531aa8db29c", "6a9ab9e8c63dd531aa8db2bb", "6a9ab9dfc63dd531aa8db292", "6a9ab9ecc63dd531aa8db2c4", "6a9ab9e4c63dd531aa8db2a7",
+      "6a9ab9e5c63dd531aa8db2b1", "6a9ab9efc63dd531aa8db2cc", "6a9ab9e1c63dd531aa8db298", "6a9ab9e6c63dd531aa8db2b4", "6a9ab9efc63dd531aa8db2d0",
+      "6a9ab9e7c63dd531aa8db2b9", "6a9ab9e3c63dd531aa8db29f", "6a9ab9e8c63dd531aa8db2bc", "6a9ab9f1c63dd531aa8db2d4", "6a9ab9e9c63dd531aa8db2c1",
+      "6a9ab9e3c63dd531aa8db2a1", "6a9ab9ecc63dd531aa8db2c6", "6a9ab9e0c63dd531aa8db294", "6a9ab9edc63dd531aa8db2c9", "6a9ab9e4c63dd531aa8db2ac",
+      "6a9ab9f2c63dd531aa8db2d8", "6a9ab9f1c63dd531aa8db2d6", "6a9ab9e1c63dd531aa8db296", "6a9ab9e4c63dd531aa8db2ad", "6a9ab9efc63dd531aa8db2ce"
     ];
-    const raw = await Product.find({ _id: { $in: target210Ids } })
+    const raw = await Product.find({ _id: { $in: target240Ids } })
       .populate("brand", "name")
       .populate("category", "name")
       .lean();
     const map = new Map(raw.map((p) => [p._id.toString(), p]));
-    products = target210Ids.map((id) => map.get(id)).filter(Boolean);
+    products = target240Ids.map((id) => map.get(id)).filter(Boolean);
   } else {
     if (mongoose.Types.ObjectId.isValid(brandQuery)) {
       brandDoc = await Brand.findById(brandQuery);
