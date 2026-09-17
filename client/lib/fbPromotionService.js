@@ -288,6 +288,25 @@ export async function generateProductBanner(product, customThemeKey = null) {
   const width = 1080;
   const height = 1080;
 
+  const productId = product._id ? product._id.toString() : "";
+  if (productId) {
+    try {
+      const candidates = [
+        path.join(process.cwd(), "public", "banners", `banner_${productId}.png`),
+        path.join(process.cwd(), "scratch", "banners", `banner_${productId}.png`),
+        path.join(process.cwd(), "public", "banners", `${productId}.png`),
+        path.join(process.cwd(), "..", "client", "scratch", "banners", `banner_${productId}.png`),
+      ];
+      for (const cand of candidates) {
+        if (fs.existsSync(cand)) {
+          return fs.readFileSync(cand);
+        }
+      }
+    } catch (e) {
+      // continue to live generation
+    }
+  }
+
   const brandName = product.brand?.name || "LIORA";
   const categoryName = product.category?.name || "AUTHENTIC BEAUTY";
   const originalPrice = product.originalPrice || 0;
@@ -632,29 +651,49 @@ export async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit =
   }
 
   let brandDoc = null;
-  if (mongoose.Types.ObjectId.isValid(brandQuery)) {
-    brandDoc = await Brand.findById(brandQuery);
+  let products = [];
+
+  if (brandQuery === "instock_ready") {
+    const target35Ids = [
+      "6a9ab981c63dd531aa8db110", "6a9ab987c63dd531aa8db12a", "6a9ab77134ccee884a4b5cab", "6a9ab74b661657cb254c1bd5", "6a9aad6ae4955f357f776448",
+      "6a8ae1ccdbc554e2928be214", "6a8e6c9d6d43fcfea47cad88", "6a8e6d7682271de00ebfa736", "6a8e6e13297e3906134a82f6", "6a8e6eafe9601eacddbf7dbb",
+      "6a8e702551c7c127243ea1c1", "6a8e70f151c7c127243ea1c2", "6a8e723151c7c127243ea1c3", "6a8e72fa51c7c127243ea1c4", "6a8e757fc63423be0cf51d31",
+      "6a9ab748661657cb254c1bd2", "6a9ab77434ccee884a4b5cae", "6a9ab75b661657cb254c1bdd", "6a9ab70979e75ff1fa1f8a47", "6a9abe31c63dd531aa8dc0b3",
+      "6a9ac285c63dd531aa8dcd24", "6a9ac280c63dd531aa8dcd18", "6a9aba0cc63dd531aa8db330", "6a9abf47c63dd531aa8dc404", "6a9ac288c63dd531aa8dcd30",
+      "6a9ab77734ccee884a4b5cb0", "6a9ab9f3c63dd531aa8db2dc", "6a9aba53c63dd531aa8db430", "6a9ac1bec63dd531aa8dcb1d", "6a9ac1bac63dd531aa8dcb15",
+      "6a9ac11ac63dd531aa8dc96f", "6a9ac0bac63dd531aa8dc881", "6a9ac03bc63dd531aa8dc6e5", "6a9abff3c63dd531aa8dc5fb", "6a9abcf0c63dd531aa8dbc74"
+    ];
+    const raw = await Product.find({ _id: { $in: target35Ids } })
+      .populate("brand", "name")
+      .populate("category", "name")
+      .lean();
+    const map = new Map(raw.map((p) => [p._id.toString(), p]));
+    products = target35Ids.map((id) => map.get(id)).filter(Boolean);
   } else {
-    brandDoc = await Brand.findOne({
-      $or: [
-        { name: new RegExp(`^${brandQuery}$`, "i") },
-        { slug: new RegExp(`^${brandQuery}$`, "i") },
-      ],
-    });
-  }
+    if (mongoose.Types.ObjectId.isValid(brandQuery)) {
+      brandDoc = await Brand.findById(brandQuery);
+    } else {
+      brandDoc = await Brand.findOne({
+        $or: [
+          { name: new RegExp(`^${brandQuery}$`, "i") },
+          { slug: new RegExp(`^${brandQuery}$`, "i") },
+        ],
+      });
+    }
 
-  const query = {};
-  if (brandDoc) {
-    query.$or = [{ brand: brandDoc._id }, { name: new RegExp(brandDoc.name, "i") }];
-  } else if (brandQuery && brandQuery !== "ALL") {
-    query.name = new RegExp(brandQuery, "i");
-  }
+    const query = {};
+    if (brandDoc) {
+      query.$or = [{ brand: brandDoc._id }, { name: new RegExp(brandDoc.name, "i") }];
+    } else if (brandQuery && brandQuery !== "ALL") {
+      query.name = new RegExp(brandQuery, "i");
+    }
 
-  const products = await Product.find(query)
-    .populate("brand", "name")
-    .populate("category", "name")
-    .limit(limit)
-    .lean();
+    products = await Product.find(query)
+      .populate("brand", "name")
+      .populate("category", "name")
+      .limit(limit)
+      .lean();
+  }
 
   if (products.length === 0) {
     throw new Error("No products found for the selected brand to promote.");

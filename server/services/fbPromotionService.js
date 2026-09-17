@@ -497,41 +497,61 @@ async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit = 50, pa
     stopAutoPilot();
   }
 
-  let brandDoc = null;
-  if (mongoose.Types.ObjectId.isValid(brandQuery)) {
-    brandDoc = await Brand.findById(brandQuery);
-  } else {
-    brandDoc = await Brand.findOne({
-      $or: [
-        { name: new RegExp(`^${brandQuery}$`, 'i') },
-        { slug: new RegExp(`^${brandQuery}$`, 'i') }
-      ]
-    });
-  }
+  let products = [];
+  let brandNameLabel = 'Ready In-Stock Banners';
 
-  const query = {};
-  if (brandDoc) {
-    query.$or = [
-      { brand: brandDoc._id },
-      { name: new RegExp(brandDoc.name, 'i') }
-    ];
-  } else if (brandQuery && brandQuery !== 'ALL') {
-    query.name = new RegExp(brandQuery, 'i');
-  }
-
-  const products = await Product.find(query)
+  if (brandQuery === 'instock_ready' || brandQuery === 'ALL' || !brandQuery) {
+    products = await Product.find({
+      inStock: true,
+      stockStatus: { $ne: 'Out of Stock' },
+      stockQuantity: { $gt: 0 },
+      image: { $exists: true, $ne: '' }
+    })
     .populate('brand', 'name slug')
     .populate('category', 'name slug')
-    .limit(limit)
+    .sort({ isFeatured: -1, isTrending: -1, stockQuantity: -1 })
+    .limit(limit || 35)
     .lean();
+    brandNameLabel = '৩৫টি প্রস্তুতকৃত ইন-স্টক ব্যানার';
+  } else {
+    let brandDoc = null;
+    if (mongoose.Types.ObjectId.isValid(brandQuery)) {
+      brandDoc = await Brand.findById(brandQuery);
+    } else {
+      brandDoc = await Brand.findOne({
+        $or: [
+          { name: new RegExp(`^${brandQuery}$`, 'i') },
+          { slug: new RegExp(`^${brandQuery}$`, 'i') }
+        ]
+      });
+    }
+
+    const query = {};
+    if (brandDoc) {
+      query.$or = [
+        { brand: brandDoc._id },
+        { name: new RegExp(brandDoc.name, 'i') }
+      ];
+      brandNameLabel = brandDoc.name;
+    } else {
+      query.name = new RegExp(brandQuery, 'i');
+      brandNameLabel = brandQuery;
+    }
+
+    products = await Product.find(query)
+      .populate('brand', 'name slug')
+      .populate('category', 'name slug')
+      .limit(limit)
+      .lean();
+  }
 
   if (!products || products.length === 0) {
-    throw new Error(`No products found for brand "${brandQuery}"`);
+    throw new Error(`No products found for "${brandQuery}"`);
   }
 
   autoPilotJob = {
     isRunning: true,
-    brandName: brandDoc?.name || brandQuery,
+    brandName: brandNameLabel,
     totalProducts: products.length,
     postedCount: 0,
     failedCount: 0,

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 import { connectToDatabase } from "@/lib/db";
 import { Brand, Product, SiteSettings } from "@/lib/models";
 import {
@@ -14,6 +16,63 @@ import {
 } from "@/lib/fbPromotionService";
 
 export const runtime = "nodejs";
+
+const TARGET_35_IDS = [
+  "6a9ab981c63dd531aa8db110", // APLB Glutathione Niacinamide Tablet
+  "6a9ab987c63dd531aa8db12a", // Beauty of Joseon Relief Sun
+  "6a9ab77134ccee884a4b5cab", // The Ordinary Niacinamide
+  "6a9ab74b661657cb254c1bd5", // I'M From Rice Toner
+  "6a9aad6ae4955f357f776448", // Axis-y Dark Spot Glow Serum 5ml
+  "6a8ae1ccdbc554e2928be214", // Skino Strawberry Shower Gel
+  "6a8e6c9d6d43fcfea47cad88", // Skin O Keratin Shampoo
+  "6a8e6d7682271de00ebfa736", // Skin O Anti Hair Fall Shampoo
+  "6a8e6e13297e3906134a82f6", // Skin O Lavender Gel
+  "6a8e6eafe9601eacddbf7dbb", // Skin O Vitamin E Milk Face Wash
+  "6a8e702551c7c127243ea1c1", // Skin O Rose Shower Gel
+  "6a8e70f151c7c127243ea1c2", // Innsaei Low pH 5.5 Cleanser
+  "6a8e723151c7c127243ea1c3", // Innsaei Salicylic Acid Foam
+  "6a8e72fa51c7c127243ea1c4", // Skin O Daily Refresh Gel
+  "6a8e757fc63423be0cf51d31", // Skin O Miracle Anti Acne Foam
+  "6a9ab748661657cb254c1bd2", // Beauty Glazed Lipliner B114
+  "6a9ab77434ccee884a4b5cae", // Laikou Octopus Cleansing Brush
+  "6a9ab75b661657cb254c1bdd", // Ponds Super Light Gel
+  "6a9ab70979e75ff1fa1f8a47", // Bob Long Lasting Waterproof Kajal
+  "6a9abe31c63dd531aa8dc0b3", // COSRX Salicylic Acid Cleanser
+  "6a9ac285c63dd531aa8dcd24", // Covercoco 24k Gold Ampoule
+  "6a9ac280c63dd531aa8dcd18", // YC Cucumber Face Wash
+  "6a9aba0cc63dd531aa8db330", // Laikou Whitening Sunscreen
+  "6a9abf47c63dd531aa8dc404", // Imagic Liquid Matte Lipstick
+  "6a9ac288c63dd531aa8dcd30", // Maybelline Baby Skin Pore Eraser
+  "6a9ab77734ccee884a4b5cb0", // AXIS-Y Glow Serum 50ml
+  "6a9ab9f3c63dd531aa8db2dc", // W7 HD Foundation Suede
+  "6a9aba53c63dd531aa8db430", // Laikou Vitamin C Set
+  "6a9ac1bec63dd531aa8dcb1d", // Wet N Wild Buff Bisque
+  "6a9ac1bac63dd531aa8dcb15", // Wet N Wild Bronze Beige
+  "6a9ac11ac63dd531aa8dc96f", // Nirvana Color Berry Lips
+  "6a9ac0bac63dd531aa8dc881", // Laikou CC Cream Tan
+  "6a9ac03bc63dd531aa8dc6e5", // Ponds Bright Beauty Face Wash
+  "6a9abff3c63dd531aa8dc5fb", // Care:Nel Whitening Cream
+  "6a9abcf0c63dd531aa8dbc74", // Swiss Beauty Blusher
+];
+
+function getStoredBannerBuffer(productId) {
+  try {
+    const candidates = [
+      path.join(process.cwd(), "public", "banners", `banner_${productId}.png`),
+      path.join(process.cwd(), "scratch", "banners", `banner_${productId}.png`),
+      path.join(process.cwd(), "public", "banners", `${productId}.png`),
+      path.join(process.cwd(), "..", "client", "scratch", "banners", `banner_${productId}.png`),
+    ];
+    for (const cand of candidates) {
+      if (fs.existsSync(cand)) {
+        return fs.readFileSync(cand);
+      }
+    }
+  } catch (e) {
+    // silent
+  }
+  return null;
+}
 
 export async function GET(req, { params }) {
   try {
@@ -35,14 +94,22 @@ export async function GET(req, { params }) {
         countMap[c._id.toString()] = c.count;
       });
 
-      const enriched = brands
-        .map((b) => ({
-          _id: b._id,
-          name: b.name,
-          slug: b.slug,
-          productCount: countMap[b._id.toString()] || 0,
-        }))
-        .filter((b) => b.productCount > 0);
+      const enriched = [
+        {
+          _id: "instock_ready",
+          name: "🔥 প্রস্তুতকৃত ৩৫টি ইন-স্টক ব্যানার (Ready 35 Banners)",
+          slug: "instock_ready",
+          productCount: 35,
+        },
+        ...brands
+          .map((b) => ({
+            _id: b._id,
+            name: b.name,
+            slug: b.slug,
+            productCount: countMap[b._id.toString()] || 0,
+          }))
+          .filter((b) => b.productCount > 0),
+      ];
 
       return NextResponse.json({ success: true, brands: enriched });
     }
@@ -54,18 +121,28 @@ export async function GET(req, { params }) {
         return NextResponse.json({ success: false, error: "brandId is required" }, { status: 400 });
       }
 
-      const query = {
-        $or: [
-          { brand: brandId },
-          ...(mongoose.Types.ObjectId.isValid(brandId) ? [{ brand: new mongoose.Types.ObjectId(brandId) }] : []),
-        ],
-      };
+      let products = [];
+      if (brandId === "instock_ready") {
+        const raw = await Product.find({ _id: { $in: TARGET_35_IDS } })
+          .populate("category", "name")
+          .populate("brand", "name")
+          .lean();
+        const map = new Map(raw.map((p) => [p._id.toString(), p]));
+        products = TARGET_35_IDS.map((id) => map.get(id)).filter(Boolean);
+      } else {
+        const query = {
+          $or: [
+            { brand: brandId },
+            ...(mongoose.Types.ObjectId.isValid(brandId) ? [{ brand: new mongoose.Types.ObjectId(brandId) }] : []),
+          ],
+        };
 
-      const products = await Product.find(query)
-        .populate("category", "name")
-        .populate("brand", "name")
-        .limit(100)
-        .lean();
+        products = await Product.find(query)
+          .populate("category", "name")
+          .populate("brand", "name")
+          .limit(100)
+          .lean();
+      }
 
       return NextResponse.json({
         success: true,
@@ -98,8 +175,13 @@ export async function GET(req, { params }) {
       }
 
       const caption = generateFBCaption(product, product.brand?.name || "LIORA");
-      const bannerBuffer = await generateProductBanner(product, theme);
-      const isSvg = bannerBuffer.toString("utf8", 0, 100).includes("<svg");
+
+      let bannerBuffer = getStoredBannerBuffer(productId);
+      let isSvg = false;
+      if (!bannerBuffer) {
+        bannerBuffer = await generateProductBanner(product, theme);
+        isSvg = bannerBuffer.toString("utf8", 0, 100).includes("<svg");
+      }
       const mime = isSvg ? "image/svg+xml" : "image/png";
 
       return NextResponse.json({
@@ -114,7 +196,6 @@ export async function GET(req, { params }) {
         theme: theme || pickSmartTheme(product.name, product.category?.name),
         caption,
         isSvg,
-        sharpError: global.__lastSharpError || null,
         bannerBase64: `data:${mime};base64,${bannerBuffer.toString("base64")}`,
       });
     }
@@ -133,8 +214,12 @@ export async function GET(req, { params }) {
         return new NextResponse("Product not found", { status: 404 });
       }
 
-      const bannerBuffer = await generateProductBanner(product, theme);
-      const isSvg = bannerBuffer.toString("utf8", 0, 100).includes("<svg");
+      let bannerBuffer = getStoredBannerBuffer(productId);
+      let isSvg = false;
+      if (!bannerBuffer) {
+        bannerBuffer = await generateProductBanner(product, theme);
+        isSvg = bannerBuffer.toString("utf8", 0, 100).includes("<svg");
+      }
       const contentType = isSvg ? "image/svg+xml" : "image/png";
       const filename = `banner_${product.slug || product._id}.${isSvg ? "svg" : "png"}`;
 
@@ -314,7 +399,10 @@ export async function POST(req, { params }) {
         return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
       }
 
-      const bannerBuffer = await generateProductBanner(product, theme);
+      let bannerBuffer = getStoredBannerBuffer(productId);
+      if (!bannerBuffer) {
+        bannerBuffer = await generateProductBanner(product, theme);
+      }
       const caption = customCaption || generateFBCaption(product, product.brand?.name || "LIORA");
 
       const prodImg = product.image || (product.images && product.images[0]) || "";

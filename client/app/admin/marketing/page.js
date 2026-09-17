@@ -48,7 +48,8 @@ export default function AdminMarketingPage() {
         if (brandsJson.success && brandsJson.brands) {
           setBrands(brandsJson.brands);
           if (brandsJson.brands.length > 0) {
-            setSelectedBrand(brandsJson.brands[0]._id);
+            const hasReady = brandsJson.brands.find((b) => b._id === "instock_ready");
+            setSelectedBrand(hasReady ? "instock_ready" : brandsJson.brands[0]._id);
           }
         }
 
@@ -120,37 +121,6 @@ export default function AdminMarketingPage() {
       const res = await fetch(url);
       const json = await res.json();
       if (json.success) {
-        // Run AI Studio Background Removal in browser Canvas
-        try {
-          const productObj = products.find((p) => p._id === productId);
-          const rawImgUrl = productObj?.image;
-          if (rawImgUrl && json.bannerBase64 && json.bannerBase64.includes("data:image/svg+xml")) {
-            const proxyUrl = `${API_BASE_URL}/api/marketing/image-proxy?url=${encodeURIComponent(rawImgUrl)}`;
-            const cutout = await removeStudioBackgroundClient(proxyUrl);
-            if (cutout && cutout.dataUrl && cutout.dataUrl.startsWith("data:image/png")) {
-              const maxHeroW = 500;
-              const maxHeroH = 740;
-              const floorY = 870;
-              const centerX = 640;
-
-              let heroW = cutout.width || maxHeroW;
-              let heroH = cutout.height || maxHeroH;
-              const scale = Math.min(maxHeroW / heroW, maxHeroH / heroH);
-              heroW = Math.round(heroW * scale);
-              heroH = Math.round(heroH * scale);
-              const heroX = Math.round(centerX - heroW / 2);
-              const heroY = floorY - heroH;
-
-              let svgText = decodeURIComponent(escape(atob(json.bannerBase64.split(",")[1])));
-              const newImageTag = `<image href="${cutout.dataUrl}" x="${heroX}" y="${heroY}" width="${heroW}" height="${heroH}" preserveAspectRatio="xMidYMid meet" />`;
-              svgText = svgText.replace(/<image\s+href="[^"]*"[^>]*\/>/, newImageTag);
-              json.bannerBase64 = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgText)))}`;
-            }
-          }
-        } catch (cutoutErr) {
-          console.warn("Client cutout error:", cutoutErr);
-        }
-
         setPreviewData(json);
         if (!theme) {
           setSelectedTheme(json.theme || "teal");
