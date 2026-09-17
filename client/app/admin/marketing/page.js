@@ -31,6 +31,11 @@ export default function AdminMarketingPage() {
   const [quickFeedMsg, setQuickFeedMsg] = useState("");
   const [imageCopied, setImageCopied] = useState(false);
 
+  // Meta Business Suite Direct Staging State
+  const [schedulingBS, setSchedulingBS] = useState(false);
+  const [bsScheduleMinutes, setBsScheduleMinutes] = useState(20);
+  const [bsSuccessResult, setBsSuccessResult] = useState(null);
+
   // Auto-Pilot State
   const [autoPilotInterval, setAutoPilotInterval] = useState(15);
   const [autoPilotStatus, setAutoPilotStatus] = useState(null);
@@ -195,6 +200,40 @@ export default function AdminMarketingPage() {
       setErrorMsg(err.message || "Failed to post to Facebook.");
     } finally {
       setPublishingSingle(false);
+    }
+  }
+
+  // 5.5. Send directly to Meta Business Suite with Banner, Caption, and Schedule preset!
+  async function handleSendToBusinessSuite() {
+    if (!activeProduct || !previewData) return;
+    setSchedulingBS(true);
+    setBsSuccessResult(null);
+    setErrorMsg("");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/marketing/schedule-business-suite`, {
+        method: "POST",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: activeProduct,
+          customCaption: previewData.caption,
+          theme: selectedTheme,
+          scheduledMinutes: Number(bsScheduleMinutes) || 20,
+        }),
+      });
+      const json = await res.json();
+      if (json.success && json.fbResult) {
+        setBsSuccessResult(json.fbResult);
+        // Automatically open Meta Business Suite Scheduled Posts page in new browser tab
+        if (json.fbResult.businessSuiteUrl) {
+          window.open(json.fbResult.businessSuiteUrl, "_blank", "noopener,noreferrer");
+        }
+      } else {
+        setErrorMsg(json.error || "Failed to stage post in Meta Business Suite.");
+      }
+    } catch (err) {
+      setErrorMsg(err.message || "Failed to send to Meta Business Suite.");
+    } finally {
+      setSchedulingBS(false);
     }
   }
 
@@ -768,6 +807,111 @@ export default function AdminMarketingPage() {
                       {quickFeedMsg && (
                         <div style={{ marginTop: "10px", padding: "10px 12px", background: "rgba(16, 185, 129, 0.2)", border: "1px solid #34d399", borderRadius: "6px", fontSize: "12.5px", color: "#d1fae5", lineHeight: "1.5" }}>
                           {quickFeedMsg}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Meta Business Suite 1-Click Scheduled Poster Card */}
+                    <div style={{
+                      marginTop: "14px",
+                      background: "linear-gradient(135deg, rgba(2, 132, 199, 0.18), rgba(15, 23, 42, 0.7))",
+                      border: "1px solid rgba(56, 189, 248, 0.45)",
+                      borderRadius: "10px",
+                      padding: "16px",
+                      boxShadow: "0 4px 16px rgba(0, 0, 0, 0.25)"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "12px" }}>
+                        <div>
+                          <strong style={{ color: "#38bdf8", fontSize: "14.5px", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <span>📅</span> Meta Business Suite-এ পাঠান (সব বসানো থাকবে)
+                          </strong>
+                          <span style={{ fontSize: "12px", color: "#93c5fd", display: "block", marginTop: "3px", lineHeight: "1.4" }}>
+                            ব্যানার + ক্যাপশন + শিডিউল সহ সরাসরি Meta Business Suite এ চলে যাবে। সেখানে শুধু <b>'Publish Now'</b> চাপলেই ফেসবুকের মূল পেজ কাউন্ট (90+ posts) সাথে সাথে বেড়ে যাবে!
+                          </span>
+                        </div>
+
+                        {/* Schedule Minutes Selector */}
+                        <div style={{ minWidth: "135px" }}>
+                          <label style={{ fontSize: "11px", fontWeight: "700", color: "#94a3b8", display: "block", marginBottom: "4px" }}>
+                            শিডিউল টাইম:
+                          </label>
+                          <select
+                            value={bsScheduleMinutes}
+                            onChange={(e) => setBsScheduleMinutes(Number(e.target.value))}
+                            style={{
+                              width: "100%",
+                              background: "#0f172a",
+                              color: "#ffffff",
+                              border: "1px solid #38bdf8",
+                              borderRadius: "6px",
+                              padding: "6px 8px",
+                              fontSize: "12px",
+                              fontWeight: "700",
+                              outline: "none"
+                            }}
+                          >
+                            <option value={15}>15 মিনিট পর</option>
+                            <option value={20}>20 মিনিট পর (Standard)</option>
+                            <option value={30}>30 মিনিট পর</option>
+                            <option value={60}>1 ঘণ্টা পর</option>
+                            <option value={120}>2 ঘণ্টা পর</option>
+                            <option value={360}>6 ঘণ্টা পর</option>
+                            <option value={1440}>24 ঘণ্টা পর</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleSendToBusinessSuite}
+                        disabled={schedulingBS || !fbConfig.hasToken}
+                        style={{
+                          width: "100%",
+                          background: schedulingBS
+                            ? "#334155"
+                            : "linear-gradient(135deg, #0284c7, #2563eb)",
+                          color: "#ffffff",
+                          border: "none",
+                          padding: "12px 18px",
+                          borderRadius: "8px",
+                          fontWeight: "800",
+                          fontSize: "14px",
+                          cursor: schedulingBS || !fbConfig.hasToken ? "not-allowed" : "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px",
+                          boxShadow: "0 4px 14px rgba(2, 132, 199, 0.4)",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        {schedulingBS ? "⏳ Meta Business Suite এ পাঠানো হচ্ছে..." : "🚀 Direct Business Suite এ পাঠান (Ready to Post)"}
+                      </button>
+
+                      {bsSuccessResult && (
+                        <div style={{ marginTop: "12px", padding: "12px 14px", background: "rgba(16, 185, 129, 0.15)", border: "1px solid #10b981", borderRadius: "8px", fontSize: "12.5px", color: "#d1fae5", lineHeight: "1.5" }}>
+                          <div style={{ fontWeight: "800", color: "#34d399", marginBottom: "4px" }}>
+                            🎉 সফলভাবে Meta Business Suite-এ সাজানো হয়েছে!
+                          </div>
+                          <div>নতুন ট্যাবে Business Suite Scheduled Posts ওপেন হয়েছে। সেখানে পোস্টটির পাশে <b>'Publish Now'</b> (বা <b>'এখনই প্রকাশ করুন'</b>) চাপলেই ফেসবুকের মূল পেজ হেডার কাউন্ট সাথে সাথে বাড়বে।</div>
+                          <div style={{ marginTop: "8px" }}>
+                            <a
+                              href={bsSuccessResult.businessSuiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: "inline-block",
+                                background: "#10b981",
+                                color: "#ffffff",
+                                textDecoration: "none",
+                                padding: "7px 14px",
+                                borderRadius: "6px",
+                                fontWeight: "800",
+                                fontSize: "12.5px"
+                              }}
+                            >
+                              👉 Meta Business Suite এ পোস্টটি দেখুন & Publish Now চাপুন ↗
+                            </a>
+                          </div>
                         </div>
                       )}
                     </div>

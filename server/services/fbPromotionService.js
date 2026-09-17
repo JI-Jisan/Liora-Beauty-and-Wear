@@ -471,6 +471,84 @@ async function publishPhotoToFacebook({ imageBuffer, caption, pageId, pageAccess
   };
 }
 
+/**
+ * Schedule a Post natively to Meta Business Suite with Banner & Sales Caption
+ */
+async function schedulePostToFacebook({
+  imageBuffer,
+  imageUrl,
+  caption,
+  pageId,
+  pageAccessToken,
+  scheduledMinutes = 20,
+}) {
+  if (!pageId || !pageAccessToken) {
+    throw new Error('Facebook Page ID and Page Access Token are required.');
+  }
+
+  const minutes = Math.max(11, Number(scheduledMinutes) || 20);
+  const scheduledPublishTime = Math.floor(Date.now() / 1000) + minutes * 60;
+
+  // Step 1: Upload photo asset as unpublished
+  const photoFormData = new FormData();
+  photoFormData.append('access_token', pageAccessToken);
+  photoFormData.append('published', 'false');
+
+  if (imageBuffer) {
+    const blob = new Blob([imageBuffer], { type: 'image/png' });
+    photoFormData.append('source', blob, 'promotion_banner.png');
+  } else if (imageUrl) {
+    photoFormData.append('url', imageUrl);
+  }
+
+  const uploadRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
+    method: 'POST',
+    body: photoFormData,
+  });
+
+  const uploadData = await uploadRes.json();
+  if (uploadData.error) {
+    throw new Error(`Photo Upload Error: ${uploadData.error.message}`);
+  }
+
+  const photoId = uploadData.id;
+
+  // Step 2: Schedule Feed Post via /{pageId}/feed with attached_media
+  const feedRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/feed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: caption,
+      attached_media: [{ media_fbid: photoId }],
+      published: false,
+      scheduled_publish_time: scheduledPublishTime,
+      access_token: pageAccessToken,
+    }),
+  });
+
+  const feedData = await feedRes.json();
+  console.log('[FB Scheduled Post Response]:', JSON.stringify(feedData));
+
+  if (feedData.error) {
+    throw new Error(`Schedule Post Error: ${feedData.error.message}`);
+  }
+
+  const postId = feedData.id;
+  const businessSuiteUrl = `https://business.facebook.com/latest/posts/scheduled_posts?page_id=${pageId}`;
+  const plannerUrl = `https://business.facebook.com/latest/planner?page_id=${pageId}`;
+
+  return {
+    success: true,
+    postId,
+    photoId,
+    scheduledMinutes: minutes,
+    scheduledPublishTime,
+    scheduledDateStr: new Date(scheduledPublishTime * 1000).toLocaleString('en-US', { timeZone: 'Asia/Dhaka' }),
+    businessSuiteUrl,
+    plannerUrl,
+  };
+}
+
 // In-Memory Auto-Pilot State
 let autoPilotJob = {
   isRunning: false,
@@ -659,6 +737,7 @@ module.exports = {
   generateProductBanner,
   batchGenerateBrandPromotions,
   publishPhotoToFacebook,
+  schedulePostToFacebook,
   startAutoPilot,
   stopAutoPilot,
   getAutoPilotStatus

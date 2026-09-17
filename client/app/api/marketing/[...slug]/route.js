@@ -10,6 +10,7 @@ import {
   batchGenerateBrandPromotions,
   pickSmartTheme,
   publishPhotoToFacebook,
+  schedulePostToFacebook,
   startAutoPilot,
   stopAutoPilot,
   getAutoPilotStatus,
@@ -723,6 +724,55 @@ export async function POST(req, { params }) {
         caption,
         pageId,
         pageAccessToken,
+      });
+
+      return NextResponse.json({
+        success: true,
+        fbResult,
+      });
+    }
+
+    // 3.5. /api/marketing/schedule-business-suite (Stages banner & caption directly in Meta Business Suite)
+    if (action === "schedule-business-suite") {
+      const { productId, customCaption, theme, scheduledMinutes = 20 } = body;
+      const settings = await SiteSettings.findOne().lean();
+
+      const pageId = settings?.fbPageId || "1213659151838727";
+      const pageAccessToken = settings?.fbPageAccessToken;
+
+      if (!pageAccessToken) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Facebook Page Access Token is not set. Please save your Page Token in Settings.",
+          },
+          { status: 400 }
+        );
+      }
+
+      const product = await Product.findById(productId)
+        .populate("category", "name")
+        .populate("brand", "name")
+        .lean();
+
+      if (!product) {
+        return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
+      }
+
+      let bannerBuffer = getStoredBannerBuffer(productId);
+      if (!bannerBuffer) {
+        bannerBuffer = await generateProductBanner(product, theme);
+      }
+      const caption = customCaption || generateFBCaption(product, product.brand?.name || "LIORA");
+
+      const prodImg = product.image || (product.images && product.images[0]) || "";
+      const fbResult = await schedulePostToFacebook({
+        imageBuffer: bannerBuffer,
+        imageUrl: prodImg,
+        caption,
+        pageId,
+        pageAccessToken,
+        scheduledMinutes,
       });
 
       return NextResponse.json({

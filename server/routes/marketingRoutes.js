@@ -369,14 +369,14 @@ router.post('/fb-config', async (req, res) => {
 });
 
 // 7. Publish Single Product Directly to Facebook Page
-const { publishPhotoToFacebook, startAutoPilot, stopAutoPilot, getAutoPilotStatus } = require('../services/fbPromotionService');
+const { publishPhotoToFacebook, schedulePostToFacebook, startAutoPilot, stopAutoPilot, getAutoPilotStatus } = require('../services/fbPromotionService');
 
 router.post('/publish-single', async (req, res) => {
   try {
     const { productId, customCaption, theme } = req.body;
     const settings = await SiteSettings.findOne().lean();
 
-    const pageId = settings?.fbPageId || '61593176967507';
+    const pageId = settings?.fbPageId || '1213659151838727';
     const pageAccessToken = settings?.fbPageAccessToken;
 
     if (!pageAccessToken) {
@@ -410,6 +410,59 @@ router.post('/publish-single', async (req, res) => {
       caption,
       pageId,
       pageAccessToken
+    });
+
+    res.json({
+      success: true,
+      fbResult
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 7.5. Schedule Post to Meta Business Suite
+router.post('/schedule-business-suite', async (req, res) => {
+  try {
+    const { productId, customCaption, theme, scheduledMinutes = 20 } = req.body;
+    const settings = await SiteSettings.findOne().lean();
+
+    const pageId = settings?.fbPageId || '1213659151838727';
+    const pageAccessToken = settings?.fbPageAccessToken;
+
+    if (!pageAccessToken) {
+      return res.status(400).json({
+        success: false,
+        error: 'Facebook Page Access Token not configured. Please save your Page Token in Settings.'
+      });
+    }
+
+    const product = await Product.findById(productId)
+      .populate('category', 'name')
+      .populate('brand', 'name')
+      .lean();
+
+    if (!product) {
+      return res.status(404).json({ success: false, error: 'Product not found' });
+    }
+
+    let bannerBuffer = null;
+    try {
+      const { regenerateBannerForProduct } = require('../services/dynamicBannerService');
+      const bRes = await regenerateBannerForProduct(product._id);
+      bannerBuffer = bRes.buffer;
+    } catch (e) {
+      bannerBuffer = await generateProductBanner(product, theme);
+    }
+    const caption = customCaption || generateFBCaption(product, product.brand?.name || 'LIORA');
+
+    const fbResult = await schedulePostToFacebook({
+      imageBuffer: bannerBuffer,
+      imageUrl: product.image,
+      caption,
+      pageId,
+      pageAccessToken,
+      scheduledMinutes
     });
 
     res.json({
