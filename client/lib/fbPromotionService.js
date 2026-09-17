@@ -570,41 +570,78 @@ export async function publishPhotoToFacebook({ imageBuffer, imageUrl, caption, p
 
   const isSvg = imageBuffer && imageBuffer.toString("utf8", 0, 100).includes("<svg");
 
-  // Post photo directly with story creation (creates timeline post + increments page post count)
-  const formData = new FormData();
-  formData.append("caption", caption);
-  formData.append("access_token", pageAccessToken);
+  // Step 1: Upload photo asset as unpublished to obtain the media FBID
+  const photoFormData = new FormData();
+  photoFormData.append("access_token", pageAccessToken);
+  photoFormData.append("published", "false");
 
   if (isSvg && imageUrl) {
-    formData.append("url", imageUrl);
+    photoFormData.append("url", imageUrl);
   } else if (imageBuffer) {
     const blob = new Blob([imageBuffer], { type: "image/png" });
-    formData.append("source", blob, "promotion_banner.png");
+    photoFormData.append("source", blob, "promotion_banner.png");
   } else if (imageUrl) {
-    formData.append("url", imageUrl);
+    photoFormData.append("url", imageUrl);
   }
 
-  const res = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
+  const uploadRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
     method: "POST",
-    body: formData,
+    body: photoFormData,
   });
 
-  const data = await res.json();
-  console.log("[FB Photos] response:", JSON.stringify(data));
+  const uploadData = await uploadRes.json();
+  console.log("[FB Photo Stage] response:", JSON.stringify(uploadData));
 
-  if (data.error) {
-    throw new Error(`Photo Upload Error: ${data.error.message} (code ${data.error.code})`);
+  if (uploadData.error) {
+    throw new Error(`Photo Upload Error: ${uploadData.error.message} (code ${uploadData.error.code})`);
   }
 
-  const postId = data.post_id || data.id;
+  const photoId = uploadData.id;
+
+  // Step 2: Publish as a true News Feed Post via /{pageId}/feed with attached_media
+  // This creates an authentic Page News Feed Post that immediately increments the Page Post Counter!
+  const feedRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/feed`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: caption,
+      attached_media: [{ media_fbid: photoId }],
+      access_token: pageAccessToken,
+    }),
+  });
+
+  const feedData = await feedRes.json();
+  console.log("[FB Newsfeed Post] response:", JSON.stringify(feedData));
+
+  if (feedData.error) {
+    console.warn("[FB Feed Error] Falling back to photo post:", feedData.error.message);
+    // Fallback: publish photo directly
+    const directRes = await fetch(`https://graph.facebook.com/v20.0/${photoId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        is_published: true,
+        message: caption,
+        access_token: pageAccessToken,
+      }),
+    });
+    const directData = await directRes.json();
+    return {
+      success: true,
+      photoId,
+      postId: photoId,
+      postUrl: `https://www.facebook.com/${photoId}`,
+      method: "direct_photo_fallback",
+    };
+  }
+
+  const postId = feedData.id || photoId;
   return {
     success: true,
-    photoId: data.id,
+    photoId,
     postId,
-    postUrl: data.post_id
-      ? `https://www.facebook.com/${data.post_id}`
-      : `https://www.facebook.com/${data.id}`,
-    method: "feed_with_media",
+    postUrl: `https://www.facebook.com/${postId}`,
+    method: "official_newsfeed_post",
   };
 }
 

@@ -430,27 +430,44 @@ async function publishPhotoToFacebook({ imageBuffer, caption, pageId, pageAccess
     throw new Error('Facebook Page ID and Page Access Token are required.');
   }
 
+  // Step 1: Upload photo asset as unpublished
   const blob = new Blob([imageBuffer], { type: 'image/png' });
-  const formData = new FormData();
-  formData.append('source', blob, 'promotion_banner.png');
-  formData.append('caption', caption);
-  formData.append('access_token', pageAccessToken);
+  const photoFormData = new FormData();
+  photoFormData.append('source', blob, 'promotion_banner.png');
+  photoFormData.append('access_token', pageAccessToken);
+  photoFormData.append('published', 'false');
 
-  const res = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
+  const uploadRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/photos`, {
     method: 'POST',
-    body: formData
+    body: photoFormData
   });
 
-  const data = await res.json();
-  if (data.error) {
-    throw new Error(data.error.message || 'Facebook Publishing Failed');
+  const uploadData = await uploadRes.json();
+  if (uploadData.error) {
+    throw new Error(uploadData.error.message || 'Photo Upload Failed');
   }
+
+  const photoId = uploadData.id;
+
+  // Step 2: Publish as true News Feed Post via /{pageId}/feed with attached_media
+  const feedRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/feed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: caption,
+      attached_media: [{ media_fbid: photoId }],
+      access_token: pageAccessToken
+    })
+  });
+
+  const feedData = await feedRes.json();
+  const postId = feedData.id || photoId;
 
   return {
     success: true,
-    photoId: data.id,
-    postId: data.post_id || data.id,
-    postUrl: data.post_id ? `https://www.facebook.com/${data.post_id}` : `https://www.facebook.com/${data.id}`
+    photoId,
+    postId,
+    postUrl: `https://www.facebook.com/${postId}`
   };
 }
 
