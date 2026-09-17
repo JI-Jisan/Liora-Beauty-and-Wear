@@ -597,53 +597,89 @@ export async function POST(req, { params }) {
           inputToken = decodeURIComponent(match[1]);
         }
       }
-      settings.fbPageAccessToken = inputToken;
 
+      let activeToken = inputToken;
       let pageName = "Liora Beauty & Wear";
       let verified = false;
+      let verifyError = "";
 
-      // 1. Check if token is a User Token that can provide Page Token from /me/accounts
-      try {
-        const accountsRes = await fetch(
-          `https://graph.facebook.com/v20.0/me/accounts?access_token=${inputToken}`
-        );
-        const accountsData = await accountsRes.json();
-        if (accountsData && Array.isArray(accountsData.data) && accountsData.data.length > 0) {
-          const matchedPage = accountsData.data.find((p) => p.id === settings.fbPageId) || accountsData.data[0];
-          if (matchedPage && matchedPage.access_token) {
-            settings.fbPageAccessToken = matchedPage.access_token;
-            if (matchedPage.id) settings.fbPageId = matchedPage.id;
-            pageName = matchedPage.name;
-            verified = true;
+      // Step A: Auto-exchange short-lived token to 60-day Long-Lived User Token using fbAppId & fbAppSecret
+      if (settings.fbAppId && settings.fbAppSecret && inputToken) {
+        try {
+          const exchangeUrl = `https://graph.facebook.com/v20.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${settings.fbAppId}&client_secret=${settings.fbAppSecret}&fb_exchange_token=${inputToken}`;
+          const exRes = await fetch(exchangeUrl);
+          const exData = await exRes.json();
+          if (exData && exData.access_token) {
+            activeToken = exData.access_token;
+            console.log("[FB-Config Route] Upgraded to long-lived token successfully.");
+          } else if (exData?.error) {
+            console.warn("[FB-Config Route] Exchange note:", exData.error.message);
+            if (exData.error.code === 190) {
+              verifyError = `Token expired or invalid: ${exData.error.message}`;
+            }
           }
+        } catch (e) {
+          console.warn("[FB-Config Route] Token exchange warning:", e.message);
         }
-      } catch (e) {
-        console.warn("Accounts lookup failed, checking page directly:", e.message);
       }
 
-      // 2. If not verified via /me/accounts, test directly on Page ID
-      if (!verified && settings.fbPageAccessToken) {
+      // Step B: Get Permanent Never-Expiring Page Token via /me/accounts
+      if (activeToken) {
+        try {
+          const accountsRes = await fetch(
+            `https://graph.facebook.com/v20.0/me/accounts?access_token=${activeToken}`
+          );
+          const accountsData = await accountsRes.json();
+          if (accountsData && Array.isArray(accountsData.data) && accountsData.data.length > 0) {
+            const matchedPage =
+              accountsData.data.find((p) => p.id === settings.fbPageId) ||
+              accountsData.data.find((p) => (p.name || "").toLowerCase().includes("liora")) ||
+              accountsData.data[0];
+
+            if (matchedPage && matchedPage.access_token) {
+              settings.fbPageAccessToken = matchedPage.access_token;
+              if (matchedPage.id) settings.fbPageId = matchedPage.id;
+              pageName = matchedPage.name;
+              verified = true;
+              console.log(`[FB-Config Route] Page Token extracted for "${pageName}" (${settings.fbPageId})`);
+            }
+          } else if (accountsData?.error) {
+            verifyError = accountsData.error.message;
+          }
+        } catch (e) {
+          console.warn("[FB-Config Route] Accounts lookup failed:", e.message);
+        }
+      }
+
+      // Step C: Fallback check directly on Page ID if not verified via /me/accounts
+      if (!verified && activeToken) {
         try {
           const verifyRes = await fetch(
-            `https://graph.facebook.com/v20.0/${settings.fbPageId}?fields=id,name&access_token=${settings.fbPageAccessToken}`
+            `https://graph.facebook.com/v20.0/${settings.fbPageId}?fields=id,name&access_token=${activeToken}`
           );
           const verifyData = await verifyRes.json();
           if (verifyData && verifyData.id) {
+            settings.fbPageAccessToken = activeToken;
             pageName = verifyData.name || pageName;
             verified = true;
+          } else if (verifyData?.error) {
+            verifyError = verifyError || verifyData.error.message;
           }
         } catch (e) {
-          console.warn("Facebook token verification warning:", e.message);
+          console.warn("[FB-Config Route] Verification warning:", e.message);
         }
       }
 
-      await settings.save();
+      if (verified) {
+        await settings.save();
+      }
 
       return NextResponse.json({
-        success: true,
+        success: verified,
         verified,
         pageName,
         fbPageId: settings.fbPageId,
+        error: verified ? undefined : (verifyError || "Could not verify Facebook Page access with this token. Please make sure the token is active and has page permissions."),
       });
     }
 

@@ -151,13 +151,17 @@ export default function AdminMarketingPage() {
         })
       });
       const json = await res.json();
-      if (json.success) {
-        setTokenSavedMsg(`✅ Connected as "${json.pageName}"!`);
+      if (json.success && json.verified) {
+        setTokenSavedMsg(`✅ Connected as "${json.pageName}"! (Page Token Active)`);
         setFbConfig(prev => ({ ...prev, hasToken: true, tokenMasked: `${inputToken.slice(0, 10)}...` }));
         setInputToken("");
+      } else {
+        const errorText = json.error || "Token verification failed. Please make sure the token is active.";
+        setTokenSavedMsg(`❌ ${errorText}`);
+        setErrorMsg(errorText);
       }
     } catch (err) {
-      setTokenSavedMsg("❌ Failed to save token.");
+      setTokenSavedMsg(`❌ Failed to save token: ${err.message}`);
     } finally {
       setSavingToken(false);
     }
