@@ -17,7 +17,7 @@ import {
 
 export const runtime = "nodejs";
 
-const TARGET_35_IDS = [
+const READY_IN_STOCK_IDS = [
   "6a9ab981c63dd531aa8db110", // APLB Glutathione Niacinamide Tablet
   "6a9ab987c63dd531aa8db12a", // Beauty of Joseon Relief Sun
   "6a9ab77134ccee884a4b5cab", // The Ordinary Niacinamide
@@ -53,6 +53,22 @@ const TARGET_35_IDS = [
   "6a9ac03bc63dd531aa8dc6e5", // Ponds Bright Beauty Face Wash
   "6a9abff3c63dd531aa8dc5fb", // Care:Nel Whitening Cream
   "6a9abcf0c63dd531aa8dbc74", // Swiss Beauty Blusher
+  // Batch 5 (15 new items)
+  "6aa2ffd70d2b8add7c6efbd0", // Cosrx Salicylic Acid Daily Gentle Cleanser (৳949)
+  "6a9ab97dc63dd531aa8db0f6", // Dot & Key Barrier Repair Face Wash (৳440)
+  "6a9ab97fc63dd531aa8db100", // Simple Replenishing Rich Moisturiser (৳620)
+  "6a9ab97fc63dd531aa8db104", // Caplino Makeup Sponge – Deep Magenta (৳160)
+  "6a9ab97ec63dd531aa8db0fd", // Caplino Makeup Sponge – Magenta (৳160)
+  "6a9ab97bc63dd531aa8db0f4", // Caplino 1% Retinol Serum (৳790)
+  "6a9ab97fc63dd531aa8db101", // SKIN1004 Tone Brightening Ampoule (৳1670)
+  "6a9ab982c63dd531aa8db114", // Bioaqua Salicylic Acid Cleanser (৳270)
+  "6a9ab97ec63dd531aa8db0f9", // w7 Dip Liquid Eyeliner (৳240)
+  "6a9ab97fc63dd531aa8db107", // Technic Mega Glow Highlighter (৳370)
+  "6a9ab980c63dd531aa8db109", // BREYLEE Acne Treatment Serum (৳270)
+  "6a9ab982c63dd531aa8db119", // Handaiyan Liquid Blush Coral 03 (৳175)
+  "6a9ab982c63dd531aa8db118", // Missha Aqua Sunscreen SPF50+ (৳880)
+  "6a9ab97ec63dd531aa8db0fc", // Beauty Glazed Lipliner B118 (৳115)
+  "6a9ab980c63dd531aa8db10c", // CAPLINO Liquid Matte Lipstick 10 (৳380)
 ];
 
 function getStoredBannerBuffer(productId) {
@@ -97,9 +113,9 @@ export async function GET(req, { params }) {
       const enriched = [
         {
           _id: "instock_ready",
-          name: "🔥 প্রস্তুতকৃত ৩৫টি ইন-স্টক ব্যানার (Ready 35 Banners)",
+          name: `🔥 প্রস্তুতকৃত ${READY_IN_STOCK_IDS.length}টি ইন-স্টক ব্যানার (Ready ${READY_IN_STOCK_IDS.length} Banners)`,
           slug: "instock_ready",
-          productCount: 35,
+          productCount: READY_IN_STOCK_IDS.length,
         },
         ...brands
           .map((b) => ({
@@ -123,12 +139,12 @@ export async function GET(req, { params }) {
 
       let products = [];
       if (brandId === "instock_ready") {
-        const raw = await Product.find({ _id: { $in: TARGET_35_IDS } })
+        const raw = await Product.find({ _id: { $in: READY_IN_STOCK_IDS } })
           .populate("category", "name")
           .populate("brand", "name")
           .lean();
         const map = new Map(raw.map((p) => [p._id.toString(), p]));
-        products = TARGET_35_IDS.map((id) => map.get(id)).filter(Boolean);
+        products = READY_IN_STOCK_IDS.map((id) => map.get(id)).filter(Boolean);
       } else {
         const query = {
           $or: [
