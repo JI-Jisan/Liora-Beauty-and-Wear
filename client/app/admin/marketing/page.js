@@ -28,6 +28,8 @@ export default function AdminMarketingPage() {
   const [tokenSavedMsg, setTokenSavedMsg] = useState("");
   const [publishingSingle, setPublishingSingle] = useState(false);
   const [singlePostSuccess, setSinglePostSuccess] = useState(null);
+  const [quickFeedMsg, setQuickFeedMsg] = useState("");
+  const [imageCopied, setImageCopied] = useState(false);
 
   // Auto-Pilot State
   const [autoPilotInterval, setAutoPilotInterval] = useState(15);
@@ -273,6 +275,61 @@ export default function AdminMarketingPage() {
     navigator.clipboard.writeText(previewData.caption);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
+  };
+
+  const handleCopyImage = async () => {
+    if (!previewData?.bannerBase64) return;
+    try {
+      const res = await fetch(previewData.bannerBase64);
+      const blob = await res.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob })
+      ]);
+      setImageCopied(true);
+      setTimeout(() => setImageCopied(false), 3000);
+    } catch (e) {
+      console.warn("Image copy to clipboard not supported:", e);
+      // Fallback: download the image
+      const a = document.createElement("a");
+      a.href = `${API_BASE_URL}/api/marketing/banner-download/${previewData.product._id}?theme=${selectedTheme}`;
+      a.download = `${previewData.product.slug || "liora_banner"}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
+  const handleQuickPostFeed = async () => {
+    if (!previewData) return;
+
+    // 1. Copy sales caption to clipboard
+    if (previewData.caption) {
+      try {
+        await navigator.clipboard.writeText(previewData.caption);
+        setCopied(true);
+      } catch (e) {
+        console.warn("Caption copy failed:", e);
+      }
+    }
+
+    // 2. Trigger instant download of the banner
+    try {
+      const a = document.createElement("a");
+      a.href = `${API_BASE_URL}/api/marketing/banner-download/${previewData.product._id}?theme=${selectedTheme}`;
+      a.download = `${previewData.product.slug || "liora_banner"}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {
+      console.warn("Auto-download failed:", e);
+    }
+
+    // 3. Open Facebook Page feed directly
+    const fbUrl = `https://www.facebook.com/${fbConfig.fbPageId || "1213659151838727"}`;
+    window.open(fbUrl, "_blank", "noopener,noreferrer");
+
+    // 4. Show success guidance banner
+    setQuickFeedMsg("✅ ১ ক্লিকে ক্যাপশন কপি হয়েছে + ব্যানার ডাউনলোড হয়েছে! ফেসবুকে গিয়ে ছবিটি টেনে দিন এবং ক্যাপশন Paste (Ctrl+V) করে Post চাপুন। পেজ হেডার কাউন্ট সাথে সাথে বাড়বে!");
   };
 
   const selectedBrandObj = brands.find((b) => b._id === selectedBrand);
@@ -654,7 +711,68 @@ export default function AdminMarketingPage() {
                       <img src={previewData.bannerBase64} alt="HD Promotional Banner" style={{ width: "100%", height: "auto", display: "block" }} />
                     </div>
 
-                    <div style={{ marginTop: "14px", display: "flex", gap: "10px" }}>
+                    {/* Quick Post to Feed Action Card */}
+                    <div style={{ marginTop: "14px", background: "linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.25))", border: "1px solid rgba(52, 211, 153, 0.4)", borderRadius: "10px", padding: "14px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <div>
+                          <strong style={{ color: "#34d399", fontSize: "14px", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <span>⚡</span> Quick Post to FB Feed
+                          </strong>
+                          <span style={{ fontSize: "12px", color: "#a7f3d0", display: "block", marginTop: "2px" }}>
+                            👉 পেজের হেডার কাউন্টার (90 posts) সাথে সাথে ১, ২ করে বাড়াতে এটি ব্যবহার করুন!
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "10px" }}>
+                        <button
+                          onClick={handleQuickPostFeed}
+                          style={{
+                            flex: 2,
+                            background: "linear-gradient(135deg, #10b981, #059669)",
+                            color: "#ffffff",
+                            border: "none",
+                            padding: "12px 16px",
+                            borderRadius: "8px",
+                            fontWeight: "800",
+                            fontSize: "13.5px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                            boxShadow: "0 4px 14px rgba(16, 185, 129, 0.35)"
+                          }}
+                        >
+                          🚀 ১-ক্লিকে Feed এ পোস্ট করুন (Count বাড়ে)
+                        </button>
+
+                        <button
+                          onClick={handleCopyImage}
+                          style={{
+                            background: imageCopied ? "#10b981" : "#1e293b",
+                            color: "#ffffff",
+                            border: "1px solid #334155",
+                            padding: "10px 14px",
+                            borderRadius: "8px",
+                            fontSize: "12.5px",
+                            fontWeight: "700",
+                            cursor: "pointer"
+                          }}
+                          title="ছবি ক্লিপবোর্ডে কপি করুন, ফেসবুকে Ctrl+V চাপলে সরাসরি ছবি পেস্ট হবে"
+                        >
+                          {imageCopied ? "✓ Image Copied!" : "🖼️ Copy Image"}
+                        </button>
+                      </div>
+
+                      {quickFeedMsg && (
+                        <div style={{ marginTop: "10px", padding: "10px 12px", background: "rgba(16, 185, 129, 0.2)", border: "1px solid #34d399", borderRadius: "6px", fontSize: "12.5px", color: "#d1fae5", lineHeight: "1.5" }}>
+                          {quickFeedMsg}
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
                       <a
                         href={`${API_BASE_URL}/api/marketing/banner-download/${previewData.product._id}?theme=${selectedTheme}`}
                         download
@@ -664,11 +782,10 @@ export default function AdminMarketingPage() {
                           background: "#0284c7",
                           color: "#ffffff",
                           textDecoration: "none",
-                          padding: "12px 14px",
+                          padding: "10px 12px",
                           borderRadius: "8px",
-                          fontWeight: "800",
-                          fontSize: "13.5px",
-                          boxShadow: "0 4px 12px rgba(2, 132, 199, 0.35)"
+                          fontWeight: "700",
+                          fontSize: "13px"
                         }}
                       >
                         ⬇️ Download HD Banner (.PNG)
@@ -678,21 +795,18 @@ export default function AdminMarketingPage() {
                         onClick={handlePublishSingle}
                         disabled={publishingSingle || !fbConfig.hasToken}
                         style={{
-                          background: fbConfig.hasToken ? "linear-gradient(135deg, #1877f2, #0d65d9)" : "#475569",
-                          color: "#ffffff",
-                          border: "none",
-                          padding: "12px 16px",
+                          background: fbConfig.hasToken ? "#334155" : "#1e293b",
+                          color: "#cbd5e1",
+                          border: "1px solid #475569",
+                          padding: "10px 14px",
                           borderRadius: "8px",
-                          fontWeight: "800",
-                          fontSize: "13.5px",
-                          cursor: fbConfig.hasToken && !publishingSingle ? "pointer" : "not-allowed",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px"
+                          fontWeight: "700",
+                          fontSize: "13px",
+                          cursor: fbConfig.hasToken && !publishingSingle ? "pointer" : "not-allowed"
                         }}
-                        title={!fbConfig.hasToken ? "Save Page Token above to enable instant Facebook posting" : "Post live to Facebook"}
+                        title="Direct API Cloud Post"
                       >
-                        {publishingSingle ? "Publishing..." : "🚀 Post to FB Now"}
+                        {publishingSingle ? "Publishing..." : "🤖 Cloud Auto-Post"}
                       </button>
                     </div>
                   </div>
