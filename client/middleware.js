@@ -17,6 +17,7 @@ export async function middleware(req) {
       path.startsWith('/api/my-orders') ||
       path.includes('/api/orders/track') ||
       path.startsWith('/api/orders/view') ||
+      path.startsWith('/api/marketing/') ||
       (method === 'POST' && /^\/api\/orders\/?$/.test(path))
     ) {
       return NextResponse.next();

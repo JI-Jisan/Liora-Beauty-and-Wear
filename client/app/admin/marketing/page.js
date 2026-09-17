@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
 import { removeStudioBackgroundClient } from "@/lib/clientCutout";
 
 export default function AdminMarketingPage() {
@@ -144,7 +144,7 @@ export default function AdminMarketingPage() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/marketing/fb-config`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           fbPageId: fbConfig.fbPageId || "1213659151838727",
           fbPageAccessToken: inputToken.trim()
@@ -172,7 +172,7 @@ export default function AdminMarketingPage() {
     try {
       const res = await fetch(`${API_BASE_URL}/api/marketing/publish-single`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: activeProduct,
           customCaption: previewData.caption,
@@ -201,7 +201,7 @@ export default function AdminMarketingPage() {
       const currentBrandObj = brands.find((b) => b._id === selectedBrand);
       const res = await fetch(`${API_BASE_URL}/api/marketing/start-autopilot`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           brandId: selectedBrand,
           brandName: currentBrandObj?.name,
@@ -225,7 +225,10 @@ export default function AdminMarketingPage() {
   // 7. Stop Auto-Pilot Scheduler
   async function handleStopAutoPilot() {
     try {
-      await fetch(`${API_BASE_URL}/api/marketing/stop-autopilot`, { method: "POST" });
+      await fetch(`${API_BASE_URL}/api/marketing/stop-autopilot`, {
+        method: "POST",
+        headers: { ...getAuthHeaders() }
+      });
       setAutoPilotStatus(prev => ({ ...prev, isRunning: false, nextPostTime: null }));
     } catch (e) {
       // silent
@@ -241,7 +244,7 @@ export default function AdminMarketingPage() {
       const currentBrandObj = brands.find((b) => b._id === selectedBrand);
       const res = await fetch(`${API_BASE_URL}/api/marketing/batch-generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
         body: JSON.stringify({
           brandId: selectedBrand,
           brandName: currentBrandObj ? currentBrandObj.name : "brand",
