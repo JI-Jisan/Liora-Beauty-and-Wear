@@ -506,6 +506,15 @@ export default function AdminMarketingPage() {
             <div>
               <strong style={{ color: "#38bdf8", fontSize: "15px" }}>🎉 Published Live to Liora Facebook Page!</strong>
               <div style={{ fontSize: "13px", color: "#cbd5e1", marginTop: "2px" }}>Post ID: {singlePostSuccess.postId}</div>
+              <div style={{ fontSize: "12px", marginTop: "4px" }}>
+                {singlePostSuccess.method === "feed_with_media"
+                  ? <span style={{ color: "#34d399", fontWeight: "700" }}>✅ Method: Feed Post (post count বাড়বে) ✅</span>
+                  : <span style={{ color: "#f59e0b", fontWeight: "700" }}>⚠️ Method: Photos Fallback (post count নাও বাড়তে পারে)</span>
+                }
+                {singlePostSuccess.feedError && (
+                  <span style={{ color: "#fca5a5", marginLeft: "8px", fontSize: "11px" }}> — {singlePostSuccess.feedError}</span>
+                )}
+              </div>
             </div>
             <a
               href={singlePostSuccess.postUrl}

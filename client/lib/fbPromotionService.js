@@ -590,14 +590,15 @@ export async function publishPhotoToFacebook({ imageBuffer, imageUrl, caption, p
   });
 
   const uploadData = await uploadRes.json();
+  console.log("[FB Upload] response:", JSON.stringify(uploadData));
   if (uploadData.error) {
-    throw new Error(uploadData.error.message || "Facebook Photo Upload Failed");
+    throw new Error(`Photo Upload Error: ${uploadData.error.message} (code ${uploadData.error.code})`);
   }
 
   const photoId = uploadData.id;
+  console.log("[FB Upload] photoId:", photoId);
 
   // ─── Step 2: Publish as a feed post with the attached photo ───────────────
-  // This makes it appear as a proper timeline POST (increments post count)
   const feedRes = await fetch(`https://graph.facebook.com/v20.0/${pageId}/feed`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -609,12 +610,17 @@ export async function publishPhotoToFacebook({ imageBuffer, imageUrl, caption, p
   });
 
   const feedData = await feedRes.json();
+  console.log("[FB Feed] response:", JSON.stringify(feedData));
+
   if (feedData.error) {
-    // Fallback: if feed post fails, try direct photo post with story
+    const feedErrMsg = `Feed Error: ${feedData.error.message} (code ${feedData.error.code})`;
+    console.warn("[FB Feed] failed, trying fallback photos method. Error:", feedErrMsg);
+
+    // Fallback: publish directly as photo with story enabled
     const fallbackForm = new FormData();
     fallbackForm.append("caption", caption);
     fallbackForm.append("access_token", pageAccessToken);
-    fallbackForm.append("no_story", "false");
+    fallbackForm.append("published", "true");
     if (imageBuffer) {
       const blob2 = new Blob([imageBuffer], { type: "image/png" });
       fallbackForm.append("source", blob2, "promotion_banner.png");
@@ -626,8 +632,9 @@ export async function publishPhotoToFacebook({ imageBuffer, imageUrl, caption, p
       body: fallbackForm,
     });
     const fallbackData = await fallbackRes.json();
+    console.log("[FB Fallback] response:", JSON.stringify(fallbackData));
     if (fallbackData.error) {
-      throw new Error(fallbackData.error.message || "Facebook Publishing Failed");
+      throw new Error(`${feedErrMsg} | Fallback Error: ${fallbackData.error.message}`);
     }
     return {
       success: true,
@@ -637,6 +644,7 @@ export async function publishPhotoToFacebook({ imageBuffer, imageUrl, caption, p
         ? `https://www.facebook.com/${fallbackData.post_id}`
         : `https://www.facebook.com/${fallbackData.id}`,
       method: "photos_fallback",
+      feedError: feedErrMsg,
     };
   }
 
