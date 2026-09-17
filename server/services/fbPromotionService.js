@@ -557,7 +557,14 @@ async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit = 50, pa
 
     try {
       console.log(`[Auto-Pilot] Posting "${product.name}" to Facebook...`);
-      const bannerBuffer = await generateProductBanner(product);
+      const { regenerateBannerForProduct } = require('./dynamicBannerService');
+      let bannerBuffer = null;
+      try {
+        const result = await regenerateBannerForProduct(product._id);
+        bannerBuffer = result.buffer;
+      } catch (e) {
+        bannerBuffer = await generateProductBanner(product);
+      }
       const caption = generateFBCaption(product, brandDoc?.name || 'LIORA');
 
       const fbResult = await publishPhotoToFacebook({

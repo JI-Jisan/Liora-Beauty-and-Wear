@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
+const fs = require("fs");
 const Product = require("../models/Product");
 const upload = require("../middleware/upload");
 const adminAuth = require("../middleware/adminAuth");
 const Category = require("../models/Category");
 const Brand = require("../models/Brand");
 const SiteSettings = require("../models/SiteSettings");
+const { regenerateBannerForProduct, getBannerFilePath } = require("../services/dynamicBannerService");
 
 // GET all products
 router.get("/", async (req, res) => {
@@ -133,6 +135,35 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// GET dynamic live marketing banner for product
+router.get("/:id/banner", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { download, refresh } = req.query;
+    const bannerPath = getBannerFilePath(id);
+
+    let buffer = null;
+    if (fs.existsSync(bannerPath) && refresh !== "1") {
+      buffer = fs.readFileSync(bannerPath);
+    } else {
+      const result = await regenerateBannerForProduct(id);
+      buffer = result.buffer;
+    }
+
+    if (download === "1") {
+      res.setHeader("Content-Disposition", `attachment; filename="liora_banner_${id}.png"`);
+    } else {
+      res.setHeader("Content-Disposition", "inline");
+    }
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Cache-Control", "no-cache, must-revalidate");
+    res.send(buffer);
+  } catch (err) {
+    console.error("Banner fetch error:", err.message);
+    res.status(500).json({ message: "Could not generate banner", error: err.message });
+  }
+});
+
 // ADD new product
 router.post("/", adminAuth, async (req, res) => {
   try {
@@ -167,6 +198,11 @@ router.post("/", adminAuth, async (req, res) => {
 
     // Mark demo as seeded so deleted demos don't reappear
     await SiteSettings.findOneAndUpdate({}, { isDemoSeeded: true }, { upsert: true });
+
+    // Automatically regenerate marketing banner with fresh prices in background
+    regenerateBannerForProduct(product._id).catch((err) =>
+      console.error("[AutoBanner] Post creation error:", err.message)
+    );
 
     const savedProduct = await Product.findById(product._id).populate("category");
     res.status(201).json(savedProduct);
@@ -209,13 +245,25 @@ router.put("/:id", adminAuth, async (req, res) => {
       updated = await Product.findByIdAndUpdate(id, updateData, { new: true }).populate("category");
     }
 
+    let finalProductId = id;
     if (!updated) {
       delete updateData._id;
       const newProduct = new Product(updateData);
       await newProduct.save();
+      finalProductId = newProduct._id;
       const saved = await Product.findById(newProduct._id).populate("category");
+      
+      // Automatically generate marketing banner for new item
+      regenerateBannerForProduct(finalProductId).catch((err) =>
+        console.error("[AutoBanner] Upsert banner error:", err.message)
+      );
       return res.json(saved);
     }
+
+    // Automatically regenerate marketing banner with fresh updated price in background!
+    regenerateBannerForProduct(finalProductId).catch((err) =>
+      console.error("[AutoBanner] Price update banner regeneration error:", err.message)
+    );
 
     res.json(updated);
   } catch (error) {

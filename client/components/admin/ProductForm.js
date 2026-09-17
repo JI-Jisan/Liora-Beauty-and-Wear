@@ -291,6 +291,35 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
         </div>
       </Card>
 
+      {editing && editing._id && (
+        <Card title="🎨 সোশ্যাল মিডিয়া মার্কেটিং ব্যানার (১০৮০×১০৮০)" desc="প্রাইজ আপডেট করলে ব্যানার অটো-আপডেট হয়ে যাবে">
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            <img
+              src={`${API_BASE_URL}/api/products/${editing._id}/banner`}
+              alt="Marketing Banner"
+              style={{ width: 110, height: 110, objectFit: 'cover', borderRadius: 12, border: '1px solid #e2e8f0', background: '#090d16' }}
+            />
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ fontSize: 13, color: '#475569', marginBottom: 10, lineHeight: 1.5 }}>
+                ফেসবুক ও ইনস্টাগ্রাম বিজ্ঞাপনের জন্য রেডি এইচডি ব্যানার। প্রাইস বা অফার আপডেট করে সেভ করলেই এই ব্যানার নতুন প্রাইস দিয়ে অটো রি-জেনারেট হবে।
+              </p>
+              <a
+                href={`${API_BASE_URL}/api/products/${editing._id}/banner?download=1`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '8px 15px', borderRadius: 8, background: '#0f172a',
+                  color: '#fff', fontSize: 12.5, fontWeight: 700, textDecoration: 'none'
+                }}
+              >
+                ⬇ এইচডি ব্যানার ডাউনলোড করুন
+              </a>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {error && (
         <p style={{ color: "#dc2626", fontWeight: 600, marginTop: 12, textAlign: 'center' }}>{error}</p>
       )}

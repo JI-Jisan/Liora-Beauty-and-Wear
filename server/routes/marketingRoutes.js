@@ -276,7 +276,14 @@ router.post('/publish-single', async (req, res) => {
       return res.status(404).json({ success: false, error: 'Product not found' });
     }
 
-    const bannerBuffer = await generateProductBanner(product, theme);
+    let bannerBuffer = null;
+    try {
+      const { regenerateBannerForProduct } = require('../services/dynamicBannerService');
+      const bRes = await regenerateBannerForProduct(product._id);
+      bannerBuffer = bRes.buffer;
+    } catch (e) {
+      bannerBuffer = await generateProductBanner(product, theme);
+    }
     const caption = customCaption || generateFBCaption(product, product.brand?.name || 'LIORA');
 
     const fbResult = await publishPhotoToFacebook({
