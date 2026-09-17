@@ -11,7 +11,7 @@ const {
   THEMES
 } = require('../services/fbPromotionService');
 
-const TARGET_240_IDS = [
+const TARGET_270_IDS = [
   "6a9ab981c63dd531aa8db110", "6a9ab987c63dd531aa8db12a", "6a9ab77134ccee884a4b5cab", "6a9ab74b661657cb254c1bd5", "6a9aad6ae4955f357f776448",
   "6a8ae1ccdbc554e2928be214", "6a8e6c9d6d43fcfea47cad88", "6a8e6d7682271de00ebfa736", "6a8e6e13297e3906134a82f6", "6a8e6eafe9601eacddbf7dbb",
   "6a8e702551c7c127243ea1c1", "6a8e70f151c7c127243ea1c2", "6a8e723151c7c127243ea1c3", "6a8e72fa51c7c127243ea1c4", "6a8e757fc63423be0cf51d31",
@@ -67,7 +67,14 @@ const TARGET_240_IDS = [
   "6a9ab9e5c63dd531aa8db2b1", "6a9ab9efc63dd531aa8db2cc", "6a9ab9e1c63dd531aa8db298", "6a9ab9e6c63dd531aa8db2b4", "6a9ab9efc63dd531aa8db2d0",
   "6a9ab9e7c63dd531aa8db2b9", "6a9ab9e3c63dd531aa8db29f", "6a9ab9e8c63dd531aa8db2bc", "6a9ab9f1c63dd531aa8db2d4", "6a9ab9e9c63dd531aa8db2c1",
   "6a9ab9e3c63dd531aa8db2a1", "6a9ab9ecc63dd531aa8db2c6", "6a9ab9e0c63dd531aa8db294", "6a9ab9edc63dd531aa8db2c9", "6a9ab9e4c63dd531aa8db2ac",
-  "6a9ab9f2c63dd531aa8db2d8", "6a9ab9f1c63dd531aa8db2d6", "6a9ab9e1c63dd531aa8db296", "6a9ab9e4c63dd531aa8db2ad", "6a9ab9efc63dd531aa8db2ce"
+  "6a9ab9f2c63dd531aa8db2d8", "6a9ab9f1c63dd531aa8db2d6", "6a9ab9e1c63dd531aa8db296", "6a9ab9e4c63dd531aa8db2ad", "6a9ab9efc63dd531aa8db2ce",
+  // Batch 13 (30 items)
+  "6a9ab9fbc63dd531aa8db2fa", "6a9ab9ffc63dd531aa8db304", "6a9ab9f5c63dd531aa8db2e8", "6a9ab9fbc63dd531aa8db2f6", "6a9aba02c63dd531aa8db30e",
+  "6a9ab9f5c63dd531aa8db2e4", "6a9ab9fec63dd531aa8db2fe", "6a9ab9f2c63dd531aa8db2da", "6a9aba00c63dd531aa8db308", "6a9ab9f6c63dd531aa8db2ec",
+  "6a9ab9f7c63dd531aa8db2f4", "6a9aba02c63dd531aa8db312", "6a9ab9f4c63dd531aa8db2e1", "6a9ab9fbc63dd531aa8db2f7", "6a9aba04c63dd531aa8db316",
+  "6a9ab9fdc63dd531aa8db2fc", "6a9ab9f5c63dd531aa8db2e5", "6a9ab9fec63dd531aa8db301", "6a9aba04c63dd531aa8db317", "6a9aba00c63dd531aa8db306",
+  "6a9ab9f5c63dd531aa8db2e9", "6a9aba01c63dd531aa8db30c", "6a9ab9f3c63dd531aa8db2de", "6a9aba02c63dd531aa8db30f", "6a9ab9f7c63dd531aa8db2ef",
+  "6a9aba05c63dd531aa8db31c", "6a9aba04c63dd531aa8db31a", "6a9ab9f4c63dd531aa8db2e0", "6a9ab9f7c63dd531aa8db2f2", "6a9aba03c63dd531aa8db314"
 ];
 
 // 1. Get all brands with active products for dropdown
@@ -85,9 +92,9 @@ router.get('/brands', async (req, res) => {
     const enriched = [
       {
         _id: 'instock_ready',
-        name: `🔥 প্রস্তুতকৃত ${TARGET_240_IDS.length}টি ইন-স্টক ব্যানার (Ready ${TARGET_240_IDS.length} Banners)`,
+        name: `🔥 প্রস্তুতকৃত ${TARGET_270_IDS.length}টি ইন-স্টক ব্যানার (Ready ${TARGET_270_IDS.length} Banners)`,
         slug: 'instock_ready',
-        productCount: TARGET_240_IDS.length
+        productCount: TARGET_270_IDS.length
       },
       ...brands.map(b => ({
         _id: b._id,
@@ -113,12 +120,12 @@ router.get('/products', async (req, res) => {
 
     let products = [];
     if (brandId === 'instock_ready') {
-      const raw = await Product.find({ _id: { $in: TARGET_240_IDS } })
+      const raw = await Product.find({ _id: { $in: TARGET_270_IDS } })
         .populate('category', 'name')
         .populate('brand', 'name')
         .lean();
       const map = new Map(raw.map((p) => [p._id.toString(), p]));
-      products = TARGET_240_IDS.map((id) => map.get(id)).filter(Boolean);
+      products = TARGET_270_IDS.map((id) => map.get(id)).filter(Boolean);
     } else {
       const query = {
         $or: [
