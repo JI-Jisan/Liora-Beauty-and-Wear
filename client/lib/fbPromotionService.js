@@ -606,6 +606,7 @@ export async function publishPhotoToFacebook({ imageBuffer, imageUrl, caption, p
       : `https://www.facebook.com/${data.id}`,
     method: "feed_with_media",
   };
+}
 
 // Global in-memory autopilot job
 if (!global.__lioraAutoPilotJob) {
