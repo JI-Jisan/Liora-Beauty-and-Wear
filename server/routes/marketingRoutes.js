@@ -39,15 +39,20 @@ router.get('/brands', async (req, res) => {
       "6a9ab989c63dd531aa8db13d", "6a9ab987c63dd531aa8db12b", "6a9ab983c63dd531aa8db11c", "6a9ab989c63dd531aa8db13c", "6a9ab988c63dd531aa8db132",
       "6a9ab986c63dd531aa8db126", "6a9ab989c63dd531aa8db141", "6a9ab98ac63dd531aa8db143", "6a9ab987c63dd531aa8db130", "6a9ab984c63dd531aa8db11e",
       "6a9ab988c63dd531aa8db138", "6a9ab988c63dd531aa8db133", "6a9ab95bc63dd531aa8db124", "6a9ab989c63dd531aa8db13b", "6a9ab980c63dd531aa8db10d",
-      "6a9ab98cc63dd531aa8db14b", "6a9ab98ac63dd531aa8db148", "6a9ab987c63dd531aa8db129", "6a9ab985c63dd531aa8db121", "6a9ab988c63dd531aa8db137"
+      "6a9ab98cc63dd531aa8db14b", "6a9ab98ac63dd531aa8db148", "6a9ab987c63dd531aa8db129", "6a9ab985c63dd531aa8db121", "6a9ab988c63dd531aa8db137",
+      // Batch 7 (20 items)
+      "6a9ab996c63dd531aa8db16e", "6a9ab991c63dd531aa8db15b", "6a9ab997c63dd531aa8db173", "6a9ab996c63dd531aa8db167", "6a9ab992c63dd531aa8db15e",
+      "6a9ab990c63dd531aa8db156", "6a9ab98ec63dd531aa8db14e", "6a9ab997c63dd531aa8db171", "6a9ab992c63dd531aa8db15d", "6a9ab98ec63dd531aa8db150",
+      "6a9ab996c63dd531aa8db166", "6a9ab993c63dd531aa8db161", "6a9ab990c63dd531aa8db155", "6a9ab996c63dd531aa8db16d", "6a9ab98ec63dd531aa8db14d",
+      "6a9ab999c63dd531aa8db17a", "6a9ab998c63dd531aa8db178", "6a9ab990c63dd531aa8db157", "6a9ab98fc63dd531aa8db153", "6a9ab993c63dd531aa8db164"
     ];
 
     const enriched = [
       {
         _id: 'instock_ready',
-        name: `🔥 প্রস্তুতকৃত ${TARGET_70_IDS.length}টি ইন-স্টক ব্যানার (Ready ${TARGET_70_IDS.length} Banners)`,
+        name: `🔥 প্রস্তুতকৃত ${TARGET_90_IDS.length}টি ইন-স্টক ব্যানার (Ready ${TARGET_90_IDS.length} Banners)`,
         slug: 'instock_ready',
-        productCount: TARGET_70_IDS.length
+        productCount: TARGET_90_IDS.length
       },
       ...brands.map(b => ({
         _id: b._id,
@@ -71,7 +76,7 @@ router.get('/products', async (req, res) => {
       return res.status(400).json({ success: false, error: 'brandId is required' });
     }
 
-    const TARGET_70_IDS = [
+    const TARGET_90_IDS = [
       "6a9ab981c63dd531aa8db110", "6a9ab987c63dd531aa8db12a", "6a9ab77134ccee884a4b5cab", "6a9ab74b661657cb254c1bd5", "6a9aad6ae4955f357f776448",
       "6a8ae1ccdbc554e2928be214", "6a8e6c9d6d43fcfea47cad88", "6a8e6d7682271de00ebfa736", "6a8e6e13297e3906134a82f6", "6a8e6eafe9601eacddbf7dbb",
       "6a8e702551c7c127243ea1c1", "6a8e70f151c7c127243ea1c2", "6a8e723151c7c127243ea1c3", "6a8e72fa51c7c127243ea1c4", "6a8e757fc63423be0cf51d31",
@@ -87,12 +92,23 @@ router.get('/products', async (req, res) => {
       "6a9ab989c63dd531aa8db13d", "6a9ab987c63dd531aa8db12b", "6a9ab983c63dd531aa8db11c", "6a9ab989c63dd531aa8db13c", "6a9ab988c63dd531aa8db132",
       "6a9ab986c63dd531aa8db126", "6a9ab989c63dd531aa8db141", "6a9ab98ac63dd531aa8db143", "6a9ab987c63dd531aa8db130", "6a9ab984c63dd531aa8db11e",
       "6a9ab988c63dd531aa8db138", "6a9ab988c63dd531aa8db133", "6a9ab95bc63dd531aa8db124", "6a9ab989c63dd531aa8db13b", "6a9ab980c63dd531aa8db10d",
-      "6a9ab98cc63dd531aa8db14b", "6a9ab98ac63dd531aa8db148", "6a9ab987c63dd531aa8db129", "6a9ab985c63dd531aa8db121", "6a9ab988c63dd531aa8db137"
+      "6a9ab98cc63dd531aa8db14b", "6a9ab98ac63dd531aa8db148", "6a9ab987c63dd531aa8db129", "6a9ab985c63dd531aa8db121", "6a9ab988c63dd531aa8db137",
+      // Batch 7 (20 items)
+      "6a9ab996c63dd531aa8db16e", "6a9ab991c63dd531aa8db15b", "6a9ab997c63dd531aa8db173", "6a9ab996c63dd531aa8db167", "6a9ab992c63dd531aa8db15e",
+      "6a9ab990c63dd531aa8db156", "6a9ab98ec63dd531aa8db14e", "6a9ab997c63dd531aa8db171", "6a9ab992c63dd531aa8db15d", "6a9ab98ec63dd531aa8db150",
+      "6a9ab996c63dd531aa8db166", "6a9ab993c63dd531aa8db161", "6a9ab990c63dd531aa8db155", "6a9ab996c63dd531aa8db16d", "6a9ab98ec63dd531aa8db14d",
+      "6a9ab999c63dd531aa8db17a", "6a9ab998c63dd531aa8db178", "6a9ab990c63dd531aa8db157", "6a9ab98fc63dd531aa8db153", "6a9ab993c63dd531aa8db164"
     ];
 
     let products = [];
     if (brandId === 'instock_ready') {
-      const raw = await Product.find({ _id: { $in: TARGET_70_IDS } })
+      const raw = await Product.find({ _id: { $in: TARGET_90_IDS } })
+        .populate('category', 'name')
+        .populate('brand', 'name')
+        .lean();
+      const map = new Map(raw.map((p) => [p._id.toString(), p]));
+      products = TARGET_90_IDS.map((id) => map.get(id)).filter(Boolean);
+    } else {
         .populate('category', 'name')
         .populate('brand', 'name')
         .lean();
