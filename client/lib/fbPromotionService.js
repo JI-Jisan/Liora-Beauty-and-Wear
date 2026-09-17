@@ -654,7 +654,7 @@ export async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit =
   let products = [];
 
   if (brandQuery === "instock_ready") {
-    const target270Ids = [
+    const target300Ids = [
       "6a9ab981c63dd531aa8db110", "6a9ab987c63dd531aa8db12a", "6a9ab77134ccee884a4b5cab", "6a9ab74b661657cb254c1bd5", "6a9aad6ae4955f357f776448",
       "6a8ae1ccdbc554e2928be214", "6a8e6c9d6d43fcfea47cad88", "6a8e6d7682271de00ebfa736", "6a8e6e13297e3906134a82f6", "6a8e6eafe9601eacddbf7dbb",
       "6a8e702551c7c127243ea1c1", "6a8e70f151c7c127243ea1c2", "6a8e723151c7c127243ea1c3", "6a8e72fa51c7c127243ea1c4", "6a8e757fc63423be0cf51d31",
@@ -717,14 +717,21 @@ export async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit =
       "6a9ab9f7c63dd531aa8db2f4", "6a9aba02c63dd531aa8db312", "6a9ab9f4c63dd531aa8db2e1", "6a9ab9fbc63dd531aa8db2f7", "6a9aba04c63dd531aa8db316",
       "6a9ab9fdc63dd531aa8db2fc", "6a9ab9f5c63dd531aa8db2e5", "6a9ab9fec63dd531aa8db301", "6a9aba04c63dd531aa8db317", "6a9aba00c63dd531aa8db306",
       "6a9ab9f5c63dd531aa8db2e9", "6a9aba01c63dd531aa8db30c", "6a9ab9f3c63dd531aa8db2de", "6a9aba02c63dd531aa8db30f", "6a9ab9f7c63dd531aa8db2ef",
-      "6a9aba05c63dd531aa8db31c", "6a9aba04c63dd531aa8db31a", "6a9ab9f4c63dd531aa8db2e0", "6a9ab9f7c63dd531aa8db2f2", "6a9aba03c63dd531aa8db314"
+      "6a9aba05c63dd531aa8db31c", "6a9aba04c63dd531aa8db31a", "6a9ab9f4c63dd531aa8db2e0", "6a9ab9f7c63dd531aa8db2f2", "6a9aba03c63dd531aa8db314",
+      // Batch 10 (30 items)
+      "6a9aba10c63dd531aa8db340", "6a9aba12c63dd531aa8db349", "6a9aba0bc63dd531aa8db32c", "6a9aba0fc63dd531aa8db33c", "6a9aba14c63dd531aa8db353",
+      "6a9aba0ac63dd531aa8db328", "6a9aba11c63dd531aa8db345", "6a9aba06c63dd531aa8db320", "6a9aba14c63dd531aa8db34f", "6a9aba0dc63dd531aa8db334",
+      "6a9aba0ec63dd531aa8db33a", "6a9aba18c63dd531aa8db357", "6a9aba19c63dd531aa8db35d", "6a9aba0fc63dd531aa8db33e", "6a9aba1ac63dd531aa8db35f",
+      "6a9aba10c63dd531aa8db343", "6a9aba0ac63dd531aa8db32a", "6a9aba11c63dd531aa8db346", "6a9aba1bc63dd531aa8db361", "6a9aba13c63dd531aa8db34d",
+      "6a9aba0cc63dd531aa8db332", "6a9aba14c63dd531aa8db351", "6a9aba06c63dd531aa8db321", "6a9aba17c63dd531aa8db355", "6a9aba0dc63dd531aa8db335",
+      "6a9aba1cc63dd531aa8db364", "6a9aba1cc63dd531aa8db363", "6a9aba07c63dd531aa8db324", "6a9aba0dc63dd531aa8db336", "6a9aba19c63dd531aa8db35b"
     ];
-    const raw = await Product.find({ _id: { $in: target270Ids } })
+    const raw = await Product.find({ _id: { $in: target300Ids } })
       .populate("brand", "name")
       .populate("category", "name")
       .lean();
     const map = new Map(raw.map((p) => [p._id.toString(), p]));
-    products = target270Ids.map((id) => map.get(id)).filter(Boolean);
+    products = target300Ids.map((id) => map.get(id)).filter(Boolean);
   } else {
     if (mongoose.Types.ObjectId.isValid(brandQuery)) {
       brandDoc = await Brand.findById(brandQuery);
