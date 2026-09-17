@@ -198,15 +198,27 @@ router.post('/fb-config', async (req, res) => {
         inputToken = decodeURIComponent(match[1]);
       }
     }
-    settings.fbPageAccessToken = inputToken;
+    let activeToken = inputToken;
 
-    let pageName = 'Liora Beauty & Wear';
-    let verified = false;
+    // Step A: Auto-exchange short-lived token to 60-day Long-Lived User Token using fbAppId & fbAppSecret
+    if (settings.fbAppId && settings.fbAppSecret && inputToken) {
+      try {
+        const exchangeUrl = `https://graph.facebook.com/v20.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${settings.fbAppId}&client_secret=${settings.fbAppSecret}&fb_exchange_token=${inputToken}`;
+        const exRes = await fetch(exchangeUrl);
+        const exData = await exRes.json();
+        if (exData && exData.access_token) {
+          activeToken = exData.access_token;
+          console.log('[FB-Config] Upgraded to long-lived user token successfully.');
+        }
+      } catch (e) {
+        console.warn('[FB-Config] Token exchange warning:', e.message);
+      }
+    }
 
-    // 1. Check if token is a User Token that can provide Page Token from /me/accounts
+    // Step B: Get Permanent Never-Expiring Page Token via /me/accounts using the long-lived token
     try {
       const accountsRes = await fetch(
-        `https://graph.facebook.com/v20.0/me/accounts?access_token=${inputToken}`
+        `https://graph.facebook.com/v20.0/me/accounts?access_token=${activeToken}`
       );
       const accountsData = await accountsRes.json();
       if (accountsData && Array.isArray(accountsData.data) && accountsData.data.length > 0) {
@@ -216,18 +228,20 @@ router.post('/fb-config', async (req, res) => {
           if (matchedPage.id) settings.fbPageId = matchedPage.id;
           pageName = matchedPage.name;
           verified = true;
+          console.log(`[FB-Config] Generated Permanent Never-Expiring Page Token for "${pageName}" (${settings.fbPageId})`);
         }
       }
     } catch (e) {
-      console.warn('Accounts lookup failed, checking page directly:', e.message);
+      console.warn('[FB-Config] Accounts lookup failed, checking page directly:', e.message);
     }
 
-    // 2. If not verified via /me/accounts, test directly on Page ID
-    if (!verified && settings.fbPageAccessToken) {
+    // Step C: Fallback check directly on Page ID
+    if (!verified && activeToken) {
       try {
-        const verifyRes = await fetch(`https://graph.facebook.com/v20.0/${settings.fbPageId}?fields=id,name&access_token=${settings.fbPageAccessToken}`);
+        const verifyRes = await fetch(`https://graph.facebook.com/v20.0/${settings.fbPageId}?fields=id,name&access_token=${activeToken}`);
         const verifyData = await verifyRes.json();
         if (verifyData && verifyData.id) {
+          settings.fbPageAccessToken = activeToken;
           pageName = verifyData.name || pageName;
           verified = true;
         }
