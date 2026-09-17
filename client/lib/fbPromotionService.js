@@ -665,14 +665,19 @@ export async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit =
       // Batch 5 (15 items)
       "6aa2ffd70d2b8add7c6efbd0", "6a9ab97dc63dd531aa8db0f6", "6a9ab97fc63dd531aa8db100", "6a9ab97fc63dd531aa8db104", "6a9ab97ec63dd531aa8db0fd",
       "6a9ab97bc63dd531aa8db0f4", "6a9ab97fc63dd531aa8db101", "6a9ab982c63dd531aa8db114", "6a9ab97ec63dd531aa8db0f9", "6a9ab97fc63dd531aa8db107",
-      "6a9ab980c63dd531aa8db109", "6a9ab982c63dd531aa8db119", "6a9ab982c63dd531aa8db118", "6a9ab97ec63dd531aa8db0fc", "6a9ab980c63dd531aa8db10c"
+      "6a9ab980c63dd531aa8db109", "6a9ab982c63dd531aa8db119", "6a9ab982c63dd531aa8db118", "6a9ab97ec63dd531aa8db0fc", "6a9ab980c63dd531aa8db10c",
+      // Batch 6 (20 items)
+      "6a9ab989c63dd531aa8db13d", "6a9ab987c63dd531aa8db12b", "6a9ab983c63dd531aa8db11c", "6a9ab989c63dd531aa8db13c", "6a9ab988c63dd531aa8db132",
+      "6a9ab986c63dd531aa8db126", "6a9ab989c63dd531aa8db141", "6a9ab98ac63dd531aa8db143", "6a9ab987c63dd531aa8db130", "6a9ab984c63dd531aa8db11e",
+      "6a9ab988c63dd531aa8db138", "6a9ab988c63dd531aa8db133", "6a9ab985c63dd531aa8db124", "6a9ab989c63dd531aa8db13b", "6a9ab980c63dd531aa8db10d",
+      "6a9ab98cc63dd531aa8db14b", "6a9ab98ac63dd531aa8db148", "6a9ab987c63dd531aa8db129", "6a9ab985c63dd531aa8db121", "6a9ab988c63dd531aa8db137"
     ];
-    const raw = await Product.find({ _id: { $in: target50Ids } })
+    const raw = await Product.find({ _id: { $in: target70Ids } })
       .populate("brand", "name")
       .populate("category", "name")
       .lean();
     const map = new Map(raw.map((p) => [p._id.toString(), p]));
-    products = target50Ids.map((id) => map.get(id)).filter(Boolean);
+    products = target70Ids.map((id) => map.get(id)).filter(Boolean);
   } else {
     if (mongoose.Types.ObjectId.isValid(brandQuery)) {
       brandDoc = await Brand.findById(brandQuery);

@@ -53,7 +53,7 @@ const READY_IN_STOCK_IDS = [
   "6a9ac03bc63dd531aa8dc6e5", // Ponds Bright Beauty Face Wash
   "6a9abff3c63dd531aa8dc5fb", // Care:Nel Whitening Cream
   "6a9abcf0c63dd531aa8dbc74", // Swiss Beauty Blusher
-  // Batch 5 (15 new items)
+  // Batch 5 (15 items)
   "6aa2ffd70d2b8add7c6efbd0", // Cosrx Salicylic Acid Daily Gentle Cleanser (৳949)
   "6a9ab97dc63dd531aa8db0f6", // Dot & Key Barrier Repair Face Wash (৳440)
   "6a9ab97fc63dd531aa8db100", // Simple Replenishing Rich Moisturiser (৳620)
@@ -69,6 +69,27 @@ const READY_IN_STOCK_IDS = [
   "6a9ab982c63dd531aa8db118", // Missha Aqua Sunscreen SPF50+ (৳880)
   "6a9ab97ec63dd531aa8db0fc", // Beauty Glazed Lipliner B118 (৳115)
   "6a9ab980c63dd531aa8db10c", // CAPLINO Liquid Matte Lipstick 10 (৳380)
+  // Batch 6 (20 items)
+  "6a9ab989c63dd531aa8db13d", // Hchana Rice Serum 15ml (৳140)
+  "6a9ab987c63dd531aa8db12b", // Lanbena Lavender Foot Peel Mask (৳270)
+  "6a9ab983c63dd531aa8db11c", // Sunsilk Power Shot Treatment (৳104)
+  "6a9ab989c63dd531aa8db13c", // LAIKOU Sakura Mud Mask (৳30)
+  "6a9ab988c63dd531aa8db132", // Bioaqua Honey Moisturizing Sheet Mask (৳45)
+  "6a9ab986c63dd531aa8db126", // skinO Hydration Boost Gel Moisturizer (৳370)
+  "6a9ab989c63dd531aa8db141", // Laikou Japan Sakura Skin Care Set (৳70)
+  "6a9ab98ac63dd531aa8db143", // Purito Seoul Azelaic Acid 10 Serum (৳1600)
+  "6a9ab987c63dd531aa8db130", // Fafamoon Peptide Lip Tint Espresso (৳160)
+  "6a9ab984c63dd531aa8db11e", // Beauty Glazed Lip Crayon Espresso (৳145)
+  "6a9ab988c63dd531aa8db138", // Beauty Glazed Matte Liquid Lipstick (৳85)
+  "6a9ab988c63dd531aa8db133", // Fenyi Vitamin C Cleanser (৳190)
+  "6a9ab985c63dd531aa8db124", // Bioaqua Kiwi Fruit Brighten Sheet Mask (৳45)
+  "6a9ab989c63dd531aa8db13b", // Beauty Glazed Volume Lip Gloss 104 (৳165)
+  "6a9ab980c63dd531aa8db10d", // Beauty Glazed Volume Lip Gloss 102 (৳165)
+  "6a9ab98cc63dd531aa8db14b", // Bioaqua Pearl Whitening Facial Mask (৳65)
+  "6a9ab98ac63dd531aa8db148", // Swiss Beauty Cover Play Concealer (৳340)
+  "6a9ab987c63dd531aa8db129", // Handaiyan 12 Colors Liquid Set (৳680)
+  "6a9ab985c63dd531aa8db121", // Caplino Lavender Essential Oil (৳340)
+  "6a9ab988c63dd531aa8db137", // Matrix Opti Care Straight Hair Masque (৳1490)
 ];
 
 function getStoredBannerBuffer(productId) {
