@@ -9,9 +9,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+import {
+  cleanSearchTerm,
+  getFuzzyVariantsForToken,
+  scoreProductRelevance,
+  escapeRegex,
+} from "@/lib/searchEngine";
 
 export async function GET(req) {
   try {
@@ -142,51 +145,83 @@ export async function GET(req) {
       if (!isAdmin) query.inStock = true;
     }
 
-    const search = searchParams.get("search");
-    if (search && search.trim()) {
-      const cleanSearch = search.trim();
-      const words = cleanSearch.split(/\s+/).filter(Boolean);
+    const rawSearch = searchParams.get("search");
+    let isSearchActive = false;
+    let cleanSearchPhrase = "";
+    let searchTokens = [];
 
-      const matchingCats = await Category.find({ name: { $regex: escapeRegex(cleanSearch), $options: "i" } }).select("_id").lean();
-      const matchingCatIds = matchingCats.map((c) => c._id);
+    if (rawSearch && rawSearch.trim()) {
+      isSearchActive = true;
+      const parsed = cleanSearchTerm(rawSearch);
+      cleanSearchPhrase = parsed.cleanPhrase;
+      searchTokens = parsed.tokens;
 
-      const matchingBrands = await Brand.find({ name: { $regex: escapeRegex(cleanSearch), $options: "i" } }).select("_id").lean();
-      const matchingBrandIds = matchingBrands.map((b) => b._id);
+      if (cleanSearchPhrase || searchTokens.length > 0) {
+        // Collect all tokens and their typo/phonetic variants
+        const allSearchVariants = new Set();
+        if (cleanSearchPhrase) allSearchVariants.add(cleanSearchPhrase);
 
-      const directOrConditions = [
-        { name: { $regex: escapeRegex(cleanSearch), $options: "i" } },
-        { description: { $regex: escapeRegex(cleanSearch), $options: "i" } },
-      ];
-      if (matchingCatIds.length > 0) {
-        directOrConditions.push({ category: { $in: matchingCatIds } });
-      }
-      if (matchingBrandIds.length > 0) {
-        directOrConditions.push({ brand: { $in: matchingBrandIds } });
-      }
+        for (const t of searchTokens) {
+          allSearchVariants.add(t);
+          const { words, patterns } = getFuzzyVariantsForToken(t);
+          words.forEach((w) => allSearchVariants.add(w));
+          patterns.forEach((p) => allSearchVariants.add(p));
+        }
 
-      let searchCondition = null;
-      if (words.length > 1) {
-        const wordConditions = words.map((w) => {
-          const reg = { $regex: escapeRegex(w), $options: "i" };
-          return {
-            $or: [{ name: reg }, { description: reg }],
-          };
-        });
+        // Match Categories & Brands using cleanSearchPhrase and key variants
+        const catConditions = Array.from(allSearchVariants)
+          .filter((w) => w.length >= 2)
+          .slice(0, 15)
+          .map((w) => ({ name: { $regex: escapeRegex(w), $options: "i" } }));
 
-        searchCondition = {
-          $or: [
-            ...directOrConditions,
-            { $and: wordConditions },
-          ],
-        };
-      } else {
-        searchCondition = { $or: directOrConditions };
-      }
+        const matchingCats = catConditions.length > 0
+          ? await Category.find({ $or: catConditions }).select("_id").lean()
+          : [];
+        const matchingCatIds = matchingCats.map((c) => c._id);
 
-      if (query.$and) {
-        query.$and.push(searchCondition);
-      } else {
-        query.$and = [searchCondition];
+        const matchingBrands = catConditions.length > 0
+          ? await Brand.find({ $or: catConditions }).select("_id").lean()
+          : [];
+        const matchingBrandIds = matchingBrands.map((b) => b._id);
+
+        const orConditions = [];
+
+        // 1. Direct clean phrase in name or description
+        if (cleanSearchPhrase) {
+          orConditions.push({ name: { $regex: escapeRegex(cleanSearchPhrase), $options: "i" } });
+          orConditions.push({ description: { $regex: escapeRegex(cleanSearchPhrase), $options: "i" } });
+        }
+
+        // 2. Individual tokens and typo variants
+        for (const t of searchTokens) {
+          if (t.length < 2) continue;
+          orConditions.push({ name: { $regex: escapeRegex(t), $options: "i" } });
+
+          const { words, patterns } = getFuzzyVariantsForToken(t);
+          for (const w of words) {
+            orConditions.push({ name: { $regex: escapeRegex(w), $options: "i" } });
+          }
+          for (const p of patterns) {
+            orConditions.push({ name: { $regex: p, $options: "i" } });
+          }
+        }
+
+        // 3. Category & brand matches
+        if (matchingCatIds.length > 0) {
+          orConditions.push({ category: { $in: matchingCatIds } });
+        }
+        if (matchingBrandIds.length > 0) {
+          orConditions.push({ brand: { $in: matchingBrandIds } });
+        }
+
+        if (orConditions.length > 0) {
+          const searchCondition = { $or: orConditions };
+          if (query.$and) {
+            query.$and.push(searchCondition);
+          } else {
+            query.$and = [searchCondition];
+          }
+        }
       }
     }
 
@@ -200,20 +235,69 @@ export async function GET(req) {
     const limit = limitParam ? Math.min(maxLimit, limitParam) : (isAdmin ? 20000 : 100);
     const skip = (page - 1) * limit;
 
-    const [products, total] = await Promise.all([
+    let [products, total] = await Promise.all([
       Product.find(query)
         .select(isAdmin ? "" : "-purchasePrice")
         .populate("category", "name")
+        .populate("brand", "name slug")
         .sort(
-          type && type !== "all"
+          isSearchActive
+            ? {}
+            : type && type !== "all"
             ? { createdAt: -1 }
             : { inStock: -1, isFeatured: -1, createdAt: -1 }
         )
-        .skip(isPaginated ? skip : 0)
-        .limit(limit)
+        .skip(!isSearchActive && isPaginated ? skip : 0)
+        .limit(!isSearchActive ? limit : 200)
         .lean(),
       Product.countDocuments(query),
     ]);
+
+    // If search is active, rank products intelligently by relevance
+    if (isSearchActive && products.length > 0) {
+      products.forEach((p) => {
+        p._score = scoreProductRelevance(p, cleanSearchPhrase, searchTokens);
+      });
+      products.sort((a, b) => (b._score || 0) - (a._score || 0));
+    }
+
+    // Smart Typo Fallback: If 0 products found, search by 3-character prefix to catch heavy typos
+    if (isSearchActive && products.length === 0 && searchTokens.length > 0) {
+      const fallbackOr = [];
+      for (const t of searchTokens) {
+        if (t.length >= 3) {
+          fallbackOr.push({ name: { $regex: escapeRegex(t.slice(0, 3)), $options: "i" } });
+        }
+      }
+      if (fallbackOr.length > 0) {
+        const fallbackQuery = {};
+        if (type === "featured") fallbackQuery.isFeatured = true;
+        if (!isAdmin) fallbackQuery.inStock = true;
+        if (exclude) fallbackQuery._id = { $ne: exclude };
+        fallbackQuery.$or = fallbackOr;
+
+        const fallbackProducts = await Product.find(fallbackQuery)
+          .select(isAdmin ? "" : "-purchasePrice")
+          .populate("category", "name")
+          .populate("brand", "name slug")
+          .limit(50)
+          .lean();
+
+        if (fallbackProducts.length > 0) {
+          fallbackProducts.forEach((p) => {
+            p._score = scoreProductRelevance(p, cleanSearchPhrase, searchTokens);
+          });
+          fallbackProducts.sort((a, b) => (b._score || 0) - (a._score || 0));
+          products = fallbackProducts;
+          total = fallbackProducts.length;
+        }
+      }
+    }
+
+    if (isSearchActive && isPaginated) {
+      total = products.length;
+      products = products.slice(skip, skip + limit);
+    }
 
     if (isPaginated) {
       return NextResponse.json(
