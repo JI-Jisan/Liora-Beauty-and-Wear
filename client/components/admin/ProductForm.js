@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
 import { uploadToCloudinary, cld } from "@/lib/cloudinary";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
 import { Card, Field, inputStyle, T } from "@/app/admin/ui";
@@ -56,6 +56,27 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
+  const handleOfferPriceChange = (val) => {
+    const num = Number(val);
+    setForm((prev) => {
+      const updated = { ...prev, offerPrice: val };
+      if (!prev.originalPrice || Number(prev.originalPrice) < num) {
+        updated.originalPrice = val;
+      }
+      return updated;
+    });
+  };
+
+  const handleOriginalPriceChange = (val) => {
+    setForm((prev) => {
+      const updated = { ...prev, originalPrice: val };
+      if (!prev.offerPrice) {
+        updated.offerPrice = val;
+      }
+      return updated;
+    });
+  };
+
   const handleFile = async (file, slot) => {
     if (!file) return;
     setError("");
@@ -89,24 +110,31 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
     if (saving) return;
 
     if (!form.image) return setError("মূল ছবি (Main Image) দিতে হবে");
-    if (Number(form.offerPrice) > Number(form.originalPrice))
-      return setError("Offer Price, Original Price এর চেয়ে বেশি হতে পারে না");
+
+    let offer = Number(form.offerPrice);
+    let orig = Number(form.originalPrice);
+    if (!orig && offer) orig = offer;
+    if (!offer && orig) offer = orig;
+    if (offer > orig) orig = offer;
+
+    if (!offer || offer <= 0) return setError("সঠিক বিক্রয় মূল্য (Offer Price) দিন");
 
     setSaving(true);
     try {
-      const token = localStorage.getItem("jt_admin_token");
+      const headers = getAuthHeaders();
       const res = await fetch(
         editing
           ? `${API_BASE_URL}/api/products/${editing._id}`
           : `${API_BASE_URL}/api/products`,
         {
           method: editing ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
           body: JSON.stringify({
             ...form,
+            originalPrice: orig,
+            offerPrice: offer,
+            purchasePrice: Number(form.purchasePrice) || 0,
+            stockQuantity: Math.max(0, parseInt(form.stockQuantity) || 0),
             category: form.category || null,
             brand: form.brand || null,
             images: form.images.filter(Boolean),
@@ -232,20 +260,24 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       <Card title="দাম ও স্টক">
         <div style={{ display: 'grid', gap: 14,
                       gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
-          <Field label="ক্রয় মূল্য" required>
+          <Field label="ক্রয় মূল্য (কেনা দাম)" hint="অপশনাল">
             <input type="number" min="0" style={inputStyle} value={form.purchasePrice}
+                   placeholder="0"
                    onChange={e => setForm({ ...form, purchasePrice: e.target.value })} />
           </Field>
-          <Field label="রেগুলার প্রাইস" required>
+          <Field label="রেগুলার প্রাইস (আগের দাম)" hint="অফার দাম থেকে বেশি হলে ডিসকাউন্ট শো করবে">
             <input type="number" min="0" style={inputStyle} value={form.originalPrice}
-                   onChange={e => setForm({ ...form, originalPrice: e.target.value })} />
+                   placeholder="রেগুলার দাম"
+                   onChange={e => handleOriginalPriceChange(e.target.value)} />
           </Field>
-          <Field label="অফার প্রাইস" required>
+          <Field label="অফার প্রাইস / বিক্রয় মূল্য" required hint="গ্রাহক এই দামে কিনবে">
             <input type="number" min="0" style={inputStyle} value={form.offerPrice}
-                   onChange={e => setForm({ ...form, offerPrice: e.target.value })} />
+                   placeholder="বিক্রয় দাম"
+                   onChange={e => handleOfferPriceChange(e.target.value)} />
           </Field>
           <Field label="স্টক" hint={Number(form.stockQuantity) <= 3 ? '⚠️ স্টক কম' : ''} required>
             <input type="number" min="0" style={inputStyle} value={form.stockQuantity}
+                   placeholder="0"
                    onChange={e => setForm({ ...form, stockQuantity: e.target.value })} />
           </Field>
         </div>

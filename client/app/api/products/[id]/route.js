@@ -41,7 +41,12 @@ export async function PUT(req, { params }) {
   try {
     await connectToDatabase();
     const { id } = await params;
-    const payload = buildPayload(await req.json());
+    const body = await req.json();
+    const existing = await Product.findById(id);
+    if (!existing) {
+      return NextResponse.json({ message: "Product not found" }, { status: 404 });
+    }
+    const payload = buildPayload(body, true, existing);
     
     const updated = await Product.findByIdAndUpdate(id, payload, { new: true, runValidators: true }).populate("category");
     if (!updated) {
@@ -49,12 +54,17 @@ export async function PUT(req, { params }) {
     }
     return NextResponse.json(updated.toJSON());
   } catch (error) {
+    console.error("Product PUT error:", error);
     const isValidation = error?.name === "ValidationError" || error?.message?.length < 120;
     return NextResponse.json(
       { message: isValidation ? error.message : "Product update failed" },
       { status: isValidation ? 400 : 500 }
     );
   }
+}
+
+export async function PATCH(req, ctx) {
+  return PUT(req, ctx);
 }
 
 export async function DELETE(req, { params }) {

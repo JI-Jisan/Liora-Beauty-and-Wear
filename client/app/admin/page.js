@@ -68,6 +68,10 @@ export default function AdminPage() {
   const [products, setProducts] = useState([]);
   const [message, setMessage] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
+  const [quickPriceProduct, setQuickPriceProduct] = useState(null);
+  const [quickPriceForm, setQuickPriceForm] = useState({ offerPrice: "", originalPrice: "", purchasePrice: "" });
+  const [quickPriceSaving, setQuickPriceSaving] = useState(false);
+  const [quickPriceMsg, setQuickPriceMsg] = useState("");
 
   // Slide-out Drawer State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -178,8 +182,9 @@ export default function AdminPage() {
 
   const loadProducts = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/products?limit=10000`, {
+      const res = await fetch(`${API_BASE_URL}/api/products?limit=10000&_t=${Date.now()}`, {
         headers: getAuthHeaders(),
+        cache: "no-store",
       });
       const data = await res.json();
       const list = Array.isArray(data) ? data : (Array.isArray(data?.products) ? data.products : []);
@@ -511,6 +516,68 @@ export default function AdminPage() {
     setEditingProduct(product);
     setActiveTab("add-product");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleOpenQuickPrice = (product) => {
+    setQuickPriceProduct(product);
+    setQuickPriceForm({
+      offerPrice: product.offerPrice ?? "",
+      originalPrice: product.originalPrice ?? product.offerPrice ?? "",
+      purchasePrice: product.purchasePrice ?? "",
+    });
+    setQuickPriceMsg("");
+  };
+
+  const handleSaveQuickPrice = async (e) => {
+    if (e) e.preventDefault();
+    if (!quickPriceProduct || quickPriceSaving) return;
+
+    let offer = Number(quickPriceForm.offerPrice);
+    let orig = Number(quickPriceForm.originalPrice);
+    if (!orig && offer) orig = offer;
+    if (!offer && orig) offer = orig;
+    if (offer > orig) orig = offer;
+
+    if (!offer || offer <= 0) {
+      setQuickPriceMsg("❌ সঠিক বিক্রয় মূল্য দিন");
+      return;
+    }
+
+    setQuickPriceSaving(true);
+    setQuickPriceMsg("⏳ আপডেট হচ্ছে...");
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/products/${quickPriceProduct._id}`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          offerPrice: offer,
+          originalPrice: orig,
+          purchasePrice: quickPriceForm.purchasePrice !== "" ? Number(quickPriceForm.purchasePrice) : undefined,
+        }),
+      });
+
+      const updated = await res.json();
+      if (!res.ok) {
+        throw new Error(updated.message || "প্রাইস আপডেট ব্যর্থ হয়েছে");
+      }
+
+      // Optimistically update products state immediately
+      setProducts((prev) =>
+        prev.map((p) => (p._id === quickPriceProduct._id ? { ...p, ...updated } : p))
+      );
+
+      setQuickPriceMsg("✅ দাম সফলভাবে আপডেট হয়েছে!");
+      setTimeout(() => {
+        setQuickPriceProduct(null);
+        setQuickPriceMsg("");
+        loadProducts();
+      }, 700);
+    } catch (err) {
+      setQuickPriceMsg(`❌ ${err.message}`);
+    } finally {
+      setQuickPriceSaving(false);
+    }
   };
 
 
@@ -1096,7 +1163,12 @@ export default function AdminPage() {
                   setEditingProduct(null);
                   setActiveTab("manage-products");
                 }}
-                onSaved={() => {
+                onSaved={(savedProd) => {
+                  if (savedProd && savedProd._id) {
+                    setProducts((prev) =>
+                      prev.map((p) => (p._id === savedProd._id ? { ...p, ...savedProd } : p))
+                    );
+                  }
                   setEditingProduct(null);
                   loadProducts();
                   setActiveTab("manage-products");
@@ -1245,16 +1317,32 @@ export default function AdminPage() {
                           </div>
 
                           <div>
-                            <strong>{product.offerPrice} Tk</strong>
-                            {product.originalPrice > product.offerPrice && (
-                              <span className="jt-old-price" style={{ marginLeft: 6 }}>{product.originalPrice} Tk</span>
-                            )}
-                            {product.discountBadge && (
-                              <span className="jt-disc-badge" style={{ marginLeft: 6 }}>{product.discountBadge}</span>
-                            )}
+                            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+                              <strong style={{ fontSize: '15px', color: '#0f172a' }}>{product.offerPrice} Tk</strong>
+                              {product.originalPrice > product.offerPrice && (
+                                <span className="jt-old-price">{product.originalPrice} Tk</span>
+                              )}
+                              {product.discountBadge && (
+                                <span className="jt-disc-badge">{product.discountBadge}% OFF</span>
+                              )}
+                            </div>
                           </div>
 
                           <div className="pcard-actions">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenQuickPrice(product)}
+                              style={{
+                                background: "#fdf2f8",
+                                color: "#e11d48",
+                                border: "1px solid #fecdd3",
+                                cursor: "pointer",
+                                fontWeight: "700"
+                              }}
+                            >
+                              🏷️ দাম এডিট
+                            </button>
+
                             <button
                               type="button"
                               onClick={() => handleToggleSlider(product)}
@@ -1289,6 +1377,150 @@ export default function AdminPage() {
                     );
                   })}
                 </div>
+
+                {/* Quick Price Edit Modal */}
+                {quickPriceProduct && (
+                  <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.65)',
+                    zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '16px', backdropFilter: 'blur(4px)'
+                  }}>
+                    <div style={{
+                      background: '#fff', borderRadius: '16px', maxWidth: '440px', width: '100%',
+                      padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)',
+                      boxSizing: 'border-box'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '17px', color: '#0f172a', fontWeight: 800 }}>
+                            ⚡ প্রোডাক্টের দাম পরিবর্তন
+                          </h3>
+                          <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>
+                            {quickPriceProduct.name}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setQuickPriceProduct(null)}
+                          style={{
+                            background: '#f1f5f9', border: 'none', borderRadius: '50%',
+                            width: 32, height: 32, cursor: 'pointer', fontSize: 16,
+                            color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <form onSubmit={handleSaveQuickPrice}>
+                        <div style={{ marginBottom: 14 }}>
+                          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                            বিক্রয় মূল্য / অফার প্রাইস (Selling Price) *
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            required
+                            value={quickPriceForm.offerPrice}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setQuickPriceForm(prev => {
+                                const updated = { ...prev, offerPrice: val };
+                                if (!prev.originalPrice || Number(prev.originalPrice) < Number(val)) {
+                                  updated.originalPrice = val;
+                                }
+                                return updated;
+                              });
+                            }}
+                            placeholder="উদাহরণ: 1200"
+                            style={{
+                              width: '100%', padding: '10px 12px', borderRadius: '10px',
+                              border: '1.5px solid #e2e8f0', fontSize: '15px', fontWeight: 700,
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                          <span style={{ fontSize: '11px', color: '#64748b' }}>গ্রাহক ওয়েবসাইটে এই দাম দেখবে ও কিনবে</span>
+                        </div>
+
+                        <div style={{ marginBottom: 14 }}>
+                          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                            রেগুলার প্রাইস / কাটা দাম (Original Price) - অপশনাল
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={quickPriceForm.originalPrice}
+                            onChange={(e) => setQuickPriceForm({ ...quickPriceForm, originalPrice: e.target.value })}
+                            placeholder="উদাহরণ: 1500"
+                            style={{
+                              width: '100%', padding: '10px 12px', borderRadius: '10px',
+                              border: '1.5px solid #e2e8f0', fontSize: '15px',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                          <span style={{ fontSize: '11px', color: '#64748b' }}>বিক্রয় মূল্যের চেয়ে বেশি হলে ডিসকাউন্ট ব্যাজ শো করবে</span>
+                        </div>
+
+                        <div style={{ marginBottom: 18 }}>
+                          <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                            ক্রয় মূল্য (কেনা দাম) - অপশনাল
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={quickPriceForm.purchasePrice}
+                            onChange={(e) => setQuickPriceForm({ ...quickPriceForm, purchasePrice: e.target.value })}
+                            placeholder="0"
+                            style={{
+                              width: '100%', padding: '10px 12px', borderRadius: '10px',
+                              border: '1.5px solid #e2e8f0', fontSize: '14px',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                          <span style={{ fontSize: '11px', color: '#64748b' }}>আপনার লাভ ও রিপোর্টের জন্য</span>
+                        </div>
+
+                        {quickPriceMsg && (
+                          <div style={{
+                            padding: '8px 12px', borderRadius: '8px', marginBottom: 14,
+                            fontSize: '13px', fontWeight: 600,
+                            background: quickPriceMsg.startsWith('✅') ? '#f0fdf4' : quickPriceMsg.startsWith('⏳') ? '#eff6ff' : '#fef2f2',
+                            color: quickPriceMsg.startsWith('✅') ? '#16a34a' : quickPriceMsg.startsWith('⏳') ? '#2563eb' : '#dc2626'
+                          }}>
+                            {quickPriceMsg}
+                          </div>
+                        )}
+
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <button
+                            type="button"
+                            onClick={() => setQuickPriceProduct(null)}
+                            style={{
+                              flex: 1, padding: '11px', borderRadius: '10px',
+                              border: '1px solid #cbd5e1', background: '#fff',
+                              fontSize: '14px', fontWeight: 600, color: '#64748b', cursor: 'pointer'
+                            }}
+                          >
+                            বাতিল
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={quickPriceSaving}
+                            style={{
+                              flex: 2, padding: '11px', borderRadius: '10px',
+                              border: 'none', background: quickPriceSaving ? '#f5a3bf' : '#e11d48',
+                              fontSize: '14px', fontWeight: 700, color: '#fff',
+                              cursor: quickPriceSaving ? 'not-allowed' : 'pointer',
+                              boxShadow: '0 4px 12px rgba(225,29,99,0.25)'
+                            }}
+                          >
+                            {quickPriceSaving ? 'সেভ হচ্ছে...' : '💾 দাম সেভ করুন'}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
