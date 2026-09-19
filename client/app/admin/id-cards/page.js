@@ -112,7 +112,7 @@ export default function AdminIdCardStudio() {
               🪪 LIORA ID Card Studio
             </h1>
             <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
-              সহজ ও নিখুঁত Canva-স্টাইল এডিটর (কোনো সাদা দাগ ছাড়া আসল ব্যাকগ্রাউন্ডে টেক্সট বসে)
+              সহজ ও নিখুঁত Canva-স্টাইল এডিটর (কোনো ডাবল টেক্সট বা ওভারল্যাপ ছাড়া)
             </p>
           </div>
         </div>
@@ -466,7 +466,7 @@ export default function AdminIdCardStudio() {
                   width: "332px",
                   height: "640px",
                   position: "relative",
-                  backgroundImage: "url('/id_cards/front_clean_base.png')",
+                  backgroundImage: "url('/id_cards/front_master_clean.png')",
                   backgroundSize: "332px 640px",
                   backgroundRepeat: "no-repeat",
                   borderRadius: "24px",
@@ -481,11 +481,11 @@ export default function AdminIdCardStudio() {
                   alt={cardData.name}
                   style={{
                     position: "absolute",
-                    left: "74px",
-                    top: "215px",
-                    width: "184px",
-                    height: "156px",
-                    borderRadius: "14px",
+                    left: "77px",
+                    top: "219px",
+                    width: "178px",
+                    height: "148px",
+                    borderRadius: "12px",
                     objectFit: "cover",
                     zIndex: 5,
                   }}
@@ -541,29 +541,29 @@ export default function AdminIdCardStudio() {
                 <div
                   style={{
                     position: "absolute",
-                    top: "444px",
-                    left: "72px",
-                    width: "235px",
+                    top: "451px",
+                    left: "68px",
+                    width: "240px",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "7px",
-                    fontSize: "11px",
+                    gap: "10px",
+                    fontSize: "10.5px",
                     zIndex: 5,
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "16px" }}>
                     <span style={{ color: "#1e293b", fontWeight: 500 }}>Employee ID :</span>
                     <span style={{ fontWeight: 800, color: "#0f172a" }}>{cardData.empId}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "16px" }}>
                     <span style={{ color: "#1e293b", fontWeight: 500 }}>Department :</span>
                     <span style={{ fontWeight: 800, color: "#0f172a" }}>{cardData.department}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "16px" }}>
                     <span style={{ color: "#1e293b", fontWeight: 500 }}>Blood Group :</span>
                     <span style={{ fontWeight: 800, color: "#0f172a" }}>{cardData.bloodGroup}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "16px" }}>
                     <span style={{ color: "#1e293b", fontWeight: 500 }}>Joining Date :</span>
                     <span style={{ fontWeight: 800, color: "#0f172a" }}>{cardData.joiningDate}</span>
                   </div>
@@ -581,7 +581,7 @@ export default function AdminIdCardStudio() {
                   width: "332px",
                   height: "640px",
                   position: "relative",
-                  backgroundImage: "url('/id_cards/back_clean_base.png')",
+                  backgroundImage: "url('/id_cards/back_master_clean.png')",
                   backgroundSize: "332px 640px",
                   backgroundRepeat: "no-repeat",
                   borderRadius: "24px",
@@ -594,53 +594,73 @@ export default function AdminIdCardStudio() {
                 <div
                   style={{
                     position: "absolute",
-                    top: "204px",
-                    left: "80px",
-                    width: "230px",
+                    top: "200px",
+                    left: "78px",
+                    width: "235px",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "9px",
                     zIndex: 5,
                   }}
                 >
-                  <div>
-                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Official Contact</div>
-                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.contact}</div>
+                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "25px" }}>
+                    <div style={{ fontSize: "9.5px", color: "#1e293b", fontWeight: 600, lineHeight: 1, marginBottom: "2px" }}>
+                      Official Contact
+                    </div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800, lineHeight: 1.1 }}>
+                      {cardData.contact}
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Email</div>
-                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.email}</div>
+                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "25px" }}>
+                    <div style={{ fontSize: "9.5px", color: "#1e293b", fontWeight: 600, lineHeight: 1, marginBottom: "2px" }}>
+                      Email
+                    </div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800, lineHeight: 1.1 }}>
+                      {cardData.email}
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Facebook Page</div>
-                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.fbPage}</div>
+                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "25px" }}>
+                    <div style={{ fontSize: "9.5px", color: "#1e293b", fontWeight: 600, lineHeight: 1, marginBottom: "2px" }}>
+                      Facebook Page
+                    </div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800, lineHeight: 1.1 }}>
+                      {cardData.fbPage}
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Website</div>
-                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.website}</div>
+                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "25px" }}>
+                    <div style={{ fontSize: "9.5px", color: "#1e293b", fontWeight: 600, lineHeight: 1, marginBottom: "2px" }}>
+                      Website
+                    </div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800, lineHeight: 1.1 }}>
+                      {cardData.website}
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Business Address</div>
-                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.address}</div>
+                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "25px" }}>
+                    <div style={{ fontSize: "9.5px", color: "#1e293b", fontWeight: 600, lineHeight: 1, marginBottom: "2px" }}>
+                      Business Address
+                    </div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800, lineHeight: 1.1 }}>
+                      {cardData.address}
+                    </div>
                   </div>
                 </div>
 
-                {/* QR Code */}
+                {/* Single Clean QR Code */}
                 <div
                   style={{
                     position: "absolute",
-                    top: "432px",
-                    left: "44px",
-                    width: "58px",
-                    height: "58px",
+                    top: "416px",
+                    left: "36px",
+                    width: "72px",
+                    height: "72px",
                     background: "white",
-                    padding: "2px",
-                    borderRadius: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     zIndex: 5,
-                    border: "1px solid #fecdd3",
                   }}
                 >
-                  <QRCodeSVG value={cardData.qrUrl} size={54} level="M" />
+                  <QRCodeSVG value={cardData.qrUrl} size={66} level="M" />
                 </div>
               </div>
               <div style={{ marginTop: "12px", fontSize: "13px", color: "#be185d", fontWeight: 700 }} className="no-print">

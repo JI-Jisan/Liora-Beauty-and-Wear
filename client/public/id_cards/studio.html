@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LIORA ID Card Studio - 100% Seamless Canva Editor</title>
+  <title>LIORA ID Card Studio - 100% Clean & Natural Canva Editor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -147,7 +147,6 @@
       flex-wrap: wrap;
     }
 
-    /* CARD CONTAINERS */
     .card-wrap {
       display: flex;
       flex-direction: column;
@@ -160,6 +159,7 @@
       font-weight: 700;
     }
 
+    /* CARD CANVAS */
     .card-canvas {
       width: 332px;
       height: 640px;
@@ -172,20 +172,20 @@
     }
 
     #front-canvas {
-      background-image: url('front_clean_base.png');
+      background-image: url('front_master_clean.png');
     }
     #back-canvas {
-      background-image: url('back_clean_base.png');
+      background-image: url('back_master_clean.png');
     }
 
-    /* NATIVE LIVE EDITABLE LAYERS (NO WHITE RECTANGLES) */
+    /* PRECISE DYNAMIC ELEMENTS */
     .card-photo {
       position: absolute;
-      left: 74px;
-      top: 215px;
-      width: 184px;
-      height: 156px;
-      border-radius: 14px;
+      left: 77px;
+      top: 219px;
+      width: 178px;
+      height: 148px;
+      border-radius: 12px;
       object-fit: cover;
       display: block;
       z-index: 5;
@@ -202,7 +202,6 @@
       color: #0f172a;
       font-family: 'Inter', sans-serif;
       z-index: 5;
-      background: transparent;
     }
 
     .card-des-wrap {
@@ -225,22 +224,23 @@
       box-shadow: 0 2px 6px rgba(190, 24, 93, 0.3);
     }
 
+    /* Precise Alignment with the 4 Icons */
     .card-details-block {
       position: absolute;
-      top: 444px;
-      left: 72px;
-      width: 235px;
+      top: 451px;
+      left: 68px;
+      width: 240px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
-      font-size: 11px;
+      gap: 10px;
+      font-size: 10.5px;
       z-index: 5;
-      background: transparent;
     }
     .card-detail-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      height: 16px;
     }
     .card-detail-label {
       color: #1e293b;
@@ -251,40 +251,49 @@
       color: #0f172a;
     }
 
-    /* Back Card Live Elements */
+    /* Back Card Precise Alignments with the 5 Icons */
     .card-contact-block {
       position: absolute;
-      top: 204px;
-      left: 80px;
-      width: 230px;
+      top: 200px;
+      left: 78px;
+      width: 235px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 9px;
       z-index: 5;
-      background: transparent;
+    }
+    .contact-item {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 25px;
     }
     .contact-unit-title {
-      font-size: 10px;
+      font-size: 9.5px;
       color: #1e293b;
       font-weight: 600;
+      line-height: 1;
+      margin-bottom: 2px;
     }
     .contact-unit-val {
       font-size: 10.5px;
       color: #0f172a;
       font-weight: 800;
+      line-height: 1.1;
     }
 
+    /* QR Code placed cleanly inside the white square */
     .card-qr-box {
       position: absolute;
-      top: 432px;
-      left: 44px;
-      width: 58px;
-      height: 58px;
+      top: 416px;
+      left: 36px;
+      width: 72px;
+      height: 72px;
       background: white;
-      padding: 2px;
-      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 5;
-      border: 1px solid #fecdd3;
     }
 
     @media print {
@@ -301,7 +310,7 @@
   <header class="no-print">
     <div class="brand-info">
       <div class="brand-title"><span>🪪</span> LIORA ID Card Studio</div>
-      <div class="brand-sub">সহজ ও নিখুঁত Canva-স্টাইল এডিটর (কোনো সাদা দাগ ছাড়া আসল ব্যাকগ্রাউন্ডে টেক্সট বসে)</div>
+      <div class="brand-sub">সহজ ও নিখুঁত Canva-স্টাইল এডিটর (কোনো ডাবল টেক্সট বা ওভারল্যাপ ছাড়া)</div>
     </div>
     <div class="header-actions">
       <button class="btn btn-print" onclick="window.print()">🖨️ প্রিন্ট করুন (Print)</button>
@@ -365,7 +374,7 @@
           <input type="file" id="inp-file" accept="image/*" onchange="handlePhotoUpload(event)">
         </div>
         <p style="font-size: 12px; color: #64748b; line-height: 1.4;">
-          যেকোনো কর্মীর নতুন ছবি সিলেক্ট করলে তাৎক্ষণিকভাবে কার্ডের ফটো ফ্রেমে সেট হয়ে যাবে।
+          কম্পিউটার বা মোবাইল থেকে যেকোনো স্টাফের ছবি সিলেক্ট করলে তাৎক্ষণিকভাবে কার্ডের ফটো ফ্রেমে সেট হয়ে যাবে।
         </p>
         <div style="text-align: center; margin-top: 15px;">
           <button class="btn btn-secondary" style="margin: 0 auto;" onclick="resetPhoto()">আসল ছবি ফিরিয়ে আনুন</button>
@@ -395,7 +404,7 @@
           <input type="text" id="inp-addr" value="Rayerbag, Dhaka, Bangladesh" oninput="renderLive()">
         </div>
         <div class="form-group">
-          <label>কিউআর কোড টার্গেট লিংক</label>
+          <label>কিউআর কোড লিংক</label>
           <input type="text" id="inp-qr" value="https://liorabeautyandwear.com" oninput="updateQr()">
         </div>
       </div>
@@ -465,29 +474,29 @@
           <div class="card-canvas" id="back-canvas">
             <!-- Contact Rows -->
             <div class="card-contact-block">
-              <div>
+              <div class="contact-item">
                 <div class="contact-unit-title">Official Contact</div>
                 <div class="contact-unit-val" id="view-contact">+880 1712 345678</div>
               </div>
-              <div>
+              <div class="contact-item">
                 <div class="contact-unit-title">Email</div>
                 <div class="contact-unit-val" id="view-email">liorabeautyandwear@gmail.com</div>
               </div>
-              <div>
+              <div class="contact-item">
                 <div class="contact-unit-title">Facebook Page</div>
                 <div class="contact-unit-val" id="view-fb">Liora Beauty and Wear</div>
               </div>
-              <div>
+              <div class="contact-item">
                 <div class="contact-unit-title">Website</div>
                 <div class="contact-unit-val" id="view-web">liorabeautyandwear.com</div>
               </div>
-              <div>
+              <div class="contact-item">
                 <div class="contact-unit-title">Business Address</div>
                 <div class="contact-unit-val" id="view-addr">Rayerbag, Dhaka, Bangladesh</div>
               </div>
             </div>
 
-            <!-- QR Code -->
+            <!-- Single Clean QR Code -->
             <div class="card-qr-box" id="view-qr"></div>
           </div>
           <div class="card-label no-print">পেছনের অংশ (Back Side)</div>
@@ -504,8 +513,8 @@
       qrEl.innerHTML = "";
       qrObj = new QRCode(qrEl, {
         text: document.getElementById("inp-qr").value || "https://liorabeautyandwear.com",
-        width: 54,
-        height: 54,
+        width: 66,
+        height: 66,
         colorDark: "#1e293b",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.M
