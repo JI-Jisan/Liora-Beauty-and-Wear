@@ -173,12 +173,14 @@ export async function POST(req) {
     const thana = String(body.thana || "").trim();
     const isDhaka = isLocationInsideDhaka(district, thana);
     const finalDeliveryZone = isDhaka ? "inside_dhaka" : "outside_dhaka";
+    const deliveryType = String(body.deliveryType || "standard").trim().toLowerCase();
+    const isUrgent = isDhaka && deliveryType === "urgent";
 
     // ---- ডেলিভারি চার্জও সম্পূর্ণ সার্ভারেই নির্ধারিত হবে ----
     const settings = (await SiteSettings.findOne().lean()) || {};
-    const baseCharge = isDhaka ? 70 : 130;
+    const baseCharge = isUrgent ? 250 : (isDhaka ? 70 : 130);
     const threshold = Number(settings.freeDeliveryThreshold ?? 0);
-    const deliveryCharge = threshold > 0 && subtotal >= threshold ? 0 : baseCharge;
+    const deliveryCharge = (!isUrgent && threshold > 0 && subtotal >= threshold) ? 0 : baseCharge;
 
     let user = null;
     try {
@@ -206,6 +208,7 @@ export async function POST(req) {
           note,
           items,
           deliveryZone: finalDeliveryZone,
+          deliveryType: isUrgent ? "urgent" : "standard",
           deliveryCharge,
           subtotal,
           totalCost,

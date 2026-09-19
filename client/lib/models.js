@@ -260,6 +260,7 @@ const OrderSchema = new mongoose.Schema(
       type: String,
       default: "inside_dhaka",
     },
+    deliveryType: { type: String, default: "standard" }, // "standard" or "urgent"
     deliveryCharge: { type: Number, default: 0, min: 0 },
     discount: { type: Number, default: 0, min: 0 },
     subtotal: { type: Number, required: true, min: 0 },
