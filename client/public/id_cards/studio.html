@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LIORA ID Card Studio - 100% Clean & Natural Canva Editor</title>
+  <title>LIORA ID Card Studio - Exact Reference Match</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: #fdf2f4;
+      font-family: 'Inter', sans-serif;
+      background: #f8e6ea;
       color: #1e293b;
       overflow-x: hidden;
     }
@@ -129,14 +129,42 @@
       background: #ffffff;
     }
 
+    /* PREVIEW STAGE (Realistic Studio Pink Background) */
     .canvas-stage {
       padding: 30px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      background: radial-gradient(circle at center, #fff1f3 0%, #fde8ee 100%);
+      background: radial-gradient(circle at center, #fcecee 0%, #f6dbe2 100%);
       overflow-y: auto;
+    }
+
+    .view-mode-toggle {
+      display: flex;
+      gap: 8px;
+      background: white;
+      padding: 4px;
+      border-radius: 30px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(190, 24, 93, 0.1);
+      border: 1px solid #fbcfe8;
+    }
+    .mode-btn {
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+    .mode-btn.active {
+      background: #be185d;
+      color: white;
+      box-shadow: 0 2px 8px rgba(190, 24, 93, 0.25);
     }
 
     .cards-row {
@@ -147,153 +175,70 @@
       flex-wrap: wrap;
     }
 
-    .card-wrap {
+    /* CARD PRESENTATION */
+    .card-col {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    .card-label {
-      margin-top: 12px;
+
+    /* Hanging Lanyard Ribbon & Clip */
+    .strap-wrap {
+      width: 44px;
+      height: 75px;
+      background: linear-gradient(180deg, #c02656 0%, #9d174d 100%);
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(190, 24, 93, 0.3);
+      position: relative;
+      z-index: 2;
+    }
+    .strap-text {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 4px;
+    }
+    .metal-clip {
+      width: 32px;
+      height: 16px;
+      background: linear-gradient(180deg, #94a3b8, #cbd5e1, #64748b);
+      border-radius: 4px;
+      margin-bottom: -4px;
+      z-index: 3;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    /* PURE VECTOR CARD CONTAINER */
+    .card-box {
+      width: 330px;
+      height: 555px;
+      border-radius: 22px;
+      box-shadow: 0 25px 50px -10px rgba(190, 24, 93, 0.3), 0 0 0 1px rgba(254, 205, 211, 0.5);
+      overflow: hidden;
+      position: relative;
+      background: #ffffff;
+    }
+
+    .label-badge {
+      margin-top: 14px;
       font-size: 13px;
       color: #be185d;
       font-weight: 700;
     }
 
-    /* CARD CANVAS */
-    .card-canvas {
-      width: 332px;
-      height: 640px;
-      position: relative;
-      background-size: 332px 640px;
-      background-repeat: no-repeat;
+    /* Original Photo View */
+    #view-original-mode {
+      display: none;
+      max-width: 900px;
+      width: 100%;
       border-radius: 24px;
-      box-shadow: 0 25px 50px -12px rgba(190, 24, 93, 0.25);
-      overflow: hidden;
-    }
-
-    #front-canvas {
-      background-image: url('front_master_clean.png');
-    }
-    #back-canvas {
-      background-image: url('back_master_clean.png');
-    }
-
-    /* PRECISE DYNAMIC ELEMENTS */
-    .card-photo {
-      position: absolute;
-      left: 77px;
-      top: 219px;
-      width: 178px;
-      height: 148px;
-      border-radius: 12px;
-      object-fit: cover;
-      display: block;
-      z-index: 5;
-    }
-
-    .card-name {
-      position: absolute;
-      top: 382px;
-      left: 0;
-      width: 332px;
-      text-align: center;
-      font-weight: 800;
-      font-size: 18px;
-      color: #0f172a;
-      font-family: 'Inter', sans-serif;
-      z-index: 5;
-    }
-
-    .card-des-wrap {
-      position: absolute;
-      top: 410px;
-      left: 0;
-      width: 332px;
-      text-align: center;
-      z-index: 5;
-    }
-    .card-des-pill {
-      display: inline-block;
-      background: #be185d;
-      color: white;
-      font-size: 9.5px;
-      font-weight: 800;
-      letter-spacing: 0.8px;
-      padding: 4px 16px;
-      border-radius: 999px;
-      box-shadow: 0 2px 6px rgba(190, 24, 93, 0.3);
-    }
-
-    /* Precise Alignment with the 4 Icons */
-    .card-details-block {
-      position: absolute;
-      top: 451px;
-      left: 68px;
-      width: 240px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      font-size: 10.5px;
-      z-index: 5;
-    }
-    .card-detail-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 16px;
-    }
-    .card-detail-label {
-      color: #1e293b;
-      font-weight: 500;
-    }
-    .card-detail-val {
-      font-weight: 800;
-      color: #0f172a;
-    }
-
-    /* Back Card Precise Alignments with the 5 Icons */
-    .card-contact-block {
-      position: absolute;
-      top: 200px;
-      left: 78px;
-      width: 235px;
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-      z-index: 5;
-    }
-    .contact-item {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: 25px;
-    }
-    .contact-unit-title {
-      font-size: 9.5px;
-      color: #1e293b;
-      font-weight: 600;
-      line-height: 1;
-      margin-bottom: 2px;
-    }
-    .contact-unit-val {
-      font-size: 10.5px;
-      color: #0f172a;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    /* QR Code placed cleanly inside the white square */
-    .card-qr-box {
-      position: absolute;
-      top: 416px;
-      left: 36px;
-      width: 72px;
-      height: 72px;
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 5;
+      box-shadow: 0 25px 50px -12px rgba(190, 24, 93, 0.35);
+      border: 2px solid #fecdd3;
     }
 
     @media print {
@@ -302,7 +247,7 @@
       .studio-layout { display: block !important; }
       .canvas-stage { padding: 0 !important; background: white !important; }
       .cards-row { gap: 20px !important; }
-      .card-canvas { box-shadow: none !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .card-box { box-shadow: none !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
   </style>
 </head>
@@ -310,11 +255,11 @@
   <header class="no-print">
     <div class="brand-info">
       <div class="brand-title"><span>🪪</span> LIORA ID Card Studio</div>
-      <div class="brand-sub">সহজ ও নিখুঁত Canva-স্টাইল এডিটর (কোনো ডাবল টেক্সট বা ওভারল্যাপ ছাড়া)</div>
+      <div class="brand-sub">রেফারেন্স ছবির সাথে হুবহু মেলানো লাইভ ক্যানভা এডিটর</div>
     </div>
     <div class="header-actions">
       <button class="btn btn-print" onclick="window.print()">🖨️ প্রিন্ট করুন (Print)</button>
-      <button class="btn btn-secondary" onclick="resetToOriginal()">↺ মূল জিসান সাহেবের তথ্যে রিসেট</button>
+      <button class="btn btn-secondary" onclick="resetToOriginal()">↺ মূল তথ্যে রিসেট</button>
     </div>
   </header>
 
@@ -332,20 +277,20 @@
       <div id="tab-info">
         <div class="form-group">
           <label>কর্মচারীর নাম (Full Name)</label>
-          <input type="text" id="inp-name" value="Jahidul Islam Jisan" oninput="renderLive()">
+          <input type="text" id="inp-name" value="Jahidul Islam Jisan" oninput="updateSvg()">
         </div>
         <div class="form-group">
           <label>পদবী (Designation)</label>
-          <input type="text" id="inp-des" value="MANAGING DIRECTOR (MD)" oninput="renderLive()">
+          <input type="text" id="inp-des" value="MANAGING DIRECTOR (MD)" oninput="updateSvg()">
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label>এমপ্লয়ি আইডি (ID)</label>
-            <input type="text" id="inp-id" value="LIORA-001" oninput="renderLive()">
+            <input type="text" id="inp-id" value="LIORA-001" oninput="updateSvg()">
           </div>
           <div class="form-group">
             <label>রক্তের গ্রুপ</label>
-            <select id="inp-blood" onchange="renderLive()">
+            <select id="inp-blood" onchange="updateSvg()">
               <option value="O+" selected>O+</option>
               <option value="A+">A+</option>
               <option value="B+">B+</option>
@@ -359,11 +304,15 @@
         </div>
         <div class="form-group">
           <label>ডিপার্টমেন্ট (Department)</label>
-          <input type="text" id="inp-dept" value="Management & Marketing" oninput="renderLive()">
+          <input type="text" id="inp-dept" value="Management & Marketing" oninput="updateSvg()">
         </div>
         <div class="form-group">
           <label>যোগদানের তারিখ (Joining Date)</label>
-          <input type="text" id="inp-date" value="01 Aug 2025" oninput="renderLive()">
+          <input type="text" id="inp-date" value="01 Aug 2025" oninput="updateSvg()">
+        </div>
+        <div class="form-group">
+          <label>স্লোগান (Slogan)</label>
+          <input type="text" id="inp-slogan" value="Together We Grow ♥" oninput="updateSvg()">
         </div>
       </div>
 
@@ -374,10 +323,10 @@
           <input type="file" id="inp-file" accept="image/*" onchange="handlePhotoUpload(event)">
         </div>
         <p style="font-size: 12px; color: #64748b; line-height: 1.4;">
-          কম্পিউটার বা মোবাইল থেকে যেকোনো স্টাফের ছবি সিলেক্ট করলে তাৎক্ষণিকভাবে কার্ডের ফটো ফ্রেমে সেট হয়ে যাবে।
+          যেকোনো কর্মীর নতুন ছবি আপলোড করলে কার্ডের ফটো ফ্রেমে তাৎক্ষণিকভাবে নির্ভুলভাবে সেট হয়ে যাবে।
         </p>
         <div style="text-align: center; margin-top: 15px;">
-          <button class="btn btn-secondary" style="margin: 0 auto;" onclick="resetPhoto()">আসল ছবি ফিরিয়ে আনুন</button>
+          <button class="btn btn-secondary" style="margin: 0 auto;" onclick="resetPhoto()">আসল জিসান সাহেবের ছবি ফিরিয়ে আনুন</button>
         </div>
       </div>
 
@@ -385,27 +334,27 @@
       <div id="tab-back" style="display: none;">
         <div class="form-group">
           <label>অফিশিয়াল কন্টাক্ট</label>
-          <input type="text" id="inp-contact" value="+880 1712 345678" oninput="renderLive()">
+          <input type="text" id="inp-contact" value="+880 1712 345678" oninput="updateSvg()">
         </div>
         <div class="form-group">
           <label>ইমেইল</label>
-          <input type="text" id="inp-email" value="liorabeautyandwear@gmail.com" oninput="renderLive()">
+          <input type="text" id="inp-email" value="liorabeautyandwear@gmail.com" oninput="updateSvg()">
         </div>
         <div class="form-group">
           <label>ফেসবুক পেজ</label>
-          <input type="text" id="inp-fb" value="Liora Beauty and Wear" oninput="renderLive()">
+          <input type="text" id="inp-fb" value="Liora Beauty and Wear" oninput="updateSvg()">
         </div>
         <div class="form-group">
           <label>ওয়েবসাইট</label>
-          <input type="text" id="inp-web" value="liorabeautyandwear.com" oninput="renderLive()">
+          <input type="text" id="inp-web" value="liorabeautyandwear.com" oninput="updateSvg()">
         </div>
         <div class="form-group">
           <label>অফিস ঠিকানা</label>
-          <input type="text" id="inp-addr" value="Rayerbag, Dhaka, Bangladesh" oninput="renderLive()">
+          <input type="text" id="inp-addr" value="Rayerbag, Dhaka, Bangladesh" oninput="updateSvg()">
         </div>
         <div class="form-group">
-          <label>কিউআর কোড লিংক</label>
-          <input type="text" id="inp-qr" value="https://liorabeautyandwear.com" oninput="updateQr()">
+          <label>কিউআর কোড টার্গেট লিংক</label>
+          <input type="text" id="inp-qr" value="https://liorabeautyandwear.com" oninput="updateQrSvg()">
         </div>
       </div>
 
@@ -413,16 +362,16 @@
       <div id="tab-roles" style="display: none;">
         <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">১-ক্লিকে যেকোনো স্টাফের রোল অ্যাপ্লাই করুন:</p>
         <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Jahidul Islam Jisan', 'MANAGING DIRECTOR (MD)', 'LIORA-001', 'Management & Marketing', 'O+', '01 Aug 2025')">
+          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Jahidul Islam Jisan', 'MANAGING DIRECTOR (MD)', 'LIORA-001', 'Management & Marketing', 'O+', '01 Aug 2025', 'Together We Grow ♥')">
             <span>👑 Managing Director (MD)</span> <span>→</span>
           </button>
-          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Nusrat Jahan', 'SHOWROOM MANAGER', 'LIORA-012', 'Retail & Operations', 'A+', '15 Oct 2025')">
+          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Nusrat Jahan', 'SHOWROOM MANAGER', 'LIORA-012', 'Retail & Operations', 'A+', '15 Oct 2025', 'Excellence in Service ♥')">
             <span>🏬 Showroom Manager</span> <span>→</span>
           </button>
-          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Fatema Tuz Zohra', 'BEAUTY CONSULTANT', 'LIORA-025', 'Customer Experience', 'B+', '01 Jan 2026')">
+          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Fatema Tuz Zohra', 'BEAUTY CONSULTANT', 'LIORA-025', 'Customer Experience', 'B+', '01 Jan 2026', 'Glow with Confidence ♥')">
             <span>💄 Beauty Consultant</span> <span>→</span>
           </button>
-          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Md. Rakib Hasan', 'DELIVERY HERO', 'LIORA-042', 'Logistics & Supply', 'O+', '10 Feb 2026')">
+          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Md. Rakib Hasan', 'DELIVERY HERO', 'LIORA-042', 'Logistics & Supply', 'O+', '10 Feb 2026', 'Fast & Safe Delivery ♥')">
             <span>🚚 Delivery Hero</span> <span>→</span>
           </button>
         </div>
@@ -431,75 +380,226 @@
 
     <!-- Right Live Canvas Stage -->
     <main class="canvas-stage">
-      <div class="cards-row">
+      <!-- Mode Toggle -->
+      <div class="view-mode-toggle no-print">
+        <button class="mode-btn active" id="btn-live-mode" onclick="toggleMode('live')">
+          🎨 লাইভ এডিটর (Live Canva Mode)
+        </button>
+        <button class="mode-btn" id="btn-orig-mode" onclick="toggleMode('orig')">
+          📸 মূল রেফারেন্স মাস্টার (Exact Pic 2)
+        </button>
+      </div>
+
+      <!-- Exact Pic 2 Image View -->
+      <img id="view-original-mode" src="original_user_design.jpg" alt="Exact Pic 2 Master Reference">
+
+      <!-- LIVE CANVA VECTOR CARDS (Zero overlapping, 100% exact match) -->
+      <div class="cards-row" id="view-live-mode">
         <!-- FRONT CARD -->
-        <div class="card-wrap">
-          <div class="card-canvas" id="front-canvas">
-            <!-- Photo inside frame -->
-            <img id="view-photo" class="card-photo" src="jisan_portrait.jpg" alt="Portrait">
+        <div class="card-col">
+          <div class="strap-wrap no-print"><div class="strap-text">LIORA</div></div>
+          <div class="metal-clip no-print"></div>
 
-            <!-- Name -->
-            <div id="view-name" class="card-name">Jahidul Islam Jisan</div>
+          <div class="card-box">
+            <!-- Front Card Vector SVG (330 x 555) -->
+            <svg width="330" height="555" viewBox="0 0 330 555" style="display: block;">
+              <defs>
+                <clipPath id="photo-clip">
+                  <rect x="100" y="112" width="130" height="130" rx="14" ry="14" />
+                </clipPath>
+              </defs>
 
-            <!-- Designation Pill -->
-            <div class="card-des-wrap">
-              <span id="view-des" class="card-des-pill">MANAGING DIRECTOR (MD)</span>
-            </div>
+              <!-- Card Base Background -->
+              <rect width="330" height="555" rx="22" ry="22" fill="#fff7f8" stroke="#fecdd3" stroke-width="1" />
 
-            <!-- Detail Rows -->
-            <div class="card-details-block">
-              <div class="card-detail-row">
-                <span class="card-detail-label">Employee ID :</span>
-                <span class="card-detail-val" id="view-id">LIORA-001</span>
-              </div>
-              <div class="card-detail-row">
-                <span class="card-detail-label">Department :</span>
-                <span class="card-detail-val" id="view-dept">Management & Marketing</span>
-              </div>
-              <div class="card-detail-row">
-                <span class="card-detail-label">Blood Group :</span>
-                <span class="card-detail-val" id="view-blood">O+</span>
-              </div>
-              <div class="card-detail-row">
-                <span class="card-detail-label">Joining Date :</span>
-                <span class="card-detail-val" id="view-date">01 Aug 2025</span>
-              </div>
-            </div>
+              <!-- Top Organic Waves -->
+              <path d="M0,0 L330,0 L330,55 Q230,85 130,45 Q60,18 0,75 Z" fill="#fde2e7" opacity="0.9"/>
+              <path d="M0,0 L330,0 L330,30 Q210,60 120,28 Q50,8 0,45 Z" fill="#fdf2f4"/>
+
+              <!-- Bottom Organic Waves -->
+              <path d="M0,555 L330,555 L330,490 Q240,535 130,510 Q60,495 0,540 Z" fill="#fde2e7" opacity="0.8"/>
+              <path d="M85,555 L330,555 L330,502 Q240,542 150,528 Q105,520 85,555 Z" fill="#be185d" opacity="0.95"/>
+
+              <!-- Botanical Rose Leaves (Bottom Right) -->
+              <image href="leaf_front.png" x="240" y="430" width="90" height="125" preserveAspectRatio="none"/>
+
+              <!-- Slot Hole -->
+              <rect x="145" y="10" width="40" height="10" rx="5" fill="#1e293b"/>
+
+              <!-- Header / Logo -->
+              <text x="165" y="44" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="7.5" font-weight="700" letter-spacing="4.5" fill="#1e293b">BEAUTY &amp; WEAR</text>
+              <text x="165" y="76" text-anchor="middle" font-family="'Playfair Display', serif" font-size="34" font-weight="700" letter-spacing="2" fill="#be185d">LIORA</text>
+              
+              <!-- Ornamental Line Left -->
+              <line x1="58" y1="88" x2="104" y2="88" stroke="#be185d" stroke-width="1"/>
+              <polygon points="58,88 61,86 64,88 61,90" fill="#be185d"/>
+              <!-- Script Subtitle -->
+              <text x="165" y="93" text-anchor="middle" font-family="'Great Vibes', cursive" font-size="19" fill="#be185d">Beauty &amp; Wear</text>
+              <!-- Ornamental Line Right -->
+              <line x1="226" y1="88" x2="272" y2="88" stroke="#be185d" stroke-width="1"/>
+              <polygon points="272,88 269,86 266,88 269,90" fill="#be185d"/>
+
+              <!-- Photo Frame -->
+              <rect x="98" y="110" width="134" height="134" rx="16" ry="16" fill="#be185d"/>
+              <image id="svg-photo" href="jisan_portrait.jpg" x="100" y="112" width="130" height="130" preserveAspectRatio="xMidYMid slice" clip-path="url(#photo-clip)"/>
+
+              <!-- Name -->
+              <text id="svg-name" x="165" y="267" text-anchor="middle" font-family="'Inter', sans-serif" font-size="19" font-weight="800" fill="#0f172a">Jahidul Islam Jisan</text>
+
+              <!-- Designation Pill Badge -->
+              <rect x="55" y="278" width="220" height="24" rx="12" fill="#be185d"/>
+              <text id="svg-des" x="165" y="294" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="9.5" font-weight="800" letter-spacing="0.7" fill="#ffffff">MANAGING DIRECTOR (MD)</text>
+
+              <!-- 4 Information Rows -->
+              <!-- Row 1: ID -->
+              <circle cx="48" cy="326" r="11" fill="#be185d"/>
+              <g transform="translate(42, 320) scale(0.5)" fill="white">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1z"/>
+              </g>
+              <text x="70" y="330" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#1e293b">Employee ID</text>
+              <text x="142" y="330" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#64748b">:</text>
+              <text id="svg-id" x="156" y="330" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">LIORA-001</text>
+
+              <!-- Row 2: Department -->
+              <circle cx="48" cy="358" r="11" fill="#be185d"/>
+              <g transform="translate(42, 352) scale(0.5)" fill="white">
+                <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/>
+              </g>
+              <text x="70" y="362" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#1e293b">Department</text>
+              <text x="142" y="362" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#64748b">:</text>
+              <text id="svg-dept" x="156" y="362" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">Management &amp; Marketing</text>
+
+              <!-- Row 3: Blood Group -->
+              <circle cx="48" cy="390" r="11" fill="#be185d"/>
+              <g transform="translate(42, 384) scale(0.5)" fill="white">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+              </g>
+              <text x="70" y="394" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#1e293b">Blood Group</text>
+              <text x="142" y="394" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#64748b">:</text>
+              <text id="svg-blood" x="156" y="394" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">O+</text>
+
+              <!-- Row 4: Joining Date -->
+              <circle cx="48" cy="422" r="11" fill="#be185d"/>
+              <g transform="translate(42, 416) scale(0.5)" fill="white">
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+              </g>
+              <text x="70" y="426" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#1e293b">Joining Date</text>
+              <text x="142" y="426" font-family="'Inter', sans-serif" font-size="11" font-weight="500" fill="#64748b">:</text>
+              <text id="svg-date" x="156" y="426" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">01 Aug 2025</text>
+
+              <!-- Slogan Bottom Left -->
+              <text id="svg-slogan" x="32" y="482" font-family="'Great Vibes', cursive" font-size="20" fill="#be185d">Together We Grow ♥</text>
+              <line x1="162" y1="477" x2="222" y2="477" stroke="#fbcfe8" stroke-width="1.5"/>
+            </svg>
           </div>
-          <div class="card-label no-print">সামনের অংশ (Front Side)</div>
+          <div class="label-badge no-print">সামনের অংশ (Front Side)</div>
         </div>
 
         <!-- BACK CARD -->
-        <div class="card-wrap">
-          <div class="card-canvas" id="back-canvas">
-            <!-- Contact Rows -->
-            <div class="card-contact-block">
-              <div class="contact-item">
-                <div class="contact-unit-title">Official Contact</div>
-                <div class="contact-unit-val" id="view-contact">+880 1712 345678</div>
-              </div>
-              <div class="contact-item">
-                <div class="contact-unit-title">Email</div>
-                <div class="contact-unit-val" id="view-email">liorabeautyandwear@gmail.com</div>
-              </div>
-              <div class="contact-item">
-                <div class="contact-unit-title">Facebook Page</div>
-                <div class="contact-unit-val" id="view-fb">Liora Beauty and Wear</div>
-              </div>
-              <div class="contact-item">
-                <div class="contact-unit-title">Website</div>
-                <div class="contact-unit-val" id="view-web">liorabeautyandwear.com</div>
-              </div>
-              <div class="contact-item">
-                <div class="contact-unit-title">Business Address</div>
-                <div class="contact-unit-val" id="view-addr">Rayerbag, Dhaka, Bangladesh</div>
-              </div>
-            </div>
+        <div class="card-col">
+          <div class="strap-wrap no-print"><div class="strap-text">LIORA</div></div>
+          <div class="metal-clip no-print"></div>
 
-            <!-- Single Clean QR Code -->
-            <div class="card-qr-box" id="view-qr"></div>
+          <div class="card-box">
+            <!-- Back Card Vector SVG (330 x 555) -->
+            <svg width="330" height="555" viewBox="0 0 330 555" style="display: block;">
+              <!-- Card Base Background -->
+              <rect width="330" height="555" rx="22" ry="22" fill="#fff7f8" stroke="#fecdd3" stroke-width="1" />
+
+              <!-- Top Organic Waves -->
+              <path d="M0,0 L330,0 L330,55 Q230,15 120,42 T0,18 Z" fill="#fde2e7" opacity="0.9"/>
+              <path d="M0,0 L330,0 L330,32 Q220,5 110,26 T0,10 Z" fill="#fdf2f4"/>
+
+              <!-- Botanical Rose Leaves (Top Right) -->
+              <image href="leaf_back.png" x="245" y="0" width="85" height="110" preserveAspectRatio="none"/>
+
+              <!-- Slot Hole -->
+              <rect x="145" y="10" width="40" height="10" rx="5" fill="#1e293b"/>
+
+              <!-- Logo -->
+              <text x="165" y="44" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="7.5" font-weight="700" letter-spacing="4.5" fill="#1e293b">BEAUTY &amp; WEAR</text>
+              <text x="165" y="76" text-anchor="middle" font-family="'Playfair Display', serif" font-size="34" font-weight="700" letter-spacing="2" fill="#be185d">LIORA</text>
+              
+              <line x1="58" y1="88" x2="104" y2="88" stroke="#be185d" stroke-width="1"/>
+              <polygon points="58,88 61,86 64,88 61,90" fill="#be185d"/>
+              <text x="165" y="93" text-anchor="middle" font-family="'Great Vibes', cursive" font-size="19" fill="#be185d">Beauty &amp; Wear</text>
+              <line x1="226" y1="88" x2="272" y2="88" stroke="#be185d" stroke-width="1"/>
+              <polygon points="272,88 269,86 266,88 269,90" fill="#be185d"/>
+
+              <!-- 5 Contact Rows -->
+              <!-- Contact 1: Phone -->
+              <circle cx="48" cy="138" r="11" fill="#be185d"/>
+              <g transform="translate(42, 132) scale(0.5)" fill="white">
+                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+              </g>
+              <text x="70" y="132" font-family="'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#1e293b">Official Contact</text>
+              <text id="svg-contact" x="70" y="147" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">+880 1712 345678</text>
+
+              <!-- Contact 2: Email -->
+              <circle cx="48" cy="173" r="11" fill="#be185d"/>
+              <g transform="translate(42, 167) scale(0.5)" fill="white">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+              </g>
+              <text x="70" y="167" font-family="'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#1e293b">Email</text>
+              <text id="svg-email" x="70" y="182" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">liorabeautyandwear@gmail.com</text>
+
+              <!-- Contact 3: Facebook -->
+              <circle cx="48" cy="208" r="11" fill="#be185d"/>
+              <g transform="translate(42, 202) scale(0.5)" fill="white">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </g>
+              <text x="70" y="202" font-family="'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#1e293b">Facebook Page</text>
+              <text id="svg-fb" x="70" y="217" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">Liora Beauty and Wear</text>
+
+              <!-- Contact 4: Website -->
+              <circle cx="48" cy="243" r="11" fill="#be185d"/>
+              <g transform="translate(42, 237) scale(0.5)" fill="white">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </g>
+              <text x="70" y="237" font-family="'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#1e293b">Website</text>
+              <text id="svg-web" x="70" y="252" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">liorabeautyandwear.com</text>
+
+              <!-- Contact 5: Address -->
+              <circle cx="48" cy="278" r="11" fill="#be185d"/>
+              <g transform="translate(42, 272) scale(0.5)" fill="white">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </g>
+              <text x="70" y="272" font-family="'Inter', sans-serif" font-size="9.5" font-weight="600" fill="#1e293b">Business Address</text>
+              <text id="svg-addr" x="70" y="287" font-family="'Inter', sans-serif" font-size="11" font-weight="800" fill="#0f172a">Rayerbag, Dhaka, Bangladesh</text>
+
+              <!-- Middle Divider with center diamond -->
+              <line x1="25" y1="310" x2="305" y2="310" stroke="#fbcfe8" stroke-width="1.2"/>
+              <polygon points="165,307 168,310 165,313 162,310" fill="#be185d"/>
+
+              <!-- QR Code Container -->
+              <rect x="66" y="326" width="80" height="80" rx="10" fill="#ffffff" stroke="#f472b6" stroke-width="1.5"/>
+              <!-- ForeignObject for QR Code SVG -->
+              <foreignObject x="71" y="331" width="70" height="70">
+                <div id="svg-qrcode-container" style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;"></div>
+              </foreignObject>
+
+              <!-- Scan Prompt Text -->
+              <text x="170" y="356" font-family="'Great Vibes', cursive" font-size="19" fill="#be185d">Scan for</text>
+              <text x="170" y="377" font-family="'Great Vibes', cursive" font-size="19" fill="#be185d">Website / Facebook</text>
+              
+              <!-- Curved Arrow SVG -->
+              <path d="M 215,385 Q 195,405 154,395 L 160,388 M 154,395 L 161,402" stroke="#be185d" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+              <!-- Return Notice Box -->
+              <rect x="25" y="422" width="280" height="38" rx="10" fill="#fce7ec"/>
+              <g transform="translate(38, 431) scale(0.7)" fill="#be185d">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+              </g>
+              <text x="68" y="445" font-family="'Inter', sans-serif" font-size="10.5" font-weight="500" fill="#1e293b">
+                If found, please return to <tspan font-weight="800" fill="#be185d">Liora Beauty &amp; Wear</tspan>
+              </text>
+
+              <!-- Bottom Wavy Crimson Banner -->
+              <path d="M0,470 Q80,455 165,470 Q250,485 330,460 L330,555 L0,555 Z" fill="#be185d"/>
+              <text x="165" y="520" text-anchor="middle" font-family="'Great Vibes', cursive" font-size="18" fill="#ffffff" letter-spacing="1">Beauty  •  Confidence  •  You  ♥</text>
+            </svg>
           </div>
-          <div class="card-label no-print">পেছনের অংশ (Back Side)</div>
+          <div class="label-badge no-print">পেছনের অংশ (Back Side)</div>
         </div>
       </div>
     </main>
@@ -507,26 +607,6 @@
 
   <script>
     let qrObj = null;
-
-    function initQr() {
-      const qrEl = document.getElementById("view-qr");
-      qrEl.innerHTML = "";
-      qrObj = new QRCode(qrEl, {
-        text: document.getElementById("inp-qr").value || "https://liorabeautyandwear.com",
-        width: 66,
-        height: 66,
-        colorDark: "#1e293b",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    }
-
-    function updateQr() {
-      if (qrObj) {
-        qrObj.clear();
-        qrObj.makeCode(document.getElementById("inp-qr").value);
-      }
-    }
 
     function switchTab(name, btn) {
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -536,19 +616,61 @@
       });
     }
 
-    function renderLive() {
-      document.getElementById("view-name").textContent = document.getElementById("inp-name").value;
-      document.getElementById("view-des").textContent = document.getElementById("inp-des").value;
-      document.getElementById("view-id").textContent = document.getElementById("inp-id").value;
-      document.getElementById("view-dept").textContent = document.getElementById("inp-dept").value;
-      document.getElementById("view-blood").textContent = document.getElementById("inp-blood").value;
-      document.getElementById("view-date").textContent = document.getElementById("inp-date").value;
+    function toggleMode(mode) {
+      const liveMode = document.getElementById("view-live-mode");
+      const origMode = document.getElementById("view-original-mode");
+      const btnLive = document.getElementById("btn-live-mode");
+      const btnOrig = document.getElementById("btn-orig-mode");
 
-      document.getElementById("view-contact").textContent = document.getElementById("inp-contact").value;
-      document.getElementById("view-email").textContent = document.getElementById("inp-email").value;
-      document.getElementById("view-fb").textContent = document.getElementById("inp-fb").value;
-      document.getElementById("view-web").textContent = document.getElementById("inp-web").value;
-      document.getElementById("view-addr").textContent = document.getElementById("inp-addr").value;
+      if (mode === 'orig') {
+        liveMode.style.display = "none";
+        origMode.style.display = "block";
+        btnLive.classList.remove("active");
+        btnOrig.classList.add("active");
+      } else {
+        liveMode.style.display = "flex";
+        origMode.style.display = "none";
+        btnLive.classList.add("active");
+        btnOrig.classList.remove("active");
+      }
+    }
+
+    function updateSvg() {
+      // Front
+      document.getElementById("svg-name").textContent = document.getElementById("inp-name").value;
+      document.getElementById("svg-des").textContent = document.getElementById("inp-des").value;
+      document.getElementById("svg-id").textContent = document.getElementById("inp-id").value;
+      document.getElementById("svg-dept").textContent = document.getElementById("inp-dept").value;
+      document.getElementById("svg-blood").textContent = document.getElementById("inp-blood").value;
+      document.getElementById("svg-date").textContent = document.getElementById("inp-date").value;
+      document.getElementById("svg-slogan").textContent = document.getElementById("inp-slogan").value;
+
+      // Back
+      document.getElementById("svg-contact").textContent = document.getElementById("inp-contact").value;
+      document.getElementById("svg-email").textContent = document.getElementById("inp-email").value;
+      document.getElementById("svg-fb").textContent = document.getElementById("inp-fb").value;
+      document.getElementById("svg-web").textContent = document.getElementById("inp-web").value;
+      document.getElementById("svg-addr").textContent = document.getElementById("inp-addr").value;
+    }
+
+    function initQrSvg() {
+      const el = document.getElementById("svg-qrcode-container");
+      el.innerHTML = "";
+      qrObj = new QRCode(el, {
+        text: document.getElementById("inp-qr").value || "https://liorabeautyandwear.com",
+        width: 66,
+        height: 66,
+        colorDark: "#1e293b",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function updateQrSvg() {
+      if (qrObj) {
+        qrObj.clear();
+        qrObj.makeCode(document.getElementById("inp-qr").value);
+      }
     }
 
     function handlePhotoUpload(e) {
@@ -556,14 +678,14 @@
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          document.getElementById("view-photo").src = evt.target.result;
+          document.getElementById("svg-photo").setAttribute("href", evt.target.result);
         };
         reader.readAsDataURL(file);
       }
     }
 
     function resetPhoto() {
-      document.getElementById("view-photo").src = "jisan_portrait.jpg";
+      document.getElementById("svg-photo").setAttribute("href", "jisan_portrait.jpg");
     }
 
     function resetToOriginal() {
@@ -573,6 +695,7 @@
       document.getElementById("inp-blood").value = "O+";
       document.getElementById("inp-dept").value = "Management & Marketing";
       document.getElementById("inp-date").value = "01 Aug 2025";
+      document.getElementById("inp-slogan").value = "Together We Grow ♥";
       document.getElementById("inp-contact").value = "+880 1712 345678";
       document.getElementById("inp-email").value = "liorabeautyandwear@gmail.com";
       document.getElementById("inp-fb").value = "Liora Beauty and Wear";
@@ -580,22 +703,26 @@
       document.getElementById("inp-addr").value = "Rayerbag, Dhaka, Bangladesh";
       document.getElementById("inp-qr").value = "https://liorabeautyandwear.com";
       resetPhoto();
-      renderLive();
-      updateQr();
+      updateSvg();
+      updateQrSvg();
     }
 
-    function applyRole(name, des, id, dept, blood, date) {
+    function applyRole(name, des, id, dept, blood, date, slogan) {
       document.getElementById("inp-name").value = name;
       document.getElementById("inp-des").value = des;
       document.getElementById("inp-id").value = id;
       document.getElementById("inp-dept").value = dept;
       document.getElementById("inp-blood").value = blood;
       document.getElementById("inp-date").value = date;
-      renderLive();
+      document.getElementById("inp-slogan").value = slogan;
+      updateSvg();
       alert("'" + des + "' রোল অ্যাপ্লাই করা হয়েছে!");
     }
 
-    window.onload = initQr;
+    window.onload = function() {
+      initQrSvg();
+      updateSvg();
+    };
   </script>
 </body>
 </html>
