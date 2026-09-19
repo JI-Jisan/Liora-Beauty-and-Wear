@@ -6,12 +6,6 @@ import { getImageUrl } from "@/lib/api";
 
 const DEFAULT_CAMPAIGN_BANNERS = [
   {
-    id: "banner-brand-main",
-    title: "LIORA Beauty & Wear - 100% Authentic & Premium Quality",
-    image: "/hero-banner-main.jpg",
-    link: "/products",
-  },
-  {
     id: "banner-korean-skincare",
     title: "Glowing Korean Skincare - Up to 30% OFF",
     image: "/banners/hero_korean_skincare.jpg",
@@ -42,8 +36,8 @@ export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
   const banners = useMemo(() => {
     const list = [];
 
-    // 1. If admin has a main hero image, put it first
-    if (heroImage && heroImage.trim()) {
+    // 1. If admin has a main hero image, put it first (excluding deleted default banner)
+    if (heroImage && heroImage.trim() && !heroImage.includes("hero-banner-main")) {
       list.push({
         id: "banner-hero-main-dynamic",
         title: "LIORA Beauty & Wear",
