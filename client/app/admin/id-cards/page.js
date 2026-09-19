@@ -8,7 +8,6 @@ export default function AdminIdCardStudio() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState("info");
-  const [zoom, setZoom] = useState(1);
 
   const [cardData, setCardData] = useState({
     name: "Jahidul Islam Jisan",
@@ -17,8 +16,7 @@ export default function AdminIdCardStudio() {
     department: "Management & Marketing",
     bloodGroup: "O+",
     joiningDate: "01 Aug 2025",
-    slogan: "Together We Grow ♥",
-    customPhoto: null,
+    photoUrl: "/id_cards/jisan_portrait.jpg",
     // Back Side
     contact: "+880 1712 345678",
     email: "liorabeautyandwear@gmail.com",
@@ -27,17 +25,6 @@ export default function AdminIdCardStudio() {
     address: "Rayerbag, Dhaka, Bangladesh",
     qrUrl: "https://liorabeautyandwear.com",
   });
-
-  const isFrontModified =
-    cardData.name !== "Jahidul Islam Jisan" ||
-    cardData.designation !== "MANAGING DIRECTOR (MD)" ||
-    cardData.empId !== "LIORA-001" ||
-    cardData.customPhoto !== null;
-
-  const isBackModified =
-    cardData.contact !== "+880 1712 345678" ||
-    cardData.email !== "liorabeautyandwear@gmail.com" ||
-    cardData.qrUrl !== "https://liorabeautyandwear.com";
 
   const handleInputChange = (field, value) => {
     setCardData((prev) => ({ ...prev, [field]: value }));
@@ -48,7 +35,7 @@ export default function AdminIdCardStudio() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setCardData((prev) => ({ ...prev, customPhoto: event.target.result }));
+        setCardData((prev) => ({ ...prev, photoUrl: event.target.result }));
       };
       reader.readAsDataURL(file);
     }
@@ -62,8 +49,7 @@ export default function AdminIdCardStudio() {
       department: "Management & Marketing",
       bloodGroup: "O+",
       joiningDate: "01 Aug 2025",
-      slogan: "Together We Grow ♥",
-      customPhoto: null,
+      photoUrl: "/id_cards/jisan_portrait.jpg",
       contact: "+880 1712 345678",
       email: "liorabeautyandwear@gmail.com",
       fbPage: "Liora Beauty and Wear",
@@ -71,6 +57,18 @@ export default function AdminIdCardStudio() {
       address: "Rayerbag, Dhaka, Bangladesh",
       qrUrl: "https://liorabeautyandwear.com",
     });
+  };
+
+  const applyRole = (name, des, id, dept, blood, date) => {
+    setCardData((prev) => ({
+      ...prev,
+      name,
+      designation: des,
+      empId: id,
+      department: dept,
+      bloodGroup: blood,
+      joiningDate: date,
+    }));
   };
 
   return (
@@ -114,7 +112,7 @@ export default function AdminIdCardStudio() {
               🪪 LIORA ID Card Studio
             </h1>
             <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
-              আসল মাস্টার টেমপ্লেটের সাথে ১০০% হুবহু লাইভ আইডি কার্ড এডিটর
+              সহজ ও নিখুঁত Canva-স্টাইল এডিটর (কোনো সাদা দাগ ছাড়া আসল ব্যাকগ্রাউন্ডে টেক্সট বসে)
             </p>
           </div>
         </div>
@@ -148,7 +146,7 @@ export default function AdminIdCardStudio() {
               fontSize: "13px",
             }}
           >
-            ↺ মূল ডিজাইনে রিসেট
+            ↺ মূল জিসান সাহেবের তথ্যে রিসেট
           </button>
         </div>
       </header>
@@ -272,21 +270,12 @@ export default function AdminIdCardStudio() {
                   style={inputStyle}
                 />
               </div>
-              <div>
-                <label style={labelStyle}>স্লোগান / মটো (Slogan)</label>
-                <input
-                  type="text"
-                  value={cardData.slogan}
-                  onChange={(e) => handleInputChange("slogan", e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
             </div>
           )}
 
           {activeTab === "photo" && (
             <div>
-              <label style={labelStyle}>পাসপোর্ট সাইজ ছবি আপলোড করুন</label>
+              <label style={labelStyle}>পাসপোর্ট সাইজ ছবি পরিবর্তন করুন</label>
               <input
                 type="file"
                 accept="image/*"
@@ -294,27 +283,25 @@ export default function AdminIdCardStudio() {
                 style={{ ...inputStyle, padding: "8px", marginBottom: "16px" }}
               />
               <p style={{ fontSize: "12px", color: "#64748b", lineHeight: 1.4 }}>
-                যেকোনো কর্মীর নতুন ছবি আপলোড করলে কার্ডের ফটো ফ্রেমে লাইভ সেট হয়ে যাবে।
+                যেকোনো কর্মীর নতুন ছবি সিলেক্ট করলে তাৎক্ষণিকভাবে কার্ডের ফটো ফ্রেমে সেট হয়ে যাবে।
               </p>
-              {cardData.customPhoto && (
-                <div style={{ textAlign: "center", marginTop: "16px" }}>
-                  <button
-                    onClick={() => handleInputChange("customPhoto", null)}
-                    style={{
-                      background: "#be185d",
-                      color: "white",
-                      border: "none",
-                      padding: "8px 14px",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    আসল ছবি ফিরিয়ে আনুন
-                  </button>
-                </div>
-              )}
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
+                <button
+                  onClick={() => handleInputChange("photoUrl", "/id_cards/jisan_portrait.jpg")}
+                  style={{
+                    background: "#fce7ec",
+                    color: "#be185d",
+                    border: "1px solid #fbcfe8",
+                    padding: "8px 14px",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  আসল ছবি ফিরিয়ে আনুন
+                </button>
+              </div>
             </div>
           )}
 
@@ -391,7 +378,6 @@ export default function AdminIdCardStudio() {
                     dept: "Management & Marketing",
                     bg: "O+",
                     date: "01 Aug 2025",
-                    slogan: "Together We Grow ♥",
                     icon: "👑",
                   },
                   {
@@ -401,7 +387,6 @@ export default function AdminIdCardStudio() {
                     dept: "Retail & Operations",
                     bg: "A+",
                     date: "15 Oct 2025",
-                    slogan: "Excellence in Service ♥",
                     icon: "🏬",
                   },
                   {
@@ -411,7 +396,6 @@ export default function AdminIdCardStudio() {
                     dept: "Customer Experience",
                     bg: "B+",
                     date: "01 Jan 2026",
-                    slogan: "Glow with Confidence ♥",
                     icon: "💄",
                   },
                   {
@@ -421,24 +405,12 @@ export default function AdminIdCardStudio() {
                     dept: "Logistics & Supply",
                     bg: "O+",
                     date: "10 Feb 2026",
-                    slogan: "Fast & Safe Delivery ♥",
                     icon: "🚚",
                   },
                 ].map((r, i) => (
                   <button
                     key={i}
-                    onClick={() => {
-                      setCardData((prev) => ({
-                        ...prev,
-                        name: r.name,
-                        designation: r.des,
-                        empId: r.id,
-                        department: r.dept,
-                        bloodGroup: r.bg,
-                        joiningDate: r.date,
-                        slogan: r.slogan,
-                      }));
-                    }}
+                    onClick={() => applyRole(r.name, r.des, r.id, r.dept, r.bg, r.date)}
                     style={{
                       background: "#fdf2f4",
                       border: "1px solid #fbcfe8",
@@ -494,7 +466,7 @@ export default function AdminIdCardStudio() {
                   width: "332px",
                   height: "640px",
                   position: "relative",
-                  backgroundImage: "url('/id_cards/front_with_ribbon.png')",
+                  backgroundImage: "url('/id_cards/front_clean_base.png')",
                   backgroundSize: "332px 640px",
                   backgroundRepeat: "no-repeat",
                   borderRadius: "24px",
@@ -503,106 +475,99 @@ export default function AdminIdCardStudio() {
                 }}
                 className="print-card"
               >
-                {/* Dynamic Overlays (Visible when user edits) */}
-                {cardData.customPhoto && (
-                  <img
-                    src={cardData.customPhoto}
-                    alt="Custom Portrait"
+                {/* Photo */}
+                <img
+                  src={cardData.photoUrl}
+                  alt={cardData.name}
+                  style={{
+                    position: "absolute",
+                    left: "74px",
+                    top: "215px",
+                    width: "184px",
+                    height: "156px",
+                    borderRadius: "14px",
+                    objectFit: "cover",
+                    zIndex: 5,
+                  }}
+                />
+
+                {/* Name */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "382px",
+                    left: 0,
+                    width: "332px",
+                    textAlign: "center",
+                    fontWeight: 800,
+                    fontSize: "18px",
+                    color: "#0f172a",
+                    fontFamily: "'Inter', sans-serif",
+                    zIndex: 5,
+                  }}
+                >
+                  {cardData.name}
+                </div>
+
+                {/* Designation Pill */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "410px",
+                    left: 0,
+                    width: "332px",
+                    textAlign: "center",
+                    zIndex: 5,
+                  }}
+                >
+                  <span
                     style={{
-                      position: "absolute",
-                      left: "74px",
-                      top: "215px",
-                      width: "184px",
-                      height: "156px",
-                      borderRadius: "14px",
-                      objectFit: "cover",
-                      zIndex: 10,
-                      boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-                      border: "2px solid #be185d",
+                      display: "inline-block",
+                      background: "#be185d",
+                      color: "white",
+                      fontSize: "9.5px",
+                      fontWeight: 800,
+                      letterSpacing: "0.8px",
+                      padding: "4px 16px",
+                      borderRadius: "999px",
+                      boxShadow: "0 2px 6px rgba(190, 24, 93, 0.3)",
                     }}
-                  />
-                )}
+                  >
+                    {cardData.designation}
+                  </span>
+                </div>
 
-                {isFrontModified && (
-                  <>
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "382px",
-                        left: "10px",
-                        width: "312px",
-                        textAlign: "center",
-                        fontWeight: 800,
-                        fontSize: "17px",
-                        color: "#0f172a",
-                        fontFamily: "'Inter', sans-serif",
-                        background: "#ffffff",
-                        padding: "2px 0",
-                        zIndex: 10,
-                      }}
-                    >
-                      {cardData.name}
-                    </div>
-
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "410px",
-                        left: "0",
-                        width: "332px",
-                        textAlign: "center",
-                        background: "#ffffff",
-                        padding: "2px 0",
-                        zIndex: 10,
-                      }}
-                    >
-                      <span
-                        style={{
-                          display: "inline-block",
-                          background: "#be185d",
-                          color: "white",
-                          fontSize: "9.5px",
-                          fontWeight: 800,
-                          letterSpacing: "0.8px",
-                          padding: "4px 16px",
-                          borderRadius: "999px",
-                          boxShadow: "0 2px 6px rgba(190, 24, 93, 0.3)",
-                        }}
-                      >
-                        {cardData.designation}
-                      </span>
-                    </div>
-
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "444px",
-                        left: "55px",
-                        width: "250px",
-                        background: "#ffffff",
-                        padding: "4px 6px",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "6px",
-                        fontSize: "11px",
-                        zIndex: 10,
-                      }}
-                    >
-                      <div>
-                        <span style={{ fontWeight: 700, color: "#0f172a" }}>{cardData.empId}</span>
-                      </div>
-                      <div>
-                        <span style={{ fontWeight: 700, color: "#0f172a" }}>{cardData.department}</span>
-                      </div>
-                      <div>
-                        <span style={{ fontWeight: 700, color: "#0f172a" }}>{cardData.bloodGroup}</span>
-                      </div>
-                      <div>
-                        <span style={{ fontWeight: 700, color: "#0f172a" }}>{cardData.joiningDate}</span>
-                      </div>
-                    </div>
-                  </>
-                )}
+                {/* Detail Rows */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "444px",
+                    left: "72px",
+                    width: "235px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "7px",
+                    fontSize: "11px",
+                    zIndex: 5,
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "#1e293b", fontWeight: 500 }}>Employee ID :</span>
+                    <span style={{ fontWeight: 800, color: "#0f172a" }}>{cardData.empId}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "#1e293b", fontWeight: 500 }}>Department :</span>
+                    <span style={{ fontWeight: 800, color: "#0f172a" }}>{cardData.department}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "#1e293b", fontWeight: 500 }}>Blood Group :</span>
+                    <span style={{ fontWeight: 800, color: "#0f172a" }}>{cardData.bloodGroup}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ color: "#1e293b", fontWeight: 500 }}>Joining Date :</span>
+                    <span style={{ fontWeight: 800, color: "#0f172a" }}>{cardData.joiningDate}</span>
+                  </div>
+                </div>
               </div>
               <div style={{ marginTop: "12px", fontSize: "13px", color: "#be185d", fontWeight: 700 }} className="no-print">
                 সামনের অংশ (Front Side)
@@ -616,7 +581,7 @@ export default function AdminIdCardStudio() {
                   width: "332px",
                   height: "640px",
                   position: "relative",
-                  backgroundImage: "url('/id_cards/back_with_ribbon.png')",
+                  backgroundImage: "url('/id_cards/back_clean_base.png')",
                   backgroundSize: "332px 640px",
                   backgroundRepeat: "no-repeat",
                   borderRadius: "24px",
@@ -625,46 +590,58 @@ export default function AdminIdCardStudio() {
                 }}
                 className="print-card"
               >
-                {isBackModified && (
-                  <>
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "215px",
-                        left: "85px",
-                        width: "230px",
-                        background: "#ffffff",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "14px",
-                        zIndex: 10,
-                      }}
-                    >
-                      <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 700 }}>{cardData.contact}</div>
-                      <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 700 }}>{cardData.email}</div>
-                      <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 700 }}>{cardData.fbPage}</div>
-                      <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 700 }}>{cardData.website}</div>
-                      <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 700 }}>{cardData.address}</div>
-                    </div>
+                {/* Contact Rows */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "204px",
+                    left: "80px",
+                    width: "230px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                    zIndex: 5,
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Official Contact</div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.contact}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Email</div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.email}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Facebook Page</div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.fbPage}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Website</div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.website}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: "10px", color: "#1e293b", fontWeight: 600 }}>Business Address</div>
+                    <div style={{ fontSize: "10.5px", color: "#0f172a", fontWeight: 800 }}>{cardData.address}</div>
+                  </div>
+                </div>
 
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "432px",
-                        left: "45px",
-                        width: "58px",
-                        height: "58px",
-                        background: "white",
-                        padding: "2px",
-                        borderRadius: "6px",
-                        zIndex: 10,
-                        border: "1px solid #fecdd3",
-                      }}
-                    >
-                      <QRCodeSVG value={cardData.qrUrl} size={54} level="M" />
-                    </div>
-                  </>
-                )}
+                {/* QR Code */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "432px",
+                    left: "44px",
+                    width: "58px",
+                    height: "58px",
+                    background: "white",
+                    padding: "2px",
+                    borderRadius: "6px",
+                    zIndex: 5,
+                    border: "1px solid #fecdd3",
+                  }}
+                >
+                  <QRCodeSVG value={cardData.qrUrl} size={54} level="M" />
+                </div>
               </div>
               <div style={{ marginTop: "12px", fontSize: "13px", color: "#be185d", fontWeight: 700 }} className="no-print">
                 পেছনের অংশ (Back Side)

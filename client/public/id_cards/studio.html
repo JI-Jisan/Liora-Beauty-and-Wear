@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LIORA ID Card Studio - 100% Original Brand Match</title>
+  <title>LIORA ID Card Studio - 100% Seamless Canva Editor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
@@ -147,7 +147,7 @@
       flex-wrap: wrap;
     }
 
-    /* EXACT 100% ORIGINAL CANVAS CARD CONTAINERS */
+    /* CARD CONTAINERS */
     .card-wrap {
       display: flex;
       flex-direction: column;
@@ -169,21 +169,17 @@
       border-radius: 24px;
       box-shadow: 0 25px 50px -12px rgba(190, 24, 93, 0.25);
       overflow: hidden;
-      transition: transform 0.2s ease;
-    }
-    .card-canvas:hover {
-      transform: translateY(-4px);
     }
 
     #front-canvas {
-      background-image: url('front_with_ribbon.png');
+      background-image: url('front_clean_base.png');
     }
     #back-canvas {
-      background-image: url('back_with_ribbon.png');
+      background-image: url('back_clean_base.png');
     }
 
-    /* DYNAMIC OVERLAY ELEMENTS (Only active when edited) */
-    .overlay-photo {
+    /* NATIVE LIVE EDITABLE LAYERS (NO WHITE RECTANGLES) */
+    .card-photo {
       position: absolute;
       left: 74px;
       top: 215px;
@@ -191,40 +187,33 @@
       height: 156px;
       border-radius: 14px;
       object-fit: cover;
-      display: none;
-      z-index: 10;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      border: 2px solid #be185d;
+      display: block;
+      z-index: 5;
     }
 
-    .overlay-name {
+    .card-name {
       position: absolute;
       top: 382px;
-      left: 10px;
-      width: 312px;
+      left: 0;
+      width: 332px;
       text-align: center;
       font-weight: 800;
-      font-size: 17px;
+      font-size: 18px;
       color: #0f172a;
       font-family: 'Inter', sans-serif;
-      background: #ffffff;
-      padding: 2px 0;
-      display: none;
-      z-index: 10;
+      z-index: 5;
+      background: transparent;
     }
 
-    .overlay-des-wrap {
+    .card-des-wrap {
       position: absolute;
       top: 410px;
       left: 0;
       width: 332px;
       text-align: center;
-      background: #ffffff;
-      padding: 2px 0;
-      display: none;
-      z-index: 10;
+      z-index: 5;
     }
-    .overlay-des-pill {
+    .card-des-pill {
       display: inline-block;
       background: #be185d;
       color: white;
@@ -236,69 +225,65 @@
       box-shadow: 0 2px 6px rgba(190, 24, 93, 0.3);
     }
 
-    .overlay-details-block {
+    .card-details-block {
       position: absolute;
       top: 444px;
-      left: 55px;
-      width: 250px;
-      background: #ffffff;
-      padding: 4px 6px;
-      display: none;
+      left: 72px;
+      width: 235px;
+      display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
       font-size: 11px;
-      z-index: 10;
+      z-index: 5;
+      background: transparent;
     }
-    .overlay-detail-val {
-      font-weight: 700;
+    .card-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-detail-label {
+      color: #1e293b;
+      font-weight: 500;
+    }
+    .card-detail-val {
+      font-weight: 800;
       color: #0f172a;
-      display: inline-block;
-      margin-left: 4px;
     }
 
-    .overlay-slogan {
+    /* Back Card Live Elements */
+    .card-contact-block {
       position: absolute;
-      bottom: 22px;
-      left: 25px;
-      font-family: 'Great Vibes', cursive;
-      font-size: 17px;
-      color: #be185d;
-      background: #fdf2f4;
-      padding: 0 4px;
-      display: none;
-      z-index: 10;
-    }
-
-    /* Back Overlays */
-    .overlay-contact-block {
-      position: absolute;
-      top: 215px;
-      left: 85px;
+      top: 204px;
+      left: 80px;
       width: 230px;
-      background: #ffffff;
-      display: none;
+      display: flex;
       flex-direction: column;
-      gap: 14px;
-      z-index: 10;
+      gap: 8px;
+      z-index: 5;
+      background: transparent;
     }
-    .overlay-contact-item {
+    .contact-unit-title {
+      font-size: 10px;
+      color: #1e293b;
+      font-weight: 600;
+    }
+    .contact-unit-val {
       font-size: 10.5px;
       color: #0f172a;
-      font-weight: 700;
-      line-height: 1.1;
+      font-weight: 800;
     }
 
-    .overlay-qr {
+    .card-qr-box {
       position: absolute;
       top: 432px;
-      left: 45px;
+      left: 44px;
       width: 58px;
       height: 58px;
       background: white;
       padding: 2px;
       border-radius: 6px;
-      display: none;
-      z-index: 10;
+      z-index: 5;
       border: 1px solid #fecdd3;
     }
 
@@ -316,11 +301,11 @@
   <header class="no-print">
     <div class="brand-info">
       <div class="brand-title"><span>🪪</span> LIORA ID Card Studio</div>
-      <div class="brand-sub">আপনার আসল মাস্টার টেমপ্লেটের সাথে ১০০% হুবহু লাইভ এডিটর</div>
+      <div class="brand-sub">সহজ ও নিখুঁত Canva-স্টাইল এডিটর (কোনো সাদা দাগ ছাড়া আসল ব্যাকগ্রাউন্ডে টেক্সট বসে)</div>
     </div>
     <div class="header-actions">
       <button class="btn btn-print" onclick="window.print()">🖨️ প্রিন্ট করুন (Print)</button>
-      <button class="btn btn-secondary" onclick="resetToOriginal()">↺ মূল ডিজাইনে রিসেট</button>
+      <button class="btn btn-secondary" onclick="resetToOriginal()">↺ মূল জিসান সাহেবের তথ্যে রিসেট</button>
     </div>
   </header>
 
@@ -338,20 +323,20 @@
       <div id="tab-info">
         <div class="form-group">
           <label>কর্মচারীর নাম (Full Name)</label>
-          <input type="text" id="inp-name" value="Jahidul Islam Jisan" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-name" value="Jahidul Islam Jisan" oninput="renderLive()">
         </div>
         <div class="form-group">
           <label>পদবী (Designation)</label>
-          <input type="text" id="inp-des" value="MANAGING DIRECTOR (MD)" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-des" value="MANAGING DIRECTOR (MD)" oninput="renderLive()">
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label>এমপ্লয়ি আইডি (ID)</label>
-            <input type="text" id="inp-id" value="LIORA-001" oninput="applyCustomOverlay()">
+            <input type="text" id="inp-id" value="LIORA-001" oninput="renderLive()">
           </div>
           <div class="form-group">
             <label>রক্তের গ্রুপ</label>
-            <select id="inp-blood" onchange="applyCustomOverlay()">
+            <select id="inp-blood" onchange="renderLive()">
               <option value="O+" selected>O+</option>
               <option value="A+">A+</option>
               <option value="B+">B+</option>
@@ -365,15 +350,11 @@
         </div>
         <div class="form-group">
           <label>ডিপার্টমেন্ট (Department)</label>
-          <input type="text" id="inp-dept" value="Management & Marketing" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-dept" value="Management & Marketing" oninput="renderLive()">
         </div>
         <div class="form-group">
           <label>যোগদানের তারিখ (Joining Date)</label>
-          <input type="text" id="inp-date" value="01 Aug 2025" oninput="applyCustomOverlay()">
-        </div>
-        <div class="form-group">
-          <label>স্লোগান / মটো (Slogan)</label>
-          <input type="text" id="inp-slogan" value="Together We Grow ♥" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-date" value="01 Aug 2025" oninput="renderLive()">
         </div>
       </div>
 
@@ -383,11 +364,11 @@
           <label>পাসপোর্ট সাইজ ছবি পরিবর্তন করুন</label>
           <input type="file" id="inp-file" accept="image/*" onchange="handlePhotoUpload(event)">
         </div>
-        <p style="font-size: 11.5px; color: #64748b; line-height: 1.4;">
-          কম্পিউটার বা মোবাইল থেকে যেকোনো স্টাফের ছবি আপলোড করলেই ফটো ফ্রেমে লাইভ সেট হয়ে যাবে।
+        <p style="font-size: 12px; color: #64748b; line-height: 1.4;">
+          যেকোনো কর্মীর নতুন ছবি সিলেক্ট করলে তাৎক্ষণিকভাবে কার্ডের ফটো ফ্রেমে সেট হয়ে যাবে।
         </p>
         <div style="text-align: center; margin-top: 15px;">
-          <button class="btn btn-secondary" style="margin: 0 auto;" onclick="resetPhoto()">আসল জিসান সাহেবের ছবি ফিরিয়ে আনুন</button>
+          <button class="btn btn-secondary" style="margin: 0 auto;" onclick="resetPhoto()">আসল ছবি ফিরিয়ে আনুন</button>
         </div>
       </div>
 
@@ -395,27 +376,27 @@
       <div id="tab-back" style="display: none;">
         <div class="form-group">
           <label>অফিশিয়াল কন্টাক্ট</label>
-          <input type="text" id="inp-contact" value="+880 1712 345678" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-contact" value="+880 1712 345678" oninput="renderLive()">
         </div>
         <div class="form-group">
           <label>ইমেইল</label>
-          <input type="text" id="inp-email" value="liorabeautyandwear@gmail.com" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-email" value="liorabeautyandwear@gmail.com" oninput="renderLive()">
         </div>
         <div class="form-group">
           <label>ফেসবুক পেজ</label>
-          <input type="text" id="inp-fb" value="Liora Beauty and Wear" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-fb" value="Liora Beauty and Wear" oninput="renderLive()">
         </div>
         <div class="form-group">
           <label>ওয়েবসাইট</label>
-          <input type="text" id="inp-web" value="liorabeautyandwear.com" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-web" value="liorabeautyandwear.com" oninput="renderLive()">
         </div>
         <div class="form-group">
           <label>অফিস ঠিকানা</label>
-          <input type="text" id="inp-addr" value="Rayerbag, Dhaka, Bangladesh" oninput="applyCustomOverlay()">
+          <input type="text" id="inp-addr" value="Rayerbag, Dhaka, Bangladesh" oninput="renderLive()">
         </div>
         <div class="form-group">
           <label>কিউআর কোড টার্গেট লিংক</label>
-          <input type="text" id="inp-qr" value="https://liorabeautyandwear.com" oninput="updateQrOverlay()">
+          <input type="text" id="inp-qr" value="https://liorabeautyandwear.com" oninput="updateQr()">
         </div>
       </div>
 
@@ -423,16 +404,16 @@
       <div id="tab-roles" style="display: none;">
         <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">১-ক্লিকে যেকোনো স্টাফের রোল অ্যাপ্লাই করুন:</p>
         <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Jahidul Islam Jisan', 'MANAGING DIRECTOR (MD)', 'LIORA-001', 'Management & Marketing', 'O+', '01 Aug 2025', 'Together We Grow ♥')">
+          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Jahidul Islam Jisan', 'MANAGING DIRECTOR (MD)', 'LIORA-001', 'Management & Marketing', 'O+', '01 Aug 2025')">
             <span>👑 Managing Director (MD)</span> <span>→</span>
           </button>
-          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Nusrat Jahan', 'SHOWROOM MANAGER', 'LIORA-012', 'Retail & Operations', 'A+', '15 Oct 2025', 'Excellence in Service ♥')">
+          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Nusrat Jahan', 'SHOWROOM MANAGER', 'LIORA-012', 'Retail & Operations', 'A+', '15 Oct 2025')">
             <span>🏬 Showroom Manager</span> <span>→</span>
           </button>
-          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Fatema Tuz Zohra', 'BEAUTY CONSULTANT', 'LIORA-025', 'Customer Experience', 'B+', '01 Jan 2026', 'Glow with Confidence ♥')">
+          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Fatema Tuz Zohra', 'BEAUTY CONSULTANT', 'LIORA-025', 'Customer Experience', 'B+', '01 Jan 2026')">
             <span>💄 Beauty Consultant</span> <span>→</span>
           </button>
-          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Md. Rakib Hasan', 'DELIVERY HERO', 'LIORA-042', 'Logistics & Supply', 'O+', '10 Feb 2026', 'Fast & Safe Delivery ♥')">
+          <button class="btn" style="background: #fdf2f4; border: 1px solid #fbcfe8; color: #be185d; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Md. Rakib Hasan', 'DELIVERY HERO', 'LIORA-042', 'Logistics & Supply', 'O+', '10 Feb 2026')">
             <span>🚚 Delivery Hero</span> <span>→</span>
           </button>
         </div>
@@ -445,19 +426,36 @@
         <!-- FRONT CARD -->
         <div class="card-wrap">
           <div class="card-canvas" id="front-canvas">
-            <!-- Dynamic Overlays (Only visible when user changes values) -->
-            <img id="overlay-photo" class="overlay-photo" src="" alt="Custom Portrait">
-            <div id="overlay-name" class="overlay-name"></div>
-            <div id="overlay-des-wrap" class="overlay-des-wrap">
-              <span id="overlay-des-pill" class="overlay-des-pill"></span>
+            <!-- Photo inside frame -->
+            <img id="view-photo" class="card-photo" src="jisan_portrait.jpg" alt="Portrait">
+
+            <!-- Name -->
+            <div id="view-name" class="card-name">Jahidul Islam Jisan</div>
+
+            <!-- Designation Pill -->
+            <div class="card-des-wrap">
+              <span id="view-des" class="card-des-pill">MANAGING DIRECTOR (MD)</span>
             </div>
-            <div id="overlay-details" class="overlay-details-block">
-              <div><span class="overlay-detail-val" id="val-id"></span></div>
-              <div><span class="overlay-detail-val" id="val-dept"></span></div>
-              <div><span class="overlay-detail-val" id="val-blood"></span></div>
-              <div><span class="overlay-detail-val" id="val-date"></span></div>
+
+            <!-- Detail Rows -->
+            <div class="card-details-block">
+              <div class="card-detail-row">
+                <span class="card-detail-label">Employee ID :</span>
+                <span class="card-detail-val" id="view-id">LIORA-001</span>
+              </div>
+              <div class="card-detail-row">
+                <span class="card-detail-label">Department :</span>
+                <span class="card-detail-val" id="view-dept">Management & Marketing</span>
+              </div>
+              <div class="card-detail-row">
+                <span class="card-detail-label">Blood Group :</span>
+                <span class="card-detail-val" id="view-blood">O+</span>
+              </div>
+              <div class="card-detail-row">
+                <span class="card-detail-label">Joining Date :</span>
+                <span class="card-detail-val" id="view-date">01 Aug 2025</span>
+              </div>
             </div>
-            <div id="overlay-slogan" class="overlay-slogan"></div>
           </div>
           <div class="card-label no-print">সামনের অংশ (Front Side)</div>
         </div>
@@ -465,14 +463,32 @@
         <!-- BACK CARD -->
         <div class="card-wrap">
           <div class="card-canvas" id="back-canvas">
-            <div id="overlay-contacts" class="overlay-contact-block">
-              <div class="overlay-contact-item" id="val-contact"></div>
-              <div class="overlay-contact-item" id="val-email"></div>
-              <div class="overlay-contact-item" id="val-fb"></div>
-              <div class="overlay-contact-item" id="val-web"></div>
-              <div class="overlay-contact-item" id="val-addr"></div>
+            <!-- Contact Rows -->
+            <div class="card-contact-block">
+              <div>
+                <div class="contact-unit-title">Official Contact</div>
+                <div class="contact-unit-val" id="view-contact">+880 1712 345678</div>
+              </div>
+              <div>
+                <div class="contact-unit-title">Email</div>
+                <div class="contact-unit-val" id="view-email">liorabeautyandwear@gmail.com</div>
+              </div>
+              <div>
+                <div class="contact-unit-title">Facebook Page</div>
+                <div class="contact-unit-val" id="view-fb">Liora Beauty and Wear</div>
+              </div>
+              <div>
+                <div class="contact-unit-title">Website</div>
+                <div class="contact-unit-val" id="view-web">liorabeautyandwear.com</div>
+              </div>
+              <div>
+                <div class="contact-unit-title">Business Address</div>
+                <div class="contact-unit-val" id="view-addr">Rayerbag, Dhaka, Bangladesh</div>
+              </div>
             </div>
-            <div id="overlay-qr" class="overlay-qr"></div>
+
+            <!-- QR Code -->
+            <div class="card-qr-box" id="view-qr"></div>
           </div>
           <div class="card-label no-print">পেছনের অংশ (Back Side)</div>
         </div>
@@ -483,6 +499,26 @@
   <script>
     let qrObj = null;
 
+    function initQr() {
+      const qrEl = document.getElementById("view-qr");
+      qrEl.innerHTML = "";
+      qrObj = new QRCode(qrEl, {
+        text: document.getElementById("inp-qr").value || "https://liorabeautyandwear.com",
+        width: 54,
+        height: 54,
+        colorDark: "#1e293b",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function updateQr() {
+      if (qrObj) {
+        qrObj.clear();
+        qrObj.makeCode(document.getElementById("inp-qr").value);
+      }
+    }
+
     function switchTab(name, btn) {
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
@@ -491,66 +527,19 @@
       });
     }
 
-    function applyCustomOverlay() {
-      const name = document.getElementById("inp-name").value;
-      const des = document.getElementById("inp-des").value;
-      const id = document.getElementById("inp-id").value;
-      const dept = document.getElementById("inp-dept").value;
-      const blood = document.getElementById("inp-blood").value;
-      const date = document.getElementById("inp-date").value;
-      const slogan = document.getElementById("inp-slogan").value;
+    function renderLive() {
+      document.getElementById("view-name").textContent = document.getElementById("inp-name").value;
+      document.getElementById("view-des").textContent = document.getElementById("inp-des").value;
+      document.getElementById("view-id").textContent = document.getElementById("inp-id").value;
+      document.getElementById("view-dept").textContent = document.getElementById("inp-dept").value;
+      document.getElementById("view-blood").textContent = document.getElementById("inp-blood").value;
+      document.getElementById("view-date").textContent = document.getElementById("inp-date").value;
 
-      // If user modified from default, show overlays
-      const isOriginal = name === "Jahidul Islam Jisan" && des === "MANAGING DIRECTOR (MD)" && id === "LIORA-001";
-
-      const nameEl = document.getElementById("overlay-name");
-      const desWrap = document.getElementById("overlay-des-wrap");
-      const desPill = document.getElementById("overlay-des-pill");
-      const detailsEl = document.getElementById("overlay-details");
-      const sloganEl = document.getElementById("overlay-slogan");
-
-      if (isOriginal) {
-        nameEl.style.display = "none";
-        desWrap.style.display = "none";
-        detailsEl.style.display = "none";
-        sloganEl.style.display = "none";
-      } else {
-        nameEl.textContent = name;
-        nameEl.style.display = "block";
-
-        desPill.textContent = des;
-        desWrap.style.display = "block";
-
-        document.getElementById("val-id").textContent = id;
-        document.getElementById("val-dept").textContent = dept;
-        document.getElementById("val-blood").textContent = blood;
-        document.getElementById("val-date").textContent = date;
-        detailsEl.style.display = "flex";
-
-        sloganEl.textContent = slogan;
-        sloganEl.style.display = "block";
-      }
-
-      // Back Overlays
-      const contact = document.getElementById("inp-contact").value;
-      const email = document.getElementById("inp-email").value;
-      const fb = document.getElementById("inp-fb").value;
-      const web = document.getElementById("inp-web").value;
-      const addr = document.getElementById("inp-addr").value;
-
-      const isBackOriginal = contact === "+880 1712 345678" && email === "liorabeautyandwear@gmail.com";
-      const contactsEl = document.getElementById("overlay-contacts");
-
-      if (isBackOriginal) {
-        contactsEl.style.display = "none";
-      } else {
-        document.getElementById("val-contact").textContent = contact;
-        document.getElementById("val-email").textContent = email;
-        document.getElementById("val-fb").textContent = fb;
-        document.getElementById("val-web").textContent = web;
-        document.getElementById("val-addr").textContent = addr;
-        contactsEl.style.display = "flex";
-      }
+      document.getElementById("view-contact").textContent = document.getElementById("inp-contact").value;
+      document.getElementById("view-email").textContent = document.getElementById("inp-email").value;
+      document.getElementById("view-fb").textContent = document.getElementById("inp-fb").value;
+      document.getElementById("view-web").textContent = document.getElementById("inp-web").value;
+      document.getElementById("view-addr").textContent = document.getElementById("inp-addr").value;
     }
 
     function handlePhotoUpload(e) {
@@ -558,18 +547,14 @@
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
-          const photoEl = document.getElementById("overlay-photo");
-          photoEl.src = evt.target.result;
-          photoEl.style.display = "block";
+          document.getElementById("view-photo").src = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
     }
 
     function resetPhoto() {
-      const photoEl = document.getElementById("overlay-photo");
-      photoEl.style.display = "none";
-      photoEl.src = "";
+      document.getElementById("view-photo").src = "jisan_portrait.jpg";
     }
 
     function resetToOriginal() {
@@ -579,43 +564,29 @@
       document.getElementById("inp-blood").value = "O+";
       document.getElementById("inp-dept").value = "Management & Marketing";
       document.getElementById("inp-date").value = "01 Aug 2025";
-      document.getElementById("inp-slogan").value = "Together We Grow ♥";
+      document.getElementById("inp-contact").value = "+880 1712 345678";
+      document.getElementById("inp-email").value = "liorabeautyandwear@gmail.com";
+      document.getElementById("inp-fb").value = "Liora Beauty and Wear";
+      document.getElementById("inp-web").value = "liorabeautyandwear.com";
+      document.getElementById("inp-addr").value = "Rayerbag, Dhaka, Bangladesh";
+      document.getElementById("inp-qr").value = "https://liorabeautyandwear.com";
       resetPhoto();
-      applyCustomOverlay();
+      renderLive();
+      updateQr();
     }
 
-    function applyRole(name, des, id, dept, blood, date, slogan) {
+    function applyRole(name, des, id, dept, blood, date) {
       document.getElementById("inp-name").value = name;
       document.getElementById("inp-des").value = des;
       document.getElementById("inp-id").value = id;
       document.getElementById("inp-dept").value = dept;
       document.getElementById("inp-blood").value = blood;
       document.getElementById("inp-date").value = date;
-      document.getElementById("inp-slogan").value = slogan;
-      applyCustomOverlay();
+      renderLive();
       alert("'" + des + "' রোল অ্যাপ্লাই করা হয়েছে!");
     }
 
-    function updateQrOverlay() {
-      const qrVal = document.getElementById("inp-qr").value;
-      const isQrOriginal = qrVal === "https://liorabeautyandwear.com";
-      const qrEl = document.getElementById("overlay-qr");
-
-      if (isQrOriginal) {
-        qrEl.style.display = "none";
-      } else {
-        qrEl.innerHTML = "";
-        qrEl.style.display = "block";
-        new QRCode(qrEl, {
-          text: qrVal,
-          width: 54,
-          height: 54,
-          colorDark: "#1e293b",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.M
-        });
-      }
-    }
+    window.onload = initQr;
   </script>
 </body>
 </html>
