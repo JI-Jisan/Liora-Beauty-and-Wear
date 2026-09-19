@@ -619,8 +619,33 @@ export default function AdminIdCardStudio() {
                     <path d="M0,555 L330,555 L330,490 Q240,535 130,510 Q60,495 0,540 Z" fill="#fde2e7" opacity="0.8" />
                     <path d="M85,555 L330,555 L330,502 Q240,542 150,528 Q105,520 85,555 Z" fill="#be185d" opacity="0.95" />
 
-                    {/* Botanical Rose Leaves (Bottom Right) */}
-                    <image href="/id_cards/leaf_front.png" x="240" y="430" width="90" height="125" preserveAspectRatio="none" />
+                    {/* Seamless Vector Botanical Rose Leaves (Bottom Right) */}
+                    <g stroke="#be185d" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                      {/* Stem */}
+                      <path d="M 298,555 Q 288,485 268,415" strokeWidth="1.8" opacity="0.85" />
+                      
+                      {/* Leaf 1 (Top Tip) */}
+                      <path d="M 268,438 C 262,425 264,412 268,408 C 274,416 276,428 272,442 Z" fill="#be185d" fillOpacity="0.22" strokeWidth="1.3" />
+                      <path d="M 268,442 Q 268,422 268,408" strokeWidth="0.8" opacity="0.6" />
+
+                      {/* Leaf 2 (Upper Right) */}
+                      <path d="M 276,432 C 286,420 302,416 308,422 C 304,432 292,442 278,438 Z" fill="#be185d" fillOpacity="0.2" strokeWidth="1.3" />
+                      <path d="M 276,432 Q 295,424 308,422" strokeWidth="0.8" opacity="0.6" />
+
+                      {/* Leaf 3 (Mid Left - Prominent) */}
+                      <path d="M 275,455 C 255,445 235,452 225,462 C 238,474 258,474 274,463 Z" fill="#be185d" fillOpacity="0.24" strokeWidth="1.4" />
+                      <path d="M 275,455 Q 248,458 225,462" strokeWidth="0.9" opacity="0.7" />
+                      <path d="M 260,457 L 254,451 M 248,460 L 240,456 M 255,462 L 250,469" strokeWidth="0.7" opacity="0.5" />
+
+                      {/* Leaf 4 (Mid Right) */}
+                      <path d="M 285,465 C 298,455 315,458 322,468 C 316,480 298,482 284,474 Z" fill="#be185d" fillOpacity="0.2" strokeWidth="1.3" />
+                      <path d="M 285,465 Q 306,466 322,468" strokeWidth="0.8" opacity="0.6" />
+
+                      {/* Leaf 5 (Lower Left) */}
+                      <path d="M 288,495 C 272,488 255,496 248,506 C 258,518 276,516 288,504 Z" fill="#be185d" fillOpacity="0.22" strokeWidth="1.3" />
+                      <path d="M 288,495 Q 266,502 248,506" strokeWidth="0.9" opacity="0.6" />
+                      <path d="M 278,498 L 272,492 M 264,502 L 258,498 M 270,505 L 265,512" strokeWidth="0.7" opacity="0.5" />
+                    </g>
 
                     {/* Slot Hole */}
                     <rect x="145" y="10" width="40" height="10" rx="5" fill="#1e293b" />
@@ -780,8 +805,32 @@ export default function AdminIdCardStudio() {
                     <path d="M0,0 L330,0 L330,55 Q230,15 120,42 T0,18 Z" fill="#fde2e7" opacity="0.9" />
                     <path d="M0,0 L330,0 L330,32 Q220,5 110,26 T0,10 Z" fill="#fdf2f4" />
 
-                    {/* Botanical Rose Leaves (Top Right) */}
-                    <image href="/id_cards/leaf_back.png" x="245" y="0" width="85" height="110" preserveAspectRatio="none" />
+                    {/* Seamless Vector Botanical Rose Leaves (Top Right) */}
+                    <g stroke="#be185d" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                      {/* Main Stem */}
+                      <path d="M 315,0 Q 295,40 262,85" strokeWidth="1.8" opacity="0.85" />
+                      
+                      {/* Leaf 1 (Top Left) */}
+                      <path d="M 305,16 C 290,6 272,12 265,22 C 275,32 295,30 306,22 Z" fill="#be185d" fillOpacity="0.2" strokeWidth="1.3" />
+                      <path d="M 305,16 Q 282,18 265,22" strokeWidth="0.8" opacity="0.6" />
+
+                      {/* Leaf 2 (Upper Right) */}
+                      <path d="M 298,28 C 310,22 322,25 328,34 C 322,42 308,44 296,36 Z" fill="#be185d" fillOpacity="0.18" strokeWidth="1.2" />
+                      <path d="M 298,28 Q 315,30 328,34" strokeWidth="0.8" opacity="0.6" />
+
+                      {/* Leaf 3 (Middle Left) */}
+                      <path d="M 285,48 C 265,42 245,50 236,62 C 248,72 268,70 284,58 Z" fill="#be185d" fillOpacity="0.22" strokeWidth="1.4" />
+                      <path d="M 285,48 Q 258,56 236,62" strokeWidth="0.9" opacity="0.7" />
+                      <path d="M 270,50 L 265,44 M 258,54 L 250,50 M 264,57 L 258,63" strokeWidth="0.7" opacity="0.5" />
+
+                      {/* Leaf 4 (Lower Right) */}
+                      <path d="M 276,64 C 290,58 308,62 316,72 C 308,82 290,84 275,74 Z" fill="#be185d" fillOpacity="0.2" strokeWidth="1.3" />
+                      <path d="M 276,64 Q 298,68 316,72" strokeWidth="0.8" opacity="0.6" />
+
+                      {/* Leaf 5 (Lowest Leaf) */}
+                      <path d="M 268,82 C 255,88 245,98 248,108 C 258,110 270,102 272,90 Z" fill="#be185d" fillOpacity="0.2" strokeWidth="1.2" />
+                      <path d="M 268,82 Q 256,98 248,108" strokeWidth="0.8" opacity="0.6" />
+                    </g>
 
                     {/* Slot Hole */}
                     <rect x="145" y="10" width="40" height="10" rx="5" fill="#1e293b" />
