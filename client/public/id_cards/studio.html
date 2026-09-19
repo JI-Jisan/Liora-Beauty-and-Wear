@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIORA ID Card Studio (Canva-Style Live Editor)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    header {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ff4d6d;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-sub {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-print { background: #3b82f6; color: white; }
+    .btn-front { background: #ff4d6d; color: white; }
+    .btn-back { background: #e11d48; color: white; }
+    .btn-save { background: #10b981; color: white; }
+
+    .studio-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      min-height: calc(100vh - 65px);
+    }
+    @media (max-width: 900px) {
+      .studio-layout { grid-template-columns: 1fr; }
+    }
+
+    aside {
+      background: #1e293b;
+      border-right: 1px solid #334155;
+      padding: 20px;
+      overflow-y: auto;
+      max-height: calc(100vh - 65px);
+    }
+    .tab-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      background: #0f172a;
+      padding: 4px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      background: transparent;
+      color: #94a3b8;
+      border: none;
+      padding: 8px 4px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #ff4d6d;
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 9px 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #f8fafc;
+      font-size: 13px;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: #ff4d6d;
+    }
+
+    .canvas-stage {
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: #0b1120;
+      overflow-y: auto;
+    }
+
+    .cards-row {
+      display: flex;
+      gap: 45px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Lanyard Ribbon */
+    .ribbon-strap {
+      width: 48px;
+      height: 90px;
+      background: linear-gradient(180deg, #ff4d6d 0%, #e11d48 100%);
+      border-radius: 4px 4px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 2;
+    }
+    .ribbon-text {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 4px;
+    }
+    .metal-clip {
+      width: 36px;
+      height: 18px;
+      background: linear-gradient(180deg, #94a3b8, #cbd5e1, #64748b);
+      border-radius: 4px;
+      margin-bottom: -4px;
+      z-index: 3;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    }
+
+    /* Physical CR80 Card (320px x 500px) */
+    .id-card {
+      width: 320px;
+      height: 500px;
+      background: linear-gradient(145deg, #ffffff 0%, #fff1f3 60%, #ffe4e6 100%);
+      border-radius: 18px;
+      border: 2px solid #fbcfe8;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 18px 14px;
+      color: #1e293b;
+    }
+
+    .card-slot {
+      width: 40px;
+      height: 10px;
+      background: #0f172a;
+      border-radius: 20px;
+      margin: 0 auto 10px;
+      border: 1px solid #334155;
+    }
+    .card-logo {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .card-logo img {
+      height: 48px;
+      max-width: 200px;
+    }
+    .photo-container {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 10px;
+      border-radius: 16px;
+      padding: 3px;
+      background: #ff4d6d;
+      box-shadow: 0 6px 14px rgba(255, 77, 109, 0.25);
+    }
+    .photo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 13px;
+      display: block;
+    }
+
+    .emp-name {
+      text-align: center;
+      font-weight: 800;
+      font-size: 17px;
+      color: #1e293b;
+      margin-bottom: 4px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .emp-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ff4d6d, #e11d48);
+      color: white;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(255, 77, 109, 0.3);
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 11px;
+      padding: 0 6px;
+      margin-top: 10px;
+      flex: 1;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .info-label {
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .info-val {
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .card-footer {
+      border-top: 1px dashed #fbcfe8;
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .slogan {
+      font-family: 'Great Vibes', cursive;
+      font-size: 15px;
+      color: #ff4d6d;
+      font-weight: bold;
+    }
+
+    /* Back Card Specifics */
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 11px;
+      padding: 0 4px;
+      margin-top: 4px;
+    }
+    .contact-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .contact-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ff4d6d;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .qr-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 10px 0;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 12px;
+      border: 1px solid #fbcfe8;
+    }
+    .return-box {
+      background: #ffe4e6;
+      border-radius: 8px;
+      padding: 7px 10px;
+      text-align: center;
+      font-size: 10px;
+      color: #9d174d;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .tagline-text {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ff4d6d;
+    }
+
+    @media print {
+      body { background: white !important; color: black !important; }
+      .no-print { display: none !important; }
+      .studio-layout { display: block !important; }
+      .canvas-stage { padding: 0 !important; background: white !important; }
+      .cards-row { gap: 20px !important; }
+      .id-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="no-print">
+    <div class="brand-info">
+      <div class="brand-title"><span>🪪</span> LIORA ID Card Studio</div>
+      <div class="brand-sub">Canva-র মতো লাইভ স্টাফ আইডি কার্ড জেনারেটর (আসল ব্র্যান্ড লোগো ও থিম)</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-print" onclick="window.print()">🖨️ প্রিন্ট করুন</button>
+      <button class="btn btn-front" onclick="downloadCanvas('front')">📥 Front PNG</button>
+      <button class="btn btn-back" onclick="downloadCanvas('back')">📥 Back PNG</button>
+    </div>
+  </header>
+
+  <div class="studio-layout">
+    <!-- Left Inspector Sidebar -->
+    <aside class="no-print">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('info', this)">তথ্য</button>
+        <button class="tab-btn" onclick="switchTab('photo', this)">ছবি</button>
+        <button class="tab-btn" onclick="switchTab('back', this)">পেছন</button>
+        <button class="tab-btn" onclick="switchTab('roles', this)">রোলস</button>
+      </div>
+
+      <!-- TAB 1: BASIC INFO -->
+      <div id="tab-info">
+        <div class="form-group">
+          <label>কর্মচারীর নাম (Full Name)</label>
+          <input type="text" id="inp-name" value="Jahidul Islam Jisan" oninput="updateLive()">
+        </div>
+        <div class="form-group">
+          <label>পদবী (Designation)</label>
+          <input type="text" id="inp-des" value="MANAGING DIRECTOR (MD)" oninput="updateLive()">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>এমপ্লয়ি আইডি (ID)</label>
+            <input type="text" id="inp-id" value="LIORA-001" oninput="updateLive()">
+          </div>
+          <div class="form-group">
+            <label>রক্তের গ্রুপ</label>
+            <select id="inp-blood" onchange="updateLive()">
+              <option value="O+" selected>O+</option>
+              <option value="A+">A+</option>
+              <option value="B+">B+</option>
+              <option value="AB+">AB+</option>
+              <option value="O-">O-</option>
+              <option value="A-">A-</option>
+              <option value="B-">B-</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>ডিপার্টমেন্ট (Department)</label>
+          <input type="text" id="inp-dept" value="Management & Marketing" oninput="updateLive()">
+        </div>
+        <div class="form-group">
+          <label>যোগদানের তারিখ (Joining Date)</label>
+          <input type="text" id="inp-date" value="01 Aug 2025" oninput="updateLive()">
+        </div>
+        <div class="form-group">
+          <label>স্লোগান / মটো (Slogan)</label>
+          <input type="text" id="inp-slogan" value="Together We Grow ♥" oninput="updateLive()">
+        </div>
+      </div>
+
+      <!-- TAB 2: PHOTO -->
+      <div id="tab-photo" style="display: none;">
+        <div class="form-group">
+          <label>কম্পিউটার/মোবাইল থেকে ছবি সিলেক্ট করুন</label>
+          <input type="file" id="inp-file" accept="image/*" onchange="handlePhoto(event)">
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+          <button class="btn btn-front" style="margin: 0 auto;" onclick="resetPhoto()">আসল ছবি ফিরিয়ে আনুন</button>
+        </div>
+      </div>
+
+      <!-- TAB 3: BACK SIDE -->
+      <div id="tab-back" style="display: none;">
+        <div class="form-group">
+          <label>অফিশিয়াল কন্টাক্ট নম্বর</label>
+          <input type="text" id="inp-contact" value="+880 1712 345678" oninput="updateLive()">
+        </div>
+        <div class="form-group">
+          <label>অফিশিয়াল ইমেইল</label>
+          <input type="text" id="inp-email" value="liorabeautyandwear@gmail.com" oninput="updateLive()">
+        </div>
+        <div class="form-group">
+          <label>ওয়েবসাইট</label>
+          <input type="text" id="inp-web" value="liorabeautyandwear.com" oninput="updateLive()">
+        </div>
+        <div class="form-group">
+          <label>অফিস ঠিকানা</label>
+          <input type="text" id="inp-addr" value="Rayerbag, Dhaka, Bangladesh" oninput="updateLive()">
+        </div>
+        <div class="form-group">
+          <label>কিউআর কোড টার্গেট লিংক</label>
+          <input type="text" id="inp-qr" value="https://liorabeautyandwear.com" oninput="updateQr()">
+        </div>
+        <div class="form-group">
+          <label>রিটার্ন নোটিশ</label>
+          <input type="text" id="inp-return" value="If found, please return to Liora Beauty & Wear" oninput="updateLive()">
+        </div>
+      </div>
+
+      <!-- TAB 4: ROLES PRESETS -->
+      <div id="tab-roles" style="display: none;">
+        <p style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">যেকোনো রোলে ক্লিক করলে সাথে সাথে সব ফিল্ড পূরণ হয়ে যাবে:</p>
+        <div style="display: flex; flexDirection: column; gap: 8px;">
+          <button class="btn" style="background: #0f172a; border: 1px solid #334155; color: white; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Jahidul Islam Jisan', 'MANAGING DIRECTOR (MD)', 'LIORA-001', 'Management & Marketing', 'O+', '01 Aug 2025', 'Together We Grow ♥')">
+            <span>👑 Managing Director (MD)</span> <span>→</span>
+          </button>
+          <button class="btn" style="background: #0f172a; border: 1px solid #334155; color: white; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Nusrat Jahan', 'SHOWROOM MANAGER', 'LIORA-012', 'Retail & Operations', 'A+', '15 Oct 2025', 'Excellence in Service ♥')">
+            <span>🏬 Showroom Manager</span> <span>→</span>
+          </button>
+          <button class="btn" style="background: #0f172a; border: 1px solid #334155; color: white; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Fatema Tuz Zohra', 'BEAUTY CONSULTANT', 'LIORA-025', 'Customer Experience', 'B+', '01 Jan 2026', 'Glow with Confidence ♥')">
+            <span>💄 Beauty Consultant</span> <span>→</span>
+          </button>
+          <button class="btn" style="background: #0f172a; border: 1px solid #334155; color: white; width: 100%; text-align: left; justify-content: space-between;" onclick="applyRole('Md. Rakib Hasan', 'DELIVERY HERO', 'LIORA-042', 'Logistics & Supply', 'O+', '10 Feb 2026', 'Fast & Safe Delivery ♥')">
+            <span>🚚 Delivery Hero</span> <span>→</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right Live Canvas Stage -->
+    <main class="canvas-stage">
+      <div class="cards-row">
+        <!-- FRONT CARD -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div class="ribbon-strap no-print"><div class="ribbon-text">LIORA</div></div>
+          <div class="metal-clip no-print"></div>
+          <div class="id-card" id="front-card-node">
+            <div class="card-slot"></div>
+            <div class="card-logo">
+              <img src="/liora-logo.svg" alt="LIORA Beauty & Wear Logo">
+            </div>
+            <div class="photo-container">
+              <img id="card-photo" src="original_user_design.jpg" alt="Photo">
+            </div>
+            <div class="emp-name" id="view-name">Jahidul Islam Jisan</div>
+            <div style="text-align: center; margin-bottom: 8px;">
+              <span class="emp-badge" id="view-des">MANAGING DIRECTOR (MD)</span>
+            </div>
+            <div class="info-list">
+              <div class="info-row">
+                <span class="info-label">🪪 Employee ID :</span>
+                <span class="info-val" id="view-id">LIORA-001</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">🏢 Department :</span>
+                <span class="info-val" id="view-dept">Management & Marketing</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">🩸 Blood Group :</span>
+                <span class="info-val" id="view-blood">O+</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">📅 Joining Date :</span>
+                <span class="info-val" id="view-date">01 Aug 2025</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span class="slogan" id="view-slogan">Together We Grow ♥</span>
+              <span style="font-size: 11px; color: #9d174d; font-weight: 700;">FRONT</span>
+            </div>
+          </div>
+          <div style="margin-top: 10px; font-size: 13px; color: #94a3b8; font-weight: 600;" class="no-print">সামনের অংশ (Front)</div>
+        </div>
+
+        <!-- BACK CARD -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div class="ribbon-strap no-print"><div class="ribbon-text">LIORA</div></div>
+          <div class="metal-clip no-print"></div>
+          <div class="id-card" id="back-card-node">
+            <div class="card-slot"></div>
+            <div class="card-logo">
+              <img src="/liora-logo.svg" alt="LIORA Beauty & Wear Logo">
+            </div>
+            <div class="contact-list">
+              <div class="contact-row">
+                <div class="contact-icon">📞</div>
+                <div>
+                  <div style="font-size: 10px; color: #64748b;">Official Contact</div>
+                  <div style="font-weight: 700; color: #1e293b;" id="view-contact">+880 1712 345678</div>
+                </div>
+              </div>
+              <div class="contact-row">
+                <div class="contact-icon">✉️</div>
+                <div>
+                  <div style="font-size: 10px; color: #64748b;">Email</div>
+                  <div style="font-weight: 700; color: #1e293b;" id="view-email">liorabeautyandwear@gmail.com</div>
+                </div>
+              </div>
+              <div class="contact-row">
+                <div class="contact-icon">🌐</div>
+                <div>
+                  <div style="font-size: 10px; color: #64748b;">Website</div>
+                  <div style="font-weight: 700; color: #1e293b;" id="view-web">liorabeautyandwear.com</div>
+                </div>
+              </div>
+              <div class="contact-row">
+                <div class="contact-icon">📍</div>
+                <div>
+                  <div style="font-size: 10px; color: #64748b;">Address</div>
+                  <div style="font-weight: 700; color: #1e293b;" id="view-addr">Rayerbag, Dhaka, Bangladesh</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="qr-box">
+              <div id="qrcode" style="background: white; padding: 4px; border-radius: 6px;"></div>
+              <div>
+                <div style="font-family: 'Great Vibes', cursive; font-size: 16px; color: #ff4d6d; font-weight: bold;">Scan for Website</div>
+                <div style="font-size: 10px; color: #64748b;">Official Staff Verification</div>
+              </div>
+            </div>
+
+            <div class="return-box" id="view-return">
+              🛡️ If found, please return to Liora Beauty & Wear
+            </div>
+            <div class="tagline-text">
+              Beauty • Confidence • You ♥
+            </div>
+          </div>
+          <div style="margin-top: 10px; font-size: 13px; color: #94a3b8; font-weight: 600;" class="no-print">পেছনের অংশ (Back)</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let qrcodeObj = null;
+
+    function initQr() {
+      const el = document.getElementById("qrcode");
+      el.innerHTML = "";
+      qrcodeObj = new QRCode(el, {
+        text: document.getElementById("inp-qr").value || "https://liorabeautyandwear.com",
+        width: 58,
+        height: 58,
+        colorDark: "#1e293b",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function updateQr() {
+      if (qrcodeObj) {
+        qrcodeObj.clear();
+        qrcodeObj.makeCode(document.getElementById("inp-qr").value);
+      }
+    }
+
+    function switchTab(name, btn) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      ['info', 'photo', 'back', 'roles'].forEach(t => {
+        document.getElementById("tab-" + t).style.display = t === name ? "block" : "none";
+      });
+    }
+
+    function updateLive() {
+      document.getElementById("view-name").textContent = document.getElementById("inp-name").value;
+      document.getElementById("view-des").textContent = document.getElementById("inp-des").value;
+      document.getElementById("view-id").textContent = document.getElementById("inp-id").value;
+      document.getElementById("view-blood").textContent = document.getElementById("inp-blood").value;
+      document.getElementById("view-dept").textContent = document.getElementById("inp-dept").value;
+      document.getElementById("view-date").textContent = document.getElementById("inp-date").value;
+      document.getElementById("view-slogan").textContent = document.getElementById("inp-slogan").value;
+
+      document.getElementById("view-contact").textContent = document.getElementById("inp-contact").value;
+      document.getElementById("view-email").textContent = document.getElementById("inp-email").value;
+      document.getElementById("view-web").textContent = document.getElementById("inp-web").value;
+      document.getElementById("view-addr").textContent = document.getElementById("inp-addr").value;
+      document.getElementById("view-return").textContent = "🛡️ " + document.getElementById("inp-return").value;
+    }
+
+    function handlePhoto(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById("card-photo").src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function resetPhoto() {
+      document.getElementById("card-photo").src = "original_user_design.jpg";
+    }
+
+    function applyRole(name, des, id, dept, blood, date, slogan) {
+      document.getElementById("inp-name").value = name;
+      document.getElementById("inp-des").value = des;
+      document.getElementById("inp-id").value = id;
+      document.getElementById("inp-dept").value = dept;
+      document.getElementById("inp-blood").value = blood;
+      document.getElementById("inp-date").value = date;
+      document.getElementById("inp-slogan").value = slogan;
+      updateLive();
+      alert("'" + des + "' টেমপ্লেট অ্যাপ্লাই করা হয়েছে!");
+    }
+
+    function downloadCanvas(side) {
+      const scale = 3;
+      const width = 320 * scale;
+      const height = 500 * scale;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+
+      // Background
+      ctx.fillStyle = "#fff1f3";
+      ctx.fillRect(0, 0, width, height);
+
+      // Top Header Wave
+      ctx.fillStyle = "#ff4d6d";
+      ctx.globalAlpha = 0.15;
+      ctx.beginPath();
+      ctx.arc(width/2, -50, width*0.7, 0, Math.PI);
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+
+      // Slot Hole
+      ctx.fillStyle = "#0f172a";
+      ctx.roundRect(width/2 - 20*scale, 10*scale, 40*scale, 10*scale, 5*scale);
+      ctx.fill();
+
+      // Logo
+      const logo = new Image();
+      logo.src = "/liora-logo.svg";
+      logo.onload = function() {
+        ctx.drawImage(logo, (width - 180*scale)/2, 28*scale, 180*scale, 50*scale);
+
+        if (side === 'front') {
+          const photo = document.getElementById("card-photo");
+          const pSize = 110 * scale;
+          const pX = (width - pSize) / 2;
+          const pY = 90 * scale;
+          ctx.fillStyle = "#ff4d6d";
+          ctx.roundRect(pX - 3*scale, pY - 3*scale, pSize + 6*scale, pSize + 6*scale, 16*scale);
+          ctx.fill();
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.roundRect(pX, pY, pSize, pSize, 14*scale);
+          ctx.clip();
+          ctx.drawImage(photo, pX, pY, pSize, pSize);
+          ctx.restore();
+
+          // Name
+          ctx.fillStyle = "#1e293b";
+          ctx.font = "bold " + (17*scale) + "px Montserrat, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(document.getElementById("inp-name").value, width/2, 235*scale);
+
+          // Badge
+          ctx.fillStyle = "#ff4d6d";
+          ctx.beginPath();
+          ctx.roundRect(width/2 - 95*scale, 246*scale, 190*scale, 22*scale, 11*scale);
+          ctx.fill();
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold " + (9*scale) + "px Montserrat, sans-serif";
+          ctx.fillText(document.getElementById("inp-des").value, width/2, 260*scale);
+
+          // Info Rows
+          const rows = [
+            ["Employee ID", document.getElementById("inp-id").value],
+            ["Department", document.getElementById("inp-dept").value],
+            ["Blood Group", document.getElementById("inp-blood").value],
+            ["Joining Date", document.getElementById("inp-date").value]
+          ];
+          let y = 300 * scale;
+          ctx.textAlign = "left";
+          rows.forEach(r => {
+            ctx.fillStyle = "#64748b";
+            ctx.font = (8.5*scale) + "px Inter, sans-serif";
+            ctx.fillText(r[0] + " :", 35*scale, y);
+            ctx.fillStyle = "#1e293b";
+            ctx.font = "bold " + (8.5*scale) + "px Inter, sans-serif";
+            ctx.fillText(r[1], 150*scale, y);
+            y += 24*scale;
+          });
+
+          // Slogan
+          ctx.fillStyle = "#ff4d6d";
+          ctx.font = "italic bold " + (14*scale) + "px 'Great Vibes', cursive";
+          ctx.fillText(document.getElementById("inp-slogan").value, 30*scale, 460*scale);
+
+          savePng("LIORA_FRONT.png");
+        } else {
+          // Back side draw
+          const contacts = [
+            ["Official Contact", document.getElementById("inp-contact").value],
+            ["Email", document.getElementById("inp-email").value],
+            ["Website", document.getElementById("inp-web").value],
+            ["Address", document.getElementById("inp-addr").value]
+          ];
+          let y = 110 * scale;
+          ctx.textAlign = "left";
+          contacts.forEach(c => {
+            ctx.fillStyle = "#ff4d6d";
+            ctx.beginPath();
+            ctx.arc(38*scale, y + 2*scale, 9*scale, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.fillStyle = "#64748b";
+            ctx.font = (7.5*scale) + "px Inter, sans-serif";
+            ctx.fillText(c[0], 56*scale, y - 2*scale);
+            ctx.fillStyle = "#1e293b";
+            ctx.font = "bold " + (8.5*scale) + "px Inter, sans-serif";
+            ctx.fillText(c[1], 56*scale, y + 10*scale);
+            y += 32*scale;
+          });
+
+          // Notice
+          ctx.fillStyle = "#ffe4e6";
+          ctx.beginPath();
+          ctx.roundRect(25*scale, 360*scale, width - 50*scale, 40*scale, 8*scale);
+          ctx.fill();
+          ctx.fillStyle = "#9d174d";
+          ctx.font = "bold " + (8.5*scale) + "px Inter, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("🛡️ " + document.getElementById("inp-return").value, width/2, 384*scale);
+
+          // Tagline
+          ctx.fillStyle = "#ff4d6d";
+          ctx.font = "bold " + (10*scale) + "px Inter, sans-serif";
+          ctx.fillText("Beauty • Confidence • You ♥", width/2, 450*scale);
+
+          savePng("LIORA_BACK.png");
+        }
+      };
+
+      function savePng(filename) {
+        const link = document.createElement("a");
+        link.download = filename;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }
+    }
+
+    window.onload = initQr;
+  </script>
+</body>
+</html>

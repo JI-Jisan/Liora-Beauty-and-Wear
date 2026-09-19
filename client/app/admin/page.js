@@ -863,6 +863,22 @@ export default function AdminPage() {
             ⚡ Facebook Auto Promoter
           </li>
           <li
+            onClick={() => {
+              router.push("/admin/id-cards");
+            }}
+            style={{
+              background: "linear-gradient(135deg, #ff4d6d, #be185d)",
+              color: "#ffffff",
+              fontWeight: "800",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(255, 77, 109, 0.3)",
+              margin: "6px 0",
+              cursor: "pointer",
+            }}
+          >
+            🪪 ID Card Studio
+          </li>
+          <li
             className={activeTab === "add-product" ? "active-tab" : ""}
             onClick={() => {
               setActiveTab("add-product");
@@ -1034,6 +1050,16 @@ export default function AdminPage() {
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>⚡</div>
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#e11d48", fontWeight: "800", textAlign: "center" }}>FB Auto Promoter</h3>
                   <span style={{ fontSize: "11px", color: "#be123c", textAlign: "center", marginTop: "2px", fontWeight: "600" }}>AI Banners & Posts</span>
+                </div>
+
+                {/* ID Card Studio Box */}
+                <div 
+                  onClick={() => { router.push("/admin/id-cards"); }}
+                  style={{ background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)", padding: "18px 10px", borderRadius: "16px", border: "1px solid #fbcfe8", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 10px rgba(219,39,119,0.12)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🪪</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#be185d", fontWeight: "800", textAlign: "center" }}>ID Card Studio</h3>
+                  <span style={{ fontSize: "11px", color: "#9d174d", textAlign: "center", marginTop: "2px", fontWeight: "600" }}>Canva-Style Cards</span>
                 </div>
 
 
