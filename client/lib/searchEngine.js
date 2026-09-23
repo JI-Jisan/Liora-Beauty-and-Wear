@@ -105,6 +105,10 @@ const BEAUTY_TYPO_ALIASES = {
   bodymist: ["body mist", "bodymist"],
 };
 
+export const SEARCH_STOP_WORDS = new Set([
+  "to", "for", "in", "on", "at", "of", "a", "an", "the", "and", "or", "with", "by", "from", "is", "it", "as", "into"
+]);
+
 /**
  * Normalizes and strips brackets and punctuation from search string.
  * Keeps letters, numbers, and Bengali Unicode characters intact.

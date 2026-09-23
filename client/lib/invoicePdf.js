@@ -169,17 +169,21 @@ export async function downloadInvoicePdf(order) {
 
   items.forEach((item, index) => {
     const isEven = index % 2 === 0;
+    const name = item.productName || item.name || "Product Item";
+    const itemLines = doc.splitTextToSize(name, 92);
+    const lineCount = Array.isArray(itemLines) ? itemLines.length : 1;
+    const rowHeight = lineCount > 1 ? Math.max(8, 4.5 + lineCount * 3.8) : 8;
+
     if (isEven) {
       doc.setFillColor(253, 253, 254);
-      doc.rect(14, tableY, 182, 7.5, "F");
+      doc.rect(14, tableY, 182, rowHeight, "F");
     }
 
     doc.setTextColor(...darkNavy);
     doc.text(String(index + 1), 18, tableY + 5);
 
-    const name = item.productName || item.name || "Product Item";
-    const displayName = name.length > 55 ? name.slice(0, 52) + "..." : name;
-    doc.text(displayName, 32, tableY + 5);
+    // Full product name without truncation
+    doc.text(itemLines, 32, tableY + 5);
 
     const qty = Number(item.quantity) || 1;
     doc.text(String(qty), 130, tableY + 5, { align: "center" });
@@ -192,9 +196,9 @@ export async function downloadInvoicePdf(order) {
 
     doc.setDrawColor(...borderLine);
     doc.setLineWidth(0.2);
-    doc.line(14, tableY + 7.5, 196, tableY + 7.5);
+    doc.line(14, tableY + rowHeight, 196, tableY + rowHeight);
 
-    tableY += 7.5;
+    tableY += rowHeight;
   });
 
   // 6. Summary Block (Subtotal, Delivery, Discount, Total)
