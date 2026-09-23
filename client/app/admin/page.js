@@ -222,7 +222,10 @@ export default function AdminPage() {
 
   const loadReports = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/reports`);
+      const res = await fetch(`${API_BASE_URL}/api/admin/reports`, {
+        cache: "no-store",
+        headers: getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setReportData(data.orders || []);
@@ -231,6 +234,12 @@ export default function AdminPage() {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    if (activeTab === "reports") {
+      loadReports();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -677,6 +686,7 @@ export default function AdminPage() {
   let totalRevenue = 0;
   let totalCost = 0;
   let totalProfit = 0;
+  let totalDiscounts = 0;
   const soldItems = [];
 
   const now = new Date();
@@ -693,6 +703,9 @@ export default function AdminPage() {
   });
 
   filteredOrders.forEach((order) => {
+    const orderDiscount = Number(order.discount) || 0;
+    totalDiscounts += orderDiscount;
+
     (order.items || []).forEach((item) => {
       const buyPrice = Number(item.purchasePrice || item.costAtSale || 0);
       const sellPrice = Number(item.price !== undefined && item.price !== null ? item.price : (item.offerPrice || 0));
@@ -726,6 +739,10 @@ export default function AdminPage() {
       });
     });
   });
+
+  // Deduct order-level discounts from Total Revenue and Net Profit
+  totalRevenue = Math.max(0, totalRevenue - totalDiscounts);
+  totalProfit = totalRevenue - totalCost;
 
   const overallProfitPct = totalCost > 0 ? Math.round((totalProfit / totalCost) * 100) : 0;
 
@@ -2029,7 +2046,7 @@ export default function AdminPage() {
           {activeTab === "orders" && (
             <div id="orders-section" className="jt-admin-panel jt-admin-panel-wide">
               <h3>Recent Orders</h3>
-              <AdminOrders />
+              <AdminOrders onOrderUpdated={loadReports} />
             </div>
           )}
 
@@ -2076,84 +2093,6 @@ export default function AdminPage() {
                 <StatCard label="Margin" value={`${overallProfitPct}%`} tone="pink" icon="📈" />
               </div>
 
-              {/* Mobile: Card View */}
-              <div className="md:hidden" style={{ display: "grid", gap: "8px" }}>
-                {soldItems.length === 0 ? (
-                  <p style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>No sales data found for the selected period.</p>
-                ) : (
-                  soldItems.map((item, idx) => (
-                    <div key={idx} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "10px", boxSizing: "border-box" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "11px", fontWeight: "800", color: "#2563eb", background: "#eff6ff", padding: "2px 6px", borderRadius: "6px" }}>
-                          {item.orderId}
-                        </span>
-                        <span style={{ fontSize: "11px", color: "#64748b" }}>{item.date}</span>
-                      </div>
-                      <p style={{ margin: "0 0 6px", fontSize: "13px", fontWeight: "700", color: "#0f172a" }}>{item.name}</p>
-                      
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "6px", borderRadius: "8px", marginBottom: "8px" }}>
-                        <div>
-                          <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>কেনা</p>
-                          <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{item.buyPrice} Tk</p>
-                        </div>
-                        <div>
-                          <p style={{ margin: 0, fontSize: "10px", color: "#64748b" }}>বিক্রি ({item.qty})</p>
-                          <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "700" }}>{item.sellPrice} Tk</p>
-                        </div>
-                        <div>
-                          <p style={{ margin: 0, fontSize: "10px", color: "#16a34a" }}>নিট লাভ</p>
-                          <p style={{ margin: "1px 0 0", fontSize: "12px", fontWeight: "800", color: "#16a34a" }}>{item.rowProfit} Tk</p>
-                        </div>
-                      </div>
-
-                      {/* Action buttons on card */}
-                      <div style={{ display: "flex", gap: "6px" }}>
-                        <button
-                          type="button"
-                          onClick={() => downloadInvoicePdf(item.order)}
-                          style={{
-                            flex: 1,
-                            background: "#e11d48",
-                            color: "#fff",
-                            border: "none",
-                            padding: "6px 8px",
-                            borderRadius: "6px",
-                            fontSize: "11px",
-                            fontWeight: "800",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "3px",
-                          }}
-                        >
-                          📥 Download PDF
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveTab("orders");
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                          }}
-                          style={{
-                            background: "#2563eb",
-                            color: "#fff",
-                            border: "none",
-                            padding: "6px 12px",
-                            borderRadius: "6px",
-                            fontSize: "11px",
-                            fontWeight: "800",
-                            cursor: "pointer",
-                          }}
-                        >
-                          ✏️ Edit
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
               {/* View Mode Switcher */}
               <div className="no-print" style={{ display: "flex", gap: "6px", background: "#e2e8f0", padding: "4px", borderRadius: "10px", width: "fit-content", marginBottom: "16px" }}>
                 <button
@@ -2170,7 +2109,7 @@ export default function AdminPage() {
                     color: reportViewMode === "cards" ? "#ffffff" : "#475569",
                   }}
                 >
-                  📱 Cards View (মোবাইল ফ্রেন্ডলি)
+                  📱 Cards View (কার্ড ভিউ)
                 </button>
                 <button
                   type="button"
@@ -2186,7 +2125,7 @@ export default function AdminPage() {
                     color: reportViewMode === "table" ? "#ffffff" : "#475569",
                   }}
                 >
-                  📊 Table View (ফুল টেবিল)
+                  📊 Table View (টেবিল ভিউ)
                 </button>
               </div>
 
@@ -2204,7 +2143,13 @@ export default function AdminPage() {
                           </span>
                           <span style={{ fontSize: "11px", color: "#64748b" }}>{item.date}</span>
                         </div>
-                        <p style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: "800", color: "#0f172a", wordBreak: "break-word" }}>{item.name}</p>
+                        <p style={{ margin: "0 0 6px", fontSize: "14px", fontWeight: "800", color: "#0f172a", wordBreak: "break-word" }}>{item.name}</p>
+                        
+                        {item.order?.discount > 0 && (
+                          <div style={{ margin: "0 0 8px", background: "#fef2f2", border: "1px dashed #fca5a5", borderRadius: "6px", padding: "3px 8px", fontSize: "11px", color: "#e11d48", fontWeight: "700" }}>
+                            🎁 স্পেশাল ছাড়: -৳{item.order.discount} (অর্ডার মোট: ৳{item.order.total})
+                          </div>
+                        )}
                         
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "4px", textAlign: "center", background: "#f8fafc", padding: "8px", borderRadius: "10px", marginBottom: "10px" }}>
                           <div>
@@ -2293,7 +2238,14 @@ export default function AdminPage() {
                           <tr key={idx} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>{item.date}</td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#2563eb", fontWeight: "700", whiteSpace: "nowrap" }}>{item.orderId}</td>
-                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>{item.name}</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>
+                              {item.name}
+                              {item.order?.discount > 0 && (
+                                <span style={{ display: "inline-block", marginLeft: "6px", fontSize: "10px", color: "#e11d48", background: "#fef2f2", border: "1px solid #fecaca", padding: "1px 5px", borderRadius: "4px" }}>
+                                  🎁 স্পেশাল ছাড়: -৳{item.order.discount}
+                                </span>
+                              )}
+                            </td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#64748b", whiteSpace: "nowrap" }}>{item.buyPrice} Tk</td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "right", color: "#0f172a", fontWeight: "800", whiteSpace: "nowrap" }}>{item.sellPrice} Tk</td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", fontWeight: "700" }}>{item.qty}</td>

@@ -7,7 +7,7 @@ import QRCode from "qrcode";
 
 const STATUS_OPTIONS = ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"];
 
-export default function AdminOrders() {
+export default function AdminOrders({ onOrderUpdated }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("All");
@@ -69,6 +69,9 @@ export default function AdminOrders() {
       setOrders((prev) =>
         prev.map((ord) => (ord._id === id ? { ...ord, status } : ord))
       );
+      if (typeof onOrderUpdated === "function") {
+        onOrderUpdated();
+      }
       setMessage("Order status updated successfully!");
     } catch (error) {
       console.error("Failed to update status:", error);
@@ -474,6 +477,9 @@ export default function AdminOrders() {
       setOrders((prev) =>
         prev.map((ord) => (ord._id === updated._id ? updated : ord))
       );
+      if (typeof onOrderUpdated === "function") {
+        onOrderUpdated();
+      }
       setMessage("✅ অর্ডার এবং ইনভয়েস সফলভাবে আপডেট হয়েছে!");
       setEditingOrder(null);
     } catch (err) {

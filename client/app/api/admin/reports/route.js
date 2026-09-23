@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { Order } from "@/lib/models";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req) {
   try {
     await connectToDatabase();
@@ -30,13 +34,20 @@ export async function GET(req) {
 
     const netProfit = totalRevenue - totalCost;
 
-    return NextResponse.json({
-      totalOrders,
-      totalRevenue,
-      totalCost,
-      netProfit,
-      orders
-    });
+    return NextResponse.json(
+      {
+        totalOrders,
+        totalRevenue,
+        totalCost,
+        netProfit,
+        orders
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        },
+      }
+    );
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
