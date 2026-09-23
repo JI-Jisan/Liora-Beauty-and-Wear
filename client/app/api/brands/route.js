@@ -15,7 +15,15 @@ export async function GET(req) {
     const q = all ? {} : { isActive: true };
     const brands = await Brand.find(q).sort({ order: 1, name: 1 })
       .select('name slug logo isActive order').lean();
-    return NextResponse.json(brands);
+    const cacheHeader = all
+      ? "no-store, no-cache, must-revalidate, max-age=0"
+      : "public, s-maxage=300, stale-while-revalidate=86400";
+
+    return NextResponse.json(brands, {
+      headers: {
+        "Cache-Control": cacheHeader,
+      },
+    });
   } catch (error) {
     console.error("Brands GET error:", error);
     return NextResponse.json({ message: "Error fetching brands" }, { status: 500 });

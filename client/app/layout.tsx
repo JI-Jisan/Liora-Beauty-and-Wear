@@ -56,6 +56,7 @@ export const viewport = {
 
 import LayoutChrome from "@/components/LayoutChrome";
 import { AuthProvider } from "@/components/AuthProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({
   children,
@@ -98,6 +99,7 @@ export default function RootLayout({
             </div>
           </CartProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );

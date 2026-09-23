@@ -9,7 +9,11 @@ export async function GET() {
   try {
     await connectDB();
     const cats = await Category.find({}).sort({ level: 1, order: 1, name: 1 }).lean();
-    return NextResponse.json(cats);
+    return NextResponse.json(cats, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
+      },
+    });
   } catch (e) {
     return NextResponse.json({ message: "লোড করা যায়নি" }, { status: 500 });
   }

@@ -299,6 +299,10 @@ export async function GET(req) {
       products = products.slice(skip, skip + limit);
     }
 
+    const cacheHeader = isAdmin
+      ? "no-store, no-cache, must-revalidate, max-age=0"
+      : "public, s-maxage=60, stale-while-revalidate=300";
+
     if (isPaginated) {
       return NextResponse.json(
         {
@@ -310,7 +314,7 @@ export async function GET(req) {
         },
         {
           headers: {
-            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Cache-Control": cacheHeader,
           },
         }
       );
@@ -320,7 +324,7 @@ export async function GET(req) {
       headers: {
         "X-Total-Count": String(total),
         "X-Total-Pages": String(Math.ceil(total / limit) || 1),
-        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Cache-Control": cacheHeader,
       },
     });
   } catch (error) {

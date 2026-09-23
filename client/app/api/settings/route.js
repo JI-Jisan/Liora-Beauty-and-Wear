@@ -35,9 +35,17 @@ export async function GET() {
     if (!settings) {
       settings = await SiteSettings.create(DEFAULT_SETTINGS);
     }
-    return NextResponse.json(settings);
+    return NextResponse.json(settings, {
+      headers: {
+        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=3600",
+      },
+    });
   } catch {
-    return NextResponse.json(DEFAULT_SETTINGS);
+    return NextResponse.json(DEFAULT_SETTINGS, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   }
 }
 

@@ -16,7 +16,15 @@ export async function GET(req) {
       .select('label href icon authOnly openInNew isActive order')
       .lean();
     
-    return NextResponse.json(menus);
+    const cacheHeader = all
+      ? "no-store, no-cache, must-revalidate, max-age=0"
+      : "public, s-maxage=300, stale-while-revalidate=86400";
+
+    return NextResponse.json(menus, {
+      headers: {
+        "Cache-Control": cacheHeader,
+      },
+    });
   } catch (error) {
     console.error("Menus GET error:", error);
     return NextResponse.json({ message: "Error fetching menus" }, { status: 500 });

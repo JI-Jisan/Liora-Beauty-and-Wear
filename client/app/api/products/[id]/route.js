@@ -22,7 +22,13 @@ export async function GET(req, { params }) {
         .lean();
       
       if (product) {
-        return NextResponse.json(product);
+        return NextResponse.json(product, {
+          headers: {
+            "Cache-Control": isAdmin
+              ? "no-store, no-cache, must-revalidate, max-age=0"
+              : "public, s-maxage=120, stale-while-revalidate=1800",
+          },
+        });
       }
     }
 
