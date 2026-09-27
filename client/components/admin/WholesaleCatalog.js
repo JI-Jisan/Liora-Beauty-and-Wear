@@ -104,7 +104,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   // Selected Products List
   const selectedProductList = useMemo(() => {
     return products
-      .filter((p) => selectedProductMap[p._id || p.id])
+      .filter((p) => selectedProductMap[p._id || p.id] !== undefined)
       .map((p) => {
         const customPrice = selectedProductMap[p._id || p.id];
         const buyPrice = Number(p.purchasePrice) || 0;
@@ -186,6 +186,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       });
       return next;
     });
+    setActiveSubTab("selected");
   };
 
   // Clear all selections
@@ -495,6 +496,29 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
             {summaryStats.totalSelected > 0 && (
               <button
                 type="button"
+                onClick={() => setActiveSubTab(activeSubTab === "selected" ? "browse" : "selected")}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  border: "1.5px solid #e11d48",
+                  background: activeSubTab === "selected" ? "#e11d48" : "#fff1f2",
+                  color: activeSubTab === "selected" ? "#ffffff" : "#be123c",
+                  fontWeight: "800",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  boxShadow: "0 2px 8px rgba(225, 29, 72, 0.15)",
+                }}
+              >
+                {activeSubTab === "selected" ? "← প্রোডাক্ট যোগ করতে ফিরে যান" : `📋 নির্বাচিত শিট দেখুন (${summaryStats.totalSelected}টি) ➔`}
+              </button>
+            )}
+
+            {summaryStats.totalSelected > 0 && (
+              <button
+                type="button"
                 onClick={handleClearAll}
                 style={{
                   padding: "8px 14px",
@@ -641,39 +665,58 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       </div>
 
       {/* Tabs Switcher: Browse All vs Selected List */}
-      <div style={{ display: "flex", gap: "8px", borderBottom: "2px solid #e2e8f0", paddingBottom: "8px" }}>
+      <div style={{ display: "flex", gap: "10px", alignItems: "center", borderBottom: "2px solid #e2e8f0", paddingBottom: "10px", flexWrap: "wrap" }}>
         <button
           type="button"
           onClick={() => setActiveSubTab("browse")}
           style={{
-            padding: "8px 18px",
-            borderRadius: "8px",
-            border: "none",
+            padding: "9px 20px",
+            borderRadius: "10px",
+            border: activeSubTab === "browse" ? "2px solid #0f172a" : "1.5px solid #cbd5e1",
             cursor: "pointer",
             fontWeight: "800",
             fontSize: "13px",
-            background: activeSubTab === "browse" ? "#0f172a" : "#f1f5f9",
+            background: activeSubTab === "browse" ? "#0f172a" : "#ffffff",
             color: activeSubTab === "browse" ? "#ffffff" : "#475569",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            transition: "all 0.15s ease",
+            boxShadow: activeSubTab === "browse" ? "0 2px 8px rgba(15,23,42,0.18)" : "none",
           }}
         >
-          📦 সব প্রোডাক্ট ({filteredProducts.length})
+          <span>📦 সব প্রোডাক্ট</span>
+          <span
+            style={{
+              background: activeSubTab === "browse" ? "rgba(255,255,255,0.2)" : "#f1f5f9",
+              color: activeSubTab === "browse" ? "#ffffff" : "#475569",
+              padding: "2px 8px",
+              borderRadius: "10px",
+              fontSize: "11px",
+              fontWeight: "900",
+            }}
+          >
+            {filteredProducts.length}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveSubTab("selected")}
           style={{
-            padding: "8px 18px",
-            borderRadius: "8px",
-            border: "none",
+            padding: "9px 22px",
+            borderRadius: "10px",
+            border: activeSubTab === "selected" ? "2px solid #e11d48" : summaryStats.totalSelected > 0 ? "2px solid #fda4af" : "1.5px solid #cbd5e1",
             cursor: "pointer",
             fontWeight: "800",
             fontSize: "13px",
-            background: activeSubTab === "selected" ? "#e11d48" : "#f1f5f9",
-            color: activeSubTab === "selected" ? "#ffffff" : "#475569",
+            background: activeSubTab === "selected" ? "#e11d48" : summaryStats.totalSelected > 0 ? "#fff1f2" : "#ffffff",
+            color: activeSubTab === "selected" ? "#ffffff" : "#e11d48",
             display: "flex",
             alignItems: "center",
-            gap: "6px",
+            gap: "8px",
+            transition: "all 0.15s ease",
+            boxShadow: activeSubTab === "selected" ? "0 4px 12px rgba(225,29,72,0.25)" : summaryStats.totalSelected > 0 ? "0 2px 8px rgba(225,29,72,0.12)" : "none",
           }}
         >
           <span>📋 নির্বাচিত কোটেশন শিট</span>
@@ -681,16 +724,99 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
             style={{
               background: activeSubTab === "selected" ? "#ffffff" : "#e11d48",
               color: activeSubTab === "selected" ? "#e11d48" : "#ffffff",
-              padding: "1px 7px",
+              padding: "2px 9px",
               borderRadius: "10px",
-              fontSize: "11px",
+              fontSize: "11.5px",
               fontWeight: "900",
             }}
           >
             {summaryStats.totalSelected}
           </span>
+          {activeSubTab === "browse" && summaryStats.totalSelected > 0 && (
+            <span style={{ fontSize: "11px", opacity: 0.9 }}>➔ ক্লিক করুন</span>
+          )}
         </button>
       </div>
+
+      {/* Contextual Info Banner */}
+      {activeSubTab === "browse" && summaryStats.totalSelected > 0 && (
+        <div
+          style={{
+            background: "#f0fdf4",
+            border: "1.5px solid #86efac",
+            borderRadius: "10px",
+            padding: "10px 16px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
+        >
+          <div style={{ color: "#166534", fontSize: "13px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span>✅</span>
+            <span>
+              আপনার কোটেশন শিটে <strong>{summaryStats.totalSelected}</strong> টি প্রোডাক্ট যোগ করা হয়েছে।
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab("selected")}
+            style={{
+              background: "#16a34a",
+              border: "none",
+              color: "#ffffff",
+              padding: "6px 16px",
+              borderRadius: "8px",
+              fontSize: "12px",
+              fontWeight: "800",
+              cursor: "pointer",
+              boxShadow: "0 2px 6px rgba(22, 163, 74, 0.2)",
+            }}
+          >
+            📋 নির্বাচিত শিট ওপেন করুন ➔
+          </button>
+        </div>
+      )}
+
+      {activeSubTab === "selected" && (
+        <div
+          style={{
+            background: "#fff1f2",
+            border: "1.5px solid #fecdd3",
+            borderRadius: "10px",
+            padding: "10px 16px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
+        >
+          <div style={{ color: "#9f1239", fontSize: "13px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+            <span>📋</span>
+            <span>
+              <strong>নির্বাচিত কোটেশন শিট:</strong> মোট {summaryStats.totalSelected} টি প্রোডাক্ট। এখানে প্রয়োজনমতো পাইকারি রেট কাস্টমাইজ করতে পারবেন।
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveSubTab("browse")}
+            style={{
+              background: "#ffffff",
+              border: "1.5px solid #e11d48",
+              color: "#e11d48",
+              padding: "6px 14px",
+              borderRadius: "8px",
+              fontSize: "12px",
+              fontWeight: "800",
+              cursor: "pointer",
+            }}
+          >
+            + আরও প্রোডাক্ট যোগ করুন
+          </button>
+        </div>
+      )}
 
       {/* Products Table */}
       <div style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "14px", overflow: "hidden" }}>
