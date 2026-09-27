@@ -10,6 +10,7 @@ import CategoryManager from "@/components/admin/CategoryManager";
 import StatCard from "@/components/StatCard";
 import AdminStorefrontPOS from "@/components/admin/AdminStorefrontPOS";
 import AdminUserManager from "@/components/admin/AdminUserManager";
+import WholesaleCatalog from "@/components/admin/WholesaleCatalog";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -1009,6 +1010,20 @@ export default function AdminPage() {
             📋 Inventory / Stock
           </li>
           <li
+            className={activeTab === "wholesale" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("wholesale");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            style={{
+              color: activeTab === "wholesale" ? undefined : "#e11d48",
+              fontWeight: "800",
+            }}
+          >
+            💼 Wholesale & PDF Rate Sheet
+          </li>
+          <li
             className={activeTab === "users" ? "active-tab" : ""}
             onClick={() => {
               setActiveTab("users");
@@ -1221,6 +1236,15 @@ export default function AdminPage() {
                 >
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>✨</div>
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#334155", fontWeight: "800", textAlign: "center" }}>Branding</h3>
+                </div>
+
+                {/* Wholesale Quotations Box */}
+                <div 
+                  onClick={() => { setActiveTab("wholesale"); window.scrollTo(0,0); }}
+                  style={{ background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)", padding: "18px 10px", borderRadius: "16px", border: "1px solid #fecdd3", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(225,29,72,0.08)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>💼</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#e11d48", fontWeight: "900", textAlign: "center" }}>Wholesale PDF</h3>
                 </div>
 
                 {/* Admin & Users Box */}
@@ -2636,6 +2660,13 @@ export default function AdminPage() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Wholesale Rate Sheet Tab */}
+          {activeTab === "wholesale" && (
+            <div className="jt-admin-panel jt-admin-panel-wide admin-card">
+              <WholesaleCatalog products={products} categories={categories} />
             </div>
           )}
         </div>
