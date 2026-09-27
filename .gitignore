@@ -10,3 +10,5 @@ server/uploads/banners/*
 server/uploads/cutouts/*
 !server/uploads/cutouts/.gitkeep
 
+.vercel
+.env*

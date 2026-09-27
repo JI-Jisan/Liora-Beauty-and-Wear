@@ -84,6 +84,7 @@ export default function AdminPage() {
   const [stockCategoryFilter, setStockCategoryFilter] = useState("all");
   const [stockViewMode, setStockViewMode] = useState("cards"); // 'cards' or 'table'
   const [reportViewMode, setReportViewMode] = useState("cards"); // 'cards' or 'table'
+  const [reportSellerFilter, setReportSellerFilter] = useState("all"); // 'all' | 'Owner' | 'Partner'
 
   // Manage Products Advanced Controls State
   const [productSearch, setProductSearch] = useState("");
@@ -682,7 +683,7 @@ export default function AdminPage() {
     }
   }, [activeTab]);
 
-  // Excel-like Calculation based on selected Time Filter
+  // Excel-like Calculation based on selected Time & Seller Filter
   let totalRevenue = 0;
   let totalCost = 0;
   let totalProfit = 0;
@@ -690,8 +691,9 @@ export default function AdminPage() {
   const soldItems = [];
 
   const now = new Date();
-  const filteredOrders = reportData.filter((order) => {
-    // শুধুমাত্র Delivered বা Completed অর্ডার লাভ হিসেবে হিসাব হবে
+  
+  // 1. Time-filtered Delivered Orders (সব ডেলিভারড অর্ডার)
+  const timeFilteredOrders = reportData.filter((order) => {
     const isDelivered = ["delivered", "completed"].includes(String(order.status || "").toLowerCase());
     if (!isDelivered) return false;
 
@@ -700,6 +702,54 @@ export default function AdminPage() {
     const cutoffDate = new Date();
     cutoffDate.setDate(now.getDate() - days);
     return new Date(order.createdAt) >= cutoffDate;
+  });
+
+  // 2. Fund & Money Position (টাকা কার কাছে আছে: Owner vs Partner)
+  let ownerRevenue = 0;
+  let ownerCost = 0;
+  let ownerProfit = 0;
+  let ownerOrderCount = 0;
+
+  let partnerRevenue = 0;
+  let partnerCost = 0;
+  let partnerProfit = 0;
+  let partnerOrderCount = 0;
+
+  timeFilteredOrders.forEach((order) => {
+    const seller = (order.shippedBy || "Owner").toLowerCase() === "partner" ? "Partner" : "Owner";
+    const orderDiscount = Number(order.discount) || 0;
+    let ordRev = 0;
+    let ordCost = 0;
+
+    (order.items || []).forEach((item) => {
+      const buyPrice = Number(item.purchasePrice || item.costAtSale || 0);
+      const sellPrice = Number(item.price !== undefined && item.price !== null ? item.price : (item.offerPrice || 0));
+      const qty = Number(item.quantity || 1);
+      ordRev += sellPrice * qty;
+      ordCost += buyPrice * qty;
+    });
+
+    const netOrdRev = Math.max(0, ordRev - orderDiscount);
+    const netOrdProfit = netOrdRev - ordCost;
+
+    if (seller === "Owner") {
+      ownerRevenue += netOrdRev;
+      ownerCost += ordCost;
+      ownerProfit += netOrdProfit;
+      ownerOrderCount += 1;
+    } else {
+      partnerRevenue += netOrdRev;
+      partnerCost += ordCost;
+      partnerProfit += netOrdProfit;
+      partnerOrderCount += 1;
+    }
+  });
+
+  // 3. Filter orders based on reportSellerFilter
+  const filteredOrders = timeFilteredOrders.filter((order) => {
+    if (reportSellerFilter === "all") return true;
+    const seller = (order.shippedBy || "Owner").toLowerCase() === "partner" ? "Partner" : "Owner";
+    return seller === reportSellerFilter;
   });
 
   filteredOrders.forEach((order) => {
@@ -724,9 +774,12 @@ export default function AdminPage() {
       totalCost += rowCost;
       totalProfit += rowProfit;
 
+      const seller = (order.shippedBy || "Owner").toLowerCase() === "partner" ? "Partner" : "Owner";
+
       soldItems.push({
         date: new Date(order.createdAt).toLocaleDateString(),
         orderId: order.orderNumber || order._id,
+        seller,
         name: item.productName || item.name || "Product Item",
         category: item.categoryName || "Product", // ক্যাটাগরি নাম
         buyPrice,
@@ -2076,12 +2129,59 @@ export default function AdminPage() {
                     <option value="all">📅 All Time (শুরু থেকে সব)</option>
                   </select>
 
+                  <select 
+                    value={reportSellerFilter} 
+                    onChange={(e) => setReportSellerFilter(e.target.value)}
+                    style={{ flex: 1, minWidth: "160px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "12px" }}
+                  >
+                    <option value="all">👥 সব বিক্রেতা (All: Owner & Partner)</option>
+                    <option value="Owner">👑 শুধু আমি (Owner Sales)</option>
+                    <option value="Partner">🤝 শুধু পার্টনার (Partner Sales)</option>
+                  </select>
+
                   <button
                     onClick={() => window.print()}
                     style={{ background: "#0f172a", color: "#fff", border: "none", padding: "8px 12px", borderRadius: "8px", fontWeight: "800", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", fontSize: "12px" }}
                   >
                     🖨️ Print
                   </button>
+                </div>
+              </div>
+
+              {/* Fund Position & Partner Breakdown Bar */}
+              <div className="no-print" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "10px", marginBottom: "16px" }}>
+                <div style={{ background: "#ffffff", border: "1px solid #bae6fd", borderLeft: "5px solid #0284c7", borderRadius: "10px", padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontSize: "15px" }}>👑</span>
+                      <span style={{ fontSize: "13px", fontWeight: "800", color: "#0369a1" }}>Owner (আমার কাছে টাকা)</span>
+                      <span style={{ fontSize: "10px", background: "#e0f2fe", color: "#0284c7", fontWeight: "800", padding: "1px 6px", borderRadius: "8px" }}>{ownerOrderCount} অর্ডার</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "3px" }}>
+                      লাভ: <strong style={{ color: "#16a34a" }}>৳{ownerProfit}</strong> • কেনা খরচ: ৳{ownerCost}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: "10px", color: "#64748b", fontWeight: "700" }}>মোট কালেকশন</div>
+                    <div style={{ fontSize: "16px", fontWeight: "900", color: "#0f172a" }}>৳{ownerRevenue}</div>
+                  </div>
+                </div>
+
+                <div style={{ background: "#ffffff", border: "1px solid #e9d5ff", borderLeft: "5px solid #9333ea", borderRadius: "10px", padding: "12px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontSize: "15px" }}>🤝</span>
+                      <span style={{ fontSize: "13px", fontWeight: "800", color: "#7e22ce" }}>Partner (পার্টনারের কাছে টাকা)</span>
+                      <span style={{ fontSize: "10px", background: "#f3e8ff", color: "#9333ea", fontWeight: "800", padding: "1px 6px", borderRadius: "8px" }}>{partnerOrderCount} অর্ডার</span>
+                    </div>
+                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "3px" }}>
+                      লাভ: <strong style={{ color: "#16a34a" }}>৳{partnerProfit}</strong> • কেনা খরচ: ৳{partnerCost}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: "10px", color: "#64748b", fontWeight: "700" }}>মোট কালেকশন</div>
+                    <div style={{ fontSize: "16px", fontWeight: "900", color: "#0f172a" }}>৳{partnerRevenue}</div>
+                  </div>
                 </div>
               </div>
 
@@ -2137,10 +2237,21 @@ export default function AdminPage() {
                   ) : (
                     soldItems.map((item, idx) => (
                       <div key={idx} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "12px", boxShadow: "0 2px 6px rgba(0,0,0,0.03)" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                          <span style={{ fontSize: "11px", fontWeight: "800", color: "#2563eb", background: "#eff6ff", padding: "3px 8px", borderRadius: "6px" }}>
-                            {item.orderId}
-                          </span>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "6px", flexWrap: "wrap" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <span style={{ fontSize: "11px", fontWeight: "800", color: "#2563eb", background: "#eff6ff", padding: "3px 8px", borderRadius: "6px" }}>
+                              {item.orderId}
+                            </span>
+                            {item.seller === "Partner" ? (
+                              <span style={{ background: "#f3e8ff", color: "#7e22ce", border: "1px solid #d8b4fe", padding: "2px 6px", borderRadius: "6px", fontWeight: "800", fontSize: "10px" }}>
+                                🤝 Partner
+                              </span>
+                            ) : (
+                              <span style={{ background: "#e0f2fe", color: "#0369a1", border: "1px solid #bae6fd", padding: "2px 6px", borderRadius: "6px", fontWeight: "800", fontSize: "10px" }}>
+                                👑 Owner
+                              </span>
+                            )}
+                          </div>
                           <span style={{ fontSize: "11px", color: "#64748b" }}>{item.date}</span>
                         </div>
                         <p style={{ margin: "0 0 6px", fontSize: "14px", fontWeight: "800", color: "#0f172a", wordBreak: "break-word" }}>{item.name}</p>
@@ -2220,6 +2331,7 @@ export default function AdminPage() {
                       <tr>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Date</th>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Order ID</th>
+                        <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "center" }}>প্রেরক (Seller)</th>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155" }}>Product Name</th>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Buy Price</th>
                         <th style={{ padding: "10px 8px", border: "1px solid #cbd5e1", color: "#334155", textAlign: "right" }}>Sell Price</th>
@@ -2232,12 +2344,23 @@ export default function AdminPage() {
                     </thead>
                     <tbody>
                       {soldItems.length === 0 ? (
-                        <tr><td colSpan="10" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
+                        <tr><td colSpan="11" style={{ padding: "24px", textAlign: "center", color: "#64748b", fontWeight: "700" }}>No sales data found for the selected period.</td></tr>
                       ) : (
                         soldItems.map((item, idx) => (
                           <tr key={idx} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc" }}>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#475569", whiteSpace: "nowrap" }}>{item.date}</td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", color: "#2563eb", fontWeight: "700", whiteSpace: "nowrap" }}>{item.orderId}</td>
+                            <td style={{ padding: "8px", border: "1px solid #cbd5e1", textAlign: "center", whiteSpace: "nowrap" }}>
+                              {item.seller === "Partner" ? (
+                                <span style={{ background: "#f3e8ff", color: "#7e22ce", border: "1px solid #d8b4fe", padding: "2px 8px", borderRadius: "6px", fontWeight: "800", fontSize: "11px" }}>
+                                  🤝 Partner
+                                </span>
+                              ) : (
+                                <span style={{ background: "#e0f2fe", color: "#0369a1", border: "1px solid #bae6fd", padding: "2px 8px", borderRadius: "6px", fontWeight: "800", fontSize: "11px" }}>
+                                  👑 Owner
+                                </span>
+                              )}
+                            </td>
                             <td style={{ padding: "8px", border: "1px solid #cbd5e1", fontWeight: "700", color: "#0f172a" }}>
                               {item.name}
                               {item.order?.discount > 0 && (
