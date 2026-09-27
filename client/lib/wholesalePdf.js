@@ -199,7 +199,7 @@ export async function generateWholesalePdf({
     doc.setFontSize(8);
     doc.setTextColor(...colorMuted);
     doc.text(`Date: ${todayStr}`, 196, 26, { align: "right" });
-    doc.text(`Pricing Tier: Cost + ${profitPercent}% Margin`, 196, 29.5, { align: "right" });
+    doc.text("Special B2B Wholesale Pricing", 196, 29.5, { align: "right" });
 
     // Thin separator
     doc.setDrawColor(...colorBorder);
@@ -232,7 +232,8 @@ export async function generateWholesalePdf({
       doc.setFontSize(8);
       doc.setTextColor(...colorMuted);
       const contactStr = [clientPhone, clientAddress].filter(Boolean).join("  |  ");
-      doc.text(contactStr, 192, clientY + 9, { align: "right" });
+      const safeContact = doc.splitTextToSize(contactStr, 90)[0];
+      doc.text(safeContact, 192, clientY + 9, { align: "right" });
     }
 
     // ⭐ HIGHLIGHT SAVINGS BANNER (Customer Delight)
@@ -257,7 +258,7 @@ export async function generateWholesalePdf({
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.setTextColor(...colorDark);
-    doc.text("SPECIAL WHOLESALE BENEFIT & RETAIL MARGIN:", marginX + 56, bannerY + 6.5);
+    doc.text("SPECIAL WHOLESALE BENEFIT & SAVINGS:", marginX + 56, bannerY + 6.5);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
@@ -291,14 +292,14 @@ export async function generateWholesalePdf({
     doc.setFontSize(8);
     doc.setTextColor(...colorDark);
 
-    // Columns:
-    // Serial (8mm) | Image (16mm) | Product Name (82mm) | Market MRP (24mm) | Wholesale Rate (28mm) | Savings (24mm)
+    // Columns within 182mm (marginX: 14 to 196):
+    // Serial (8mm) | Image (16mm) | Product Details (76mm) | Market MRP (24mm) | Wholesale Rate (28mm) | Discount (30mm)
     doc.text("#", marginX + 4, y + 5.5, { align: "center" });
     doc.text("IMAGE", marginX + 16, y + 5.5, { align: "center" });
-    doc.text("PRODUCT DETAILS", marginX + 27, y + 5.5);
-    doc.text("MARKET (MRP)", marginX + 120, y + 5.5, { align: "right" });
-    doc.text("WHOLESALE RATE", marginX + 152, y + 5.5, { align: "right" });
-    doc.text("CLIENT SAVINGS", marginX + 178, y + 5.5, { align: "center" });
+    doc.text("PRODUCT DETAILS", marginX + 26, y + 5.5);
+    doc.text("MARKET (MRP)", marginX + 118, y + 5.5, { align: "right" });
+    doc.text("WHOLESALE RATE", marginX + 148, y + 5.5, { align: "right" });
+    doc.text("DISCOUNT", marginX + 167, y + 5.5, { align: "center" });
 
     return y + h;
   }
@@ -333,7 +334,7 @@ export async function generateWholesalePdf({
     // Text wrapping for product name
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.5);
-    const titleLines = doc.splitTextToSize(item.name, 78);
+    const titleLines = doc.splitTextToSize(item.name, 72);
     const titleHeight = titleLines.length * 4;
     const rowHeight = Math.max(rowMinHeight, titleHeight + 7);
 
@@ -412,7 +413,7 @@ export async function generateWholesalePdf({
     }
 
     // 4. Market Price (MRP / Regular Retail)
-    const mrpX = marginX + 120;
+    const mrpX = marginX + 118;
     const mrpY = currentY + rowHeight / 2 + 1.5;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
@@ -426,18 +427,18 @@ export async function generateWholesalePdf({
     doc.line(mrpX - mrpWidth, mrpY - 1, mrpX, mrpY - 1);
 
     // 5. Wholesale Rate (Highlighted in Bold Rose/Dark)
-    const wsX = marginX + 152;
+    const wsX = marginX + 148;
     const wsY = currentY + rowHeight / 2 + 1.5;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(...colorPrimary);
     doc.text(`Tk ${item.wholesalePrice.toLocaleString()}`, wsX, wsY, { align: "right" });
 
-    // 6. Savings % Badge
-    const badgeX = marginX + 167;
-    const badgeY = currentY + (rowHeight - 6.5) / 2;
-    const badgeW = 21;
+    // 6. Savings % Badge (Properly inside table border)
+    const badgeW = 20;
     const badgeH = 6.5;
+    const badgeX = marginX + 157; // 14 + 157 = 171. Right edge = 191 (< 196)
+    const badgeY = currentY + (rowHeight - badgeH) / 2;
 
     doc.setFillColor(...colorGreenBg);
     doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 1.5, 1.5, "F");
@@ -448,7 +449,7 @@ export async function generateWholesalePdf({
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(...colorGreen);
-    doc.text(`${item.discountPct}% OFF`, badgeX + badgeW / 2, badgeY + 4.5, { align: "center" });
+    doc.text(`${item.discountPct}% OFF`, marginX + 167, badgeY + 4.5, { align: "center" });
 
     currentY += rowHeight;
   }
