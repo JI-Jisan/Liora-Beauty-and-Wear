@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { Product, Category, Brand } from "@/lib/models";
 import { buildPayload } from "@/lib/productPayload";
 import { getAdminFromRequest } from "@/lib/adminGuard";
+import { ensureProductBatchStock } from "@/lib/inventory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -374,6 +375,9 @@ export async function POST(req) {
     const payload = buildPayload(body);          // whitelist, mass assignment নয়
 
     const product = await Product.create(payload);
+    if (payload.stockQuantity > 0) {
+      await ensureProductBatchStock(product._id, payload.stockQuantity, payload.purchasePrice, product.name);
+    }
     return NextResponse.json(product.toJSON(), { status: 201 });
   } catch (error) {
     console.error("Products POST:", error);

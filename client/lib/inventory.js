@@ -1,6 +1,6 @@
 import { PurchaseBatch, Product } from "@/lib/models";
 
-/** একটা প্রোডাক্টের মোট available (সব batch এর remaining) */
+/** একটা প্রোডাক্টের মোট available (সব batch এর remaining, fallback to product.stockQuantity) */
 export async function getAvailable(productId, ownerName = null) {
   const match = { product: productId, remaining: { $gt: 0 } };
   if (ownerName) match.locationName = ownerName;
@@ -8,7 +8,12 @@ export async function getAvailable(productId, ownerName = null) {
     { $match: match },
     { $group: { _id: null, total: { $sum: "$remaining" } } },
   ]);
-  return rows[0]?.total || 0;
+  const batchTotal = rows[0]?.total || 0;
+  if (batchTotal > 0 || ownerName) return batchTotal;
+
+  // Fallback: যদি ব্যাচে কোনো এন্ট্রি না থাকে তবে সরাসরি Product.stockQuantity দেখো
+  const prod = await Product.findById(productId).select("stockQuantity").lean();
+  return prod?.stockQuantity || 0;
 }
 
 /** Product.stockQuantity কে batch এর যোগফল দিয়ে sync করা (cache) */
@@ -24,6 +29,63 @@ export async function syncProductStock(productId, ProductModel = Product) {
 }
 
 /**
+ * Admin যখন প্রোডাক্টের দাম ও স্টক এডিট করে স্টক পরিবর্তন করে,
+ * তখন PurchaseBatch এর সাথে সেই স্টক সিঙ্ক রাখা
+ */
+export async function ensureProductBatchStock(productId, targetStock, unitCost = 0, productName = "") {
+  const target = Math.max(0, parseInt(targetStock) || 0);
+  const batches = await PurchaseBatch.find({ product: productId }).sort({ purchaseDate: -1, _id: -1 });
+  const currentTotal = batches.reduce((sum, b) => sum + Math.max(0, b.remaining || 0), 0);
+  const diff = target - currentTotal;
+
+  if (diff > 0) {
+    // স্টক বেড়েছে — ব্যাচ আপডেট বা তৈরি করো
+    const openBatch = batches.find(
+      (b) => b.ownerName === "Opening Stock" || b.supplier === "Initial Stock" || b.supplier === "Stock Adjustment"
+    );
+    if (openBatch) {
+      await PurchaseBatch.findByIdAndUpdate(openBatch._id, {
+        $inc: { remaining: diff, qty: diff },
+        ...(unitCost > 0 ? { unitCost } : {}),
+      });
+    } else {
+      await PurchaseBatch.create({
+        product: productId,
+        productName: productName || "Product",
+        qty: diff,
+        remaining: diff,
+        unitCost: unitCost || 0,
+        purchaseDate: new Date(),
+        ownerName: "Owner",
+        locationName: "Owner",
+        supplier: "Stock Adjustment",
+        note: "Admin Stock Update",
+      });
+    }
+  } else if (diff < 0) {
+    // স্টক কমেছে — ব্যাচ থেকে কমাও
+    let toDeduct = Math.abs(diff);
+    for (const b of batches) {
+      if (toDeduct <= 0) break;
+      const take = Math.min(toDeduct, b.remaining || 0);
+      if (take > 0) {
+        await PurchaseBatch.findByIdAndUpdate(b._id, {
+          $inc: { remaining: -take },
+        });
+        toDeduct -= take;
+      }
+    }
+  }
+
+  const finalStatus = target <= 0 ? "Out of Stock" : target <= 5 ? "Limited Stock" : "In Stock";
+  await Product.findByIdAndUpdate(productId, {
+    stockQuantity: target,
+    stockStatus: finalStatus,
+    inStock: target > 0,
+  });
+}
+
+/**
  * FIFO allocate — পুরোনো batch আগে।
  * ownerName দিলে শুধু ওই ব্যক্তির stock থেকে নেবে।
  * ফেরত দেয়: { ok, allocations, avgCost, totalCost } অথবা { ok:false, available }
@@ -32,7 +94,33 @@ export async function allocateFIFO(productId, needQty, ownerName = null) {
   const filter = { product: productId, remaining: { $gt: 0 } };
   if (ownerName) filter.locationName = ownerName;
 
-  const batches = await PurchaseBatch.find(filter).sort({ purchaseDate: 1, _id: 1 });
+  let batches = await PurchaseBatch.find(filter).sort({ purchaseDate: 1, _id: 1 });
+  let totalInBatches = batches.reduce((s, b) => s + (b.remaining || 0), 0);
+
+  // ⭐ SAFETY AUTO-RECONCILIATION:
+  // যদি ব্যাচে পর্যাপ্ত স্টক না থাকে কিন্তু Product ডকুমেন্টে স্টক থাকে:
+  if (totalInBatches < needQty && !ownerName) {
+    const prod = await Product.findById(productId);
+    if (prod && (prod.stockQuantity || 0) >= needQty) {
+      const neededExtra = Math.max(needQty - totalInBatches, (prod.stockQuantity || 0) - totalInBatches);
+      if (neededExtra > 0) {
+        await PurchaseBatch.create({
+          product: prod._id,
+          productName: prod.name || "Product",
+          qty: neededExtra,
+          remaining: neededExtra,
+          unitCost: Number(prod.purchasePrice) || 0,
+          purchaseDate: new Date(),
+          ownerName: "Owner",
+          locationName: "Owner",
+          supplier: "Stock Adjustment",
+          note: "Auto-reconciled on checkout",
+        });
+        // ব্যাচ রি-লোড করো
+        batches = await PurchaseBatch.find(filter).sort({ purchaseDate: 1, _id: 1 });
+      }
+    }
+  }
 
   const allocations = [];
   let left = needQty;

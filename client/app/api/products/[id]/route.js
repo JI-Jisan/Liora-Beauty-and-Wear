@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/db";
 import { Product } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
 import { buildPayload } from "@/lib/productPayload";
+import { ensureProductBatchStock } from "@/lib/inventory";
 export async function GET(req, { params }) {
   try {
     await connectToDatabase();
@@ -57,6 +58,9 @@ export async function PUT(req, { params }) {
     const updated = await Product.findByIdAndUpdate(id, payload, { new: true, runValidators: true }).populate("category");
     if (!updated) {
       return NextResponse.json({ message: "Product not found" }, { status: 404 });
+    }
+    if (payload.stockQuantity !== undefined) {
+      await ensureProductBatchStock(updated._id, payload.stockQuantity, updated.purchasePrice, updated.name);
     }
     return NextResponse.json(updated.toJSON());
   } catch (error) {
