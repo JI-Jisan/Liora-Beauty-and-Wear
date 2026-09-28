@@ -15,7 +15,7 @@ if (fs.existsSync(envPath)) {
     const eqIdx = trimmed.indexOf('=');
     if (eqIdx > 0) {
       const k = trimmed.slice(0, eqIdx).trim();
-      const v = trimmed.slice(eqIdx + 1).trim();
+      const v = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
       if (!process.env[k]) process.env[k] = v;
     }
   }
@@ -26,10 +26,13 @@ const MONGO_URI =
   process.env.MONGODB_URI ||
   "mongodb://jisan_trends:liora889@ac-2e905xv-shard-00-00.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-01.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-02.6nzddbx.mongodb.net:27017/jisantrends?ssl=true&replicaSet=atlas-12gikm-shard-0&authSource=admin&retryWrites=true&w=majority";
 
-const rawCookieString = process.env.OGERIO_COOKIE || `_gcl_au=1.1.1916874540.1788358494; _ga=GA1.1.2067872575.1788358494; _fbp=fb.1.1788358495210.128381418579568748; cfz_zaraz-analytics=%7B%22_cfa_clientId%22%3A%7B%22v%22%3A%2210465947386125474%22%2C%22e%22%3A1819894495463%7D%2C%22_cfa_sId%22%3A%7B%22v%22%3A%2255278755305913830%22%2C%22e%22%3A1788609984785%7D%7D; wordpress_test_cookie=WP%20Cookie%20check; wordpress_logged_in_65affc8df1b074206d0540bb7c0f54de=liorabeautyandwear%40gmail.com%7C1788882320%7CwASYPZuk7rMhx0mpmYyfNK0qw9oUb5iFgJgrfodkDzl%7C0737d9f24563eb8e04a774aff17038e6003e51af675ecbd4ce8b638b40bf59cf; wfwaf-authcookie-1c7ab08f031298fbc2c588336c15d99f=104283%7Cother%7Cread%7Cde049eb9db6b74f506ccc0bc664b2fa6dfd023f55e7d3595402192f5633dacc7; woocommerce_items_in_cart=1; wp_woocommerce_session_65affc8df1b074206d0540bb7c0f54de=104283%7C1789314321%7C1788795921%7C568609153d2d468fc6da53de12b451c9; _ga_4KG7WNH0Z4=GS2.1.s1788709278$o3$g1$t1788709519$j52$l0$h0; woocommerce_cart_hash=2f08db6f4cbf150bff9ef95a585ba4f8; g_state={"i_l":0,"i_ll":1788710205528,"i_e":{"enable_itp_optimization":24},"i_et":1788710205528,"i_b":"qIW2FSs2UIJtIVuxNCNsNpg01gfdfBdz7/nuizp/gj4"}; cf_clearance=wGs8YsDKmmYyJiQUm1dNaFoMnmmcIhaZScrMzo.Gw_g-1788710208-1.2.1.1-SL5vKIvwAwZ83FyLhIcPJMb2sELBh.qHIgF8p5vD3.EwDwGguUQWyb4opQICeszSoF4O5zPZ0OgUFkNftdScLnwGZKDIYgsGjQJVgKoMxpWHE77irAJFzealY_vhyc0EXXNFJv_In_3fTi.b62GmSKV1UiF6F9RkdbbiGYBwKI4JkWWc51wnNjdqcwJg1pZGUOBuSvLWYbnaL7SHWHgOM7q6CS1cM8GgHx014QUbDRfaJpNEOMHv_s8r.4hBXqoPz.bONwYqCtHSp9gV5rxuW_3bxbVFAyrARcBpX0KTBCpaVOMjMVePVZxgIwNLmnGHzpMPpQrck5Ss6qWmGOHYK0BTjRiD1unJ3bf1CV1z69A`;
+const rawCookieString =
+  process.env.OGERIO_COOKIE ||
+  `_gcl_au=1.1.124190221.1790566594; _ga=GA1.1.843681729.1790566594; cf_clearance=.CkAbXOzmS0MiII1IxKJUV_1tTHQ0VkRASIoDbsUW0M-1790566595-1.2.1.1-PNqJGYzbyJsL.EmwSbFkQN6oU2n3RCPctVbmmM0qZPIDMJy58c.49C8hKOUDq7hgEBO24vj1PgIJ2iHWw8IOuj.p8pVpJyj0Y7.H0_cx7tXYzU0P7Uk5NhiL22P_AxkRYueHYK1NkW9jPGehHJ21kaQo7Pc8IzfyH.b5AdsXK9bH7v0lz3aUDJYBu5QISaVve6OH9HnU82cPeBxT1OwPK2LLCa0XDGE19zZvnmGfOu8tVPB1Mme.ZumjbHm8JMxseTLx8T1FdP2jTceoTQqro3.PgTHpZX3OYNcfpKO8c8DaxaadgqB2579IMJc9jqtmPRqg3jOLNwKX3UFkHnpTwnV0HQkrGB0GmdfTjgrYVAI; wordpress_test_cookie=WP%20Cookie%20check; wordpress_logged_in_65affc8df1b074206d0540bb7c0f54de=liorabeautyandwear%40gmail.com%7C1790739419%7CMGQCfhE7eHVqz5SgEAS3PL6lhS6dxrQ7riBUNO1dZLJ%7C48ad693648f7f263cda3b2b25915e7b601b5c4e5da69ebf3121a23f13da53d03; wfwaf-authcookie-1c7ab08f031298fbc2c588336c15d99f=104283%7Cother%7Cread%7C26dfb1365261d9837e23d33f12b82cd5e93ddc0ff295d7eb5d3fafc1a022e57f; _ga_4KG7WNH0Z4=GS2.1.s1790566594$o1$g1$t1790566734$j60$l0$h0; g_state={"i_l":0,"i_ll":1790567211196,"i_e":{"enable_itp_optimization":24},"i_et":1790567211196,"i_b":"CHlmsTL303yTuw7F4OwFnC8iC2ICNa8odcLd+LDxebo"}`;
 
-const TOTAL_PAGES = 150;
-const CONCURRENCY = 3;
+const TOTAL_PAGES = 120;
+const CONCURRENCY = 4;
+const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36';
 
 function parseCookies(str, domain = '.ogerio.com') {
   return str.split(';').map(part => {
@@ -51,7 +54,7 @@ function normalizeTitle(t) {
 }
 
 async function setupPage(page, cookies) {
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36');
+  await page.setUserAgent(USER_AGENT);
   await page.setCookie(...cookies);
   await page.setRequestInterception(true);
   page.on('request', (req) => {
@@ -66,7 +69,8 @@ async function setupPage(page, cookies) {
 async function main() {
   console.log('====================================================');
   console.log('💰 Syncing Real Wholesale Buying Prices from Ogerio');
-  console.log('====================================================');
+  console.log('   Account: liorabeautyandwear@gmail.com');
+  console.log('====================================================\n');
 
   console.log('Connecting to MongoDB...');
   await m.connect(MONGO_URI);
@@ -102,21 +106,26 @@ async function main() {
 
   const wholesaleDataMap = new Map(); // title -> wholesalePrice
   let completedPages = 0;
+  let reachedEnd = false;
   const startTime = Date.now();
 
   async function worker(tabIndex) {
     const p = pages[tabIndex];
-    while (queue.length > 0) {
+    while (queue.length > 0 && !reachedEnd) {
       const pageNum = queue.shift();
-      const pageUrl = `https://www.ogerio.com/shopbd/page/${pageNum}/`;
+      if (!pageNum) break;
 
+      const pageUrl = `https://www.ogerio.com/shopbd/page/${pageNum}/`;
       let retries = 2;
       let success = false;
 
-      while (retries >= 0 && !success) {
+      while (retries >= 0 && !success && !reachedEnd) {
         try {
           const res = await p.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 35000 });
           if (res && res.status() === 404) {
+            console.log(`[Worker ${tabIndex + 1}] Reached end of shop at Page ${pageNum} (404). Stopping queue.`);
+            reachedEnd = true;
+            queue.length = 0;
             success = true;
             break;
           }
@@ -146,8 +155,8 @@ async function main() {
           }
 
           completedPages++;
-          if (completedPages % 10 === 0 || completedPages === TOTAL_PAGES) {
-            console.log(`[Worker ${tabIndex + 1}] Page ${pageNum}/${TOTAL_PAGES} | Scraped: ${pageWholesaleCount} prices | Total Wholesale Collected: ${wholesaleDataMap.size}`);
+          if (completedPages % 5 === 0 || queue.length === 0) {
+            console.log(`[Worker ${tabIndex + 1}] Page ${pageNum} done | Scraped: ${pageWholesaleCount} prices | Total Wholesale Collected: ${wholesaleDataMap.size}`);
           }
 
           success = true;
@@ -163,7 +172,7 @@ async function main() {
     }
   }
 
-  console.log(`Starting crawl of pages 1 to ${TOTAL_PAGES}...`);
+  console.log(`Starting crawl of shopbd pages (up to ${TOTAL_PAGES})...`);
   await Promise.all(pages.map((_, i) => worker(i)));
   await browser.close();
 
@@ -172,28 +181,59 @@ async function main() {
   console.log(`Total unique wholesale prices collected: ${wholesaleDataMap.size}`);
   console.log('====================================================\n');
 
-  console.log('Applying wholesale buying prices to LIORA Database...');
+  // Save backup of scraped wholesale data
+  const dumpPath = path.resolve(process.cwd(), 'scripts', 'scraped_wholesale_prices.json');
+  const dumpObj = Object.fromEntries(wholesaleDataMap);
+  fs.writeFileSync(dumpPath, JSON.stringify(dumpObj, null, 2), 'utf8');
+  console.log(`💾 Saved local backup of wholesale prices to: scripts/scraped_wholesale_prices.json\n`);
 
-  let updatedProducts = 0;
-  let updatedBatches = 0;
+  console.log('Loading all products from LIORA database into memory for lightning-fast matching...');
+  const allDbProducts = await ProductCol.find({}, { projection: { _id: 1, name: 1, purchasePrice: 1, wholesalePrice: 1 } }).toArray();
+  console.log(`Loaded ${allDbProducts.length} products from database.\n`);
+
+  // Build high-speed lookup maps
+  const exactMap = new Map();
+  const lowerMap = new Map();
+  const normMap = new Map();
+
+  for (const p of allDbProducts) {
+    if (!p.name) continue;
+    exactMap.set(p.name, p);
+    lowerMap.set(p.name.toLowerCase(), p);
+    normMap.set(normalizeTitle(p.name), p);
+  }
+
+  console.log('Matching scraped wholesale prices with LIORA database products...');
+
+  const productUpdates = [];
+  const matchedProductIds = new Map(); // prodId -> wholesalePrice
   let notFoundInDB = 0;
 
   for (const [title, wholesalePrice] of wholesaleDataMap.entries()) {
     // 1. Exact match
-    let prod = await ProductCol.findOne({ name: title });
+    let prod = exactMap.get(title);
 
-    // 2. Case-insensitive exact regex
+    // 2. Case-insensitive
     if (!prod) {
-      const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      prod = await ProductCol.findOne({ name: { $regex: new RegExp(`^${escaped}$`, 'i') } });
+      prod = lowerMap.get(title.toLowerCase());
     }
 
-    // 3. Normalized word matching
+    // 3. Normalized title
+    if (!prod) {
+      prod = normMap.get(normalizeTitle(title));
+    }
+
+    // 4. Word-prefix matching
     if (!prod) {
       const norm = normalizeTitle(title);
-      const words = norm.split(' ').slice(0, 4).filter(Boolean).join('.*');
-      if (words && words.length > 5) {
-        prod = await ProductCol.findOne({ name: { $regex: new RegExp(words, 'i') } });
+      const first4 = norm.split(' ').slice(0, 4).filter(Boolean).join(' ');
+      if (first4.length > 8) {
+        for (const [dbNorm, dbP] of normMap.entries()) {
+          if (dbNorm.startsWith(first4) || dbNorm.includes(first4)) {
+            prod = dbP;
+            break;
+          }
+        }
       }
     }
 
@@ -202,46 +242,72 @@ async function main() {
       continue;
     }
 
-    // Update Product purchasePrice
-    await ProductCol.updateOne(
-      { _id: prod._id },
-      {
-        $set: {
-          purchasePrice: wholesalePrice,
-          updatedAt: new Date()
+    matchedProductIds.set(prod._id.toString(), wholesalePrice);
+
+    productUpdates.push({
+      updateOne: {
+        filter: { _id: prod._id },
+        update: {
+          $set: {
+            purchasePrice: wholesalePrice,
+            wholesalePrice: wholesalePrice,
+            updatedAt: new Date()
+          }
         }
       }
-    );
-    updatedProducts++;
-
-    // Update purchase batches unitCost for this product
-    const batchRes = await BatchCol.updateMany(
-      { product: prod._id },
-      {
-        $set: {
-          unitCost: wholesalePrice,
-          updatedAt: new Date()
-        }
-      }
-    );
-    updatedBatches += batchRes.modifiedCount;
-
-    if (updatedProducts % 100 === 0) {
-      console.log(`Updated ${updatedProducts} products with wholesale purchasePrice...`);
-    }
+    });
   }
+
+  console.log(`Matched ${productUpdates.length} products! (Unmatched Ogerio items: ${notFoundInDB})`);
+  console.log('Writing wholesale price updates to MongoDB in bulk...');
+
+  let updatedProducts = 0;
+  for (let i = 0; i < productUpdates.length; i += 500) {
+    const chunk = productUpdates.slice(i, i + 500);
+    const res = await ProductCol.bulkWrite(chunk);
+    updatedProducts += res.modifiedCount;
+  }
+
+  console.log(`✅ Updated ${updatedProducts} products in 'products' collection.`);
+
+  // Update Purchase Batches
+  console.log('\nUpdating Purchase Batches unitCost...');
+  const batchUpdates = [];
+  for (const [prodIdStr, wholesalePrice] of matchedProductIds.entries()) {
+    batchUpdates.push({
+      updateMany: {
+        filter: { product: new m.Types.ObjectId(prodIdStr) },
+        update: {
+          $set: {
+            unitCost: wholesalePrice,
+            updatedAt: new Date()
+          }
+        }
+      }
+    });
+  }
+
+  let updatedBatches = 0;
+  for (let i = 0; i < batchUpdates.length; i += 500) {
+    const chunk = batchUpdates.slice(i, i + 500);
+    const res = await BatchCol.bulkWrite(chunk);
+    updatedBatches += res.modifiedCount;
+  }
+
+  console.log(`✅ Updated ${updatedBatches} purchase batches.`);
 
   const totalTime = Math.round((Date.now() - startTime) / 1000);
   console.log('\n====================================================');
-  console.log('✅ WHOLESALE BUYING PRICES SYNC FINISHED!');
+  console.log('🎉 WHOLESALE BUYING PRICES SYNC FINISHED SUCCESSFULLY!');
   console.log('====================================================');
   console.log(`⏱️ Total Time: ${totalTime}s`);
-  console.log(`🔍 Wholesale Prices Found on Ogerio: ${wholesaleDataMap.size}`);
-  console.log(`📦 Products Updated in LIORA DB: ${updatedProducts}`);
-  console.log(`📊 Purchase Batches Updated: ${updatedBatches}`);
-  console.log(`⚠️ Not matched in DB: ${notFoundInDB}`);
+  console.log(`🔍 Wholesale Prices Scraped from Ogerio: ${wholesaleDataMap.size}`);
+  console.log(`📦 Matched Products: ${productUpdates.length}`);
+  console.log(`💾 Products Modified in LIORA DB: ${updatedProducts}`);
+  console.log(`📊 Purchase Batches Modified: ${updatedBatches}`);
   console.log('====================================================\n');
 
+  await m.disconnect();
   process.exit(0);
 }
 
