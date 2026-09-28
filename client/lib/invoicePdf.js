@@ -170,9 +170,16 @@ export async function downloadInvoicePdf(order) {
   items.forEach((item, index) => {
     const isEven = index % 2 === 0;
     const name = item.productName || item.name || "Product Item";
-    const itemLines = doc.splitTextToSize(name, 92);
+    const itemLines = doc.splitTextToSize(name, 90);
     const lineCount = Array.isArray(itemLines) ? itemLines.length : 1;
-    const rowHeight = lineCount > 1 ? Math.max(8, 4.5 + lineCount * 3.8) : 8;
+
+    const price = Number(item.price) || 0;
+    const origPrice = Number(item.originalPrice) || 0;
+    const hasDiscount = origPrice > price;
+
+    const rowHeight = hasDiscount || lineCount > 1
+      ? Math.max(9.5, 4.5 + lineCount * 3.8)
+      : 8;
 
     if (isEven) {
       doc.setFillColor(253, 253, 254);
@@ -180,19 +187,48 @@ export async function downloadInvoicePdf(order) {
     }
 
     doc.setTextColor(...darkNavy);
-    doc.text(String(index + 1), 18, tableY + 5);
+    const textBaseY = tableY + (hasDiscount ? 5.5 : 5);
+    doc.text(String(index + 1), 18, textBaseY);
 
     // Full product name without truncation
-    doc.text(itemLines, 32, tableY + 5);
+    doc.text(itemLines, 32, textBaseY);
 
     const qty = Number(item.quantity) || 1;
-    doc.text(String(qty), 130, tableY + 5, { align: "center" });
+    doc.text(String(qty), 130, textBaseY, { align: "center" });
 
-    const price = Number(item.price) || 0;
-    doc.text(`${price}`, 160, tableY + 5, { align: "right" });
+    // Price Column: Strikethrough regular price + bold offer price
+    const priceX = 160;
+    if (hasDiscount) {
+      // Strikethrough regular MRP
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.8);
+      doc.setTextColor(148, 163, 184); // Slate-400
+      const origText = `Tk ${origPrice.toLocaleString()}`;
+      const origWidth = doc.getTextWidth(origText);
+      const origY = tableY + 3.8;
+      doc.text(origText, priceX, origY, { align: "right" });
+      doc.setDrawColor(225, 29, 72); // Rose strike line
+      doc.setLineWidth(0.25);
+      doc.line(priceX - origWidth, origY - 0.7, priceX, origY - 0.7);
 
+      // Offer price in bold
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...darkNavy);
+      doc.text(`Tk ${price.toLocaleString()}`, priceX, tableY + 7.6, { align: "right" });
+    } else {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...darkNavy);
+      doc.text(`Tk ${price.toLocaleString()}`, priceX, textBaseY, { align: "right" });
+    }
+
+    // Row total
     const rowTotal = price * qty;
-    doc.text(`${rowTotal}`, 191, tableY + 5, { align: "right" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...darkNavy);
+    doc.text(`Tk ${rowTotal.toLocaleString()}`, 191, textBaseY, { align: "right" });
 
     doc.setDrawColor(...borderLine);
     doc.setLineWidth(0.2);
@@ -201,39 +237,72 @@ export async function downloadInvoicePdf(order) {
     tableY += rowHeight;
   });
 
+  // Calculate Total Market Value (MRP) and Savings
+  let totalMrp = 0;
+  items.forEach((item) => {
+    const qty = Number(item.quantity) || 1;
+    const pOrig = Number(item.originalPrice) || Number(item.price) || 0;
+    totalMrp += pOrig * qty;
+  });
+  if (totalMrp < subtotal) totalMrp = subtotal;
+
+  const productSavings = Math.max(0, totalMrp - subtotal);
+  const orderDiscount = discount > 0 ? discount : 0;
+  const totalSaved = productSavings + orderDiscount;
+  const savedPercent = totalMrp > 0 ? Math.round((totalSaved / (totalMrp + deliveryCharge)) * 100) : 0;
+
   // 6. Summary Block (Subtotal, Delivery, Discount, Total)
-  const summaryStartY = tableY + 5;
-  const summaryX = 120;
+  const summaryStartY = tableY + 4;
+  const summaryX = 114;
   let currentSummaryY = summaryStartY;
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...textMuted);
-  doc.text("Subtotal:", summaryX, currentSummaryY + 5);
-  doc.setTextColor(...darkNavy);
-  doc.text(`Tk ${subtotal.toLocaleString()}`, 191, currentSummaryY + 5, { align: "right" });
+  // If there are product savings, display Regular MRP vs Instant Discount
+  if (productSavings > 0) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.2);
+    doc.setTextColor(...textMuted);
+    doc.text("Regular Market Value (MRP):", summaryX, currentSummaryY + 4.5);
+    doc.setTextColor(...darkNavy);
+    doc.text(`Tk ${totalMrp.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
+    currentSummaryY += 5.2;
 
-  currentSummaryY += 6;
-  doc.setTextColor(...textMuted);
-  doc.text("Delivery Charge:", summaryX, currentSummaryY + 5);
-  doc.setTextColor(...darkNavy);
-  doc.text(`Tk ${deliveryCharge.toLocaleString()}`, 191, currentSummaryY + 5, { align: "right" });
-
-  if (discount > 0) {
-    currentSummaryY += 6;
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(22, 163, 74); // Vibrant Emerald Green #16a34a
-    doc.text("Special Discount:", summaryX, currentSummaryY + 5);
-    doc.text(`- Tk ${discount.toLocaleString()}`, 191, currentSummaryY + 5, { align: "right" });
+    doc.setFontSize(8.2);
+    doc.setTextColor(22, 163, 74); // Emerald Green
+    doc.text("Instant Offer Discount:", summaryX, currentSummaryY + 4.5);
+    doc.text(`- Tk ${productSavings.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
+    currentSummaryY += 5.2;
   }
 
-  currentSummaryY += 7;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...textMuted);
+  doc.text("Subtotal:", summaryX, currentSummaryY + 4.5);
+  doc.setTextColor(...darkNavy);
+  doc.text(`Tk ${subtotal.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
+  currentSummaryY += 5.5;
+
+  doc.setTextColor(...textMuted);
+  doc.text("Delivery Charge:", summaryX, currentSummaryY + 4.5);
+  doc.setTextColor(...darkNavy);
+  doc.text(`Tk ${deliveryCharge.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
+  currentSummaryY += 5.5;
+
+  if (orderDiscount > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(22, 163, 74); // Vibrant Emerald Green #16a34a
+    doc.text("Special Voucher / Discount:", summaryX, currentSummaryY + 4.5);
+    doc.text(`- Tk ${orderDiscount.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
+    currentSummaryY += 5.5;
+  }
+
+  currentSummaryY += 1.5;
   // Total Highlight Box
   doc.setFillColor(255, 241, 242); // Rose-50
-  doc.roundedRect(summaryX - 4, currentSummaryY, 80, 10, 2, 2, "F");
+  doc.roundedRect(summaryX - 4, currentSummaryY, 82, 9.5, 2, 2, "F");
   doc.setDrawColor(...primaryColor);
   doc.setLineWidth(0.5);
-  doc.roundedRect(summaryX - 4, currentSummaryY, 80, 10, 2, 2, "D");
+  doc.roundedRect(summaryX - 4, currentSummaryY, 82, 9.5, 2, 2, "D");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10.5);
@@ -241,33 +310,63 @@ export async function downloadInvoicePdf(order) {
   doc.text("Total Payable:", summaryX, currentSummaryY + 6.5);
   doc.text(`Tk ${total.toLocaleString()}`, 191, currentSummaryY + 6.5, { align: "right" });
 
-  if (discount > 0) {
-    currentSummaryY += 12;
-    // Customer Happiness Badge: "You Saved Tk 50 on this order!"
+  // Customer Happiness Badge: "You Saved Tk X (Y%) on this order!"
+  if (totalSaved > 0) {
+    currentSummaryY += 11.5;
     doc.setFillColor(240, 253, 244); // Green-50
-    doc.roundedRect(summaryX - 4, currentSummaryY, 80, 7.5, 2, 2, "F");
+    doc.roundedRect(summaryX - 4, currentSummaryY, 82, 8, 2, 2, "F");
     doc.setDrawColor(34, 197, 94); // Green-500
     doc.setLineWidth(0.3);
-    doc.roundedRect(summaryX - 4, currentSummaryY, 80, 7.5, 2, 2, "D");
+    doc.roundedRect(summaryX - 4, currentSummaryY, 82, 8, 2, 2, "D");
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(22, 163, 74);
-    doc.text(`You Saved Tk ${discount.toLocaleString()} on this order!`, summaryX + 36, currentSummaryY + 5, { align: "center" });
+    doc.text(
+      `You Saved Tk ${totalSaved.toLocaleString()} (${savedPercent}%) on this order!`,
+      summaryX + 37,
+      currentSummaryY + 5.2,
+      { align: "center" }
+    );
   }
 
-  // 7. Policy & Note Box (Left side)
-  const termsY = summaryStartY + 2;
+  // 7. Policy & Trust Box (Left side)
+  const leftBoxY = summaryStartY + 1;
+
+  // 100% Authentic Product Guarantee Badge Box
+  doc.setFillColor(248, 250, 252); // Slate-50
+  doc.roundedRect(14, leftBoxY, 92, 15, 2, 2, "F");
+  doc.setDrawColor(226, 232, 240); // Slate-200
+  doc.setLineWidth(0.3);
+  doc.roundedRect(14, leftBoxY, 92, 15, 2, 2, "D");
+
+  // Emerald accent bar on left of guarantee card
+  doc.setFillColor(34, 197, 94); // Green-500
+  doc.roundedRect(14, leftBoxY, 3, 15, 1, 1, "F");
+
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
+  doc.setTextColor(15, 23, 42); // Dark Navy
+  doc.text("100% AUTHENTIC PRODUCT GUARANTEE", 20, leftBoxY + 5.5);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...textMuted);
+  doc.text("All skincare & cosmetics are 100% genuine & directly sourced.", 20, leftBoxY + 9.5);
+  doc.text("We guarantee uncompromised quality & freshness for every product.", 20, leftBoxY + 13);
+
+  // TERMS & CONDITIONS below the guarantee card
+  const termsY = leftBoxY + 19;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
   doc.setTextColor(...darkNavy);
   doc.text("TERMS & CONDITIONS:", 14, termsY);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.2);
   doc.setTextColor(...textMuted);
-  doc.text("• Please check product authenticity and condition in front of delivery rider.", 14, termsY + 5);
-  doc.text("• For any return or exchange, please notify us within 24 hours with unbroken seal.", 14, termsY + 9.5);
-  doc.text("• Track your live order progress anytime at liorabeautyandwear.com/order-tracking", 14, termsY + 14);
+  doc.text("• Please check product authenticity & condition in front of delivery rider.", 14, termsY + 4.5);
+  doc.text("• For any return or exchange, please notify us within 24 hours with intact seal.", 14, termsY + 8.5);
+  doc.text("• Track your live order progress anytime at liorabeautyandwear.com/order-tracking", 14, termsY + 12.5);
 
   // 8. Footer Bar
   const footerY = 280;
