@@ -220,7 +220,7 @@ export async function POST(req) {
           subtotal,
           totalCost,
           total: subtotal + deliveryCharge,
-          shippedBy: "Owner",
+          shippedBy: "Jisan",
           stockDeducted: true,
           orderNumber,
           serial,

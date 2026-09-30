@@ -717,7 +717,8 @@ export default function AdminPage() {
   let partnerOrderCount = 0;
 
   timeFilteredOrders.forEach((order) => {
-    const seller = (order.shippedBy || "Owner").toLowerCase() === "partner" ? "Partner" : "Owner";
+    const rawShipper = (order.shippedBy || "").toLowerCase();
+    const seller = rawShipper === "arif" || rawShipper === "partner" ? "Arif" : "Jisan";
     const orderDiscount = Number(order.discount) || 0;
     let ordRev = 0;
     let ordCost = 0;
@@ -733,7 +734,7 @@ export default function AdminPage() {
     const netOrdRev = Math.max(0, ordRev - orderDiscount);
     const netOrdProfit = netOrdRev - ordCost;
 
-    if (seller === "Owner") {
+    if (seller === "Jisan") {
       ownerRevenue += netOrdRev;
       ownerCost += ordCost;
       ownerProfit += netOrdProfit;
@@ -749,7 +750,8 @@ export default function AdminPage() {
   // 3. Filter orders based on reportSellerFilter
   const filteredOrders = timeFilteredOrders.filter((order) => {
     if (reportSellerFilter === "all") return true;
-    const seller = (order.shippedBy || "Owner").toLowerCase() === "partner" ? "Partner" : "Owner";
+    const rawShipper = (order.shippedBy || "").toLowerCase();
+    const seller = rawShipper === "arif" || rawShipper === "partner" ? "Arif" : "Jisan";
     return seller === reportSellerFilter;
   });
 
@@ -775,7 +777,8 @@ export default function AdminPage() {
       totalCost += rowCost;
       totalProfit += rowProfit;
 
-      const seller = (order.shippedBy || "Owner").toLowerCase() === "partner" ? "Partner" : "Owner";
+      const rawShipper = (order.shippedBy || "").toLowerCase();
+      const seller = rawShipper === "arif" || rawShipper === "partner" ? "Arif" : "Jisan";
 
       soldItems.push({
         date: new Date(order.createdAt).toLocaleDateString(),
@@ -2158,9 +2161,9 @@ export default function AdminPage() {
                     onChange={(e) => setReportSellerFilter(e.target.value)}
                     style={{ flex: 1, minWidth: "160px", padding: "8px 10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontWeight: "800", background: "#f8fafc", cursor: "pointer", color: "#0f172a", fontSize: "12px" }}
                   >
-                    <option value="all">👥 সব বিক্রেতা (All: Owner & Partner)</option>
-                    <option value="Owner">👑 শুধু আমি (Owner Sales)</option>
-                    <option value="Partner">🤝 শুধু পার্টনার (Partner Sales)</option>
+                    <option value="all">👥 সব বিক্রেতা (All: Jisan & Arif)</option>
+                    <option value="Jisan">👑 শুধু জিসান (Jisan Sales & Cash)</option>
+                    <option value="Arif">🤝 শুধু আরিফ (Arif Sales & Cash)</option>
                   </select>
 
                   <button
@@ -2178,7 +2181,7 @@ export default function AdminPage() {
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <span style={{ fontSize: "15px" }}>👑</span>
-                      <span style={{ fontSize: "13px", fontWeight: "800", color: "#0369a1" }}>Owner (আমার কাছে টাকা)</span>
+                      <span style={{ fontSize: "13px", fontWeight: "800", color: "#0369a1" }}>জিসান (Jisan - ক্যাশ টাকা)</span>
                       <span style={{ fontSize: "10px", background: "#e0f2fe", color: "#0284c7", fontWeight: "800", padding: "1px 6px", borderRadius: "8px" }}>{ownerOrderCount} অর্ডার</span>
                     </div>
                     <div style={{ fontSize: "11px", color: "#64748b", marginTop: "3px" }}>
@@ -2186,7 +2189,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: "10px", color: "#64748b", fontWeight: "700" }}>মোট কালেকশন</div>
+                    <div style={{ fontSize: "10px", color: "#64748b", fontWeight: "700" }}>ক্যাশ কালেকশন</div>
                     <div style={{ fontSize: "16px", fontWeight: "900", color: "#0f172a" }}>৳{ownerRevenue}</div>
                   </div>
                 </div>
@@ -2195,7 +2198,7 @@ export default function AdminPage() {
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <span style={{ fontSize: "15px" }}>🤝</span>
-                      <span style={{ fontSize: "13px", fontWeight: "800", color: "#7e22ce" }}>Partner (পার্টনারের কাছে টাকা)</span>
+                      <span style={{ fontSize: "13px", fontWeight: "800", color: "#7e22ce" }}>আরিফ (Arif - ক্যাশ টাকা)</span>
                       <span style={{ fontSize: "10px", background: "#f3e8ff", color: "#9333ea", fontWeight: "800", padding: "1px 6px", borderRadius: "8px" }}>{partnerOrderCount} অর্ডার</span>
                     </div>
                     <div style={{ fontSize: "11px", color: "#64748b", marginTop: "3px" }}>
@@ -2203,7 +2206,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: "10px", color: "#64748b", fontWeight: "700" }}>মোট কালেকশন</div>
+                    <div style={{ fontSize: "10px", color: "#64748b", fontWeight: "700" }}>ক্যাশ কালেকশন</div>
                     <div style={{ fontSize: "16px", fontWeight: "900", color: "#0f172a" }}>৳{partnerRevenue}</div>
                   </div>
                 </div>

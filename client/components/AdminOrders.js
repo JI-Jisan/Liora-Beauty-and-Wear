@@ -623,27 +623,8 @@ export default function AdminOrders({ onOrderUpdated }) {
     }
   };
 
-  const knownShippers = useMemo(() => {
-    const set = new Set(["Owner", "Partner"]);
-    orders.forEach((o) => {
-      if (o.shippedBy && typeof o.shippedBy === "string" && o.shippedBy.trim()) {
-        set.add(o.shippedBy.trim());
-      }
-    });
-    return Array.from(set);
-  }, [orders]);
-
   return (
     <div className="jt-admin-orders-container">
-      <datalist id="shippers-list">
-        <option value="Owner">আমি (Owner)</option>
-        <option value="Partner">পার্টনার (Partner)</option>
-        {knownShippers
-          .filter((s) => s !== "Owner" && s !== "Partner")
-          .map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-      </datalist>
       {/* Header Bar with Search, Sound Toggle, Refresh & Filter Tabs */}
       <div className="jt-orders-header-bar">
         <div className="jt-orders-search" style={{ marginBottom: "10px", display: "flex", gap: "8px", alignItems: "center" }}>
@@ -1077,39 +1058,40 @@ export default function AdminOrders({ onOrderUpdated }) {
                     </select>
                   </div>
 
-                  <div className="jt-status-select-wrap" style={{ minWidth: "160px" }}>
+                  <div className="jt-status-select-wrap">
                     <label>কে পাঠাচ্ছে (হিসাব):</label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <input
-                        type="text"
-                        list="shippers-list"
-                        key={`${order._id}-${order.shippedBy}`}
-                        defaultValue={order.shippedBy || "Owner"}
-                        placeholder="প্রেরকের নাম লিখুন..."
-                        disabled={updatingId === order._id}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        onBlur={(e) => {
-                          const val = e.target.value.trim();
-                          if (val && val !== (order.shippedBy || "Owner")) {
-                            updateShippedBy(order._id, val);
-                          }
-                        }}
-                        style={{
-                          padding: "6px 10px",
-                          borderRadius: "6px",
-                          border: "1px solid #cbd5e1",
-                          fontSize: "12px",
-                          fontWeight: "700",
-                          color: order.shippedBy === "Partner" ? "#7c3aed" : "#0f172a",
-                          background: "#ffffff",
-                          width: "135px",
-                        }}
-                      />
-                    </div>
+                    <select
+                      value={
+                        (order.shippedBy || "").toLowerCase() === "arif" ||
+                        (order.shippedBy || "").toLowerCase() === "partner"
+                          ? "Arif"
+                          : "Jisan"
+                      }
+                      disabled={updatingId === order._id}
+                      onChange={(e) => updateShippedBy(order._id, e.target.value)}
+                      style={{
+                        padding: "7px 10px",
+                        borderRadius: "8px",
+                        border: "1px solid",
+                        borderColor:
+                          (order.shippedBy || "").toLowerCase() === "arif" ||
+                          (order.shippedBy || "").toLowerCase() === "partner"
+                            ? "#8b5cf6"
+                            : "#0284c7",
+                        fontSize: "12px",
+                        fontWeight: "700",
+                        color:
+                          (order.shippedBy || "").toLowerCase() === "arif" ||
+                          (order.shippedBy || "").toLowerCase() === "partner"
+                            ? "#7c3aed"
+                            : "#0369a1",
+                        background: "#ffffff",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <option value="Jisan">👑 জিসান (Jisan)</option>
+                      <option value="Arif">🤝 আরিফ (Arif)</option>
+                    </select>
                   </div>
 
                   {/* ✅ One-Click Quick Confirm Button */}
