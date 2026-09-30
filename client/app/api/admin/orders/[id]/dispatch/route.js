@@ -17,11 +17,9 @@ export async function PATCH(req, { params }) {
   const order = await Order.findById(id);
   if (!order) return NextResponse.json({ message: "অর্ডার পাওয়া যায়নি" }, { status: 404 });
 
-  try {
-    await reassignOrderOwner(order, shippedBy, Product);
-  } catch (e) {
-    return NextResponse.json({ message: e.message }, { status: 409 });
-  }
+  const assignedShipper = String(shippedBy || "").trim() || "Owner";
+  order.shippedBy = assignedShipper;
+  await order.save();
 
   // পার্টনারের মাল গেলে ledger entry
   if (shippedBy && shippedBy !== "Owner") {

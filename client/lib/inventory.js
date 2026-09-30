@@ -1,15 +1,14 @@
 import { PurchaseBatch, Product } from "@/lib/models";
 
 /** একটা প্রোডাক্টের মোট available (সব batch এর remaining, fallback to product.stockQuantity) */
-export async function getAvailable(productId, ownerName = null) {
+export async function getAvailable(productId) {
   const match = { product: productId, remaining: { $gt: 0 } };
-  if (ownerName) match.locationName = ownerName;
   const rows = await PurchaseBatch.aggregate([
     { $match: match },
     { $group: { _id: null, total: { $sum: "$remaining" } } },
   ]);
   const batchTotal = rows[0]?.total || 0;
-  if (batchTotal > 0 || ownerName) return batchTotal;
+  if (batchTotal > 0) return batchTotal;
 
   // Fallback: যদি ব্যাচে কোনো এন্ট্রি না থাকে তবে সরাসরি Product.stockQuantity দেখো
   const prod = await Product.findById(productId).select("stockQuantity").lean();
@@ -92,14 +91,13 @@ export async function ensureProductBatchStock(productId, targetStock, unitCost =
  */
 export async function allocateFIFO(productId, needQty, ownerName = null) {
   const filter = { product: productId, remaining: { $gt: 0 } };
-  if (ownerName) filter.locationName = ownerName;
 
   let batches = await PurchaseBatch.find(filter).sort({ purchaseDate: 1, _id: 1 });
   let totalInBatches = batches.reduce((s, b) => s + (b.remaining || 0), 0);
 
   // ⭐ SAFETY AUTO-RECONCILIATION:
   // যদি ব্যাচে পর্যাপ্ত স্টক না থাকে কিন্তু Product ডকুমেন্টে স্টক থাকে:
-  if (totalInBatches < needQty && !ownerName) {
+  if (totalInBatches < needQty) {
     const prod = await Product.findById(productId);
     if (prod && (prod.stockQuantity || 0) >= needQty) {
       const neededExtra = Math.max(needQty - totalInBatches, (prod.stockQuantity || 0) - totalInBatches);
@@ -180,37 +178,11 @@ export async function releaseOrder(order, ProductModel = Product) {
 }
 
 /**
- * অর্ডারের stock এক ব্যক্তির থেকে আরেকজনের stock এ সরানো।
- * অ্যাডমিন "কে পাঠাচ্ছে" বদলালে এটা চলবে।
+ * অর্ডারের "কে পাঠাচ্ছে" ফিল্ড আপডেট করা (হিসাব রাখার জন্য)।
+ * আলাদা owner/partner স্টক বিভাজন ছাড়াই মেইন স্টক থেকে কাজ সম্পন্ন হয়।
  */
 export async function reassignOrderOwner(order, newOwner, ProductModel = Product) {
-  for (const item of order.items) {
-    const current = item.allocations || [];
-    const alreadyRight = current.length > 0 && current.every((a) => a.ownerName === newOwner);
-    if (alreadyRight) continue;
-
-    // আগে ফিরিয়ে দাও
-    await releaseAllocations(current);
-
-    // নতুন owner এর stock থেকে নাও
-    const pId = item.productId || item.product;
-    const res = await allocateFIFO(pId, item.quantity, newOwner);
-    if (!res.ok) {
-      // ব্যর্থ হলে আগের অবস্থায় ফিরে যাও
-      const back = await allocateFIFO(pId, item.quantity, null);
-      item.allocations = back.ok ? back.allocations : [];
-      await order.save();
-      throw new Error(
-        `${item.productName || item.name || "প্রোডাক্ট"} — ${newOwner} এর কাছে পর্যাপ্ত stock নেই (আছে ${res.available} পিস)`
-      );
-    }
-    item.allocations = res.allocations;
-    item.costAtSale = res.avgCost;
-    await syncProductStock(pId, ProductModel);
-  }
-
-  order.totalCost = order.items.reduce((s, i) => s + (i.costAtSale || 0) * i.quantity, 0);
-  order.shippedBy = newOwner;
+  order.shippedBy = String(newOwner || "Owner").trim();
   await order.save();
   return order;
 }
