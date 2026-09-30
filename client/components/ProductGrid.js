@@ -8,6 +8,7 @@ import ProductWatermark from "./ProductWatermark";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { cld } from "@/lib/cloudinary";
 import { getDiscount, getSaved } from "@/lib/price";
+import { useCart } from "@/context/CartContext";
 
 function getPaginationItems(current, total) {
   if (total <= 7) {
@@ -47,6 +48,25 @@ function ProductGridContent({
   const router = useRouter();
   const gridRef = useRef(null);
   const searchParams = useSearchParams();
+  const cartContext = useCart();
+  const [addedId, setAddedId] = useState(null);
+
+  const handleAddToCart = (product, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setAddedId(product._id);
+    setTimeout(() => {
+      setAddedId((curr) => (curr === product._id ? null : curr));
+    }, 1500);
+
+    if (typeof onAddToCart === "function") {
+      onAddToCart(product);
+    } else if (cartContext && typeof cartContext.addToCart === "function") {
+      cartContext.addToCart(product);
+    }
+  };
   const urlPage = parseInt(searchParams ? searchParams.get("page") : null, 10) || 1;
   const urlSearchTerm = searchParams ? searchParams.get("search") || "" : "";
   const activeSearchTerm = propSearchTerm !== undefined ? propSearchTerm : urlSearchTerm;
@@ -331,15 +351,28 @@ function ProductGridContent({
 
                 <button
                   type="button"
-                  onClick={() => onAddToCart(product)}
+                  onClick={(e) => handleAddToCart(product, e)}
                   disabled={product.stockStatus === "Out of Stock"}
                   className={`jt-add-to-cart-btn ${
                     product.stockStatus === "Out of Stock" ? "disabled" : ""
                   }`}
-                  style={{ width: "100%", boxSizing: "border-box" }}
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    transition: "all 0.25s ease",
+                    ...(addedId === product._id
+                      ? {
+                          backgroundColor: "#10b981",
+                          borderColor: "#10b981",
+                          color: "#ffffff",
+                        }
+                      : {}),
+                  }}
                 >
                   {product.stockStatus === "Out of Stock"
                     ? "Out of Stock"
+                    : addedId === product._id
+                    ? "✓ Added to Cart!"
                     : "Add to Cart"}
                 </button>
               </div>
