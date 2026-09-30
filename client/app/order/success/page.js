@@ -97,6 +97,33 @@ function OrderSuccessContent() {
           {order?.note && <p style={{ margin: "2px 0", fontSize: "13px", color: "#475569" }}><strong>Note:</strong> {order.note}</p>}
         </div>
 
+        {/* Verification Alert if Multiple Pending Orders */}
+        {(order?.isFlagged || (order?.pendingOrdersCount && order.pendingOrdersCount > 0)) && (
+          <div
+            style={{
+              background: "#fffbeb",
+              border: "1px solid #fde68a",
+              borderRadius: "12px",
+              padding: "14px 16px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "12px",
+              textAlign: "left",
+            }}
+          >
+            <span style={{ fontSize: "24px", lineHeight: "1" }}>📞</span>
+            <div>
+              <h4 style={{ margin: "0 0 4px", fontSize: "14px", color: "#92400e", fontWeight: "800" }}>
+                অর্ডার ভেরিফিকেশন ও নিশ্চিতকরণ নোটিশ
+              </h4>
+              <p style={{ margin: 0, fontSize: "13px", color: "#78350f", lineHeight: "1.5" }}>
+                আপনার পূর্বেও অর্ডার প্রসেসিং এ থাকায়, আমাদের প্রতিনিধি শীঘ্রই ফোনে যোগাযোগ করে এই অর্ডারটি নিশ্চিত (Confirmed) করবেন। আপনি চাইলে সরাসরি আমাদের হটলাইনে কল করেও দ্রুত কনফার্ম করে নিতে পারেন।
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Items Table */}
         <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
           <thead>

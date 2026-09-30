@@ -41,6 +41,9 @@ const orderSchema = new mongoose.Schema(
     total: { type: Number, required: true, min: 0 },
 
     status: { type: String, enum: ORDER_STATUSES, default: "Pending", index: true },
+    isFlagged: { type: Boolean, default: false, index: true },
+    flagReason: { type: String, default: "" },
+    pendingOrdersCount: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }

@@ -83,19 +83,26 @@ export async function POST(req) {
       );
     }
 
-    // অতিরিক্ত abuse guard: একই নম্বর থেকে ২৪ ঘণ্টায় ৩টির বেশি pending/processing অর্ডার প্রতিরোধ
+    // অতিরিক্ত abuse guard: একই নম্বর থেকে ২৪ ঘণ্টায় পেন্ডিং/প্রসেসিং অর্ডার চেক
     const recentOrdersCount = await Order.countDocuments({
       phone,
       status: { $in: ["Pending", "Processing", "pending", "processing"] },
       createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
     });
 
-    if (recentOrdersCount >= 3) {
+    // চরম স্প্যাম বা রোবট প্রতিরোধ: যদি একই নম্বর থেকে ২৪ ঘণ্টায় ৮টির বেশি অর্ডার জমে থাকে, কেবল তখনই ব্লক হবে
+    if (recentOrdersCount >= 8) {
       return NextResponse.json(
-        { message: "আপনার একাধিক অর্ডার প্রসেসিং এ আছে। কনফার্ম করতে আমাদের কল করুন।" },
+        { message: "অতিরিক্ত পেন্ডিং অর্ডারের কারণে সাময়িক স্থগিত। আপনার আগের অর্ডারগুলো কনফার্ম করতে দয়া করে আমাদের হেল্পলাইনে সরাসরি কল করুন।" },
         { status: 429 }
       );
     }
+
+    // গ্রাহকের আগের অর্ডার পেন্ডিং থাকলে অর্ডারটি গ্রহণ হবে এবং সতর্কতামূলক ফ্ল্যাগ যুক্ত হবে যাতে অ্যাডমিন প্যানেলে অ্যালার্ট দেখতে পান
+    const isFlagged = recentOrdersCount >= 1;
+    const flagReason = isFlagged
+      ? `গ্রাহকের পূর্বের ${recentOrdersCount}টি অর্ডার পেন্ডিং/প্রসেসিং অবস্থায় আছে`
+      : "";
 
     if (address.length < 8)
       return NextResponse.json({ message: "সম্পূর্ণ ঠিকানা লিখুন" }, { status: 400 });
@@ -220,6 +227,9 @@ export async function POST(req) {
           accessToken: crypto.randomBytes(12).toString("hex"),
           firebaseUid,
           status: "Pending",
+          isFlagged,
+          flagReason,
+          pendingOrdersCount: recentOrdersCount,
         });
 
         if (firebaseUid) {
@@ -269,6 +279,8 @@ export async function POST(req) {
         total: order.total,
         subtotal: order.subtotal,
         deliveryCharge: order.deliveryCharge,
+        isFlagged: order.isFlagged,
+        pendingOrdersCount: order.pendingOrdersCount,
       },
       { status: 201 }
     );

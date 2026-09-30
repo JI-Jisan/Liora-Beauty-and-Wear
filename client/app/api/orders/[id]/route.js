@@ -160,7 +160,12 @@ export async function PUT(req, { params }) {
       order.stockRestored = false;
     }
 
-    if (status) order.status = status;
+    if (status) {
+      order.status = status;
+      if (status === "Confirmed" || status === "Shipped" || status === "Delivered") {
+        order.isFlagged = false;
+      }
+    }
 
     await order.save();
 

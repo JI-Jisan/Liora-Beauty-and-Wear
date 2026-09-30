@@ -1,11 +1,44 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
 import { downloadInvoicePdf } from "@/lib/invoicePdf";
 import QRCode from "qrcode";
 
 const STATUS_OPTIONS = ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"];
+
+function playNotificationChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, now); // D5
+    gain1.gain.setValueAtTime(0.2, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.3);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(880, now + 0.12); // A5
+    gain2.gain.setValueAtTime(0.25, now + 0.12);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.12);
+    osc2.stop(now + 0.55);
+  } catch (e) {
+    console.debug("Chime playback skipped:", e?.message);
+  }
+}
 
 export default function AdminOrders({ onOrderUpdated }) {
   const [orders, setOrders] = useState([]);
@@ -14,6 +47,32 @@ export default function AdminOrders({ onOrderUpdated }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
   const [message, setMessage] = useState("");
+
+  // Notification & Polling states
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [newOrderAlert, setNewOrderAlert] = useState(null);
+  const isFirstLoadRef = useRef(true);
+  const latestOrderIdRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("liora_admin_order_sound");
+      if (saved !== null) {
+        setSoundEnabled(saved === "true");
+      }
+    } catch {}
+  }, []);
+
+  const toggleSound = () => {
+    setSoundEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("liora_admin_order_sound", String(next));
+      } catch {}
+      if (next) playNotificationChime();
+      return next;
+    });
+  };
 
   // Edit Order Modal State
   const [editingOrder, setEditingOrder] = useState(null);
@@ -25,31 +84,57 @@ export default function AdminOrders({ onOrderUpdated }) {
   const [productSearchResults, setProductSearchResults] = useState([]);
   const [searchingProducts, setSearchingProducts] = useState(false);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const res = await fetch(`${API_BASE_URL}/api/orders`, {
         headers: getAuthHeaders(),
       });
       const data = await res.json();
+      let orderList = [];
       if (Array.isArray(data)) {
-        setOrders(data);
+        orderList = data;
       } else if (data && Array.isArray(data.orders)) {
-        setOrders(data.orders);
-      } else {
-        setOrders([]);
+        orderList = data.orders;
       }
+
+      if (orderList.length > 0) {
+        const topOrder = orderList[0];
+        if (!isFirstLoadRef.current && latestOrderIdRef.current && topOrder._id !== latestOrderIdRef.current) {
+          // New Order Arrived!
+          if (soundEnabled) {
+            playNotificationChime();
+          }
+          setNewOrderAlert({
+            orderNumber: topOrder.orderNumber || topOrder._id,
+            total: topOrder.total,
+            isFlagged: topOrder.isFlagged,
+          });
+          setTimeout(() => setNewOrderAlert(null), 9000);
+        }
+        latestOrderIdRef.current = topOrder._id;
+        isFirstLoadRef.current = false;
+      }
+
+      setOrders(orderList);
     } catch (error) {
       console.error("Failed to fetch orders:", error);
-      setOrders([]);
+      if (!isBackground) setOrders([]);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(false);
+
+    // 20 seconds background polling for live order updates
+    const timer = setInterval(() => {
+      fetchOrders(true);
+    }, 20000);
+
+    return () => clearInterval(timer);
+  }, [soundEnabled]);
 
   const updateStatus = async (id, status) => {
     try {
@@ -491,10 +576,23 @@ export default function AdminOrders({ onOrderUpdated }) {
     }
   };
 
+  const flaggedCount = useMemo(() => {
+    return orders.filter(
+      (o) =>
+        (o.isFlagged || (o.pendingOrdersCount && o.pendingOrdersCount > 0)) &&
+        o.status === "Pending"
+    ).length;
+  }, [orders]);
+
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const matchesStatus =
-        filterStatus === "All" || order.status === filterStatus;
+        filterStatus === "All"
+          ? true
+          : filterStatus === "Flagged"
+          ? (order.isFlagged || (order.pendingOrdersCount && order.pendingOrdersCount > 0)) &&
+            order.status === "Pending"
+          : order.status === filterStatus;
 
       const keyword = searchTerm.trim().toLowerCase();
       const matchesSearch =
@@ -527,22 +625,64 @@ export default function AdminOrders({ onOrderUpdated }) {
 
   return (
     <div className="jt-admin-orders-container">
-      {/* Header Bar with Search & Filter Tabs */}
+      {/* Header Bar with Search, Sound Toggle, Refresh & Filter Tabs */}
       <div className="jt-orders-header-bar">
-        <div className="jt-orders-search" style={{ marginBottom: "10px" }}>
+        <div className="jt-orders-search" style={{ marginBottom: "10px", display: "flex", gap: "8px", alignItems: "center" }}>
           <input
             type="text"
             placeholder="Search by name, phone, or order ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
-              width: "100%",
+              flex: 1,
               padding: "10px 12px",
               borderRadius: "8px",
               border: "1px solid #cbd5e1",
               fontSize: "14px",
             }}
           />
+          <button
+            type="button"
+            onClick={toggleSound}
+            title={soundEnabled ? "সাউন্ড চালু আছে (ক্লিক করে বন্ধ করুন)" : "সাউন্ড বন্ধ আছে (ক্লিক করে চালু করুন)"}
+            style={{
+              padding: "10px 14px",
+              borderRadius: "8px",
+              border: "1px solid #cbd5e1",
+              background: soundEnabled ? "#f0fdf4" : "#f8fafc",
+              color: soundEnabled ? "#166534" : "#64748b",
+              fontWeight: "700",
+              fontSize: "13px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {soundEnabled ? "🔊 Sound ON" : "🔇 Sound OFF"}
+          </button>
+          <button
+            type="button"
+            onClick={() => fetchOrders(false)}
+            title="নতুন অর্ডারের জন্য রিফ্রেশ করুন"
+            style={{
+              padding: "10px 14px",
+              borderRadius: "8px",
+              border: "1px solid #cbd5e1",
+              background: "#f8fafc",
+              color: "#334155",
+              fontWeight: "700",
+              fontSize: "13px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            🔄 Refresh
+          </button>
         </div>
 
         <div
@@ -594,8 +734,76 @@ export default function AdminOrders({ onOrderUpdated }) {
               </button>
             );
           })}
+          {flaggedCount > 0 && (
+            <button
+              type="button"
+              className={`jt-tab ${filterStatus === "Flagged" ? "active" : ""}`}
+              onClick={() => setFilterStatus("Flagged")}
+              style={{
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+                padding: "6px 14px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: "700",
+                cursor: "pointer",
+                background: filterStatus === "Flagged" ? "#dc2626" : "#fef2f2",
+                color: filterStatus === "Flagged" ? "#ffffff" : "#dc2626",
+                border: "1px solid #fecaca",
+              }}
+            >
+              ⚠️ Multiple Pending ({flaggedCount})
+            </button>
+          )}
         </div>
       </div>
+
+      {newOrderAlert && (
+        <div
+          style={{
+            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            color: "#ffffff",
+            padding: "12px 18px",
+            borderRadius: "10px",
+            marginBottom: "16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            boxShadow: "0 4px 14px rgba(16, 185, 129, 0.3)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "22px" }}>🔔</span>
+            <div>
+              <strong style={{ fontSize: "14px", display: "block" }}>
+                নতুন অর্ডার এসেছে! (#{newOrderAlert.orderNumber})
+              </strong>
+              <span style={{ fontSize: "12px", opacity: 0.95 }}>
+                সর্বমোট: ৳{newOrderAlert.total} {newOrderAlert.isFlagged ? " • ⚠️ একাধিক অর্ডার পেন্ডিং রয়েছে" : ""}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSearchTerm(String(newOrderAlert.orderNumber));
+              setNewOrderAlert(null);
+            }}
+            style={{
+              background: "#ffffff",
+              color: "#065f46",
+              border: "none",
+              padding: "6px 12px",
+              borderRadius: "6px",
+              fontWeight: "800",
+              fontSize: "12px",
+              cursor: "pointer",
+            }}
+          >
+            অর্ডারটি দেখুন
+          </button>
+        </div>
+      )}
 
       {message && <div className="jt-orders-toast">{message}</div>}
 
@@ -668,6 +876,56 @@ export default function AdminOrders({ onOrderUpdated }) {
                     {order.status}
                   </span>
                 </div>
+
+                {/* ⚠️ Warning Banner if Customer has Multiple Pending Orders */}
+                {(order.isFlagged || (order.pendingOrdersCount && order.pendingOrdersCount > 0)) && order.status === "Pending" && (
+                  <div
+                    style={{
+                      background: "#fff1f2",
+                      border: "1px solid #fecdd3",
+                      borderRadius: "8px",
+                      padding: "10px 12px",
+                      marginTop: "10px",
+                      marginBottom: "6px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      flexWrap: "wrap",
+                      gap: "8px",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "20px", lineHeight: "1" }}>⚠️</span>
+                      <div>
+                        <strong style={{ color: "#be123c", fontSize: "12px", display: "block" }}>
+                          সতর্কতা: এই নম্বরে পূর্বের {order.pendingOrdersCount || "একাধিক"}টি অর্ডার পেন্ডিং/প্রসেসিং আছে!
+                        </strong>
+                        <span style={{ color: "#9f1239", fontSize: "11px" }}>
+                          {order.flagReason || "গ্রাহককে কল করে নিশ্চিত হন এবং কোনো ডুপ্লিকেট অর্ডার থাকলে Cancelled করুন।"}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm(order.phone)}
+                      style={{
+                        background: "#e11d48",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "6px",
+                        padding: "5px 10px",
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      🔍 এই গ্রাহকের সব অর্ডার
+                    </button>
+                  </div>
+                )}
 
                 {/* Customer Details Grid */}
                 <div className="jt-admin-order-body">
@@ -815,6 +1073,31 @@ export default function AdminOrders({ onOrderUpdated }) {
                       <option value="Partner">পার্টনার (Partner)</option>
                     </select>
                   </div>
+
+                  {/* ✅ One-Click Quick Confirm Button */}
+                  {order.status === "Pending" && (
+                    <button
+                      type="button"
+                      disabled={updatingId === order._id}
+                      onClick={() => updateStatus(order._id, "Confirmed")}
+                      style={{
+                        background: "#16a34a",
+                        color: "#ffffff",
+                        border: "none",
+                        padding: "8px 14px",
+                        borderRadius: "6px",
+                        fontWeight: "700",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        fontSize: "12px",
+                      }}
+                      title="অর্ডারটি সরাসরি Confirmed করুন"
+                    >
+                      {updatingId === order._id ? "Updating..." : "✅ Confirm"}
+                    </button>
+                  )}
 
                   {/* ✏️ Edit Order / Invoice Button */}
                   <button

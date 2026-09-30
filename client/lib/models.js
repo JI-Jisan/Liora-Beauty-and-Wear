@@ -273,6 +273,9 @@ const OrderSchema = new mongoose.Schema(
       enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"],
       default: "Pending",
     },
+    isFlagged: { type: Boolean, default: false },
+    flagReason: { type: String, default: "" },
+    pendingOrdersCount: { type: Number, default: 0 },
     stockRestored: { type: Boolean, default: false },  // Cancelled এ স্টক ফেরতের জন্য
     isDeleted: { type: Boolean, default: false },      // soft delete
   },
@@ -282,6 +285,7 @@ const OrderSchema = new mongoose.Schema(
 OrderSchema.index({ createdAt: -1 });
 OrderSchema.index({ status: 1 });
 OrderSchema.index({ phone: 1 });
+OrderSchema.index({ isFlagged: 1 });
 
 export const Order =
   mongoose.models.Order || mongoose.model("Order", OrderSchema);
