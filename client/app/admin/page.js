@@ -11,6 +11,7 @@ import StatCard from "@/components/StatCard";
 import AdminStorefrontPOS from "@/components/admin/AdminStorefrontPOS";
 import AdminUserManager from "@/components/admin/AdminUserManager";
 import WholesaleCatalog from "@/components/admin/WholesaleCatalog";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -2669,7 +2670,9 @@ export default function AdminPage() {
           {/* Wholesale Rate Sheet Tab */}
           {activeTab === "wholesale" && (
             <div className="jt-admin-panel jt-admin-panel-wide admin-card">
-              <WholesaleCatalog products={products} categories={categories} />
+              <ErrorBoundary>
+                <WholesaleCatalog products={products} categories={categories} />
+              </ErrorBoundary>
             </div>
           )}
         </div>

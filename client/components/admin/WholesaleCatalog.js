@@ -49,11 +49,11 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       // Fallback: extract unique brands from products
       const bSet = new Map();
       products.forEach((p) => {
-        if (p.brand) {
-          const bName = typeof p.brand === "object" ? p.brand?.name : p.brand;
-          const bId = typeof p.brand === "object" ? p.brand?._id : p.brand;
-          if (bName && !bSet.has(bName)) {
-            bSet.set(bName, { _id: bId || bName, name: bName });
+        if (p?.brand) {
+          const bName = (p.brand && typeof p.brand === "object" ? p.brand.name : p.brand) || "";
+          const bId = (p.brand && typeof p.brand === "object" ? p.brand._id : p.brand) || "";
+          if (bName && !bSet.has(String(bName))) {
+            bSet.set(String(bName), { _id: bId || bName, name: bName });
           }
         }
       });
@@ -64,35 +64,49 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   // Filtered Products
   const filteredProducts = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
+    const q = (searchQuery || "").toLowerCase().trim();
 
-    return products.filter((p) => {
+    return (products || []).filter((p) => {
+      if (!p) return false;
+
       // 1. Stock Filter
       if (inStockOnly && p.inStock === false) return false;
 
       // 2. Brand Filter
       if (selectedBrand !== "all") {
-        const bName = (typeof p.brand === "object" ? p.brand?.name : p.brand) || "";
-        const bId = (typeof p.brand === "object" ? p.brand?._id : p.brand) || "";
-        if (String(bId) !== selectedBrand && bName.toLowerCase() !== selectedBrand.toLowerCase()) {
+        const bName = (p.brand && typeof p.brand === "object" ? p.brand.name : p.brand) || "";
+        const bId = (p.brand && typeof p.brand === "object" ? p.brand._id : p.brand) || "";
+        if (String(bId) !== selectedBrand && String(bName).toLowerCase() !== selectedBrand.toLowerCase()) {
           return false;
         }
       }
 
       // 3. Category Filter
       if (selectedCategory !== "all") {
-        const cId = (typeof p.category === "object" ? p.category?._id : p.category) || "";
-        const cName = (typeof p.category === "object" ? p.category?.name : p.category) || "";
-        if (String(cId) !== selectedCategory && cName.toLowerCase() !== selectedCategory.toLowerCase()) {
+        const cId = (p.category && typeof p.category === "object" ? p.category._id : p.category) || "";
+        const cName = (p.category && typeof p.category === "object" ? p.category.name : p.category) || "";
+        if (String(cId) !== selectedCategory && String(cName).toLowerCase() !== selectedCategory.toLowerCase()) {
           return false;
         }
       }
 
       // 4. Search Filter
       if (q) {
-        const pName = (p.name || "").toLowerCase();
-        const bName = (typeof p.brand === "object" ? p.brand?.name : p.brand || "").toLowerCase();
-        if (!pName.includes(q) && !bName.includes(q)) {
+        const pName = String(p.name || "").toLowerCase();
+        const rawBrand = (p.brand && typeof p.brand === "object" ? p.brand.name : p.brand) || "";
+        const bName = String(rawBrand).toLowerCase();
+        const rawCat = (p.category && typeof p.category === "object" ? p.category.name : p.category) || "";
+        const cName = String(rawCat).toLowerCase();
+        const pId = String(p._id || p.id || "").toLowerCase();
+        const pSku = String(p.sku || p.barcode || "").toLowerCase();
+
+        if (
+          !pName.includes(q) &&
+          !bName.includes(q) &&
+          !cName.includes(q) &&
+          !pId.includes(q) &&
+          !pSku.includes(q)
+        ) {
           return false;
         }
       }
@@ -878,8 +892,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                     ? Math.round(((origPrice - finalWholesale) / origPrice) * 100)
                     : 0;
 
-                  const brandName = typeof p.brand === "object" ? p.brand?.name : (p.brand || "");
-                  const categoryName = typeof p.category === "object" ? p.category?.name : (p.category || "");
+                  const brandName = (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) || "";
+                  const categoryName = (p.category && typeof p.category === "object" ? p.category?.name : p.category) || "";
 
                   return (
                     <tr

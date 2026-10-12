@@ -594,13 +594,13 @@ export default function AdminOrders({ onOrderUpdated }) {
             order.status === "Pending"
           : order.status === filterStatus;
 
-      const keyword = searchTerm.trim().toLowerCase();
+      const keyword = (searchTerm || "").trim().toLowerCase();
       const matchesSearch =
         !keyword ||
-        order.customerName?.toLowerCase().includes(keyword) ||
-        order.phone?.toLowerCase().includes(keyword) ||
-        order.orderNumber?.toLowerCase().includes(keyword) ||
-        order._id?.toLowerCase().includes(keyword);
+        String(order?.customerName || "").toLowerCase().includes(keyword) ||
+        String(order?.phone || "").toLowerCase().includes(keyword) ||
+        String(order?.orderNumber || "").toLowerCase().includes(keyword) ||
+        String(order?._id || "").toLowerCase().includes(keyword);
 
       return matchesStatus && matchesSearch;
     });

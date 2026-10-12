@@ -151,8 +151,8 @@ export async function generateWholesalePdf({
     return {
       id: p._id || p.id || p.name,
       name: p.name || "Product Item",
-      brandName: typeof p.brand === "object" ? p.brand?.name : (p.brand || ""),
-      categoryName: typeof p.category === "object" ? p.category?.name : (p.category || ""),
+      brandName: (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) || "",
+      categoryName: (p.category && typeof p.category === "object" ? p.category?.name : p.category) || "",
       buyPrice,
       originalPrice: origPrice,
       wholesalePrice: finalWholesale,
