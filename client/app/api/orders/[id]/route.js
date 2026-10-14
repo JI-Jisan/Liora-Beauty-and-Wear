@@ -40,6 +40,8 @@ export async function PUT(req, { params }) {
       district,
       items,
       discount,
+      commission,
+      commissionNote,
     } = body;
 
     const order = await Order.findById(id);
@@ -80,12 +82,18 @@ export async function PUT(req, { params }) {
       order.totalCost = newTotalCost;
     }
 
-    // ২. ডেলিভারি চার্জ ও ডিসকাউন্ট আপডেট
+    // ২. ডেলিভারি চার্জ, ডিসকাউন্ট ও কমিশন আপডেট
     if (typeof deliveryCharge === "number" || deliveryCharge !== undefined) {
       order.deliveryCharge = Math.max(0, Number(deliveryCharge) || 0);
     }
     if (typeof discount === "number" || discount !== undefined) {
       order.discount = Math.max(0, Number(discount) || 0);
+    }
+    if (typeof commission === "number" || commission !== undefined) {
+      order.commission = Math.max(0, Number(commission) || 0);
+    }
+    if (commissionNote !== undefined && typeof commissionNote === "string") {
+      order.commissionNote = commissionNote.trim();
     }
 
     // মোট প্রদেয় (Total) রিক্য্যালকুলেট

@@ -523,8 +523,10 @@ export default function AdminOrders({ onOrderUpdated }) {
   }, [editingOrder, editSubtotal]);
 
   const editProfit = useMemo(() => {
-    return editSubtotal - editTotalCost;
-  }, [editSubtotal, editTotalCost]);
+    const discount = Number(editingOrder?.discount) || 0;
+    const commission = Number(editingOrder?.commission) || 0;
+    return editSubtotal - editTotalCost - discount - commission;
+  }, [editSubtotal, editTotalCost, editingOrder?.discount, editingOrder?.commission]);
 
   // Save edited order
   const handleSaveEdit = async () => {
@@ -542,6 +544,8 @@ export default function AdminOrders({ onOrderUpdated }) {
         status: editingOrder.status,
         deliveryCharge: Number(editingOrder.deliveryCharge) || 0,
         discount: Number(editingOrder.discount) || 0,
+        commission: Number(editingOrder.commission) || 0,
+        commissionNote: editingOrder.commissionNote || "",
         items: editingOrder.items,
         subtotal: editSubtotal,
         total: editTotal,
@@ -1030,6 +1034,13 @@ export default function AdminOrders({ onOrderUpdated }) {
                         Subtotal: <span>{order.subtotal} Tk</span> | Delivery:{" "}
                         <span>{order.deliveryCharge} Tk</span>
                         {order.discount ? <span> | Discount: -{order.discount} Tk</span> : null}
+                        {order.commission ? (
+                          <span style={{ color: "#d97706", fontWeight: "700" }}>
+                            {" "}
+                            | 🔒 কমিশন: ৳{order.commission}
+                            {order.commissionNote ? ` (${order.commissionNote})` : ""}
+                          </span>
+                        ) : null}
                       </div>
                       <div className="jt-grand-total">
                         Total Amount: <strong>{order.total} Tk (COD)</strong>
@@ -1594,6 +1605,32 @@ export default function AdminOrders({ onOrderUpdated }) {
                   />
                 </div>
 
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: "700", color: "#b45309" }}>
+                      🤝 বিক্রয় কমিশন (Tk):
+                    </label>
+                    <span style={{ fontSize: "10px", color: "#dc2626", fontWeight: "700", background: "#fef2f2", padding: "1px 6px", borderRadius: "4px", border: "1px solid #fecaca" }}>
+                      🔒 ইনভয়েসে প্রিন্ট হবে না
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={editingOrder.commission ?? 0}
+                    onChange={(e) => setEditingOrder({ ...editingOrder, commission: Number(e.target.value) || 0 })}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: "6px", border: "1.5px solid #fcd34d", background: "#fffbeb", fontSize: "13px", fontWeight: "700", color: "#92400e" }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="কার কমিশন / নোট (যেমন: করিম ভাই / ৫%)"
+                    value={editingOrder.commissionNote || ""}
+                    onChange={(e) => setEditingOrder({ ...editingOrder, commissionNote: e.target.value })}
+                    style={{ width: "100%", marginTop: "6px", padding: "6px 10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "12px" }}
+                  />
+                </div>
+
                 {/* Calculation Summary Box */}
                 <div
                   style={{
@@ -1617,6 +1654,12 @@ export default function AdminOrders({ onOrderUpdated }) {
                     <div style={{ display: "flex", justifyContent: "space-between", color: "#e11d48" }}>
                       <span>ডিসকাউন্ট:</span>
                       <span>-৳{(Number(editingOrder.discount) || 0).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {(Number(editingOrder.commission) || 0) > 0 && (
+                    <div style={{ display: "flex", justifyContent: "space-between", color: "#d97706", fontWeight: "600" }}>
+                      <span>কমিশন খরচ (গোপন):</span>
+                      <span>-৳{(Number(editingOrder.commission) || 0).toLocaleString()}</span>
                     </div>
                   )}
                   <div
@@ -1644,7 +1687,7 @@ export default function AdminOrders({ onOrderUpdated }) {
                       fontWeight: "700",
                     }}
                   >
-                    <span>এই অর্ডারে আপনার আনুমানিক লাভ:</span>
+                    <span>এই অর্ডারে আপনার নিট লাভ:</span>
                     <span>{editProfit >= 0 ? `+৳${editProfit.toLocaleString()}` : `-৳${Math.abs(editProfit).toLocaleString()} (লস)`}</span>
                   </div>
                 </div>

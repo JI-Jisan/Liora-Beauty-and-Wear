@@ -263,6 +263,8 @@ const OrderSchema = new mongoose.Schema(
     deliveryType: { type: String, default: "standard" }, // "standard" or "urgent"
     deliveryCharge: { type: Number, default: 0, min: 0 },
     discount: { type: Number, default: 0, min: 0 },
+    commission: { type: Number, default: 0, min: 0 },
+    commissionNote: { type: String, default: "" },
     subtotal: { type: Number, required: true, min: 0 },
     totalCost: { type: Number, default: 0 },                  // সব item এর কেনা দাম
     total: { type: Number, required: true, min: 0 },

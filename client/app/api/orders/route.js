@@ -64,8 +64,8 @@ export async function POST(req) {
 
   try {
     await connectToDatabase();
+    const admin = getAdminFromRequest(req);
     const body = await req.json();
-
 
     const customerName = String(body.customerName || "").trim();
     const phone = normalizeBdPhone(body.phone);
@@ -111,7 +111,7 @@ export async function POST(req) {
     if (body.items.length > 50)
       return NextResponse.json({ message: "অনেক বেশি আইটেম" }, { status: 400 });
 
-    // ---- দাম ও স্টক: সম্পূর্ণ সার্ভার থেকে FIFO ব্যাচ এলগোরিদম দ্বারা ----
+    // ---- দাম ও স্টক: সার্ভার থেকে FIFO ব্যাচ এলগোরিদম দ্বারা (অ্যাডমিন কাস্টম দাম সাপোর্টসহ) ----
     const items = [];
     const doneAllocations = []; // rollback এর জন্য
     let subtotal = 0;
@@ -150,7 +150,12 @@ export async function POST(req) {
 
       doneAllocations.push(...res.allocations);
 
-      const price = Number(p.offerPrice ?? p.originalPrice ?? 0);
+      // অ্যাডমিন অর্ডার কাটলে নির্ধারিত কাস্টম প্রাইজ গ্রহণ করবে
+      const defaultPrice = Number(p.offerPrice ?? p.originalPrice ?? 0);
+      const price = (admin && raw.price !== undefined && raw.price !== null && !isNaN(Number(raw.price)))
+        ? Math.max(0, Number(raw.price))
+        : defaultPrice;
+
       subtotal += price * qty;
       totalCost += (res.totalCost || res.avgCost * qty);
 
@@ -183,11 +188,29 @@ export async function POST(req) {
     const deliveryType = String(body.deliveryType || "standard").trim().toLowerCase();
     const isUrgent = isDhaka && deliveryType === "urgent";
 
-    // ---- ডেলিভারি চার্জও সম্পূর্ণ সার্ভারেই নির্ধারিত হবে ----
+    // ---- ডেলিভারি চার্জ নির্ধারণ (অ্যাডমিন কাস্টম ডেলিভারি ফি সাপোর্টসহ) ----
     const settings = (await SiteSettings.findOne().lean()) || {};
     const baseCharge = isUrgent ? 250 : (isDhaka ? 70 : 130);
     const threshold = Number(settings.freeDeliveryThreshold ?? 0);
-    const deliveryCharge = (!isUrgent && threshold > 0 && subtotal >= threshold) ? 0 : baseCharge;
+    const defaultDeliveryCharge = (!isUrgent && threshold > 0 && subtotal >= threshold) ? 0 : baseCharge;
+
+    const deliveryCharge = (admin && body.deliveryCharge !== undefined && body.deliveryCharge !== null && !isNaN(Number(body.deliveryCharge)))
+      ? Math.max(0, Number(body.deliveryCharge))
+      : defaultDeliveryCharge;
+
+    const discount = (admin && body.discount !== undefined && !isNaN(Number(body.discount)))
+      ? Math.max(0, Number(body.discount))
+      : 0;
+
+    const commission = (admin && body.commission !== undefined && !isNaN(Number(body.commission)))
+      ? Math.max(0, Number(body.commission))
+      : 0;
+
+    const commissionNote = admin && body.commissionNote
+      ? String(body.commissionNote).trim().slice(0, 200)
+      : "";
+
+    const total = Math.max(0, subtotal + deliveryCharge - discount);
 
     let user = null;
     try {
@@ -217,9 +240,12 @@ export async function POST(req) {
           deliveryZone: finalDeliveryZone,
           deliveryType: isUrgent ? "urgent" : "standard",
           deliveryCharge,
+          discount,
+          commission,
+          commissionNote,
           subtotal,
           totalCost,
-          total: subtotal + deliveryCharge,
+          total,
           shippedBy: "Jisan",
           stockDeducted: true,
           orderNumber,

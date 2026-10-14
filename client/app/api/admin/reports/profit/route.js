@@ -22,10 +22,14 @@ export async function GET(req) {
   let revenue = 0;
   let cogs = 0;
   let deliveryCollected = 0;
+  let discountTotal = 0;
+  let commissionTotal = 0;
   const perProduct = {};
 
   for (const o of orders) {
     deliveryCollected += o.deliveryCharge || 0;
+    discountTotal += o.discount || 0;
+    commissionTotal += o.commission || 0;
     for (const it of o.items || []) {
       const rev = (it.price || 0) * (it.quantity || 1);
       const cost = (it.costAtSale || it.purchasePrice || 0) * (it.quantity || 1);
@@ -47,7 +51,7 @@ export async function GET(req) {
     return a;
   }, {});
 
-  const grossProfit = revenue - cogs;
+  const grossProfit = revenue - cogs - discountTotal - commissionTotal;
   const netProfit = grossProfit - expenseTotal;
 
   // returned / cancelled অর্ডার
@@ -62,6 +66,8 @@ export async function GET(req) {
     returnedCount: returned,
     revenue,
     cogs,
+    discountTotal,
+    commissionTotal,
     grossProfit,
     expenseTotal,
     expenseByCategory,
