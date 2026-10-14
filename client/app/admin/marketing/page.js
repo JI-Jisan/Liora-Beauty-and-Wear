@@ -9,6 +9,9 @@ export default function AdminMarketingPage() {
   const [brands, setBrands] = useState([]);
   const [selectedBrand, setSelectedBrand] = useState("");
   const [products, setProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [topSearchInput, setTopSearchInput] = useState("");
+  const [isStoreSearchActive, setIsStoreSearchActive] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [activeProduct, setActiveProduct] = useState(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -96,6 +99,8 @@ export default function AdminMarketingPage() {
       setErrorMsg("");
       setBatchResult(null);
       setSinglePostSuccess(null);
+      setIsStoreSearchActive(false);
+      setSearchQuery("");
       try {
         const res = await fetch(`${API_BASE_URL}/api/marketing/products?brandId=${selectedBrand}`);
         const json = await res.json();
@@ -116,6 +121,64 @@ export default function AdminMarketingPage() {
     }
     loadBrandProducts();
   }, [selectedBrand]);
+
+  // Global Storewide Search
+  async function handleGlobalStoreSearch(searchTerm) {
+    const term = (searchTerm !== undefined ? searchTerm : (searchQuery || topSearchInput))?.trim();
+    if (!term) return;
+    setLoadingProducts(true);
+    setIsStoreSearchActive(true);
+    setErrorMsg("");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/marketing/products?search=${encodeURIComponent(term)}`);
+      const json = await res.json();
+      if (json.success && json.products) {
+        setProducts(json.products || []);
+        if (json.products.length > 0) {
+          loadProductPreview(json.products[0]._id);
+        } else {
+          setActiveProduct(null);
+          setPreviewData(null);
+        }
+      } else {
+        setErrorMsg(json.error || "No matching products found in store.");
+      }
+    } catch (err) {
+      setErrorMsg("Error searching products across store.");
+    } finally {
+      setLoadingProducts(false);
+    }
+  }
+
+  function handleResetSearch() {
+    setIsStoreSearchActive(false);
+    setSearchQuery("");
+    setTopSearchInput("");
+    if (selectedBrand) {
+      setLoadingProducts(true);
+      fetch(`${API_BASE_URL}/api/marketing/products?brandId=${selectedBrand}`)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success) {
+            setProducts(json.products || []);
+            if (json.products?.length > 0) {
+              loadProductPreview(json.products[0]._id);
+            }
+          }
+        })
+        .finally(() => setLoadingProducts(false));
+    }
+  }
+
+  const filteredProducts = products.filter((p) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      (p.name && p.name.toLowerCase().includes(q)) ||
+      (p.brand && p.brand.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q))
+    );
+  });
 
   // 3. Load Preview for a single product
   async function loadProductPreview(productId, theme = null) {
@@ -458,13 +521,18 @@ export default function AdminMarketingPage() {
           <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
             <div>
               <label style={{ display: "block", fontSize: "12px", textTransform: "uppercase", fontWeight: "700", color: "#94a3b8", marginBottom: "6px" }}>
-                Select Brand to Promote
+                Select Brand or Plan
               </label>
               <select
-                value={selectedBrand}
-                onChange={(e) => setSelectedBrand(e.target.value)}
-                style={{ background: "#0f172a", color: "#ffffff", border: "1px solid #475569", padding: "10px 16px", borderRadius: "8px", fontSize: "15px", fontWeight: "700", minWidth: "240px", cursor: "pointer", outline: "none" }}
+                value={isStoreSearchActive ? "" : selectedBrand}
+                onChange={(e) => {
+                  setIsStoreSearchActive(false);
+                  setSearchQuery("");
+                  setSelectedBrand(e.target.value);
+                }}
+                style={{ background: "#0f172a", color: "#ffffff", border: "1px solid #475569", padding: "10px 16px", borderRadius: "8px", fontSize: "14px", fontWeight: "700", minWidth: "260px", cursor: "pointer", outline: "none" }}
               >
+                {isStoreSearchActive && <option value="">🔍 Store Search Active...</option>}
                 {brands.map((b) => (
                   <option key={b._id} value={b._id}>
                     {b.name} ({b.productCount} Products)
@@ -473,9 +541,47 @@ export default function AdminMarketingPage() {
               </select>
             </div>
 
+            {/* Quick Search Store Bar */}
+            <div>
+              <label style={{ display: "block", fontSize: "12px", textTransform: "uppercase", fontWeight: "700", color: "#94a3b8", marginBottom: "6px" }}>
+                🔍 Quick Search Store
+              </label>
+              <div style={{ display: "flex", gap: "6px" }}>
+                <input
+                  type="text"
+                  placeholder="Type product name (e.g. Ordinary, Rice)..."
+                  value={topSearchInput}
+                  onChange={(e) => setTopSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && topSearchInput.trim()) {
+                      handleGlobalStoreSearch(topSearchInput);
+                    }
+                  }}
+                  style={{ background: "#0f172a", color: "#ffffff", border: "1px solid #475569", padding: "9px 12px", borderRadius: "8px", fontSize: "13.5px", width: "230px", outline: "none" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleGlobalStoreSearch(topSearchInput)}
+                  disabled={loadingProducts || !topSearchInput.trim()}
+                  style={{ background: "#0284c7", color: "#ffffff", border: "none", padding: "9px 14px", borderRadius: "8px", fontWeight: "700", fontSize: "13px", cursor: "pointer" }}
+                >
+                  Search
+                </button>
+                {isStoreSearchActive && (
+                  <button
+                    type="button"
+                    onClick={handleResetSearch}
+                    style={{ background: "#334155", color: "#38bdf8", border: "none", padding: "9px 12px", borderRadius: "8px", fontWeight: "700", fontSize: "13px", cursor: "pointer" }}
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div style={{ alignSelf: "flex-end" }}>
-              <span style={{ fontSize: "14px", color: "#cbd5e1" }}>
-                Found: <strong style={{ color: "#38bdf8" }}>{products.length}</strong> items in <strong>{selectedBrandObj?.name}</strong>
+              <span style={{ fontSize: "13.5px", color: "#cbd5e1" }}>
+                Found: <strong style={{ color: "#38bdf8" }}>{filteredProducts.length}</strong> {filteredProducts.length !== products.length ? `(filtered from ${products.length})` : ""} items {isStoreSearchActive ? "in storewide search" : `in ${selectedBrandObj?.name || "selection"}`}
               </span>
             </div>
           </div>
@@ -635,21 +741,122 @@ export default function AdminMarketingPage() {
 
         {/* Main 2-Column Work Area */}
         <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: "24px", alignItems: "start" }}>
-          {/* Left Column: Product List */}
+          {/* Left Column: Product List with Search */}
           <div style={{ background: "#1e293b", borderRadius: "14px", border: "1px solid #334155", overflow: "hidden", maxHeight: "820px", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "14px 18px", borderBottom: "1px solid #334155", background: "#0b1120" }}>
-              <h2 style={{ fontSize: "14px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", margin: 0 }}>
-                Products in {selectedBrandObj?.name || "Brand"} ({products.length})
-              </h2>
+            <div style={{ padding: "12px 16px", borderBottom: "1px solid #334155", background: "#0b1120" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <h2 style={{ fontSize: "12.5px", fontWeight: "800", color: "#94a3b8", textTransform: "uppercase", margin: 0 }}>
+                  {isStoreSearchActive ? "Store Search" : "Products"} ({filteredProducts.length})
+                </h2>
+                {isStoreSearchActive && (
+                  <button
+                    onClick={handleResetSearch}
+                    style={{ background: "#334155", color: "#38bdf8", border: "none", borderRadius: "4px", padding: "2px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
+                  >
+                    Reset Brand
+                  </button>
+                )}
+              </div>
+
+              {/* Instant Search Box */}
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <span style={{ position: "absolute", left: "10px", color: "#64748b", fontSize: "13px", pointerEvents: "none" }}>🔍</span>
+                <input
+                  type="text"
+                  placeholder="Search product (নাম দিয়ে খুঁজুন)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && searchQuery.trim()) {
+                      handleGlobalStoreSearch(searchQuery);
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    background: "#0f172a",
+                    border: "1px solid #334155",
+                    borderRadius: "8px",
+                    color: "#ffffff",
+                    padding: "8px 28px 8px 30px",
+                    fontSize: "13px",
+                    outline: "none"
+                  }}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    style={{
+                      position: "absolute",
+                      right: "8px",
+                      background: "transparent",
+                      border: "none",
+                      color: "#94a3b8",
+                      fontSize: "14px",
+                      cursor: "pointer",
+                      padding: 0
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Filter stats & Storewide search button */}
+              {searchQuery && (
+                <div style={{ marginTop: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "11.5px", color: "#94a3b8" }}>
+                    Showing {filteredProducts.length} of {products.length}
+                  </span>
+                  {!isStoreSearchActive && (
+                    <button
+                      onClick={() => handleGlobalStoreSearch(searchQuery)}
+                      disabled={loadingProducts}
+                      style={{
+                        background: "rgba(56, 189, 248, 0.15)",
+                        border: "1px solid rgba(56, 189, 248, 0.4)",
+                        color: "#38bdf8",
+                        borderRadius: "5px",
+                        padding: "3px 8px",
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        cursor: "pointer"
+                      }}
+                    >
+                      🌐 Search entire store
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div style={{ overflowY: "auto", padding: "8px" }}>
+            <div style={{ overflowY: "auto", padding: "8px", flex: 1 }}>
               {loadingProducts ? (
                 <div style={{ padding: "30px", textAlign: "center", color: "#94a3b8" }}>Loading products...</div>
-              ) : products.length === 0 ? (
-                <div style={{ padding: "30px", textAlign: "center", color: "#94a3b8" }}>No products found for this brand.</div>
+              ) : filteredProducts.length === 0 ? (
+                <div style={{ padding: "30px 16px", textAlign: "center" }}>
+                  <p style={{ color: "#94a3b8", fontSize: "14px", margin: "0 0 12px 0" }}>
+                    {searchQuery ? `No products matching "${searchQuery}" in this list.` : "No products found."}
+                  </p>
+                  {searchQuery && !isStoreSearchActive && (
+                    <button
+                      onClick={() => handleGlobalStoreSearch(searchQuery)}
+                      style={{
+                        background: "#0284c7",
+                        color: "#ffffff",
+                        border: "none",
+                        padding: "8px 14px",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontWeight: "700",
+                        cursor: "pointer"
+                      }}
+                    >
+                      🌐 Search Entire Store for "{searchQuery}"
+                    </button>
+                  )}
+                </div>
               ) : (
-                products.map((p) => {
+                filteredProducts.map((p) => {
                   const isSelected = activeProduct === p._id;
                   return (
                     <div

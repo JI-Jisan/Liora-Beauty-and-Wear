@@ -370,12 +370,46 @@ export async function GET(req, { params }) {
         countMap[c._id.toString()] = c.count;
       });
 
+      const totalInStock = await Product.countDocuments({ inStock: true, stockQuantity: { $gt: 0 } });
+
+      // Load 30-day plan if available
+      let planDays = [];
+      try {
+        const planPath = path.join(process.cwd(), "lib", "30_day_posting_plan.json");
+        const altPath = path.join(process.cwd(), "scripts", "30_day_posting_plan.json");
+        const chosenPath = fs.existsSync(planPath) ? planPath : fs.existsSync(altPath) ? altPath : null;
+        if (chosenPath) {
+          const planJson = JSON.parse(fs.readFileSync(chosenPath, "utf8"));
+          planDays = planJson.map((d) => ({
+            _id: `plan_day_${d.day}`,
+            name: `📅 Day ${d.day}: ${d.theme.split("(")[0].trim()} (${d.products.length} Products)`,
+            slug: `plan_day_${d.day}`,
+            productCount: d.products.length,
+          }));
+        }
+      } catch (e) {
+        // silent
+      }
+
       const enriched = [
         {
           _id: "instock_ready",
           name: `🔥 প্রস্তুতকৃত ${READY_IN_STOCK_IDS.length}টি ইন-স্টক ব্যানার (Ready ${READY_IN_STOCK_IDS.length} Banners)`,
           slug: "instock_ready",
           productCount: READY_IN_STOCK_IDS.length,
+        },
+        {
+          _id: "plan_30_days",
+          name: "📅 সম্পূর্ণ ৩০ দিনের পোস্টিং প্ল্যান (All 30 Days Plan - 450 Products)",
+          slug: "plan_30_days",
+          productCount: 450,
+        },
+        ...planDays,
+        {
+          _id: "all_instock",
+          name: `🌟 সমস্ত ইন-স্টক প্রোডাক্ট (All In-Stock Store - ${totalInStock} Products)`,
+          slug: "all_instock",
+          productCount: totalInStock,
         },
         ...brands
           .map((b) => ({
@@ -390,21 +424,91 @@ export async function GET(req, { params }) {
       return NextResponse.json({ success: true, brands: enriched });
     }
 
-    // 2. /api/marketing/products?brandId=...
+    // 2. /api/marketing/products?brandId=...&search=...
     if (action === "products") {
       const brandId = url.searchParams.get("brandId");
-      if (!brandId) {
-        return NextResponse.json({ success: false, error: "brandId is required" }, { status: 400 });
+      const search = url.searchParams.get("search")?.trim();
+
+      if (!brandId && !search) {
+        return NextResponse.json({ success: false, error: "brandId or search query is required" }, { status: 400 });
       }
 
       let products = [];
-      if (brandId === "instock_ready") {
+
+      // Global store search across in-stock products
+      if (search && (!brandId || brandId === "all_store" || brandId === "all_instock")) {
+        products = await Product.find({
+          name: { $regex: search, $options: "i" },
+          inStock: true,
+          stockQuantity: { $gt: 0 },
+        })
+          .populate("category", "name")
+          .populate("brand", "name")
+          .limit(100)
+          .lean();
+      } else if (brandId === "plan_30_days" || (brandId && brandId.startsWith("plan_day_"))) {
+        // Read from 30_day_posting_plan.json
+        let planData = [];
+        try {
+          const planPath = path.join(process.cwd(), "lib", "30_day_posting_plan.json");
+          const altPath = path.join(process.cwd(), "scripts", "30_day_posting_plan.json");
+          const chosenPath = fs.existsSync(planPath) ? planPath : fs.existsSync(altPath) ? altPath : null;
+          if (chosenPath) {
+            planData = JSON.parse(fs.readFileSync(chosenPath, "utf8"));
+          }
+        } catch (e) {
+          // silent
+        }
+
+        let targetIds = [];
+        if (brandId === "plan_30_days") {
+          planData.forEach((d) => {
+            d.products?.forEach((p) => targetIds.push(p.id));
+          });
+        } else {
+          const dayNum = parseInt(brandId.replace("plan_day_", ""), 10);
+          const dayObj = planData.find((d) => d.day === dayNum);
+          if (dayObj) {
+            targetIds = dayObj.products.map((p) => p.id);
+          }
+        }
+
+        const raw = await Product.find({ _id: { $in: targetIds } })
+          .populate("category", "name")
+          .populate("brand", "name")
+          .lean();
+        const map = new Map(raw.map((p) => [p._id.toString(), p]));
+        products = targetIds.map((id) => map.get(id)).filter(Boolean);
+
+        if (search) {
+          const s = search.toLowerCase();
+          products = products.filter((p) => p.name.toLowerCase().includes(s));
+        }
+      } else if (brandId === "all_instock") {
+        const query = {
+          inStock: true,
+          stockQuantity: { $gt: 0 },
+        };
+        if (search) {
+          query.name = { $regex: search, $options: "i" };
+        }
+        products = await Product.find(query)
+          .populate("category", "name")
+          .populate("brand", "name")
+          .limit(200)
+          .lean();
+      } else if (brandId === "instock_ready") {
         const raw = await Product.find({ _id: { $in: READY_IN_STOCK_IDS } })
           .populate("category", "name")
           .populate("brand", "name")
           .lean();
         const map = new Map(raw.map((p) => [p._id.toString(), p]));
         products = READY_IN_STOCK_IDS.map((id) => map.get(id)).filter(Boolean);
+
+        if (search) {
+          const s = search.toLowerCase();
+          products = products.filter((p) => p.name.toLowerCase().includes(s));
+        }
       } else {
         const query = {
           $or: [
@@ -412,6 +516,9 @@ export async function GET(req, { params }) {
             ...(mongoose.Types.ObjectId.isValid(brandId) ? [{ brand: new mongoose.Types.ObjectId(brandId) }] : []),
           ],
         };
+        if (search) {
+          query.name = { $regex: search, $options: "i" };
+        }
 
         products = await Product.find(query)
           .populate("category", "name")

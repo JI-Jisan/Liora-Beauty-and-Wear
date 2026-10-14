@@ -1,0 +1,4262 @@
+[
+  {
+    "day": 1,
+    "theme": "Sunscreens & UV Protection (রোদ থেকে ত্বকের সুরক্ষা - সানস্ক্রিন)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc86c63dd531aa8dbb16",
+        "name": "WishCare Niacinamide Oil Balance Fluid Sunscreen SPF 50 PA++++ 50g",
+        "catName": "Sunscreen",
+        "brandName": "",
+        "price": 780,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc84c63dd531aa8dbb13",
+        "name": "Wishcare Vitamin C Pure Glow Milk Sunscreen | SPF 50 PA++++",
+        "catName": "Sunscreen",
+        "brandName": "",
+        "price": 780,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc81c63dd531aa8dbb05",
+        "name": "Dot n Key Strawberry Dew Tinted Sunscreen SPF 50+ PA++++ -02 warm ivory",
+        "catName": "Sunscreen",
+        "brandName": "",
+        "price": 780,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc80c63dd531aa8dbb01",
+        "name": "LAIKOU Japan Sakura After Sun Gel 50g",
+        "catName": "Moisturizers",
+        "brandName": "Laikou",
+        "price": 260,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc7fc63dd531aa8dbafd",
+        "name": "LAIKOU Vitamin C Brightening Sunscreen Waterproof SPF50 PA+++ 50g",
+        "catName": "Sunscreen",
+        "brandName": "Laikou",
+        "price": 300,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abccfc63dd531aa8dbc13",
+        "name": "Beauty Of Joseon Relief Sun: Rice+probiotics SPF 50+PA++10ml",
+        "catName": "Sunscreen",
+        "brandName": "",
+        "price": 340,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcaac63dd531aa8dbb91",
+        "name": "BIOAQUA Rice Raw Pulp Sunscreen SPF 50 + PA+++ UVA UVB 40g",
+        "catName": "Serum",
+        "brandName": "Bioaqua",
+        "price": 195,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc0cc63dd531aa8db96b",
+        "name": "LAIKOU Rice Ultra-Light Sunscreen SPF50+ PA+++ 50g",
+        "catName": "Sunscreen",
+        "brandName": "Laikou",
+        "price": 370,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc39c63dd531aa8dba13",
+        "name": "3W Clinic Daily Rice Bran Sun Cream SPF50+ PA+++ – 70ml",
+        "catName": "Sunscreen",
+        "brandName": "3W Clinic",
+        "price": 500,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd9ac63dd531aa8dbecc",
+        "name": "Beauty Of Joseon Sunscreen: Rice + Probiotics Spf 50+ Pa++++ 50ml",
+        "catName": "Sunscreen",
+        "brandName": "",
+        "price": 1349,
+        "mrp": 1950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdbac63dd531aa8dbf35",
+        "name": "Missha Essence Sunscreen Safe Block Spf50+ Pa+++ – 70ml",
+        "catName": "Sunscreen",
+        "brandName": "Missha",
+        "price": 1270,
+        "mrp": 1650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdb6c63dd531aa8dbf27",
+        "name": "Valencia Gio Nature Plus Sun Block SPF50+PA+++",
+        "catName": "Sunscreen",
+        "brandName": "",
+        "price": 470,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd8dc63dd531aa8dbea1",
+        "name": "Laikou Sakura Sunscreen Spf 50 Pa+++ – 30gm",
+        "catName": "Sunscreen",
+        "brandName": "Laikou",
+        "price": 170,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd8cc63dd531aa8dbe9c",
+        "name": "Laikou Milk Brightening Sunscreen Spf50 Pa+++ 50g",
+        "catName": "Sunscreen",
+        "brandName": "Laikou",
+        "price": 305,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abde6c63dd531aa8dbfc1",
+        "name": "LAIKOU Whitening Sunscreen SPF50+PA+ 2gm",
+        "catName": "Sunscreen",
+        "brandName": "Laikou",
+        "price": 30,
+        "mrp": 50,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "theme": "Brightening & Glow Serums (উজ্জ্বলতা ও গ্লো বাড়ানোর সিরাম)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9ab77134ccee884a4b5cab",
+        "name": "The Ordinary Niacinamide Serum 10%+Zinc1% – 30ml",
+        "catName": "Serum",
+        "brandName": "The Ordinary",
+        "price": 1100,
+        "mrp": 1650,
+        "stock": 20
+      },
+      {
+        "id": "6a9ab77734ccee884a4b5cb0",
+        "name": "AXIS-Y Dark Spot Correcting Glow Serum – 50ml",
+        "catName": "Serum",
+        "brandName": "Axis-y",
+        "price": 1100,
+        "mrp": 1650,
+        "stock": 20
+      },
+      {
+        "id": "6a9abc87c63dd531aa8dbb19",
+        "name": "WishCare Super Bright C16 Vitamin C Serum 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 1130,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc71c63dd531aa8dbac6",
+        "name": "Deconstruct Vitamin C Ferulic Acid serum 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 1349,
+        "mrp": 1850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc70c63dd531aa8dbac1",
+        "name": "APLB Retinol Vitamin C Vitamin E Ampoule Serum 40ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 920,
+        "mrp": 1450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc65c63dd531aa8dba9d",
+        "name": "Ponds Bright Beauty Serum with 12% Gluta-Niacinamide – 28ml",
+        "catName": "Serum",
+        "brandName": "Ponds",
+        "price": 590,
+        "mrp": 600,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc5cc63dd531aa8dba83",
+        "name": "Care:Nel Niacinamide 10% Zinc 1% Serum 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 970,
+        "mrp": 970,
+        "stock": 25
+      },
+      {
+        "id": "6a9abca0c63dd531aa8dbb73",
+        "name": "Pure Ground Good Bye All Dark Spot Glow Serum 50ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 829,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbefc63dd531aa8db90b",
+        "name": "Medicube Kojic Acid Turmeric Niacinamide Serum 30ml (Triple Brightening)",
+        "catName": "Serum",
+        "brandName": "Medicube",
+        "price": 1750,
+        "mrp": 2550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd9cc63dd531aa8dbed5",
+        "name": "Zafran Advanced Whitening Serum – 80ml",
+        "catName": "Serum",
+        "brandName": "Zafran",
+        "price": 290,
+        "mrp": 625,
+        "stock": 25
+      },
+      {
+        "id": "6a9abde1c63dd531aa8dbfaf",
+        "name": "Lilac Niacinamide Serum 5% – 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 750,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd0cc63dd531aa8dbcdf",
+        "name": "Laikou Pro Niacinamide Brightening Serum 10% 17ml",
+        "catName": "Serum",
+        "brandName": "Laikou",
+        "price": 200,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcf5c63dd531aa8dbc8a",
+        "name": "Groome Niacinamide 5% + Zinc 1% Skin Correcting Serum 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 815,
+        "mrp": 980,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd5dc63dd531aa8dbe03",
+        "name": "Groome Glutathione + Alpha Arbutin +ha Brightening Serum – 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 910,
+        "mrp": 980,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd31c63dd531aa8dbd63",
+        "name": "Cos De BAHA Arbutin Niacinamide Serum AN 30ml",
+        "catName": "Serum",
+        "brandName": "Cos De BAHA",
+        "price": 1010,
+        "mrp": 1350,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "theme": "Hydration & Barrier Repair Serums (হাইড্রেটিং ও রিপেয়ার সিরাম)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc9ec63dd531aa8dbb6e",
+        "name": "Cos De BAHA L3 Level 3 Bakuchiol 2 Retinol 1.0 Serum 30ml",
+        "catName": "Serum",
+        "brandName": "Cos De BAHA",
+        "price": 1480,
+        "mrp": 1850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc6fc63dd531aa8dbabd",
+        "name": "APLB Collagen EGF Peptide Ampoule Serum 40ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 880,
+        "mrp": 1450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abce0c63dd531aa8dbc3c",
+        "name": "Sadoer Aha + Bha Fruit Acid Acne Repair Serum 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 260,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abca0c63dd531aa8dbb71",
+        "name": "Cos De BAHA HP Hyaluronic Acid B5 Serum 30ML",
+        "catName": "Serum",
+        "brandName": "Cos De BAHA",
+        "price": 1090,
+        "mrp": 1280,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc5bc63dd531aa8dba81",
+        "name": "Care:Nel Hyaluvita B5 Cica Serum 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 1070,
+        "mrp": 1450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc4cc63dd531aa8dba4f",
+        "name": "Bioaqua R Retinol Serum – 30ml",
+        "catName": "Serum",
+        "brandName": "Bioaqua",
+        "price": 290,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd93c63dd531aa8dbeae",
+        "name": "Quiyum 1% Retinol Serum – 30ml",
+        "catName": "Serum",
+        "brandName": "Quiyum",
+        "price": 370,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd8fc63dd531aa8dbea8",
+        "name": "Fenyi Lab Retinol 1% Serum – 17ml",
+        "catName": "Serum",
+        "brandName": "Fenyi",
+        "price": 209,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe11c63dd531aa8dc045",
+        "name": "Laikou Hyaluronic Acid Serum – Korea",
+        "catName": "Serum",
+        "brandName": "Laikou",
+        "price": 140,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd2ac63dd531aa8dbd4d",
+        "name": "Beauty of Joseon Revive Serum : Ginseng + Snail Mucin 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 995,
+        "mrp": 2050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd33c63dd531aa8dbd65",
+        "name": "Cos De BAHA Salicylic Acid BHA 4% Serum (S4) 30ml",
+        "catName": "Serum",
+        "brandName": "Cos De BAHA",
+        "price": 980,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd25c63dd531aa8dbd3a",
+        "name": "Melao Nicotinamide Serum –  Niacinamide 4% Vb3+Vb5 -30ml",
+        "catName": "Serum",
+        "brandName": "Melao",
+        "price": 260,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd37c63dd531aa8dbd7d",
+        "name": "Melao Retinol Serum with Hyaluronic Acid – 30ml",
+        "catName": "Serum",
+        "brandName": "Melao",
+        "price": 290,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd33c63dd531aa8dbd69",
+        "name": "Cos De Baha RS Retinol 2.5 Serum 30ml",
+        "catName": "Serum",
+        "brandName": "Cos De BAHA",
+        "price": 970,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba06c63dd531aa8db321",
+        "name": "Cosrx Advanced Snail 96 Mucin Power Essence – 30ml",
+        "catName": "Serum",
+        "brandName": "Cosrx",
+        "price": 500,
+        "mrp": 1050,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 4,
+    "theme": "Daily Refreshing Face Washes (ডেইলি ফেস ওয়াশ ও স্কিন পিউরিফায়ার)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9ac03bc63dd531aa8dc6e5",
+        "name": "Ponds Bright Beauty Spot Less Glow with Vitamin B3 Face Wash 50g",
+        "catName": "Face Wash",
+        "brandName": "Ponds",
+        "price": 120,
+        "mrp": 120,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc11c63dd531aa8db980",
+        "name": "SKIN1004 Madagascar Centella Poremizing Deep Cleansing Foam 1.5ml",
+        "catName": "Flash Sale",
+        "brandName": "SKIN1004",
+        "price": 25,
+        "mrp": 45,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbecc63dd531aa8db906",
+        "name": "Laikou Rice Silky Cleanser 50g",
+        "catName": "Face Wash",
+        "brandName": "Laikou",
+        "price": 195,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc41c63dd531aa8dba2b",
+        "name": "Natura Clear & Glow complete care face wash – 100ml",
+        "catName": "Face Care",
+        "brandName": "",
+        "price": 240,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdc6c63dd531aa8dbf5e",
+        "name": "LAIKOU Men Moisturizing Face Cleanser 50g",
+        "catName": "Face Wash",
+        "brandName": "Laikou",
+        "price": 180,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd8bc63dd531aa8dbe9a",
+        "name": "3w Clinic Charcoal Cleansing Foam – 100ml",
+        "catName": "Cleanser",
+        "brandName": "3W Clinic",
+        "price": 440,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf4c63dd531aa8dbff9",
+        "name": "FENYI Green Tea Mild Cleanser Oil Control – 50g",
+        "catName": "Face Wash",
+        "brandName": "Fenyi",
+        "price": 170,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe02c63dd531aa8dc026",
+        "name": "Rajkonna Acne Fighting Facial Wash – 100ml",
+        "catName": "Face Wash",
+        "brandName": "Rajkonna",
+        "price": 200,
+        "mrp": 230,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdd3c63dd531aa8dbf81",
+        "name": "Laikou Vitamin C Cleanser – 50g",
+        "catName": "Face Wash",
+        "brandName": "Laikou",
+        "price": 165,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdd9c63dd531aa8dbf91",
+        "name": "FENYI Japan Cherry Blossom Cleanser – 50gm",
+        "catName": "Face Wash",
+        "brandName": "Fenyi",
+        "price": 170,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd00c63dd531aa8dbcb3",
+        "name": "Dot & Key Watermelon Refresh Gel Face Wash For Oily Skin100 ml",
+        "catName": "Cleanser",
+        "brandName": "Dot & Key",
+        "price": 460,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd49c63dd531aa8dbdbd",
+        "name": "Ponds Face Wash Oil Control – 100g",
+        "catName": "Cleanser",
+        "brandName": "Ponds",
+        "price": 210,
+        "mrp": 220,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd50c63dd531aa8dbdd9",
+        "name": "Mamaearth Vitamin C Face Wash – 100ml",
+        "catName": "Face Wash",
+        "brandName": "Mamaearth",
+        "price": 460,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd4dc63dd531aa8dbdcd",
+        "name": "Mamaearth Oil Free Face Wash Apple Cider – 100ml",
+        "catName": "Face Wash",
+        "brandName": "Mamaearth",
+        "price": 440,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd44c63dd531aa8dbdaf",
+        "name": "SkinO Vitamin C Oil Control Facewash Lemon 110ml",
+        "catName": "Face Wash",
+        "brandName": "Skino",
+        "price": 200,
+        "mrp": 220,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 5,
+    "theme": "Gentle Cleansers, Scrubs & Peeling Gels (ক্লিনজার, স্ক্রাব ও এক্সফোলিয়েটর)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc7ac63dd531aa8dbae7",
+        "name": "BIOAQUA Whitening Antioxidant Vitamin C Facial Cleanser 100g",
+        "catName": "Cleanser",
+        "brandName": "Bioaqua",
+        "price": 309,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc76c63dd531aa8dbade",
+        "name": "Bioderma ABCDerm Gel Moussant Mild Cleansing Foaming Gel 200ml",
+        "catName": "Cleanser",
+        "brandName": "",
+        "price": 1899,
+        "mrp": 1899,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcafc63dd531aa8dbba3",
+        "name": "Face Facts Coconut Facial Scrub 60ML",
+        "catName": "Facial Scrub",
+        "brandName": "",
+        "price": 419,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcbac63dd531aa8dbbc9",
+        "name": "Anua Heartleaf Pore Control Cleansing Oil 20ml",
+        "catName": "Makeup Remover",
+        "brandName": "",
+        "price": 530,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc08c63dd531aa8db95c",
+        "name": "CeraVe Blemish Control Cleanser 236ml",
+        "catName": "Cleanser",
+        "brandName": "CeraVe",
+        "price": 2090,
+        "mrp": 3500,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc1ac63dd531aa8db99f",
+        "name": "APLB Glutathione Niacinamide Facial Cleanser – 80ml",
+        "catName": "Cleanser",
+        "brandName": "",
+        "price": 790,
+        "mrp": 1150,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbf7c63dd531aa8db925",
+        "name": "Laikou Japan Sakura Cleanser 150g (Deep Cleansing & Smoothing)",
+        "catName": "Cleanser",
+        "brandName": "Laikou",
+        "price": 470,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbf2c63dd531aa8db915",
+        "name": "Medicube PDRN Hydrating Gel Cleanser 200ml (99% Real Salmon PDRN)",
+        "catName": "Cleanser",
+        "brandName": "Medicube",
+        "price": 1790,
+        "mrp": 3050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc21c63dd531aa8db9b6",
+        "name": "Byphasse Purifying Cleansing Gel 200ml",
+        "catName": "Cleanser",
+        "brandName": "",
+        "price": 830,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc49c63dd531aa8dba47",
+        "name": "SKIN1004 Madagascar Centella Tone Brightening Cleansing Gel Foam 125ml",
+        "catName": "Cleanser",
+        "brandName": "SKIN1004",
+        "price": 1330,
+        "mrp": 2400,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc49c63dd531aa8dba45",
+        "name": "Nature Skin Salicylic Acid Exfoliating Gentle Cleanser-152ml",
+        "catName": "Cleanser",
+        "brandName": "",
+        "price": 780,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc3bc63dd531aa8dba19",
+        "name": "Cathy Doll AloeHa Fresh Aloe Vera Soothing Cleansing Gel 120ml",
+        "catName": "Cleanser",
+        "brandName": "",
+        "price": 550,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abda3c63dd531aa8dbee3",
+        "name": "Cerave Hydrating Facial Cleanser for Normal to Dry Skin – 355ml",
+        "catName": "Cleanser",
+        "brandName": "CeraVe",
+        "price": 2840,
+        "mrp": 3000,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd8fc63dd531aa8dbeaa",
+        "name": "Laikou Japan Sakura Cleansing Mousse Face Cleanser – 100ml",
+        "catName": "Cleanser",
+        "brandName": "Laikou",
+        "price": 370,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdfac63dd531aa8dc00b",
+        "name": "Face Facts Brightening Strawberry Facial Scrub – 60ml",
+        "catName": "Facial Scrub",
+        "brandName": "",
+        "price": 419,
+        "mrp": 650,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 6,
+    "theme": "Face Toners, Mists & Essences (হাইড্রেটিং টোনার ও স্কিন এসেন্স)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc79c63dd531aa8dbae5",
+        "name": "BIOAQUA Vitamin C Whitening Face Toner 120ml",
+        "catName": "Face Toner",
+        "brandName": "Bioaqua",
+        "price": 470,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcd9c63dd531aa8dbc2e",
+        "name": "SKIN1004 Madagascar Centella Toning Toner – 30ml",
+        "catName": "Face Toner",
+        "brandName": "SKIN1004",
+        "price": 620,
+        "mrp": 950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcabc63dd531aa8dbb95",
+        "name": "Bioaqua Rice Raw Pulm Face Essence Serum 15ml",
+        "catName": "Serum",
+        "brandName": "Bioaqua",
+        "price": 170,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc00c63dd531aa8db941",
+        "name": "LAIKOU Japan Sakura Toner 160ml",
+        "catName": "Face Toner",
+        "brandName": "Laikou",
+        "price": 419,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbfdc63dd531aa8db935",
+        "name": "LAIKOU Rice Milky Toner 100ml",
+        "catName": "Face Care",
+        "brandName": "Laikou",
+        "price": 380,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc15c63dd531aa8db991",
+        "name": "I’M FROM Black Rice Toner 150ml",
+        "catName": "Face Toner",
+        "brandName": "",
+        "price": 1950,
+        "mrp": 3050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdadc63dd531aa8dbf0a",
+        "name": "Organikaon Green Tea Face Mist Toner – 100ml",
+        "catName": "Face Toner",
+        "brandName": "Organikaon",
+        "price": 368,
+        "mrp": 580,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdb3c63dd531aa8dbf1e",
+        "name": "Cosrx AHA/BHA Clarifying Treatment Toner – 150ml",
+        "catName": "Face Toner",
+        "brandName": "Cosrx",
+        "price": 1290,
+        "mrp": 1800,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf7c63dd531aa8dbfff",
+        "name": "Fenyi Green Tea Face Toner – 100ml",
+        "catName": "Face Toner",
+        "brandName": "Fenyi",
+        "price": 290,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe02c63dd531aa8dc029",
+        "name": "Rajkonna All Purpose Toner – 120ml",
+        "catName": "Face Toner",
+        "brandName": "Rajkonna",
+        "price": 230,
+        "mrp": 240,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdfec63dd531aa8dc019",
+        "name": "LAIKOU Sakura Toner – 100ml",
+        "catName": "Face Toner",
+        "brandName": "Laikou",
+        "price": 280,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd0ac63dd531aa8dbcdb",
+        "name": "Organikaon Acne Soft Moisture Infusion Toner 100ml",
+        "catName": "Face Toner",
+        "brandName": "Organikaon",
+        "price": 410,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd05c63dd531aa8dbcca",
+        "name": "3w Clinic Crystal White Milky Essence Vitamin+ 150ml",
+        "catName": "Serum",
+        "brandName": "3W Clinic",
+        "price": 1300,
+        "mrp": 1850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd03c63dd531aa8dbcc3",
+        "name": "Organikaon Apple Cider Vinegar Toner 250ml",
+        "catName": "Face Toner",
+        "brandName": "Organikaon",
+        "price": 220,
+        "mrp": 220,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd02c63dd531aa8dbcc1",
+        "name": "SOME BY MI Snail Truecica Miracle Repair Toner – 150ml",
+        "catName": "Face Toner",
+        "brandName": "",
+        "price": 1100,
+        "mrp": 1100,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 7,
+    "theme": "Day Creams & Daily Moisturizers (ডে ক্রিম ও ময়েশ্চারাইজার)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc83c63dd531aa8dbb0e",
+        "name": "Dot & Key Watermelon Cooling Icy Gel Moisturizer 60ml",
+        "catName": "Face Cream",
+        "brandName": "Dot & Key",
+        "price": 910,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc9ac63dd531aa8dbb61",
+        "name": "Ponds Light Moisturiser Cream 25 ml",
+        "catName": "Moisturizers",
+        "brandName": "Ponds",
+        "price": 170,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc91c63dd531aa8dbb42",
+        "name": "Naturie Hatomugi Skin Conditioning Gel – 180g",
+        "catName": "Moisturizers",
+        "brandName": "",
+        "price": 1600,
+        "mrp": 2050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc08c63dd531aa8db95d",
+        "name": "Cos De BAHA CG Centella Gel Cream 45ml",
+        "catName": "gel",
+        "brandName": "Cos De BAHA",
+        "price": 890,
+        "mrp": 890,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc20c63dd531aa8db9b4",
+        "name": "Face Facts Ceramide Moisturising Gel Cream 50ml",
+        "catName": "Face Cream",
+        "brandName": "",
+        "price": 680,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbf7c63dd531aa8db923",
+        "name": "Pond’s Youthful Miracle Retinol Complex Day Cream – 50g",
+        "catName": "Face Cream",
+        "brandName": "",
+        "price": 929,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe15c63dd531aa8dc04d",
+        "name": "Nivea Creme – 60ml",
+        "catName": "Moisturizers",
+        "brandName": "Nivea",
+        "price": 275,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc2bc63dd531aa8db9db",
+        "name": "LAIKOU Japan Sakura Day Cream 30g",
+        "catName": "Face Cream",
+        "brandName": "Laikou",
+        "price": 370,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc2ec63dd531aa8db9e5",
+        "name": "Laikou Rice Moisturizer Cream Hydration Rice – 30g",
+        "catName": "Face Cream",
+        "brandName": "Laikou",
+        "price": 320,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc21c63dd531aa8db9b8",
+        "name": "Byphasse Q10 Hydra’confort Cream Day Cream 60ml",
+        "catName": "Moisturizers",
+        "brandName": "",
+        "price": 880,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe15c63dd531aa8dc04e",
+        "name": "Nivea Soft Light Moisturising Cream – 100ml",
+        "catName": "Moisturizers",
+        "brandName": "Nivea",
+        "price": 460,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd86c63dd531aa8dbe8a",
+        "name": "CeraVe Moisturizing Cream For Normal To Dry Skin – 56ml",
+        "catName": "Moisturizers",
+        "brandName": "CeraVe",
+        "price": 1145,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd79c63dd531aa8dbe5c",
+        "name": "Ponds Light Moisturiser – 100ml (BD)",
+        "catName": "Moisturizers",
+        "brandName": "Ponds",
+        "price": 275,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abde1c63dd531aa8dbfad",
+        "name": "Simple Kind to Skin Vital Vitamin Day Cream SPF15 – 50ml",
+        "catName": "Face Cream",
+        "brandName": "Simple",
+        "price": 715,
+        "mrp": 950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcecc63dd531aa8dbc68",
+        "name": "Lakme Perfect Radiance Day Cream – 50g",
+        "catName": "Face Cream",
+        "brandName": "",
+        "price": 629,
+        "mrp": 750,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 8,
+    "theme": "Night Creams, Sleeping Packs & Eye Creams (নাইট কেয়ার ও স্লিপিং প্যাক)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc2dc63dd531aa8db9e3",
+        "name": "Laikou Rice Eye Cream 20g",
+        "catName": "Eye Care",
+        "brandName": "Laikou",
+        "price": 260,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdc9c63dd531aa8dbf65",
+        "name": "Laikou Snail Sleeping Mask -3gm -5pcs",
+        "catName": "Face Mask",
+        "brandName": "Laikou",
+        "price": 95,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdefc63dd531aa8dbfe1",
+        "name": "Fenyi Green Tea Eye Cream  – 15gm",
+        "catName": "Eye Care",
+        "brandName": "Fenyi",
+        "price": 170,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdd8c63dd531aa8dbf8f",
+        "name": "FENYI Cherry Blossom Eye Cream 15gm",
+        "catName": "Eye Care",
+        "brandName": "Fenyi",
+        "price": 145,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdd7c63dd531aa8dbf8d",
+        "name": "Fenyi Cherry Blossom Sleeping Mask 3gm",
+        "catName": "Sleeping Mask",
+        "brandName": "Fenyi",
+        "price": 30,
+        "mrp": 50,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdd6c63dd531aa8dbf8b",
+        "name": "Laikou Sakura and Matcha Sleeping Mask [3gm +3gm]",
+        "catName": "Sleeping Mask",
+        "brandName": "Laikou",
+        "price": 40,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdcec63dd531aa8dbf6f",
+        "name": "LAIKOU Skin Rejuvenation Sleeping Mask 3gm",
+        "catName": "Face Mask",
+        "brandName": "Laikou",
+        "price": 25,
+        "mrp": 50,
+        "stock": 25
+      },
+      {
+        "id": "6a9abde5c63dd531aa8dbfbd",
+        "name": "Laikou Frozen Sleeping Mask – 3ml",
+        "catName": "Face Mask",
+        "brandName": "Laikou",
+        "price": 30,
+        "mrp": 50,
+        "stock": 25
+      },
+      {
+        "id": "6a9abde4c63dd531aa8dbfb9",
+        "name": "Laikou Seaweed Sleeping Mask – 3gm",
+        "catName": "Face Mask",
+        "brandName": "Laikou",
+        "price": 25,
+        "mrp": 50,
+        "stock": 25
+      },
+      {
+        "id": "6a9abddec63dd531aa8dbf9f",
+        "name": "LAIKOU Sakura Sleeping Mask 3gm – 15 pcs",
+        "catName": "Face Mask",
+        "brandName": "Laikou",
+        "price": 260,
+        "mrp": 500,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba19c63dd531aa8db35d",
+        "name": "Mary&May Tranexamic Acid + Glutathione Eye Cream – 12g",
+        "catName": "Eye Care",
+        "brandName": "",
+        "price": 470,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba5dc63dd531aa8db452",
+        "name": "LAIKOU Sakura Eye Cream – 15g",
+        "catName": "Health & Beauty",
+        "brandName": "Laikou",
+        "price": 140,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9a5c63dd531aa8db1bc",
+        "name": "Arencia TXA Booster Shot for Face and Eye Cream Moisturizer 30ml",
+        "catName": "Eye Care",
+        "brandName": "",
+        "price": 1650,
+        "mrp": 2000,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9ecc63dd531aa8db2c4",
+        "name": "Fenyi Green Tea Sleeping Mask 3gm",
+        "catName": "Sleeping Mask",
+        "brandName": "Fenyi",
+        "price": 30,
+        "mrp": 50,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9c5c63dd531aa8db231",
+        "name": "KSECRET SEOUL 1988 Eye Cream: Retinal Liposome 4% + Fermented Bean 30ml",
+        "catName": "Eye Care",
+        "brandName": "",
+        "price": 1430,
+        "mrp": 2050,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 9,
+    "theme": "Acne Fighting & Spot Treatment (ব্রণ ও দাগ রিমুভাল কেয়ার)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc62c63dd531aa8dba90",
+        "name": "Zafran Neem & Aloe Vera Acne Glycerin Soap – 100gm",
+        "catName": "Soap",
+        "brandName": "Zafran",
+        "price": 190,
+        "mrp": 240,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc62c63dd531aa8dba8f",
+        "name": "Zafran Vitamin E & Salicylic Glycerin Soap – 100gm",
+        "catName": "Soap",
+        "brandName": "Zafran",
+        "price": 190,
+        "mrp": 190,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcc1c63dd531aa8dbbe3",
+        "name": "Breylee Tea Tree Blackhead Removing Kit 3in1",
+        "catName": "Serum",
+        "brandName": "Breylee",
+        "price": 610,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcc0c63dd531aa8dbbe0",
+        "name": "Gigi Rose Blemish Bb Cream 13 50g",
+        "catName": "BB Cream",
+        "brandName": "",
+        "price": 185,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcd7c63dd531aa8dbc27",
+        "name": "SKIN1004 Madagascar Centella Hyalu-Cica Moisture Cream 75ml",
+        "catName": "Face Cream",
+        "brandName": "SKIN1004",
+        "price": 1799,
+        "mrp": 1799,
+        "stock": 25
+      },
+      {
+        "id": "6a9abca9c63dd531aa8dbb8c",
+        "name": "LAIKOU Japan Sakura Dark Spot Corrector Cream 50g",
+        "catName": "Face Cream",
+        "brandName": "Laikou",
+        "price": 580,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcb8c63dd531aa8dbbc2",
+        "name": "Medipeel Melanon X Dark Spot & Blemish Care Solution Cream 30ml",
+        "catName": "Face Cream",
+        "brandName": "",
+        "price": 1029,
+        "mrp": 1450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc31c63dd531aa8db9ee",
+        "name": "Laikou Sakura Pimple Patch Day & Night – 24 Patches",
+        "catName": "Acne Care",
+        "brandName": "Laikou",
+        "price": 160,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd8dc63dd531aa8dbe9e",
+        "name": "Laikou Bye Bye Acne Tea Tree Gel – 15g",
+        "catName": "gel",
+        "brandName": "Laikou",
+        "price": 175,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf7c63dd531aa8dc003",
+        "name": "Breylee Tea Tree Capsule Cream 30g",
+        "catName": "Acne Care",
+        "brandName": "Breylee",
+        "price": 580,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf1c63dd531aa8dbfe9",
+        "name": "Fenyi Tea Tree Acne Repairing Gel – 20g",
+        "catName": "Acne Care",
+        "brandName": "Fenyi",
+        "price": 190,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdffc63dd531aa8dc01f",
+        "name": "Groome Tea Tree Nose Strips – 6pcs Set",
+        "catName": "Blackhead Mask",
+        "brandName": "",
+        "price": 165,
+        "mrp": 195,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdfcc63dd531aa8dc00d",
+        "name": "Skinpro Ultimate Acne Gel – 15ml",
+        "catName": "gel",
+        "brandName": "",
+        "price": 195,
+        "mrp": 225,
+        "stock": 25
+      },
+      {
+        "id": "6a9abde6c63dd531aa8dbfc3",
+        "name": "Laikou Aloe Vera Acne Removal Gel – 20g",
+        "catName": "Acne Care",
+        "brandName": "Laikou",
+        "price": 190,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abde4c63dd531aa8dbfb7",
+        "name": "Laikou Japan Sakura Lotion Reduce Body Spots – 100ml",
+        "catName": "Lotion",
+        "brandName": "Laikou",
+        "price": 290,
+        "mrp": 550,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 10,
+    "theme": "Sheet Masks & Hydration Packs (ইনস্ট্যান্ট গ্লো শিট মাস্ক)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abca0c63dd531aa8dbb70",
+        "name": "3W Clinic Fresh Aloe Sheet Mask",
+        "catName": "Face Mask",
+        "brandName": "3W Clinic",
+        "price": 95,
+        "mrp": 150,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcdec63dd531aa8dbc34",
+        "name": "BIOAQUA Lavender Relive Face Sheet Mask",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 150,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc1ac63dd531aa8db99d",
+        "name": "Bioaqua Caviar Fullene Sheet Mask 25g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd96c63dd531aa8dbebc",
+        "name": "Bioaqua Aloe Vera Moisturizing Sheet Mask 25g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 150,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd95c63dd531aa8dbeba",
+        "name": "BIOAQUA Strawberry Tender and Smooth Sheet Mask – 25g",
+        "catName": "Accessories",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd95c63dd531aa8dbeb8",
+        "name": "BIOAQUA Blueberry Moisturizing Sheet Mask – 25g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd94c63dd531aa8dbeb4",
+        "name": "BIOAQUA Cucumber Moisturizing Sheet Mask – 25g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 150,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd54c63dd531aa8dbde9",
+        "name": "Laikou Sakura Moisturizing Sheet Mask – 25g",
+        "catName": "Face Mask",
+        "brandName": "Laikou",
+        "price": 70,
+        "mrp": 150,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba26c63dd531aa8db38d",
+        "name": "Bioaqua Rose Essence Brighten Skin Sheet Mask – 25g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 150,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba1cc63dd531aa8db364",
+        "name": "Bioaqua Vitamin C Brighten Sheet Mask Orange – 25g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba20c63dd531aa8db378",
+        "name": "Bioaqua Grape Seed Antioxidant Hydrating Facial Sheet Mask 25g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba51c63dd531aa8db423",
+        "name": "Bioaqua Red Pomegranate Sheet Mask Moisturizing Face – 25g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9b1c63dd531aa8db1e9",
+        "name": "BIOAQUA Green Tea Moisturizing Sheet Mask",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab985c63dd531aa8db124",
+        "name": "Bioaqua Kiwi Fruit Brighten Skin Face Sheet Mask",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 55,
+        "mrp": 100,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe2cc63dd531aa8dc09c",
+        "name": "Bioaqua Acne Removal ( Pure Skin ) Acne Rejuvenation Moisturizing Sheet Mask",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 70,
+        "mrp": 150,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 11,
+    "theme": "Clay, Mud & Peel-Off Masks (ক্লে ও পিল-অফ ডিপ ক্লিন মাস্ক)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abcafc63dd531aa8dbba2",
+        "name": "Face Facts Brightening Cucumber Clay Face Mask 60ML",
+        "catName": "Face Mask",
+        "brandName": "",
+        "price": 419,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcbbc63dd531aa8dbbcc",
+        "name": "Bioaqua Peach Extract Fruit Exfoliating Face Gel 140g",
+        "catName": "Face Mask",
+        "brandName": "Bioaqua",
+        "price": 350,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcb2c63dd531aa8dbbaa",
+        "name": "Face Facts Green Tea Illuminating Jelly Mask – 60ml",
+        "catName": "Face Mask",
+        "brandName": "",
+        "price": 419,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcafc63dd531aa8dbba4",
+        "name": "Face Facts Brightening Watermelon Peel Off Mask – 60ml",
+        "catName": "Face Mask",
+        "brandName": "",
+        "price": 419,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbf5c63dd531aa8db91d",
+        "name": "LAIKOU Milk Hydrating Mud Mask 90g (Triple Mineral Clay)",
+        "catName": "Skin Care",
+        "brandName": "Laikou",
+        "price": 270,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe12c63dd531aa8dc049",
+        "name": "Laikou Matcha Sleeping Face Mask 3gm",
+        "catName": "Face Mask",
+        "brandName": "Laikou",
+        "price": 25,
+        "mrp": 50,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdaac63dd531aa8dbf01",
+        "name": "Ribana Kojic Brightening Face Pack 50g",
+        "catName": "Face Mask",
+        "brandName": "Ribana",
+        "price": 515,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdaac63dd531aa8dbefe",
+        "name": "Ribana Activated Charcoal Face Pack 50gm",
+        "catName": "Face Mask",
+        "brandName": "Ribana",
+        "price": 335,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdaac63dd531aa8dbefd",
+        "name": "Ribana Saffron Glowing face Pack 50gm",
+        "catName": "Face Mask",
+        "brandName": "Ribana",
+        "price": 515,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abda9c63dd531aa8dbefb",
+        "name": "Ribana Almond Face & Body Scrub 50g",
+        "catName": "Face Mask",
+        "brandName": "Ribana",
+        "price": 615,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abda8c63dd531aa8dbef7",
+        "name": "Ribana Sandal Wood Face Pack 50g",
+        "catName": "Face Mask",
+        "brandName": "Ribana",
+        "price": 335,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdc0c63dd531aa8dbf45",
+        "name": "CeraVe Hydrating Cleanser For Normal To Dry Skin – 236ml",
+        "catName": "Face Mask",
+        "brandName": "CeraVe",
+        "price": 1999,
+        "mrp": 3900,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdb4c63dd531aa8dbf21",
+        "name": "Laikou 24k Gold Tearing Mask – 50g",
+        "catName": "Face Mask",
+        "brandName": "Laikou",
+        "price": 180,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf9c63dd531aa8dc007",
+        "name": "Face Facts Seaweed Mud Mask Refreshing Smooth 60ml",
+        "catName": "Face Mask",
+        "brandName": "",
+        "price": 419,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf9c63dd531aa8dc008",
+        "name": "Face Facts Cucumber Mud mask deep Cleansing 60ml",
+        "catName": "Face Mask",
+        "brandName": "",
+        "price": 419,
+        "mrp": 550,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 12,
+    "theme": "Classic Matte & Velvet Lipsticks (ম্যাট ও ভেলভেট লিপস্টিক)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc94c63dd531aa8dbb48",
+        "name": "Beauty Glazed Modern Matte Long Lasting Lipstick 107",
+        "catName": "Lipsticks",
+        "brandName": "Beauty Glazed",
+        "price": 170,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc99c63dd531aa8dbb5a",
+        "name": "Swiss Beauty Pure Matte Lipstick Magic Maroon 211",
+        "catName": "Lipsticks",
+        "brandName": "Swiss Beauty",
+        "price": 300,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc9bc63dd531aa8dbb64",
+        "name": "Swiss Beauty Matte Cat Lip Crayon Flattering Peach 5",
+        "catName": "Lipsticks",
+        "brandName": "Swiss Beauty",
+        "price": 340,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc66c63dd531aa8dbaa3",
+        "name": "Imagic Waterproof Matte Long Lasting Lipstick 810 Chilli",
+        "catName": "Lipsticks",
+        "brandName": "Imagic",
+        "price": 305,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcc5c63dd531aa8dbbf3",
+        "name": "Beauty Glazed Matte Lipstick – Wicked 114",
+        "catName": "Lipsticks",
+        "brandName": "Beauty Glazed",
+        "price": 155,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbe6c63dd531aa8db8f9",
+        "name": "Mars Matte Lipsticks Blushed Nudes 05",
+        "catName": "Lipsticks",
+        "brandName": "MARS",
+        "price": 580,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbe5c63dd531aa8db8f7",
+        "name": "Mars Matte Lipsticks Peaches and Nudes 02",
+        "catName": "Lipsticks",
+        "brandName": "MARS",
+        "price": 580,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc54c63dd531aa8dba6b",
+        "name": "SHEGLAM Ember Rose Long Lasting Matte Lipstick – Passion",
+        "catName": "Lipsticks",
+        "brandName": "Sheglam",
+        "price": 1029,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc52c63dd531aa8dba5d",
+        "name": "Sheglam Dynamatte Boom Long Lasting Matte Lipstick – A Bold Plan",
+        "catName": "Lipsticks",
+        "brandName": "Sheglam",
+        "price": 1029,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd99c63dd531aa8dbec8",
+        "name": "Beauty Glazed Velvet Supper Matte Lipstick – 358",
+        "catName": "Lipsticks",
+        "brandName": "Beauty Glazed",
+        "price": 175,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbd1c63dd531aa8db8cd",
+        "name": "Mars Matte Lipsticks All Rounder 06",
+        "catName": "Lipsticks",
+        "brandName": "MARS",
+        "price": 580,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd02c63dd531aa8dbcbb",
+        "name": "Handaiyan Matte Lip Cheek Mud 04",
+        "catName": "Lipsticks",
+        "brandName": "Handaiyan",
+        "price": 175,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9b5c63dd531aa8db1f4",
+        "name": "MARS Matte Mousse Lipstick Runway Queen 14",
+        "catName": "Lipsticks",
+        "brandName": "MARS",
+        "price": 390,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abb35c63dd531aa8db6f7",
+        "name": "MARS Creamy Matte Long Lasting Lipstick -01 kathak Kween",
+        "catName": "Lipsticks",
+        "brandName": "MARS",
+        "price": 260,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abb9ec63dd531aa8db829",
+        "name": "BRIBRI Soft Matte & Easy Lipstick Set",
+        "catName": "Lipsticks",
+        "brandName": "",
+        "price": 929,
+        "mrp": 1500,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 13,
+    "theme": "Liquid Lipsticks & Lip Liners (লিকুইড লিপস্টিক ও লিপ লাইনার)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc82c63dd531aa8dbb07",
+        "name": "Beauty Glazed Waterproof & Long Lasting Lip Liner Pencil-B111 expose",
+        "catName": "Lip Liner",
+        "brandName": "Beauty Glazed",
+        "price": 120,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc73c63dd531aa8dbace",
+        "name": "Swiss Beauty Bold Matt Lipliner Cherry Brown 06",
+        "catName": "Lip Liner",
+        "brandName": "Swiss Beauty",
+        "price": 100,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd71c63dd531aa8dbe41",
+        "name": "Beauty Glazed Lip Liner Waterproof & Long Lasting – B101 Nude",
+        "catName": "Lip Liner",
+        "brandName": "Beauty Glazed",
+        "price": 120,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd1dc63dd531aa8dbd1f",
+        "name": "SHEGLAM Matte Liquid Lipstick – Damsel",
+        "catName": "Lipsticks",
+        "brandName": "Sheglam",
+        "price": 729,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd15c63dd531aa8dbcfd",
+        "name": "Swiss Beauty Lipliner Set Bold Matte 12 Pcs",
+        "catName": "Lip Liner",
+        "brandName": "Swiss Beauty",
+        "price": 880,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcf8c63dd531aa8dbc96",
+        "name": "Swiss Beauty Matte Liquid Lipstick Nude Bomb 27",
+        "catName": "Lipsticks",
+        "brandName": "Swiss Beauty",
+        "price": 260,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe10c63dd531aa8dc043",
+        "name": "Wet N Wild Liquid Lipstick – Berry Recognize",
+        "catName": "Lipsticks",
+        "brandName": "Wet n Wild",
+        "price": 290,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba21c63dd531aa8db37f",
+        "name": "Beauty Glazed Waterproof Lip Liner 18 Shade",
+        "catName": "Lip Liner",
+        "brandName": "Beauty Glazed",
+        "price": 120,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba9ac63dd531aa8db522",
+        "name": "Imagic Waterproof Long Lasting Lip LINER Clay Mirage 2301",
+        "catName": "Lip Liner",
+        "brandName": "Imagic",
+        "price": 175,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab988c63dd531aa8db138",
+        "name": "Beauty Glazed Matte Liquid Lipstick – Waterproof (Mini)",
+        "catName": "Lipsticks",
+        "brandName": "Beauty Glazed",
+        "price": 85,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abb56c63dd531aa8db754",
+        "name": "MARS Lipliner Lusty Pink 01",
+        "catName": "Lip Liner",
+        "brandName": "MARS",
+        "price": 110,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbcdc63dd531aa8db8b8",
+        "name": "MARS Lipliner Blood Steamy Pink 09",
+        "catName": "Lip Liner",
+        "brandName": "MARS",
+        "price": 110,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbcfc63dd531aa8db8c4",
+        "name": "MARS Lipliner Blood Nude Spell 08",
+        "catName": "Lip Liner",
+        "brandName": "MARS",
+        "price": 110,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbcdc63dd531aa8db8bd",
+        "name": "MARS Lipliner Blood Spiced Cranberry 11",
+        "catName": "Lip Liner",
+        "brandName": "MARS",
+        "price": 110,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbcbc63dd531aa8db8b5",
+        "name": "MARS Lipliner Blood Barbie Bold 17",
+        "catName": "Lip Liner",
+        "brandName": "MARS",
+        "price": 110,
+        "mrp": 200,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 14,
+    "theme": "Lip Gloss, Lip Oils & Tinted Balms (লিপ গ্লস, লিপ অয়েল ও নারিশিং বাম)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc73c63dd531aa8dbad1",
+        "name": "Swiss Beauty Kiss Kandy Lip Balm Coffee Beans",
+        "catName": "Lip Care",
+        "brandName": "Swiss Beauty",
+        "price": 220,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcc4c63dd531aa8dbbee",
+        "name": "Beauty Glazed Glow Lip Oil – Love 104",
+        "catName": "Lip Oil",
+        "brandName": "Beauty Glazed",
+        "price": 160,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcacc63dd531aa8dbb98",
+        "name": "Technic Sundrenched Butter Me Up Lip Balm Tint – Bare Necessity",
+        "catName": "Lip Balm",
+        "brandName": "Technic",
+        "price": 300,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc0bc63dd531aa8db963",
+        "name": "Dot & Key Barrier Repair Hydrating Lip Balm SPF 50+ PA+++ – Blueberry Bliss (Non-Tinted)",
+        "catName": "Lip Care",
+        "brandName": "Dot & Key",
+        "price": 440,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc1ec63dd531aa8db9ab",
+        "name": "W7 Thick Drip Lip Gloss Foolish",
+        "catName": "Lipsticks",
+        "brandName": "W7",
+        "price": 410,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbd9c63dd531aa8db8e5",
+        "name": "Beauty Glazed Hot And Spicy Rich Lip Gloss Rosy 103",
+        "catName": "Lip Oil",
+        "brandName": "Beauty Glazed",
+        "price": 180,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbecc63dd531aa8db907",
+        "name": "Laikou Japan Sakura Hydrating Lip Mask 6g (Smooth Lip Lines)",
+        "catName": "Lip Care",
+        "brandName": "Laikou",
+        "price": 35,
+        "mrp": 50,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbe9c63dd531aa8db900",
+        "name": "Beauty Glazed Moisturizing Lip Oil – 101",
+        "catName": "Lip Oil",
+        "brandName": "Beauty Glazed",
+        "price": 190,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc28c63dd531aa8db9ce",
+        "name": "Sadoer Moisturizing Avocado Lip Oil 8ml",
+        "catName": "Lip Oil",
+        "brandName": "",
+        "price": 130,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc23c63dd531aa8db9c0",
+        "name": "Technic Clear Lip Gloss 5ml",
+        "catName": "Lipsticks",
+        "brandName": "Technic",
+        "price": 320,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc35c63dd531aa8db9fd",
+        "name": "Beauty Glazed Lip Oil Cool Chillz – 105 Intense Rosewood",
+        "catName": "Lip Oil",
+        "brandName": "Beauty Glazed",
+        "price": 150,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd0ec63dd531aa8dbceb",
+        "name": "Swiss Beauty Lip Oil Strawberry Dip Tint – 01",
+        "catName": "Face Care",
+        "brandName": "Swiss Beauty",
+        "price": 280,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd0dc63dd531aa8dbce6",
+        "name": "Swiss Beauty Lip Balm – Cherry",
+        "catName": "Lip Care",
+        "brandName": "Swiss Beauty",
+        "price": 220,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd0cc63dd531aa8dbce3",
+        "name": "Fafamoon Peptide Lip Tint Toast 02",
+        "catName": "Lip Care",
+        "brandName": "",
+        "price": 160,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd05c63dd531aa8dbcc8",
+        "name": "Dot & Key Lip Balm Cherry Pop Vitamin C + E SPF 30 12gm",
+        "catName": "Lip Balm",
+        "brandName": "Dot & Key",
+        "price": 440,
+        "mrp": 550,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 15,
+    "theme": "Flawless Foundations & BB/CC Creams (বেস ফাউন্ডেশন ও বিবি ক্রিম)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc8bc63dd531aa8dbb2c",
+        "name": "Sheglam Skinfinite Hydrating Foundation – Nude",
+        "catName": "Foundation",
+        "brandName": "Sheglam",
+        "price": 1650,
+        "mrp": 2240,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc9cc63dd531aa8dbb66",
+        "name": "Swiss Beauty Full Coverage Foundation – Shell White",
+        "catName": "Foundation",
+        "brandName": "Swiss Beauty",
+        "price": 560,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc76c63dd531aa8dbadd",
+        "name": "Bioaqua BB Cream – Natural 01",
+        "catName": "BB Cream",
+        "brandName": "Bioaqua",
+        "price": 230,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc74c63dd531aa8dbad7",
+        "name": "Bioaqua BB Cream – Ivory White 02",
+        "catName": "BB Cream",
+        "brandName": "Bioaqua",
+        "price": 230,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc01c63dd531aa8db943",
+        "name": "Swiss Beauty Studio Finish Full Coverage Foundation Ivory Rose 01 – 30ml",
+        "catName": "Foundation",
+        "brandName": "Swiss Beauty",
+        "price": 829,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdc3c63dd531aa8dbf4d",
+        "name": "Wet N Wild Dewy Foundation – Soft Beige",
+        "catName": "Foundation",
+        "brandName": "Wet n Wild",
+        "price": 890,
+        "mrp": 980,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd77c63dd531aa8dbe53",
+        "name": "Imagic BB Cream SPF 30PA ++ – Natural 1424",
+        "catName": "BB Cream",
+        "brandName": "Imagic",
+        "price": 295,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd97c63dd531aa8dbec0",
+        "name": "Laikou BB Cream – 50g Dark",
+        "catName": "BB Cream",
+        "brandName": "Laikou",
+        "price": 230,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf4c63dd531aa8dbffa",
+        "name": "W7 HD Foundation 12 Hour – Honey",
+        "catName": "Foundation",
+        "brandName": "W7",
+        "price": 610,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf3c63dd531aa8dbff0",
+        "name": "W7 HD Foundation – Butter Cream",
+        "catName": "Foundation",
+        "brandName": "W7",
+        "price": 610,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe0ac63dd531aa8dc02e",
+        "name": "Wet N Wild Photo Focus Dewy Foundation – Golden Beige",
+        "catName": "Foundation",
+        "brandName": "Wet n Wild",
+        "price": 750,
+        "mrp": 980,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd15c63dd531aa8dbcff",
+        "name": "Swiss Beauty BB Cream – 02",
+        "catName": "BB Cream",
+        "brandName": "Swiss Beauty",
+        "price": 309,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd53c63dd531aa8dbde7",
+        "name": "Laikou CC Cream SPF15 Natural 240",
+        "catName": "BB Cream",
+        "brandName": "Laikou",
+        "price": 170,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd27c63dd531aa8dbd41",
+        "name": "LAIKOU Sakura Foundation Natural Flawless Finish SPF15 PA++ – 240",
+        "catName": "Foundation",
+        "brandName": "Laikou",
+        "price": 190,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd27c63dd531aa8dbd40",
+        "name": "LAIKOU Sakura Foundation Ivory Flawless Finish SPF15 PA++ – 110 Ivory",
+        "catName": "Foundation",
+        "brandName": "Laikou",
+        "price": 190,
+        "mrp": 350,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 16,
+    "theme": "Primers, Concealers & Correctors (প্রাইমার, কনসিলার ও কালার কারেক্টর)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc7fc63dd531aa8dbaff",
+        "name": "Imagic Concealer Warm Ivory 1223",
+        "catName": "Concealer & Corrector",
+        "brandName": "Imagic",
+        "price": 210,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcd1c63dd531aa8dbc1e",
+        "name": "Beauty Glazed Luxury Moist Soft Makeup Primer – 20gm",
+        "catName": "Face Primer",
+        "brandName": "Beauty Glazed",
+        "price": 290,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcd0c63dd531aa8dbc1a",
+        "name": "Swiss Beauty Select Blur It All Primer – 25ml",
+        "catName": "Primer",
+        "brandName": "Swiss Beauty",
+        "price": 515,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abccfc63dd531aa8dbc15",
+        "name": "W7 HD Concealer – Fair Neutral",
+        "catName": "Concealer",
+        "brandName": "W7",
+        "price": 460,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcbcc63dd531aa8dbbd0",
+        "name": "Beauty Glazed Soft Phantom Concealer 6 Color Palette 402",
+        "catName": "Concealer & Corrector",
+        "brandName": "Beauty Glazed",
+        "price": 340,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc19c63dd531aa8db999",
+        "name": "Beauty Glazed Luxury Raise Soft Make Up Primer – 20g",
+        "catName": "Face Primer",
+        "brandName": "Beauty Glazed",
+        "price": 290,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc0cc63dd531aa8db96d",
+        "name": "Swiss Beauty Liquid Concealer – 01 Warm Sand",
+        "catName": "Concealer & Corrector",
+        "brandName": "Swiss Beauty",
+        "price": 320,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe18c63dd531aa8dc053",
+        "name": "W7 Prime Magic Clear Face Primer",
+        "catName": "Face Primer",
+        "brandName": "W7",
+        "price": 510,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd99c63dd531aa8dbeca",
+        "name": "Beauty Glazed Full Coverage Concealer – 402",
+        "catName": "Concealer & Corrector",
+        "brandName": "Beauty Glazed",
+        "price": 190,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdbbc63dd531aa8dbf3a",
+        "name": "IMAGIC Concealer & Correcter Fair Light – 1222",
+        "catName": "Concealer & Corrector",
+        "brandName": "Imagic",
+        "price": 210,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdbac63dd531aa8dbf33",
+        "name": "IMAGIC Concealer & Correcter Natural Beige – 1224",
+        "catName": "Concealer & Corrector",
+        "brandName": "Imagic",
+        "price": 210,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf3c63dd531aa8dbfef",
+        "name": "W7 HD Concealer Light Warm – LW5",
+        "catName": "Concealer",
+        "brandName": "W7",
+        "price": 460,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe0ac63dd531aa8dc02d",
+        "name": "Technic Glitter Primer 10ml",
+        "catName": "Face Primer",
+        "brandName": "Technic",
+        "price": 260,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdffc63dd531aa8dc01d",
+        "name": "L.A. Girl Pro Concealer Orange",
+        "catName": "Concealer",
+        "brandName": "L.A. Girl",
+        "price": 500,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdfcc63dd531aa8dc011",
+        "name": "Wet n Wild Prime Focus Primer Serum – 30ml",
+        "catName": "Face Primer",
+        "brandName": "Wet n Wild",
+        "price": 880,
+        "mrp": 1250,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 17,
+    "theme": "Compact, Loose Powder & Makeup Fixers (পাউডার ও সেটিং স্প্রে)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc88c63dd531aa8dbb20",
+        "name": "Swiss Beauty Matte Pressed Powder Very Natural 02",
+        "catName": "Pressed Powder",
+        "brandName": "Swiss Beauty",
+        "price": 470,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc6bc63dd531aa8dbab0",
+        "name": "Beauty Glazed Soft Focus Pressed Powder – 103",
+        "catName": "Pressed Powder",
+        "brandName": "Beauty Glazed",
+        "price": 370,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbf3c63dd531aa8db91b",
+        "name": "Swiss Beauty Silky & Smooth Oil Control Pressed Powder Compact with SPF 15 – Nude Beige 01",
+        "catName": "Pressed Powder",
+        "brandName": "Swiss Beauty",
+        "price": 500,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc45c63dd531aa8dba38",
+        "name": "Beauty Glazed Oil-control Loose Powder Pearl 104",
+        "catName": "Loose Powder",
+        "brandName": "Beauty Glazed",
+        "price": 400,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdb1c63dd531aa8dbf16",
+        "name": "W7 The Dewy Fixer Setting Spray – 60ml",
+        "catName": "Makeup Setting Spray",
+        "brandName": "W7",
+        "price": 500,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdfdc63dd531aa8dc015",
+        "name": "J Cat Indense Mineral Compact Powder – Icp105 Fair Lady",
+        "catName": "Pressed Powder",
+        "brandName": "",
+        "price": 580,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd0fc63dd531aa8dbcef",
+        "name": "Sasi Sun Cool Loose Powder SPF35 PA+++ 50gm",
+        "catName": "Loose Powder",
+        "brandName": "",
+        "price": 290,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd18c63dd531aa8dbd0d",
+        "name": "Swiss Beauty Banana Loose Powder – 28g",
+        "catName": "Loose Powder",
+        "brandName": "Swiss Beauty",
+        "price": 400,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd5fc63dd531aa8dbe08",
+        "name": "Technic Matte Setting Spray – 31ml",
+        "catName": "Makeup Setting Spray",
+        "brandName": "Technic",
+        "price": 400,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd3ac63dd531aa8dbd87",
+        "name": "Swiss Beauty Makeup Fixer Natural Dewy Finish Setting Spray – 70 Ml",
+        "catName": "Makeup Setting Spray",
+        "brandName": "Swiss Beauty",
+        "price": 410,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba1ec63dd531aa8db36b",
+        "name": "MARS Oil Blotter Gel Compact",
+        "catName": "Pressed Powder",
+        "brandName": "MARS",
+        "price": 490,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba5ac63dd531aa8db449",
+        "name": "W7 The Matte Fixer – 60ml",
+        "catName": "Makeup Setting Spray",
+        "brandName": "W7",
+        "price": 470,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9a4c63dd531aa8db1b5",
+        "name": "W7 Banana Dreams Loose Powder – 20gm",
+        "catName": "Loose Powder",
+        "brandName": "W7",
+        "price": 500,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9a8c63dd531aa8db1c1",
+        "name": "Beauty Glazed Banana Loose Powder Luxury 15g",
+        "catName": "Loose Powder",
+        "brandName": "Beauty Glazed",
+        "price": 410,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9e9c63dd531aa8db2c1",
+        "name": "IMAGIC Pressed Powder Studio Fix Compact – Nude 3",
+        "catName": "Pressed Powder",
+        "brandName": "Imagic",
+        "price": 295,
+        "mrp": 550,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 18,
+    "theme": "Blushes, Highlighters & Contours (ব্লাশ, হাইলাইটার ও কনট্যুর)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abccdc63dd531aa8dbc0b",
+        "name": "Swiss Beauty Liquid Highlighter Gold – 18ml",
+        "catName": "Highlighter",
+        "brandName": "Swiss Beauty",
+        "price": 405,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc1fc63dd531aa8db9b2",
+        "name": "Technic Colour Fix Contour Palette 8 Color",
+        "catName": "Contour",
+        "brandName": "Technic",
+        "price": 580,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc45c63dd531aa8dba37",
+        "name": "Beauty Glazed Highlighter Palette 4 Color",
+        "catName": "Highlighter",
+        "brandName": "Beauty Glazed",
+        "price": 580,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc2fc63dd531aa8db9e9",
+        "name": "HOJO Luminous Highlighter 03",
+        "catName": "Highlighter",
+        "brandName": "",
+        "price": 390,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdbbc63dd531aa8dbf39",
+        "name": "Technic Color Fix Blush Palette 8 Color –  Fard a Joues",
+        "catName": "Blush",
+        "brandName": "Technic",
+        "price": 580,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd68c63dd531aa8dbe23",
+        "name": "Technic Highlighter Wand Enlumineur – 9ml",
+        "catName": "Highlighter",
+        "brandName": "Technic",
+        "price": 370,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd20c63dd531aa8dbd27",
+        "name": "Sheglam Liquid Highlighter – Vanilla Frost",
+        "catName": "Highlighter",
+        "brandName": "Sheglam",
+        "price": 770,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd1fc63dd531aa8dbd25",
+        "name": "SHEGLAM Color Bloom Liquid Blush – Night Drive",
+        "catName": "Blush",
+        "brandName": "Sheglam",
+        "price": 770,
+        "mrp": 1080,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcefc63dd531aa8dbc72",
+        "name": "Swiss Beauty cheek a boo palette Palette Blusher, Contour, Highlighter 02",
+        "catName": "Blush",
+        "brandName": "Swiss Beauty",
+        "price": 395,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcf1c63dd531aa8dbc7a",
+        "name": "Swiss Beauty Cream It Up Blusher Natural Flush 02",
+        "catName": "Blush",
+        "brandName": "Swiss Beauty",
+        "price": 295,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abceec63dd531aa8dbc6d",
+        "name": "Swiss Beauty 3 in 1 face Palette Blusher, Contour, Highlighter 03",
+        "catName": "Blush",
+        "brandName": "Swiss Beauty",
+        "price": 395,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcfdc63dd531aa8dbca9",
+        "name": "Handaiyan Mouse Liquid Blush – Mystery 05",
+        "catName": "Blush",
+        "brandName": "Handaiyan",
+        "price": 185,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd20c63dd531aa8dbd29",
+        "name": "Sheglam Liquid Highlighter – Tea Cake",
+        "catName": "Highlighter",
+        "brandName": "Sheglam",
+        "price": 770,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd52c63dd531aa8dbde3",
+        "name": "GIGI ROSE Luxe Color Blush – 03",
+        "catName": "Blush",
+        "brandName": "",
+        "price": 90,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd5ec63dd531aa8dbe05",
+        "name": "Technic Mega Glow Highlighter Warm Edit",
+        "catName": "Highlighter",
+        "brandName": "Technic",
+        "price": 410,
+        "mrp": 550,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 19,
+    "theme": "Eyeshadow Palettes & Eye Glitters (আইশ্যাডো প্যালেট ও আই গ্লিটার)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc6ec63dd531aa8dbab7",
+        "name": "Beauty Glazed Mix & Match Eyeshadow Palette 68 Colors",
+        "catName": "Eye Shadow",
+        "brandName": "Beauty Glazed",
+        "price": 1310,
+        "mrp": 2050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc73c63dd531aa8dbad3",
+        "name": "Romcom Enchanted Bloom Makeup Book Eyeshadow Palette",
+        "catName": "Lipsticks",
+        "brandName": "",
+        "price": 1349,
+        "mrp": 2050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abca4c63dd531aa8dbb7c",
+        "name": "Swiss Beauty Lustre Eyeshadow Palette Rose N Petals 01",
+        "catName": "Eye Shadow",
+        "brandName": "Swiss Beauty",
+        "price": 370,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abce8c63dd531aa8dbc57",
+        "name": "Swiss Beauty Ultimate Eyeshadow Palette 9 Color 3",
+        "catName": "Eye Shadow",
+        "brandName": "Swiss Beauty",
+        "price": 410,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcadc63dd531aa8dbb9e",
+        "name": "Technic Enamoured Pressed Pigment Eyeshadow Palette",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 620,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcbcc63dd531aa8dbbd1",
+        "name": "IGOODCO Eyeshadow Palette Multi Color 5 in 178 Color",
+        "catName": "Lipsticks",
+        "brandName": "",
+        "price": 1230,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc1bc63dd531aa8db9a3",
+        "name": "Technic 35 Color Eyeshadow Palette Paris",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 1650,
+        "mrp": 3050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe16c63dd531aa8dc051",
+        "name": "Technic Persian Violet Eyeshadow Palette – 15 Color",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 620,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdb6c63dd531aa8dbf25",
+        "name": "Technic Y2K Pressed Pigment Eyeshadow Palette",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 620,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdedc63dd531aa8dbfd9",
+        "name": "Technic Pressed Pigment Cinnamon Swirl Eyeshadow Palette",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 620,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdecc63dd531aa8dbfd5",
+        "name": "Technic Trendsetter Pressed Pigment Eyeshadow Palette 24 Color",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 820,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe0dc63dd531aa8dc03b",
+        "name": "Technic Goddess Pressed Pigment Eyeshadow Palette",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 620,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe0dc63dd531aa8dc038",
+        "name": "Technic Boujee Pressed Pigment Eyeshadow Palette",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 620,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe0dc63dd531aa8dc037",
+        "name": "Technic Hot Love Pressed Pigment Eyeshadow Palette",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 620,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe0dc63dd531aa8dc035",
+        "name": "Technic Exposed Pressed Pigment Eyeshadow Palette",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 680,
+        "mrp": 1250,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 20,
+    "theme": "Kajal, Eyeliners & Mascaras (কাজল, আইলাইনার ও মাশকারা)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9ab70979e75ff1fa1f8a47",
+        "name": "Bob Long Lasting Waterproof Kajal",
+        "catName": "Kajal",
+        "brandName": "",
+        "price": 155,
+        "mrp": 350,
+        "stock": 20
+      },
+      {
+        "id": "6a9abe97c63dd531aa8dc1f2",
+        "name": "Beauty Glazed Kajal Pure Liner Black",
+        "catName": "Kajal",
+        "brandName": "Beauty Glazed",
+        "price": 130,
+        "mrp": 350,
+        "stock": 49
+      },
+      {
+        "id": "6a9abc90c63dd531aa8dbb40",
+        "name": "Rimmel London Scandaleyes Volume On Demand Buildable Mascara – Black",
+        "catName": "Mascara",
+        "brandName": "",
+        "price": 680,
+        "mrp": 950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc88c63dd531aa8dbb21",
+        "name": "Lipstick Eye Combo: Caplino Liquid Matte Lipstick + W7 Waterproof Kajal (Mysterious 05 + Oh My Gel)",
+        "catName": "Combo Offer",
+        "brandName": "Caplino",
+        "price": 450,
+        "mrp": 900,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc91c63dd531aa8dbb43",
+        "name": "Rimmel London Scandaleyes Reloaded Mascara Extreme Black",
+        "catName": "Mascara",
+        "brandName": "",
+        "price": 680,
+        "mrp": 950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abca7c63dd531aa8dbb85",
+        "name": "Swiss Beauty Craze Eyeliner Stamp Duo – Black",
+        "catName": "Eyeliner",
+        "brandName": "Swiss Beauty",
+        "price": 260,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abca7c63dd531aa8dbb82",
+        "name": "Swiss Beauty Eyebrow Kit 3-in-1 With Soap 01",
+        "catName": "EyeBrows",
+        "brandName": "Swiss Beauty",
+        "price": 440,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcbdc63dd531aa8dbbd6",
+        "name": "Bob Liquid Eyeliner Lambskin Long Wearing & Waterproof",
+        "catName": "Eyeliner",
+        "brandName": "",
+        "price": 220,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc02c63dd531aa8db947",
+        "name": "Swiss Beauty Jet Black Bold Felt Tip Eyeliner",
+        "catName": "Eyeliner",
+        "brandName": "Swiss Beauty",
+        "price": 260,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbffc63dd531aa8db93e",
+        "name": "Swiss Beauty Eyebrow & Gel Eyeliner 2in1 – 02 Brown",
+        "catName": "Eyeliner",
+        "brandName": "Swiss Beauty",
+        "price": 400,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbfec63dd531aa8db939",
+        "name": "Swiss Beauty Intense Gel Kajal – Pearly White 07",
+        "catName": "Kajal",
+        "brandName": "Swiss Beauty",
+        "price": 370,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc1fc63dd531aa8db9ad",
+        "name": "Technic Divine Brows Eyebrow Kit",
+        "catName": "EyeBrows",
+        "brandName": "Technic",
+        "price": 1100,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbf2c63dd531aa8db913",
+        "name": "HANDAIYAN Double Eyebrow Pencil Brown Light Brown 04",
+        "catName": "EyeBrows",
+        "brandName": "Handaiyan",
+        "price": 160,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc55c63dd531aa8dba6d",
+        "name": "Beauty Glazed White Kajal Waterproof Silkworm Eyeliner",
+        "catName": "Kajal",
+        "brandName": "Beauty Glazed",
+        "price": 120,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdf1c63dd531aa8dbfeb",
+        "name": "Menow Long Thick Curly Mascara With 2pcs Pencil",
+        "catName": "Eyeliner",
+        "brandName": "Menow",
+        "price": 175,
+        "mrp": 450,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 21,
+    "theme": "Hair Fall Defense & Nourishing Shampoos (শ্যাম্পু ও স্ক্যাল্প কেয়ার)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc08c63dd531aa8db95e",
+        "name": "Boots Ingredients Avocado & Macadamia Shampoo 300ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Boots",
+        "price": 980,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc0bc63dd531aa8db969",
+        "name": "Boots Ingredients Argan & Jojoba Shampoo 300ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Boots",
+        "price": 990,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc48c63dd531aa8dba43",
+        "name": "Tresemme Shampoo Hair Fall Defense 580ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Tresemme",
+        "price": 695,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc47c63dd531aa8dba3f",
+        "name": "Tresemme Shampoo Bond Plex Sleek 580ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Tresemme",
+        "price": 700,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc46c63dd531aa8dba3d",
+        "name": "Tresemme Shampoo Color Revitalise 580ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Tresemme",
+        "price": 680,
+        "mrp": 680,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd71c63dd531aa8dbe45",
+        "name": "Tresemme Botanique Hair Shampoo Nourish & Replenish – 400ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Tresemme",
+        "price": 980,
+        "mrp": 1150,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdd9c63dd531aa8dbf92",
+        "name": "LAIKOU Japan Sakura Shampoo 100ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Laikou",
+        "price": 305,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd67c63dd531aa8dbe1f",
+        "name": "Clear Men Cool Sport Menthol Anti-Dandruff Shampoo – 170ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "",
+        "price": 260,
+        "mrp": 260,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcecc63dd531aa8dbc6a",
+        "name": "Clear Anti Dandruff and Anti Hairfall Shampoo – 330ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "",
+        "price": 369,
+        "mrp": 400,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd36c63dd531aa8dbd79",
+        "name": "SkinO Keratin Smooth Repair Shampoo – 200ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Skino",
+        "price": 335,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd36c63dd531aa8dbd75",
+        "name": "SkinO Anti Hair Fall Solution Shampoo – 200ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Skino",
+        "price": 335,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba2ac63dd531aa8db39b",
+        "name": "Bioaqua Ginger Shampoo – 400gm",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Bioaqua",
+        "price": 680,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba69c63dd531aa8db479",
+        "name": "Zafran Organic Anti Hair Fall Shampoo – 200gm",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Zafran",
+        "price": 340,
+        "mrp": 495,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9fec63dd531aa8db2fe",
+        "name": "Bioaqua Olive Shampoo Dandruff & Hair Fall Moisturizing Shampoo – 400ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Bioaqua",
+        "price": 680,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abb90c63dd531aa8db7fb",
+        "name": "Clariss Expert Series Biotin Shampoo 400g",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "",
+        "price": 855,
+        "mrp": 1650,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 22,
+    "theme": "Hair Conditioners, Hair Masks & Spa Treatments (কন্ডিশনার ও হেয়ার স্পা মাস্ক)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc64c63dd531aa8dba98",
+        "name": "Zafran Moringa & Bhringraj Conditioner – 150ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Zafran",
+        "price": 230,
+        "mrp": 285,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc64c63dd531aa8dba97",
+        "name": "Zafran Chebe & Hibiscus Herbal Hair Conditioner 150mll",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Zafran",
+        "price": 230,
+        "mrp": 285,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcbfc63dd531aa8dbbda",
+        "name": "Shiseido Fino Premium Touch Hair Mask 230g",
+        "catName": "Hair Mask",
+        "brandName": "",
+        "price": 1500,
+        "mrp": 2050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc1cc63dd531aa8db9a5",
+        "name": "SADOER Argan Oil Morocco Hair Mask 250g",
+        "catName": "Hair Mask",
+        "brandName": "",
+        "price": 580,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc2dc63dd531aa8db9e0",
+        "name": "Laikou Sakura Hair Mask Dry Damaged Frizz Hair With Argan Oil 100g",
+        "catName": "Hair Mask",
+        "brandName": "Laikou",
+        "price": 340,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd85c63dd531aa8dbe82",
+        "name": "Laikou Morocco Argan Oil Hair Mask – 100g",
+        "catName": "Hair Mask",
+        "brandName": "Laikou",
+        "price": 340,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abddbc63dd531aa8dbf99",
+        "name": "Zafran Hair Loss Combo Hair oil & Hair Mask Bundle",
+        "catName": "Oil",
+        "brandName": "Zafran",
+        "price": 480,
+        "mrp": 890,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd09c63dd531aa8dbcd7",
+        "name": "Organikaon Hair Treatment Pack 100gm",
+        "catName": "Hair Treatment",
+        "brandName": "Organikaon",
+        "price": 238,
+        "mrp": 380,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd5ac63dd531aa8dbdf9",
+        "name": "Laikou Japan Sakura Hair Conditioner  – 100ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Laikou",
+        "price": 305,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd25c63dd531aa8dbd37",
+        "name": "Tresemme Botanique Nourish & Replenish With Coconut Oil & Aloe Vera Conditioner 700ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Tresemme",
+        "price": 1510,
+        "mrp": 1650,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba04c63dd531aa8db31a",
+        "name": "PRO Fiber Hair Mask – 120ml",
+        "catName": "Hair Mask",
+        "brandName": "",
+        "price": 320,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba21c63dd531aa8db37b",
+        "name": "Sunsilk Power Shot Treatment For Strong Lengths 20ml",
+        "catName": "Hair Mask",
+        "brandName": "Sunsilk",
+        "price": 104,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9a2c63dd531aa8db1a8",
+        "name": "Zafran Hair Mask -120ml",
+        "catName": "Hair Mask",
+        "brandName": "Zafran",
+        "price": 190,
+        "mrp": 460,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab99cc63dd531aa8db186",
+        "name": "Tresemme Keratin Smooth Conditioner – 190ml",
+        "catName": "Shampoo & Conditioner",
+        "brandName": "Tresemme",
+        "price": 325,
+        "mrp": 325,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9dbc63dd531aa8db28c",
+        "name": "Kota Keratin Treatment Double Care Hair Mask – 250g",
+        "catName": "Hair Mask",
+        "brandName": "",
+        "price": 760,
+        "mrp": 1150,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 23,
+    "theme": "Hair Serums, Oils & Growth Tonics (হেয়ার সিরাম ও পুষ্টিকর তেল)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abbffc63dd531aa8db93b",
+        "name": "Melao Multi Peptide Hair Serum 60ml",
+        "catName": "Hair serum",
+        "brandName": "Melao",
+        "price": 580,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc3dc63dd531aa8dba23",
+        "name": "Natura Grow Hair Oil – 200ml",
+        "catName": "Hair Oil",
+        "brandName": "",
+        "price": 230,
+        "mrp": 270,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc3dc63dd531aa8dba21",
+        "name": "Natura Grow shampoo + Hair oil Combo Pack – 450ml",
+        "catName": "Hair Oil",
+        "brandName": "",
+        "price": 350,
+        "mrp": 400,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc27c63dd531aa8db9c9",
+        "name": "Skino Herbal Hair Oil 100ml",
+        "catName": "Oil",
+        "brandName": "Skino",
+        "price": 270,
+        "mrp": 290,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc26c63dd531aa8db9c4",
+        "name": "Tresemme Hair Serum Keratin Smooth Anti-frizz With Argan Oil 100",
+        "catName": "Hair Oil",
+        "brandName": "Tresemme",
+        "price": 920,
+        "mrp": 1000,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd09c63dd531aa8dbcd8",
+        "name": "Organikaon Rosemary+ Onion Hair Oil 150ml",
+        "catName": "Oil",
+        "brandName": "Organikaon",
+        "price": 470,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd08c63dd531aa8dbcd1",
+        "name": "Hawaa Castor Oil 100ml",
+        "catName": "Oil",
+        "brandName": "",
+        "price": 260,
+        "mrp": 260,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd31c63dd531aa8dbd61",
+        "name": "Skino Pure Castor Oil 100% – 120ml",
+        "catName": "Oil",
+        "brandName": "Skino",
+        "price": 335,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba2ac63dd531aa8db3a2",
+        "name": "Zafran Hair Growth Therapy oil – 150ml",
+        "catName": "Hair Oil",
+        "brandName": "Zafran",
+        "price": 275,
+        "mrp": 430,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba17c63dd531aa8db355",
+        "name": "Lanbena Hair Growth Essential Oil",
+        "catName": "Essential oil",
+        "brandName": "Lanbena",
+        "price": 200,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba7cc63dd531aa8db4bb",
+        "name": "Wishcare Hair Growth Serum Concentrate Roll-On | 30ml",
+        "catName": "Hair Treatment",
+        "brandName": "",
+        "price": 1300,
+        "mrp": 1850,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba52c63dd531aa8db426",
+        "name": "Laikou Japan Sakura Argan Hair Serum – 60ml",
+        "catName": "Hair serum",
+        "brandName": "Laikou",
+        "price": 260,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe29c63dd531aa8dc092",
+        "name": "Lanbena Hair Growth Essence Spray – 20ml",
+        "catName": "Hair Oil",
+        "brandName": "Lanbena",
+        "price": 400,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9ab9d4c63dd531aa8db268",
+        "name": "Innsaei Smooth and Silky Hair Serum 50ml",
+        "catName": "Hair serum",
+        "brandName": "innsaei",
+        "price": 650,
+        "mrp": 690,
+        "stock": 25
+      },
+      {
+        "id": "6a9abb9fc63dd531aa8db82c",
+        "name": "Streax Professional Canvo Line Hair Serum 100ml",
+        "catName": "Hair serum",
+        "brandName": "Streax",
+        "price": 580,
+        "mrp": 600,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 24,
+    "theme": "Body Washes, Shower Gels & Soaps (বডি ওয়াশ ও শাওয়ার জেল)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc31c63dd531aa8db9f1",
+        "name": "LMLTOP Bath Gloves – OFF WHITE",
+        "catName": "Body Wash",
+        "brandName": "",
+        "price": 100,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdc5c63dd531aa8dbf5b",
+        "name": "Laikou Japan Sakura Body Wash – 100gm",
+        "catName": "Body Wash",
+        "brandName": "Laikou",
+        "price": 290,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba70c63dd531aa8db495",
+        "name": "Lifebuoy Total 10 Bodywash 245ml",
+        "catName": "Body Wash",
+        "brandName": "",
+        "price": 190,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba6ec63dd531aa8db48e",
+        "name": "Lifebuoy Moisture Boost Bodywash 245ml",
+        "catName": "Body Wash",
+        "brandName": "",
+        "price": 190,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe6ac63dd531aa8dc171",
+        "name": "Lux Body Wash Soft Skin French Rose & Almond Oil – 245ml",
+        "catName": "Shower Gel",
+        "brandName": "",
+        "price": 160,
+        "mrp": 200,
+        "stock": 25
+      },
+      {
+        "id": "6a9abedec63dd531aa8dc2e3",
+        "name": "Skin Cafe Rosavera Shower Gel 400ml",
+        "catName": "Shower Gel",
+        "brandName": "Skin Cafe",
+        "price": 370,
+        "mrp": 495,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbaec63dd531aa8db853",
+        "name": "skinO Mixed Fruit Nourishing Shower Gel 220ml",
+        "catName": "Shower Gel",
+        "brandName": "Skino",
+        "price": 235,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbaec63dd531aa8db851",
+        "name": "Skino Pomegranate Shower Gel 220ml",
+        "catName": "Shower Gel",
+        "brandName": "Skino",
+        "price": 235,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abad3c63dd531aa8db5cd",
+        "name": "Dot and Key Cica Calming Salicylic Acid Exfoliating Shower Gel 250ml",
+        "catName": "Shower Gel",
+        "brandName": "",
+        "price": 780,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abeacc63dd531aa8dc234",
+        "name": "SkinO Lavender Soothing Shower Gel 220ml",
+        "catName": "Shower Gel",
+        "brandName": "Skino",
+        "price": 235,
+        "mrp": 235,
+        "stock": 24
+      },
+      {
+        "id": "6a9abc2ec63dd531aa8db9e7",
+        "name": "LMLTOP Bath Gloves – Purple",
+        "catName": "Body Wash",
+        "brandName": "",
+        "price": 160,
+        "mrp": 350,
+        "stock": 24
+      },
+      {
+        "id": "6a9abe6ac63dd531aa8dc16f",
+        "name": "Lux Body Wash Skin Detox Freesia Scent Aloe Vera-245ml",
+        "catName": "Shower Gel",
+        "brandName": "",
+        "price": 160,
+        "mrp": 200,
+        "stock": 24
+      },
+      {
+        "id": "6ab9f04858f437fe12b290e9",
+        "name": "Guerniss Raw Glutathione Hyaluronic Acid Shower Gel – Cloud Touch – 250ml",
+        "catName": "Makeup",
+        "brandName": "",
+        "price": 290,
+        "mrp": 370,
+        "stock": 10
+      },
+      {
+        "id": "6a9abf63c63dd531aa8dc466",
+        "name": "Boots Vanilla White 3in1 Shower Gel, Bubble Bath & Shampoo 500ml",
+        "catName": "Shower Gel",
+        "brandName": "Boots",
+        "price": 1500,
+        "mrp": 1500,
+        "stock": 10
+      },
+      {
+        "id": "6a8e702551c7c127243ea1c1",
+        "name": "Skin O Rose Scented Shower Gel (220ml)",
+        "catName": "Shower Gel",
+        "brandName": "Skino",
+        "price": 180,
+        "mrp": 250,
+        "stock": 13
+      }
+    ]
+  },
+  {
+    "day": 25,
+    "theme": "Body Lotions, Hand & Foot Care (বডি লোশন, হ্যান্ড ও ফুট ক্রিম)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abbfbc63dd531aa8db931",
+        "name": "Aveeno Daily Moisturising Body Lotion 100ml",
+        "catName": "Body Care",
+        "brandName": "",
+        "price": 700,
+        "mrp": 1100,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc40c63dd531aa8dba29",
+        "name": "Natura Daily Moisturizing body lotion – 200ml",
+        "catName": "Body Care",
+        "brandName": "",
+        "price": 230,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc58c63dd531aa8dba7b",
+        "name": "WishCare AHA + BHA Body Lotion 200ml",
+        "catName": "Lotion",
+        "brandName": "",
+        "price": 1020,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc56c63dd531aa8dba73",
+        "name": "WishCare Multi-Vitamin Brightening Body Lotion 200ml",
+        "catName": "Body Care",
+        "brandName": "",
+        "price": 1100,
+        "mrp": 1350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd02c63dd531aa8dbcbd",
+        "name": "Some By Mi AHA BHA PHA Miracle Calming Body Lotion – 200ml",
+        "catName": "Lotion",
+        "brandName": "",
+        "price": 1320,
+        "mrp": 2400,
+        "stock": 25
+      },
+      {
+        "id": "6a9abb97c63dd531aa8db815",
+        "name": "Earth Beauty & You Vitamin C Body Lotion – 220ml",
+        "catName": "Lotion",
+        "brandName": "Earth Beauty",
+        "price": 305,
+        "mrp": 375,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba6ac63dd531aa8db47e",
+        "name": "SkinO Soft Care Hydrating Body Lotion 220ml",
+        "catName": "Lotion",
+        "brandName": "Skino",
+        "price": 335,
+        "mrp": 335,
+        "stock": 20
+      },
+      {
+        "id": "6a9abf52c63dd531aa8dc42d",
+        "name": "Zafran Goat Milk Moisturising Body Lotion 100ml",
+        "catName": "Lotion",
+        "brandName": "Zafran",
+        "price": 230,
+        "mrp": 350,
+        "stock": 10
+      },
+      {
+        "id": "6a9ac078c63dd531aa8dc7a5",
+        "name": "SkinO Ultimate Glow Vitamin E Body Lotion 220ml",
+        "catName": "Lotion",
+        "brandName": "Skino",
+        "price": 280,
+        "mrp": 350,
+        "stock": 6
+      },
+      {
+        "id": "6a9abc8dc63dd531aa8dbb34",
+        "name": "Lanbena Foot Repair Cream 100g",
+        "catName": "Foot Care",
+        "brandName": "Lanbena",
+        "price": 500,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc86c63dd531aa8dbb15",
+        "name": "Vaseline Gluta Hya Flawless Glow Serum in Lotion 200ml",
+        "catName": "Lotion",
+        "brandName": "Vaseline",
+        "price": 504,
+        "mrp": 725,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe11c63dd531aa8dc047",
+        "name": "Palmer’s Cocoa Butter Massage Cream for Stretch Marks",
+        "catName": "Bath & Body",
+        "brandName": "",
+        "price": 1020,
+        "mrp": 1020,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcdec63dd531aa8dbc39",
+        "name": "Bioaqua Avocado Moisturizing Foot Mask 1 Pair",
+        "catName": "Foot Care",
+        "brandName": "Bioaqua",
+        "price": 160,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcd2c63dd531aa8dbc24",
+        "name": "3w Clinic Enrich Foot Treatment – 100ml",
+        "catName": "Foot Care",
+        "brandName": "3W Clinic",
+        "price": 490,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbe3c63dd531aa8db8ef",
+        "name": "Handaiyan Water Lip Tint – Shade 06 (Long-Lasting Lip Stain)",
+        "catName": "Lipsticks",
+        "brandName": "Handaiyan",
+        "price": 130,
+        "mrp": 130,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 26,
+    "theme": "Body Scrubs, Whitening & Tan Removal (বডি স্ক্রাব ও স্কিন ব্রাইটনিং)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc7ac63dd531aa8dbaea",
+        "name": "Melao L-Glutathione Whitening Cream – 50ml",
+        "catName": "Face Cream",
+        "brandName": "Melao",
+        "price": 550,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcaec63dd531aa8dbba0",
+        "name": "Face Facts Coffee Body Scrub Dry Exfoliating 50g",
+        "catName": "Facial Scrub",
+        "brandName": "",
+        "price": 419,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcabc63dd531aa8dbb94",
+        "name": "SADOER Hair Removal Clean Mousse Creams Underarm Arm Leg Body 100ml",
+        "catName": "Hair Remover",
+        "brandName": "",
+        "price": 440,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbecc63dd531aa8db903",
+        "name": "LAIKOU Milk Brightening Cream 55g (Nourishing & Smoothing)",
+        "catName": "Face Cream",
+        "brandName": "Laikou",
+        "price": 370,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd91c63dd531aa8dbeac",
+        "name": "Quiyum Intensive Whitening Cream – 30g",
+        "catName": "Face Care",
+        "brandName": "Quiyum",
+        "price": 259,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd8ec63dd531aa8dbea4",
+        "name": "Quiyum Underarm Beauty Cream – 30g",
+        "catName": "Body Care",
+        "brandName": "Quiyum",
+        "price": 290,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd12c63dd531aa8dbcf5",
+        "name": "3W Clinic Collagen Whitening Cream – 60gm",
+        "catName": "Face Cream",
+        "brandName": "3W Clinic",
+        "price": 870,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe26c63dd531aa8dc088",
+        "name": "LAIKOU Camomile Facial Exfoliator Body Scrub – 120g",
+        "catName": "Facial Scrub",
+        "brandName": "Laikou",
+        "price": 275,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba5bc63dd531aa8db44d",
+        "name": "Fenyi Honey Peach Body Scrub Mini 3g",
+        "catName": "Facial Scrub",
+        "brandName": "Fenyi",
+        "price": 25,
+        "mrp": 50,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe1cc63dd531aa8dc05d",
+        "name": "Fenyi Milk Body Scrub & Exfoliating Gel | Brightening 100g",
+        "catName": "Facial Scrub",
+        "brandName": "Fenyi",
+        "price": 275,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abf68c63dd531aa8dc478",
+        "name": "Paxmoly Doctor Whitening Cream – 70g",
+        "catName": "Face Cream",
+        "brandName": "Paxmoly",
+        "price": 550,
+        "mrp": 550,
+        "stock": 20
+      },
+      {
+        "id": "6a9abfe4c63dd531aa8dc5c8",
+        "name": "3W Clinic DR. K Underarm Whitening Multi Cream 100gm",
+        "catName": "Underarm",
+        "brandName": "3W Clinic",
+        "price": 780,
+        "mrp": 1350,
+        "stock": 20
+      },
+      {
+        "id": "6ab9f04958f437fe12b290f5",
+        "name": "Guerniss Raw Glutathione Niacinamide Face & Body Scrub – 200ml",
+        "catName": "Makeup",
+        "brandName": "",
+        "price": 720,
+        "mrp": 950,
+        "stock": 10
+      },
+      {
+        "id": "6ab9f04858f437fe12b290f1",
+        "name": "Guerniss Raw Glutathione Vitamin E Face & Body Scrub – 200ml",
+        "catName": "Makeup",
+        "brandName": "",
+        "price": 720,
+        "mrp": 950,
+        "stock": 10
+      },
+      {
+        "id": "6a9abe95c63dd531aa8dc1e8",
+        "name": "Fenyi Vitamin C Whitening Cream – 40gm",
+        "catName": "Face Cream",
+        "brandName": "Fenyi",
+        "price": 250,
+        "mrp": 450,
+        "stock": 10
+      }
+    ]
+  },
+  {
+    "day": 27,
+    "theme": "SHEGLAM Viral Trending Hits (শিগ্ল্যাম ভাইরাল মেকআপ কালেকশন)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abd23c63dd531aa8dbd31",
+        "name": "Sheglam Concealer – Honey",
+        "catName": "Concealer & Corrector",
+        "brandName": "Sheglam",
+        "price": 810,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd22c63dd531aa8dbd2d",
+        "name": "Sheglam Concealer – Fair",
+        "catName": "Concealer & Corrector",
+        "brandName": "Sheglam",
+        "price": 810,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd20c63dd531aa8dbd2a",
+        "name": "Sheglam Concealer – Buttercream",
+        "catName": "Concealer & Corrector",
+        "brandName": "Sheglam",
+        "price": 810,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abba8c63dd531aa8db849",
+        "name": "Sheglam Pro Long Lasting Matte Foundation – Porcelain",
+        "catName": "Foundation",
+        "brandName": "Sheglam",
+        "price": 1650,
+        "mrp": 2240,
+        "stock": 25
+      },
+      {
+        "id": "6a9abad6c63dd531aa8db5d8",
+        "name": "Sheglam Complexion Pro Long Lasting Matte Foundation 30ml – Fair",
+        "catName": "Foundation",
+        "brandName": "Sheglam",
+        "price": 1335,
+        "mrp": 2250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abae0c63dd531aa8db5e3",
+        "name": "Sheglam All-In-One Volume & Length Mascara",
+        "catName": "Mascara",
+        "brandName": "Sheglam",
+        "price": 1010,
+        "mrp": 1010,
+        "stock": 25
+      },
+      {
+        "id": "6a9abf14c63dd531aa8dc38c",
+        "name": "Sheglam Perfect Skin High Coverage Concealer – Honey",
+        "catName": "Concealer & Corrector",
+        "brandName": "Sheglam",
+        "price": 729,
+        "mrp": 729,
+        "stock": 20
+      },
+      {
+        "id": "6ab9f04d58f437fe12b29147",
+        "name": "Sheglam For the Flush Lip & Cheek Tint – It’s Chili",
+        "catName": "Makeup",
+        "brandName": "Sheglam",
+        "price": 680,
+        "mrp": 680,
+        "stock": 20
+      },
+      {
+        "id": "6ab9f04c58f437fe12b29133",
+        "name": "SHEGLAM Complexion Boost Concealer – Fair",
+        "catName": "Makeup",
+        "brandName": "Sheglam",
+        "price": 810,
+        "mrp": 1050,
+        "stock": 10
+      },
+      {
+        "id": "6ab9f04a58f437fe12b29119",
+        "name": "Sheglam Brows On Demand 2-In-1 Brow Pencil – Chocolate",
+        "catName": "Makeup",
+        "brandName": "Sheglam",
+        "price": 780,
+        "mrp": 1050,
+        "stock": 10
+      },
+      {
+        "id": "6ab9f04a58f437fe12b29117",
+        "name": "Sheglam Line & Define Waterproof Liquid eyeliner – Black",
+        "catName": "Makeup",
+        "brandName": "Sheglam",
+        "price": 780,
+        "mrp": 1050,
+        "stock": 10
+      },
+      {
+        "id": "6ab9f04a58f437fe12b29115",
+        "name": "Sheglam Multi Tasker line & Detail Eyeliner Pen – Black",
+        "catName": "Makeup",
+        "brandName": "Sheglam",
+        "price": 780,
+        "mrp": 1050,
+        "stock": 10
+      },
+      {
+        "id": "6ab9f04a58f437fe12b29113",
+        "name": "SheGlam Pro Precision Waterproof Liquid Eyeliner – 0.6ml",
+        "catName": "Makeup",
+        "brandName": "Sheglam",
+        "price": 780,
+        "mrp": 1050,
+        "stock": 10
+      },
+      {
+        "id": "6ab9f04a58f437fe12b29111",
+        "name": "SheGlam Floral Flush Blush Palette – Multicolor",
+        "catName": "Makeup",
+        "brandName": "Sheglam",
+        "price": 1300,
+        "mrp": 1600,
+        "stock": 10
+      },
+      {
+        "id": "6a9abfbac63dd531aa8dc548",
+        "name": "Sheglam Good Grip Hydrating Primer – blueberry + Aha 45ml",
+        "catName": "Face Primer",
+        "brandName": "Sheglam",
+        "price": 1230,
+        "mrp": 1650,
+        "stock": 10
+      }
+    ]
+  },
+  {
+    "day": 28,
+    "theme": "Swiss Beauty & MARS Best Picks (সুইস বিউটি ও মার্স ফেভারিটস)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc8ac63dd531aa8dbb27",
+        "name": "Lipstick Combo 2: Caplino Liquid Matte Lipstick + Swiss Beauty Pure Matte Lipstick (Bleachers 07 + Lust on 216)",
+        "catName": "Combo Offer",
+        "brandName": "Caplino",
+        "price": 450,
+        "mrp": 900,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc89c63dd531aa8dbb24",
+        "name": "Lipstick Combo 3: Caplino Liquid Matte Lipstick + Swiss Beauty Pure Matte Lipstick (Plum Passion 04 + Bold Wine 228)",
+        "catName": "Combo Offer",
+        "brandName": "Caplino",
+        "price": 450,
+        "mrp": 900,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc99c63dd531aa8dbb5e",
+        "name": "Swiss Beauty Makeup Vanity Box Medium Size [Mixed Color]",
+        "catName": "Makeup",
+        "brandName": "Swiss Beauty",
+        "price": 930,
+        "mrp": 1650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abccfc63dd531aa8dbc17",
+        "name": "Swiss Beauty Ultra Fine Loose Finish Powder – Natural 01",
+        "catName": "Loose Powder",
+        "brandName": "Swiss Beauty",
+        "price": 480,
+        "mrp": 750,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcb5c63dd531aa8dbbb8",
+        "name": "Swiss Beauty All About Lipstick Palette 01",
+        "catName": "Lipsticks",
+        "brandName": "Swiss Beauty",
+        "price": 610,
+        "mrp": 950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc01c63dd531aa8db944",
+        "name": "Swiss Beauty Hydra Vitamin C Eye Serum Patch 60 Pcs",
+        "catName": "Eye Care",
+        "brandName": "Swiss Beauty",
+        "price": 580,
+        "mrp": 1050,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbfac63dd531aa8db92e",
+        "name": "Swiss Beauty Easy Peasy Nail Paint Remover Aloe Vera",
+        "catName": "Nails",
+        "brandName": "Swiss Beauty",
+        "price": 190,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd17c63dd531aa8dbd0b",
+        "name": "Swiss Beauty Eyeshadow Palette 36 Color – 02",
+        "catName": "Eye Shadow",
+        "brandName": "Swiss Beauty",
+        "price": 1100,
+        "mrp": 1650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd15c63dd531aa8dbcfe",
+        "name": "Swiss Beauty Kohl Kajal Sharpenable – Black",
+        "catName": "Kajal",
+        "brandName": "Swiss Beauty",
+        "price": 285,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcf6c63dd531aa8dbc8c",
+        "name": "Swiss Beauty Highlighting Primer Real Makeup Base – 32ml (Natural Tint)",
+        "catName": "Face Primer",
+        "brandName": "Swiss Beauty",
+        "price": 580,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abceac63dd531aa8dbc61",
+        "name": "Swiss Beauty Eyebrow Pencil Dark Brown",
+        "catName": "EyeBrows",
+        "brandName": "Swiss Beauty",
+        "price": 95,
+        "mrp": 150,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd3ac63dd531aa8dbd88",
+        "name": "Swiss Beauty Super Lash Mascara Waterproof 7.5ml",
+        "catName": "Mascara",
+        "brandName": "Swiss Beauty",
+        "price": 330,
+        "mrp": 450,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba3ec63dd531aa8db3ea",
+        "name": "MARS SPF50 PA++++ Cancel Concealer – 1.5 Vanilla Beige",
+        "catName": "Concealer",
+        "brandName": "MARS",
+        "price": 400,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba34c63dd531aa8db3c6",
+        "name": "Mars Zero Primer 25ML",
+        "catName": "Face Primer",
+        "brandName": "MARS",
+        "price": 390,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9aba87c63dd531aa8db4da",
+        "name": "Mars Trio Treat 3-In-1 Eye Makeup Kit with Eyeliner, Mascara & Eyeshadow",
+        "catName": "Eye Shadow",
+        "brandName": "MARS",
+        "price": 880,
+        "mrp": 1250,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 29,
+    "theme": "Beauty Glazed & Technic Must-Haves (বিউটি গ্লেজড ও টেকনিক কালেকশন)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9abc91c63dd531aa8dbb44",
+        "name": "Technic Colour Correcting Setting Powder – 20g",
+        "catName": "Loose Powder",
+        "brandName": "Technic",
+        "price": 400,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcd2c63dd531aa8dbc22",
+        "name": "Beauty Glazed Matte Liquide Lipstick Mini Tangerine Red 119",
+        "catName": "Lipsticks",
+        "brandName": "Beauty Glazed",
+        "price": 85,
+        "mrp": 250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcadc63dd531aa8dbb9b",
+        "name": "Technic Pointed Powder Brush",
+        "catName": "Makeup Brush",
+        "brandName": "Technic",
+        "price": 580,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abcadc63dd531aa8dbb9a",
+        "name": "Technic Powder Brush",
+        "catName": "Makeup Brush",
+        "brandName": "Technic",
+        "price": 540,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc1fc63dd531aa8db9af",
+        "name": "Technic Eyeshadow Blending Brush",
+        "catName": "Makeup Brush",
+        "brandName": "Technic",
+        "price": 370,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abbd7c63dd531aa8db8dd",
+        "name": "Beauty Glazed Lip Crayon – Plum B111",
+        "catName": "Lipsticks",
+        "brandName": "Beauty Glazed",
+        "price": 150,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc45c63dd531aa8dba39",
+        "name": "Beauty Glazed 4 in 1 Pencil Makeup Multifunctional 103",
+        "catName": "Eyeliner",
+        "brandName": "Beauty Glazed",
+        "price": 295,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc23c63dd531aa8db9bd",
+        "name": "Beauty Glazed Green Liner Turquoise",
+        "catName": "Eyeliner",
+        "brandName": "Beauty Glazed",
+        "price": 120,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdebc63dd531aa8dbfd2",
+        "name": "Technic Eyebrow Brush & Spoolie Brush",
+        "catName": "Makeup Brush",
+        "brandName": "Technic",
+        "price": 470,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abe0bc63dd531aa8dc031",
+        "name": "Technic Venus Rising Pressed Pigment Eyeshadow Palette",
+        "catName": "Eye Shadow",
+        "brandName": "Technic",
+        "price": 620,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdebc63dd531aa8dbfd1",
+        "name": "Technic Flat Foundation Brush – R44",
+        "catName": "Makeup Brush",
+        "brandName": "Technic",
+        "price": 470,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdebc63dd531aa8dbfcf",
+        "name": "Technic Angled Powder Brush – BQ10217",
+        "catName": "Makeup Brush",
+        "brandName": "Technic",
+        "price": 580,
+        "mrp": 850,
+        "stock": 25
+      },
+      {
+        "id": "6a9abdeac63dd531aa8dbfcd",
+        "name": "Technic Concealer Brush",
+        "catName": "Makeup Brush",
+        "brandName": "Technic",
+        "price": 370,
+        "mrp": 370,
+        "stock": 25
+      },
+      {
+        "id": "6a9abde8c63dd531aa8dbfc8",
+        "name": "Technic Fluﬀy Eyeshadow Brush",
+        "catName": "Makeup Brush",
+        "brandName": "Technic",
+        "price": 370,
+        "mrp": 550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abd4bc63dd531aa8dbdc5",
+        "name": "Beauty Glazed Eyeliner Extremely Black Waterproof",
+        "catName": "Eyeliner",
+        "brandName": "Beauty Glazed",
+        "price": 230,
+        "mrp": 450,
+        "stock": 25
+      }
+    ]
+  },
+  {
+    "day": 30,
+    "theme": "All-Time Top Rated & Best-Sellers (অল-টাইম টপ রেটেড বেস্টসেলার)",
+    "count": 15,
+    "products": [
+      {
+        "id": "6a9ab75b661657cb254c1bdd",
+        "name": "Ponds Super Light Gel Moisturiser Hydra Miracle – 100ml (BD)",
+        "catName": "Face Cream",
+        "brandName": "Ponds",
+        "price": 265,
+        "mrp": 350,
+        "stock": 20
+      },
+      {
+        "id": "6a9abc8ec63dd531aa8dbb3c",
+        "name": "Pepsodent Toothpaste Advanced Salt – 140g",
+        "catName": "Teeth Care",
+        "brandName": "",
+        "price": 155,
+        "mrp": 160,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc8dc63dd531aa8dbb33",
+        "name": "FASMC Bamboo Bath Salts – 380g",
+        "catName": "Bath Salt",
+        "brandName": "",
+        "price": 470,
+        "mrp": 950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc8dc63dd531aa8dbb31",
+        "name": "FASMC Aloe Vera Bath Salts – 380g",
+        "catName": "Bath Salt",
+        "brandName": "",
+        "price": 470,
+        "mrp": 950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc8cc63dd531aa8dbb2f",
+        "name": "FASMC Milk Bath Salts – 380g",
+        "catName": "Bath Salt",
+        "brandName": "",
+        "price": 470,
+        "mrp": 950,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc8ac63dd531aa8dbb26",
+        "name": "Caplino Turmeric Serum + Ponds Super Light Gel Moisturiser (Combo 100ml+30ml)",
+        "catName": "Combo Offer",
+        "brandName": "Caplino",
+        "price": 1029,
+        "mrp": 1370,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc82c63dd531aa8dbb09",
+        "name": "Melao Peptide Complex Serum – 30 ml",
+        "catName": "Serum",
+        "brandName": "Melao",
+        "price": 410,
+        "mrp": 650,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc9dc63dd531aa8dbb6a",
+        "name": "Cos De Baha P M.a Peptide Serum 30ml",
+        "catName": "Serum",
+        "brandName": "Cos De BAHA",
+        "price": 1110,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc9dc63dd531aa8dbb68",
+        "name": "Cos De Baha Lactic Acid 12.5 Peel Serum 30ml",
+        "catName": "Serum",
+        "brandName": "Cos De BAHA",
+        "price": 1110,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc72c63dd531aa8dbac9",
+        "name": "APLB Collagen Peptide Beauty Tablet 500mg x 30 Tablets",
+        "catName": "Moisturizers",
+        "brandName": "",
+        "price": 929,
+        "mrp": 1450,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc69c63dd531aa8dbaad",
+        "name": "Laikou Rice Raw Pulp Serum 17ml Refine Pores",
+        "catName": "Serum",
+        "brandName": "Laikou",
+        "price": 160,
+        "mrp": 350,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc62c63dd531aa8dba8e",
+        "name": "Zafran Goat Milk and Almond Glycerin Soap – 100gm",
+        "catName": "Soap",
+        "brandName": "Zafran",
+        "price": 190,
+        "mrp": 240,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc80c63dd531aa8dbb02",
+        "name": "Dabo 30 Days Green Tea Avocado Nourishing Cream 100ml",
+        "catName": "Face Cream",
+        "brandName": "",
+        "price": 920,
+        "mrp": 1550,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc77c63dd531aa8dbae3",
+        "name": "Beaute Melasma-X Moringa Brightening Cool Soothing Gel – 160ml",
+        "catName": "Soothing Gel",
+        "brandName": "",
+        "price": 710,
+        "mrp": 1250,
+        "stock": 25
+      },
+      {
+        "id": "6a9abc75c63dd531aa8dbad9",
+        "name": "SADOER Hydro Boost Milk Peach Serum – 30ml",
+        "catName": "Serum",
+        "brandName": "",
+        "price": 250,
+        "mrp": 550,
+        "stock": 25
+      }
+    ]
+  }
+]
