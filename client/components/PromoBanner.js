@@ -8,19 +8,19 @@ const DEFAULT_CAMPAIGN_BANNERS = [
   {
     id: "banner-korean-skincare",
     title: "Glowing Korean Skincare - Up to 30% OFF",
-    image: "/banners/hero_korean_skincare.jpg",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_1440,q_auto,f_auto/v1792467810/liora_store/banners/clghtv3wrtpnzf33a6gb.jpg",
     link: "/products?category=Serum",
   },
   {
     id: "banner-sunscreen-glow",
     title: "Sun Defense & Glow - SPF 50+ Hydration",
-    image: "/banners/hero_sunscreen_glow.jpg",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_1440,q_auto,f_auto/v1792467811/liora_store/banners/b5qyqf9olpne8oyfdtoq.jpg",
     link: "/products?category=Sunscreen",
   },
   {
     id: "banner-makeup-glam",
     title: "Authentic Makeup & Glam - Flat 25% OFF",
-    image: "/banners/hero_makeup_glam.jpg",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_1440,q_auto,f_auto/v1792467812/liora_store/banners/yvq8otfhiai5jllzrvw4.jpg",
     link: "/products?category=Lipsticks",
   },
 ];

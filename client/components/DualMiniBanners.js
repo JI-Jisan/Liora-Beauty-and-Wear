@@ -7,13 +7,13 @@ export default function DualMiniBanners() {
     {
       id: "mini-k-beauty",
       title: "K-Beauty Essentials - Flat 20% OFF",
-      image: "/banners/mini_korean_skin.jpg",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_720,q_auto,f_auto/v1792467812/liora_store/banners/oe6wzvqfjnindzk6za0m.jpg",
       link: "/products?category=Serum",
     },
     {
       id: "mini-makeup-glam",
       title: "Authentic Makeup & Lipsticks - Flat 25% OFF",
-      image: "/banners/mini_makeup_glam.jpg",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_720,q_auto,f_auto/v1792467813/liora_store/banners/x73lqyhktwkthczt1rtz.jpg",
       link: "/products?category=Lipsticks",
     },
   ];
