@@ -45,4 +45,6 @@ next-env.d.ts
 !/public/banners/.gitkeep
 /public/combos/*
 !/public/combos/.gitkeep
+/public/id_cards/*
+!/public/id_cards/.gitkeep
 /scratch/

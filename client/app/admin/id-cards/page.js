@@ -18,7 +18,7 @@ export default function AdminIdCardStudio() {
     bloodGroup: "O+",
     joiningDate: "01 Aug 2025",
     slogan: "Together We Grow ♥",
-    photoUrl: "/id_cards/jisan_portrait.jpg",
+    photoUrl: "https://res.cloudinary.com/dlgubaefs/image/upload/v1792469213/liora_store/id_cards/qaixsej8wv4kdhgpqzag.jpg",
     // Back Side
     contact: "+880 1712 345678",
     email: "liorabeautyandwear@gmail.com",
@@ -52,7 +52,7 @@ export default function AdminIdCardStudio() {
       bloodGroup: "O+",
       joiningDate: "01 Aug 2025",
       slogan: "Together We Grow ♥",
-      photoUrl: "/id_cards/jisan_portrait.jpg",
+      photoUrl: "https://res.cloudinary.com/dlgubaefs/image/upload/v1792469213/liora_store/id_cards/qaixsej8wv4kdhgpqzag.jpg",
       contact: "+880 1712 345678",
       email: "liorabeautyandwear@gmail.com",
       fbPage: "Liora Beauty and Wear",
@@ -301,7 +301,7 @@ export default function AdminIdCardStudio() {
               </p>
               <div style={{ textAlign: "center", marginTop: "16px" }}>
                 <button
-                  onClick={() => handleInputChange("photoUrl", "/id_cards/jisan_portrait.jpg")}
+                  onClick={() => handleInputChange("photoUrl", "https://res.cloudinary.com/dlgubaefs/image/upload/v1792469213/liora_store/id_cards/qaixsej8wv4kdhgpqzag.jpg")}
                   style={{
                     background: "#fce7ec",
                     color: "#be185d",
@@ -519,7 +519,7 @@ export default function AdminIdCardStudio() {
           {viewMode === "orig" && (
             <div style={{ maxWidth: "900px", width: "100%", textAlign: "center" }}>
               <img
-                src="/id_cards/original_user_design.jpg"
+                src="https://res.cloudinary.com/dlgubaefs/image/upload/v1792469218/liora_store/id_cards/w6phk8lyf6x72lya1npq.jpg"
                 alt="Exact Pic 2 Master Reference"
                 style={{
                   width: "100%",

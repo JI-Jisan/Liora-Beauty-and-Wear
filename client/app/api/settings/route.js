@@ -8,7 +8,7 @@ const DEFAULT_SETTINGS = {
   heroTitle: "Beauty That Inspires Confidence & Style That Speaks Elegance",
   heroText:
     "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
-  heroImage: "/hero-banner-main.jpg",
+  heroImage: "https://res.cloudinary.com/dlgubaefs/image/upload/v1792467814/liora_store/banners/tbiqgyrlq3veuklfizh6.jpg",
   offerText:
     "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1999 Tk   ✨ 100% Authentic Products",
   promoSlides: [

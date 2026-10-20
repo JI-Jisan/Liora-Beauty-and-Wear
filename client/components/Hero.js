@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { getImageUrl } from "@/lib/api";
 
-const DEFAULT_HERO_IMAGE = "/hero-banner-main.jpg";
+const DEFAULT_HERO_IMAGE = "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_1200,q_auto,f_auto/v1792467814/liora_store/banners/tbiqgyrlq3veuklfizh6.jpg";
 
 export default function Hero({
   heroText = "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
