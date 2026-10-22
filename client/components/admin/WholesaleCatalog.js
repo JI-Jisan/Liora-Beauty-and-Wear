@@ -4,6 +4,21 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { generateWholesalePdf } from "@/lib/wholesalePdf";
 import { getAuthHeaders } from "@/lib/api";
 
+// Helper to determine buying cost
+function getProductBaseCost(p, fallbackSnapshot = null) {
+  const bp = Number(p?.purchasePrice);
+  if (!isNaN(bp) && bp > 0) return bp;
+  const sp = Number(fallbackSnapshot?.purchasePrice);
+  if (!isNaN(sp) && sp > 0) return sp;
+  const wp = Number(p?.wholesalePrice || fallbackSnapshot?.wholesalePrice);
+  if (!isNaN(wp) && wp > 0) return wp;
+  const op = Number(p?.offerPrice || fallbackSnapshot?.offerPrice);
+  if (!isNaN(op) && op > 0) return Math.round(op * 0.72);
+  const rp = Number(p?.originalPrice || fallbackSnapshot?.originalPrice);
+  if (!isNaN(rp) && rp > 0) return Math.round(rp * 0.65);
+  return 100;
+}
+
 export default function WholesaleCatalog({ products = [], categories = [] }) {
   // Main Tab Navigation: 'generator' | 'saved_list'
   const [activeMainTab, setActiveMainTab] = useState("generator");
@@ -17,7 +32,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   // Profit Margin State (Default 5%)
   const [profitPercent, setProfitPercent] = useState(5);
 
-  // Selected Products for Quotation (Map of id -> { customPrice: number | null, qty: number })
+  // Selected Products for Quotation (Map of id -> { customPrice: number | null, qty: number, snapshot: object | null })
   const [selectedProductMap, setSelectedProductMap] = useState({});
 
   // Client Details for Quotation Header
@@ -109,6 +124,24 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     }
   }, [activeMainTab, fetchSavedQuotations]);
 
+  // Apply Profit Percentage to All Selected Products (Auto Price Set)
+  const handleApplyProfitPercent = (pct) => {
+    const newPct = Math.max(0, parseFloat(pct) || 0);
+    setProfitPercent(newPct);
+
+    // Auto update prices: reset customPrice to null so each item dynamically uses buyPrice + newPct%
+    setSelectedProductMap((prev) => {
+      const next = {};
+      Object.entries(prev).forEach(([id, entry]) => {
+        next[id] = {
+          ...entry,
+          customPrice: null, // null ensures it recomputes automatically
+        };
+      });
+      return next;
+    });
+  };
+
   // Filtered Products for Browse view
   const filteredProducts = useMemo(() => {
     const q = (searchQuery || "").toLowerCase().trim();
@@ -162,50 +195,81 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     });
   }, [products, selectedBrand, selectedCategory, searchQuery, inStockOnly]);
 
-  // Selected Products List with Calculated Wholesale, Qty, and Line Total
+  // Selected Products List (Works with both active products and saved quote items)
   const selectedProductList = useMemo(() => {
-    return products
-      .filter((p) => selectedProductMap[p._id || p.id] !== undefined)
-      .map((p) => {
-        const id = p._id || p.id;
-        const entry = selectedProductMap[id] || {};
-        const customPrice = entry.customPrice;
-        const qty = Math.max(1, parseInt(entry.qty) || 1);
+    const prodMap = new Map();
+    products.forEach((p) => {
+      if (p) {
+        prodMap.set(String(p._id || p.id), p);
+        if (p.name) prodMap.set(p.name.toLowerCase().trim(), p);
+      }
+    });
 
-        const buyPrice = Number(p.purchasePrice) || 0;
-        const defaultWholesale = Math.round(buyPrice * (1 + Number(profitPercent || 0) / 100));
-        const finalWholesale =
-          customPrice !== undefined && customPrice !== null && customPrice !== ""
-            ? Number(customPrice)
-            : defaultWholesale;
+    const list = [];
+    Object.entries(selectedProductMap).forEach(([id, entry]) => {
+      if (!entry) return;
+      const matchedProd =
+        prodMap.get(String(id)) ||
+        prodMap.get(String(entry.snapshot?.name || "").toLowerCase().trim());
 
-        const origPrice =
-          Number(p.originalPrice) || Number(p.offerPrice) || (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
-        const discountPct =
-          origPrice > finalWholesale ? Math.round(((origPrice - finalWholesale) / origPrice) * 100) : 0;
+      const p = matchedProd || entry.snapshot || {};
+      const buyPrice = getProductBaseCost(p, entry.snapshot);
+      const defaultWholesale = Math.round(buyPrice * (1 + Number(profitPercent || 0) / 100));
 
-        const lineTotal = finalWholesale * qty;
-        const lineMarket = origPrice * qty;
-        const lineCost = buyPrice * qty;
+      const finalWholesale =
+        entry.customPrice !== undefined && entry.customPrice !== null && entry.customPrice !== ""
+          ? Number(entry.customPrice)
+          : defaultWholesale;
 
-        const rawBrand = (p.brand && typeof p.brand === "object" ? p.brand.name : p.brand) || "Other Brands";
-        const brandName = String(rawBrand).trim() || "Other Brands";
+      const qty = Math.max(1, parseInt(entry.qty) || 1);
+      const origPrice =
+        Number(p.originalPrice) ||
+        Number(entry.snapshot?.originalPrice) ||
+        Number(p.offerPrice) ||
+        (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
 
-        return {
-          ...p,
-          brandName,
-          categoryName: (p.category && typeof p.category === "object" ? p.category.name : p.category) || "",
-          quantity: qty,
-          wholesalePrice: finalWholesale,
-          calculatedDefaultPrice: defaultWholesale,
-          customPrice: customPrice ?? null,
-          discountPct,
-          origPrice,
-          lineTotal,
-          lineMarket,
-          lineCost,
-        };
+      const discountPct =
+        origPrice > finalWholesale ? Math.round(((origPrice - finalWholesale) / origPrice) * 100) : 0;
+
+      const lineTotal = finalWholesale * qty;
+      const lineMarket = origPrice * qty;
+      const lineCost = buyPrice * qty;
+
+      const rawBrand =
+        (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) ||
+        p.brandName ||
+        entry.snapshot?.brandName ||
+        "Other Brands";
+      const brandName = String(rawBrand).trim() || "Other Brands";
+
+      list.push({
+        ...p,
+        _id: p._id || id,
+        id: p._id || id,
+        name: p.name || entry.snapshot?.name || "Product Item",
+        brandName,
+        categoryName:
+          (p.category && typeof p.category === "object" ? p.category?.name : p.category) ||
+          p.categoryName ||
+          entry.snapshot?.categoryName ||
+          "",
+        image: p.image || entry.snapshot?.image || "",
+        purchasePrice: buyPrice,
+        quantity: qty,
+        wholesalePrice: finalWholesale,
+        calculatedDefaultPrice: defaultWholesale,
+        customPrice: entry.customPrice ?? null,
+        discountPct,
+        origPrice,
+        lineTotal,
+        lineMarket,
+        lineCost,
+        stockQuantity: p.stockQuantity ?? entry.snapshot?.stockQuantity ?? 0,
+        inStock: p.inStock ?? entry.snapshot?.inStock ?? true,
       });
+    });
+
+    return list;
   }, [products, selectedProductMap, profitPercent]);
 
   // Brand-Wise Grouping of Selected Products
@@ -258,7 +322,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     const avgDiscount = totalSelected > 0 ? Math.round(totalDiscountSum / totalSelected) : 0;
     const totalSavings = Math.max(0, totalMarket - totalWholesale);
     const totalProfitEst = Math.max(0, totalWholesale - totalCost);
-    const marginPct = totalWholesale > 0 ? Math.round((totalProfitEst / totalWholesale) * 100) : profitPercent;
+    const marginPct =
+      totalWholesale > 0 ? Math.round((totalProfitEst / totalWholesale) * 100) : profitPercent;
 
     return {
       totalSelected,
@@ -275,14 +340,14 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   // Toggle single product selection
   const toggleSelect = (product) => {
-    const id = product._id || product.id;
+    const id = String(product._id || product.id);
     setSelectedProductMap((prev) => {
       const next = { ...prev };
       if (next[id] !== undefined) {
         delete next[id];
       } else {
-        // default 1 piece, null customPrice
-        next[id] = { customPrice: null, qty: 1 };
+        // default 1 piece, null customPrice (auto calculates with profitPercent)
+        next[id] = { customPrice: null, qty: 1, snapshot: product };
       }
       return next;
     });
@@ -290,11 +355,12 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   // Update Quantity for an item
   const handleQtyChange = (id, newQty) => {
+    const strId = String(id);
     const qty = Math.max(1, parseInt(newQty) || 1);
     setSelectedProductMap((prev) => ({
       ...prev,
-      [id]: {
-        ...(prev[id] || { customPrice: null }),
+      [strId]: {
+        ...(prev[strId] || { customPrice: null }),
         qty,
       },
     }));
@@ -302,12 +368,13 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   // Quick increment Qty (+6, +12, +24)
   const handleQuickAddQty = (id, delta) => {
+    const strId = String(id);
     setSelectedProductMap((prev) => {
-      const cur = prev[id]?.qty || 1;
+      const cur = prev[strId]?.qty || 1;
       return {
         ...prev,
-        [id]: {
-          ...(prev[id] || { customPrice: null }),
+        [strId]: {
+          ...(prev[strId] || { customPrice: null }),
           qty: Math.max(1, cur + delta),
         },
       };
@@ -316,11 +383,24 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   // Update custom wholesale price for a specific product
   const handleCustomPriceChange = (id, newPrice) => {
+    const strId = String(id);
     setSelectedProductMap((prev) => ({
       ...prev,
-      [id]: {
-        ...(prev[id] || { qty: 1 }),
+      [strId]: {
+        ...(prev[strId] || { qty: 1 }),
         customPrice: newPrice === "" ? null : Number(newPrice),
+      },
+    }));
+  };
+
+  // Reset a specific product's price back to auto-calculated price
+  const handleResetToAutoPrice = (id) => {
+    const strId = String(id);
+    setSelectedProductMap((prev) => ({
+      ...prev,
+      [strId]: {
+        ...(prev[strId] || { qty: 1 }),
+        customPrice: null,
       },
     }));
   };
@@ -330,9 +410,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     setSelectedProductMap((prev) => {
       const next = { ...prev };
       filteredProducts.forEach((p) => {
-        const id = p._id || p.id;
+        const id = String(p._id || p.id);
         if (next[id] === undefined) {
-          next[id] = { customPrice: null, qty: 1 };
+          next[id] = { customPrice: null, qty: 1, snapshot: p };
         }
       });
       return next;
@@ -407,7 +487,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       setCurrentQuoteNumber(data.quotation.quoteNumber);
       setSaveMessage(`✅ কোটেশন #${data.quotation.quoteNumber} সফলভাবে সংরক্ষিত হয়েছে!`);
 
-      // Refresh saved list if cached
+      // Refresh saved list
       fetchSavedQuotations();
 
       setTimeout(() => {
@@ -465,7 +545,11 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   // 1-Click Convert to Store Order
   const handleConvertToOrder = async (quoteId) => {
-    if (!confirm("আপনি কি নিশ্চিত এই কোটেশনটি অফিসিয়াল অর্ডারে কনভার্ট করতে চান? এটি ইনভেন্টরি থেকে স্টক কমিয়ে দেবে!")) {
+    if (
+      !confirm(
+        "আপনি কি নিশ্চিত এই কোটেশনটি অফিসিয়াল অর্ডারে কনভার্ট করতে চান? এটি ইনভেন্টরি থেকে স্টক কমিয়ে দেবে!"
+      )
+    ) {
       return;
     }
 
@@ -518,16 +602,23 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     setClientPhone(q.clientInfo?.clientPhone || "");
     setClientAddress(q.clientInfo?.clientAddress || "");
     setClientNote(q.clientInfo?.note || "");
-    setProfitPercent(q.profitPercent || 5);
+    const savedProfit = Number(q.profitPercent) || 5;
+    setProfitPercent(savedProfit);
     setCurrentQuoteId(q._id);
     setCurrentQuoteNumber(q.quoteNumber);
 
     const map = {};
     (q.items || []).forEach((it) => {
-      const id = it.productId || it._id || it.name;
+      const id = String(it.productId || it._id || it.name);
+      // Keep price as null if it matches the formula so changing profit% dynamically recalculates it!
+      const buyPrice = Number(it.purchasePrice) || 0;
+      const calculatedExpected = Math.round(buyPrice * (1 + savedProfit / 100));
+      const wasCustom = buyPrice > 0 && it.wholesalePrice !== calculatedExpected;
+
       map[id] = {
-        customPrice: it.wholesalePrice,
+        customPrice: wasCustom ? it.wholesalePrice : null,
         qty: it.quantity || 1,
+        snapshot: it,
       };
     });
     setSelectedProductMap(map);
@@ -539,7 +630,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   // Share Quotation via WhatsApp
   const handleWhatsAppShare = (q = null) => {
     const isSaved = Boolean(q);
-    const targetQuoteNumber = isSaved ? q.quoteNumber : currentQuoteNumber || `WS-${Date.now().toString().slice(-6)}`;
+    const targetQuoteNumber = isSaved
+      ? q.quoteNumber
+      : currentQuoteNumber || `WS-${Date.now().toString().slice(-6)}`;
     const targetClient = isSaved ? q.clientInfo?.clientName : clientName.trim() || "Wholesale Partner";
     const targetPhone = isSaved ? q.clientInfo?.clientPhone : clientPhone.trim();
     const targetItems = isSaved ? q.items : selectedProductList;
@@ -547,7 +640,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     const targetQty = isSaved ? q.totalQty : summaryStats.totalQty;
     const targetSavings = isSaved ? q.totalSavings : summaryStats.totalSavings;
 
-    const domain = typeof window !== "undefined" ? window.location.origin : "https://www.liorabeautyandwear.com";
+    const domain =
+      typeof window !== "undefined" ? window.location.origin : "https://www.liorabeautyandwear.com";
     const digitalLink = `${domain}/quote/${targetQuoteNumber}`;
 
     let msg = `*LIORA BEAUTY & WEAR — WHOLESALE INVOICE & QUOTATION*\n`;
@@ -578,7 +672,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
     const encoded = encodeURIComponent(msg);
     const cleanPhone = (targetPhone || "").replace(/[^0-9]/g, "");
-    const waUrl = cleanPhone ? `https://wa.me/88${cleanPhone.replace(/^88/, "")}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+    const waUrl = cleanPhone
+      ? `https://wa.me/88${cleanPhone.replace(/^88/, "")}?text=${encoded}`
+      : `https://wa.me/?text=${encoded}`;
     window.open(waUrl, "_blank");
   };
 
@@ -586,7 +682,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Top Banner & Title */}
+      {/* Top Banner & Title with LIVE PROFIT CONTROLS */}
       <div
         style={{
           background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
@@ -609,27 +705,28 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
             </h2>
           </div>
           <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8", maxWidth: "620px", lineHeight: "1.5" }}>
-            ব্র্যান্ড অনুযায়ী গোছানো কোটেশন ও ইনভয়েস তৈরি করুন। কাস্টম পিস সংখ্যা (Pcs), রেট ও টোটাল ক্যালকুলেশন সহ
-            মুহূর্তেই ক্লায়েন্টকে পাঠানোর মতো প্রফেশনাল পাইকারি বিলিং ইনভয়েস ডাউনলোড করুন অথবা ডেটাবেজে সেভ রাখুন।
+            কেনার দামের ওপর নির্দিষ্ট % লাভ ধরে মুহূর্তেই পাইকারি কোটেশন ও ইনভয়েস রেডি করুন।
+            পিস সংখ্যা (Pcs) ও লাইন টোটাল সহ ব্র্যান্ড অনুযায়ী আকর্ষণীয় অফিসিয়াল বিলিং ইনভয়েস PDF ডাউনলোড বা সেভ করুন।
           </p>
         </div>
 
-        {/* Global Profit Margin Control in Header */}
+        {/* Global Profit Margin Control in Header (Auto-calculates for all products!) */}
         <div
           style={{
             background: "rgba(255, 255, 255, 0.08)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            padding: "12px 18px",
-            borderRadius: "12px",
+            border: "1.5px solid rgba(244, 114, 182, 0.4)",
+            padding: "14px 20px",
+            borderRadius: "14px",
             display: "flex",
             alignItems: "center",
-            gap: "14px",
+            gap: "16px",
             backdropFilter: "blur(8px)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
           }}
         >
           <div>
-            <div style={{ fontSize: "11px", color: "#f472b6", fontWeight: "700", textTransform: "uppercase" }}>
-              📈 আপনার ডিফল্ট লাভ (% Profit)
+            <div style={{ fontSize: "11px", color: "#f472b6", fontWeight: "800", textTransform: "uppercase" }}>
+              📈 আপনার ডিফল্ট লাভ (% PROFIT)
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
               <input
@@ -638,12 +735,13 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                 max="100"
                 step="0.5"
                 value={profitPercent}
-                onChange={(e) => setProfitPercent(Math.max(0, parseFloat(e.target.value) || 0))}
+                onChange={(e) => handleApplyProfitPercent(e.target.value)}
+                title="লাভের পার্সেন্টেজ লিখলে সাথে সাথে সব প্রোডাক্টের দাম আপডেট হবে"
                 style={{
-                  width: "70px",
+                  width: "74px",
                   padding: "6px 8px",
                   borderRadius: "8px",
-                  border: "2px solid #e11d48",
+                  border: "2.5px solid #e11d48",
                   background: "#ffffff",
                   color: "#0f172a",
                   fontWeight: "900",
@@ -656,24 +754,28 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <span style={{ fontSize: "10px", color: "#94a3b8" }}>দ্রুত সিলেক্ট:</span>
-            <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", maxWidth: "160px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+            <span style={{ fontSize: "10.5px", color: "#cbd5e1", fontWeight: "700" }}>
+              ⚡ দ্রুত সিলেক্ট (অটো প্রাইস আপডেট):
+            </span>
+            <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", maxWidth: "180px" }}>
               {profitPresets.map((pct) => (
                 <button
                   key={pct}
                   type="button"
-                  onClick={() => setProfitPercent(pct)}
+                  onClick={() => handleApplyProfitPercent(pct)}
+                  title={`${pct}% লাভে সব প্রোডাক্টের রেট অটো সেট করুন`}
                   style={{
-                    padding: "3px 6px",
+                    padding: "4px 7px",
                     borderRadius: "6px",
-                    border: "none",
+                    border: profitPercent === pct ? "1.5px solid #ffffff" : "1px solid rgba(255, 255, 255, 0.2)",
                     cursor: "pointer",
                     fontSize: "11px",
-                    fontWeight: "800",
-                    background: profitPercent === pct ? "#e11d48" : "rgba(255, 255, 255, 0.15)",
+                    fontWeight: "900",
+                    background: profitPercent === pct ? "#e11d48" : "rgba(255, 255, 255, 0.12)",
                     color: "#ffffff",
-                    transition: "all 0.15s",
+                    transition: "all 0.15s ease",
+                    transform: profitPercent === pct ? "scale(1.05)" : "scale(1)",
                   }}
                 >
                   +{pct}%
@@ -790,7 +892,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                 <span style={{ fontSize: "13px", fontWeight: "600", color: "#64748b" }}>পিস</span>
               </div>
               <div style={{ fontSize: "11px", color: "#0284c7", fontWeight: "700", marginTop: "4px" }}>
-                ব্র্যান্ড গ্রুপ সংখ্যা: {brandGroupedSelected.length} টি
+                ব্র্যান্ড গ্রুপ: {brandGroupedSelected.length} টি
               </div>
             </div>
 
@@ -876,11 +978,29 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
               <div style={{ fontSize: "13.5px", fontWeight: "800", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
                 <span>📝 ক্লায়েন্ট / কাস্টমার তথ্য ও ইনভয়েস বিলিং ডিটেইলস</span>
                 {currentQuoteNumber && (
-                  <span style={{ background: "#e0f2fe", color: "#0369a1", padding: "2px 8px", borderRadius: "6px", fontSize: "12px" }}>
-                    ইনভয়েস #{currentQuoteNumber}
+                  <span style={{ background: "#e0f2fe", color: "#0369a1", padding: "2px 8px", borderRadius: "6px", fontSize: "12px", fontWeight: "800" }}>
+                    ইনভয়েস #{currentQuoteNumber} (এডিট মোড)
                   </span>
                 )}
               </div>
+              {currentQuoteNumber && (
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  style={{
+                    background: "#f1f5f9",
+                    border: "1px solid #cbd5e1",
+                    color: "#475569",
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  + নতুন কোটেশন তৈরি করুন
+                </button>
+              )}
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px" }}>
@@ -967,6 +1087,26 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                     {activeSubTab === "selected"
                       ? "← নতুন প্রোডাক্ট যোগ করতে ফিরে যান"
                       : `📋 গোছানো বিলিং শিট দেখুন (${summaryStats.totalSelected} আইটেম, ${summaryStats.totalQty} পিস) ➔`}
+                  </button>
+                )}
+
+                {summaryStats.totalSelected > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleApplyProfitPercent(profitPercent)}
+                    title="সকল প্রোডাক্টে বর্তমান লাভের % অনুযায়ী রেট রি-ক্যালকুলেট করুন"
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      border: "1.5px solid #2563eb",
+                      background: "#eff6ff",
+                      color: "#1d4ed8",
+                      fontWeight: "800",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ⚡ অটো প্রাইস রিফ্রেশ (+{profitPercent}%)
                   </button>
                 )}
 
@@ -1277,9 +1417,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                       </tr>
                     ) : (
                       filteredProducts.map((p, idx) => {
-                        const id = p._id || p.id;
+                        const id = String(p._id || p.id);
                         const isSelected = selectedProductMap[id] !== undefined;
-                        const buyPrice = Number(p.purchasePrice) || 0;
+                        const buyPrice = getProductBaseCost(p);
                         const origPrice =
                           Number(p.originalPrice) || Number(p.offerPrice) || (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
                         const defaultWholesale = Math.round(buyPrice * (1 + Number(profitPercent || 0) / 100));
@@ -1355,7 +1495,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                               <span style={{ textDecoration: "line-through" }}>৳{origPrice.toLocaleString()}</span>
                             </td>
                             <td style={{ padding: "10px", textAlign: "right", whiteSpace: "nowrap" }}>
-                              <span style={{ fontWeight: "900", color: "#e11d48", fontSize: "13.5px" }}>
+                              <span style={{ fontWeight: "900", color: "#e11d48", fontSize: "14px" }}>
                                 ৳{finalWholesale.toLocaleString()}
                               </span>
                             </td>
@@ -1498,8 +1638,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                             <th style={{ padding: "10px", color: "#475569" }}>প্রোডাক্ট ও সাইজ</th>
                             <th style={{ padding: "10px", textAlign: "right", color: "#475569", width: "80px" }}>কেনার দাম</th>
                             <th style={{ padding: "10px", textAlign: "right", color: "#475569", width: "90px" }}>খুচরা MRP</th>
-                            <th style={{ padding: "10px", textAlign: "right", color: "#0f172a", width: "120px", fontWeight: "900" }}>
-                              পাইকারি দর (রেট)
+                            <th style={{ padding: "10px", textAlign: "right", color: "#0f172a", width: "140px", fontWeight: "900" }}>
+                              পাইকারি দর (+{profitPercent}%)
                             </th>
                             <th style={{ padding: "10px", textAlign: "center", color: "#0f172a", width: "160px", fontWeight: "900" }}>
                               পরিমাণ (Pcs)
@@ -1513,8 +1653,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                         </thead>
                         <tbody>
                           {group.items.map((item, iIdx) => {
-                            const id = item._id || item.id;
+                            const id = String(item._id || item.id);
                             const isStockLow = item.stockQuantity !== undefined && item.stockQuantity < item.quantity;
+                            const isCustom = item.customPrice !== null && item.customPrice !== undefined;
 
                             return (
                               <tr
@@ -1586,22 +1727,22 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                                   <span style={{ textDecoration: "line-through" }}>৳{item.origPrice.toLocaleString()}</span>
                                 </td>
 
-                                {/* Wholesale Rate (Editable) */}
+                                {/* Wholesale Rate (Editable with Auto Price Sync) */}
                                 <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
                                   <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
                                     <span style={{ fontWeight: "800", color: "#e11d48", fontSize: "12px" }}>৳</span>
                                     <input
                                       type="number"
                                       min="0"
-                                      value={item.customPrice !== null && item.customPrice !== undefined ? item.customPrice : item.wholesalePrice}
+                                      value={item.wholesalePrice}
                                       onChange={(e) => handleCustomPriceChange(id, e.target.value)}
-                                      title="প্রয়োজনে কাস্টম রেট লিখুন"
+                                      title="কাস্টম রেট লিখুন অথবা উপরে % চেঞ্জ করলে অটো আপডেট হবে"
                                       style={{
                                         width: "74px",
                                         padding: "4px 6px",
                                         borderRadius: "6px",
-                                        border: item.customPrice ? "2px solid #e11d48" : "1px solid #cbd5e1",
-                                        background: item.customPrice ? "#fff" : "#fff1f2",
+                                        border: isCustom ? "2px solid #e11d48" : "1.5px solid #cbd5e1",
+                                        background: isCustom ? "#fff1f2" : "#ffffff",
                                         color: "#0f172a",
                                         fontWeight: "800",
                                         textAlign: "right",
@@ -1609,6 +1750,23 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                                         outline: "none",
                                       }}
                                     />
+                                    {isCustom && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleResetToAutoPrice(id)}
+                                        title="অটো রেটে ফিরিয়ে নিন"
+                                        style={{
+                                          border: "none",
+                                          background: "none",
+                                          cursor: "pointer",
+                                          fontSize: "12px",
+                                          color: "#2563eb",
+                                          padding: "0 2px",
+                                        }}
+                                      >
+                                        ↺
+                                      </button>
+                                    )}
                                   </div>
                                 </td>
 

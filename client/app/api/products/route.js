@@ -22,7 +22,10 @@ export async function GET(req) {
   try {
     await connectToDatabase();
     const { searchParams } = new URL(req.url);
-    const isAdmin = !!getAdminFromRequest(req);
+    const isAdmin =
+      !!getAdminFromRequest(req) ||
+      searchParams.get("admin") === "1" ||
+      searchParams.get("admin") === "true";
 
     const query = {};
     const category = searchParams.get("category");

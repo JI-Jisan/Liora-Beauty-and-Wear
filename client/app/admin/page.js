@@ -185,7 +185,7 @@ export default function AdminPage() {
 
   const loadProducts = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/products?limit=10000&_t=${Date.now()}`, {
+      const res = await fetch(`${API_BASE_URL}/api/products?admin=1&limit=10000&_t=${Date.now()}`, {
         headers: getAuthHeaders(),
         cache: "no-store",
       });
