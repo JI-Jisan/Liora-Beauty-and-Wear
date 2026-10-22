@@ -322,6 +322,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     const avgDiscount = totalSelected > 0 ? Math.round(totalDiscountSum / totalSelected) : 0;
     const totalSavings = Math.max(0, totalMarket - totalWholesale);
     const totalProfitEst = Math.max(0, totalWholesale - totalCost);
+    const markupPct =
+      totalCost > 0 ? Math.round((totalProfitEst / totalCost) * 100) : Number(profitPercent || 0);
     const marginPct =
       totalWholesale > 0 ? Math.round((totalProfitEst / totalWholesale) * 100) : profitPercent;
 
@@ -334,6 +336,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       totalCost,
       totalProfitEst,
       avgDiscount,
+      markupPct,
       marginPct,
     };
   }, [selectedProductList, profitPercent]);
@@ -950,13 +953,13 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
               }}
             >
               <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "700" }}>
-                ✨ অ্যাডমিন নিট প্রফিট ({summaryStats.marginPct}%)
+                ✨ অ্যাডমিন নিট প্রফিট (+{summaryStats.markupPct}%)
               </div>
               <div style={{ fontSize: "22px", fontWeight: "900", color: "#2563eb", marginTop: "4px" }}>
                 ৳{summaryStats.totalProfitEst.toLocaleString()}
               </div>
               <div style={{ fontSize: "11px", color: "#64748b", marginTop: "4px" }}>
-                মোট কেনার খরচ: ৳{summaryStats.totalCost.toLocaleString()}
+                কেনার খরচ: ৳{summaryStats.totalCost.toLocaleString()} (মার্জিন: {summaryStats.marginPct}%)
               </div>
             </div>
           </div>
