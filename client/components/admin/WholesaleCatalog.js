@@ -403,12 +403,12 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   };
 
   // Update custom wholesale price for a specific product
-  const handleCustomPriceChange = (id, newPrice) => {
+  const handleCustomPriceChange = (id, newPrice, productSnapshot = null) => {
     const strId = String(id);
     setSelectedProductMap((prev) => ({
       ...prev,
       [strId]: {
-        ...(prev[strId] || { qty: 1 }),
+        ...(prev[strId] || { qty: 1, snapshot: productSnapshot }),
         customPrice: newPrice === "" ? null : Number(newPrice),
       },
     }));
@@ -1740,12 +1740,19 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                         const buyPrice = getProductBaseCost(p);
                         const origPrice =
                           Number(p.originalPrice) || Number(p.offerPrice) || (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
-                        const defaultWholesale = Math.round(buyPrice * (1 + Number(profitPercent || 0) / 100));
-                        const finalWholesale =
-                          selectedProductMap[id]?.customPrice ?? defaultWholesale;
+                        const rawBrand = (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) || p.brandName || "";
+                        const brandName = String(rawBrand).trim();
+                        const brandOverride = brandProfitOverrides[brandName];
+                        const effectiveProfitPct =
+                          brandOverride !== undefined && brandOverride !== null && brandOverride !== ""
+                            ? Number(brandOverride)
+                            : Number(profitPercent || 0);
+                        const defaultWholesale = Math.round(buyPrice * (1 + effectiveProfitPct / 100));
+                        const customVal = selectedProductMap[id]?.customPrice;
+                        const isCustom = customVal !== undefined && customVal !== null && customVal !== "";
+                        const finalWholesale = isCustom ? Number(customVal) : defaultWholesale;
                         const discountPct =
                           origPrice > finalWholesale ? Math.round(((origPrice - finalWholesale) / origPrice) * 100) : 0;
-                        const brandName = (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) || "";
                         const categoryName = (p.category && typeof p.category === "object" ? p.category?.name : p.category) || "";
 
                         return (
@@ -1812,10 +1819,66 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                             <td style={{ padding: "10px", textAlign: "right", color: "#94a3b8", whiteSpace: "nowrap" }}>
                               <span style={{ textDecoration: "line-through" }}>৳{origPrice.toLocaleString()}</span>
                             </td>
-                            <td style={{ padding: "10px", textAlign: "right", whiteSpace: "nowrap" }}>
-                              <span style={{ fontWeight: "900", color: "#e11d48", fontSize: "14px" }}>
-                                ৳{finalWholesale.toLocaleString()}
-                              </span>
+                            <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
+                              {isSelected ? (
+                                <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                                  <div style={{ display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                    <span style={{ fontWeight: "800", color: "#e11d48", fontSize: "12px" }}>৳</span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={finalWholesale}
+                                      onChange={(e) => handleCustomPriceChange(id, e.target.value, p)}
+                                      title="কাস্টম পাইকারি রেট লিখুন (অটো আপডেট হবে)"
+                                      style={{
+                                        width: "74px",
+                                        padding: "4px 6px",
+                                        borderRadius: "6px",
+                                        border: isCustom ? "2px solid #e11d48" : "1.5px solid #cbd5e1",
+                                        background: isCustom ? "#fff1f2" : "#ffffff",
+                                        color: "#0f172a",
+                                        fontWeight: "800",
+                                        textAlign: "right",
+                                        fontSize: "13px",
+                                        outline: "none",
+                                      }}
+                                    />
+                                    {isCustom && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleResetToAutoPrice(id)}
+                                        title="অটো রেটে ফিরিয়ে নিন"
+                                        style={{
+                                          border: "none",
+                                          background: "none",
+                                          cursor: "pointer",
+                                          fontSize: "12px",
+                                          color: "#2563eb",
+                                          padding: "0 2px",
+                                        }}
+                                      >
+                                        ↺
+                                      </button>
+                                    )}
+                                  </div>
+                                  {brandOverride !== undefined && brandOverride !== null && brandOverride !== "" && !isCustom && (
+                                    <span style={{ fontSize: "9.5px", color: "#e11d48", fontWeight: "800" }}>
+                                      ব্র্যান্ড +{effectiveProfitPct}%
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "flex-end" }}>
+                                  <span style={{ fontWeight: "900", color: "#e11d48", fontSize: "14px" }}>
+                                    ৳{finalWholesale.toLocaleString()}
+                                  </span>
+                                  {brandOverride !== undefined && brandOverride !== null && brandOverride !== "" && (
+                                    <span style={{ fontSize: "9.5px", color: "#e11d48", fontWeight: "800" }}>
+                                      ব্র্যান্ড +{effectiveProfitPct}%
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </td>
                             <td style={{ padding: "10px", textAlign: "center", whiteSpace: "nowrap" }}>
                               <span
