@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { generateWholesalePdf } from "@/lib/wholesalePdf";
+import { generateWholesalePdf, buildHierarchicalGroups } from "@/lib/wholesalePdf";
 import { getAuthHeaders } from "@/lib/api";
 
 // Helper to determine buying cost
@@ -45,6 +45,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   // UI State inside Generator: Active View ('browse' | 'selected')
   const [activeSubTab, setActiveSubTab] = useState("browse");
+
+  // Grouping Mode: 'brand' (Brand -> Category) | 'category' (Category -> Brand)
+  const [groupByMode, setGroupByMode] = useState("brand");
 
   // PDF Generation State
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -272,7 +275,12 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     return list;
   }, [products, selectedProductMap, profitPercent]);
 
-  // Brand-Wise Grouping of Selected Products
+  // Hierarchical Grouping of Selected Products (Brand -> Category or Category -> Brand)
+  const hierarchicalSelected = useMemo(() => {
+    return buildHierarchicalGroups(selectedProductList, groupByMode);
+  }, [selectedProductList, groupByMode]);
+
+  // Brand-Wise Grouping of Selected Products (compatibility)
   const brandGroupedSelected = useMemo(() => {
     const groups = {};
     selectedProductList.forEach((item) => {
@@ -506,7 +514,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   };
 
   // Download PDF Handler
-  const handleDownloadPdf = async (customItems = null, customClient = null, quoteNum = null) => {
+  const handleDownloadPdf = async (customItems = null, customClient = null, quoteNum = null, customGroupBy = null) => {
     const listToPrint = customItems || selectedProductList;
     const infoToPrint = customClient || {
       clientName: clientName.trim() || "Wholesale Partner",
@@ -519,8 +527,13 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       return;
     }
 
+    const targetGroup = customGroupBy || groupByMode;
     setIsGeneratingPdf(true);
-    setPdfMessage("ব্র্যান্ড অনুযায়ী ছবি ও ইনভয়েস টেবিল সাজানো হচ্ছে...");
+    setPdfMessage(
+      targetGroup === "brand"
+        ? "ব্র্যান্ড ➔ ক্যাটাগরি অনুযায়ী ছবি ও ইনভয়েস টেবিল সাজানো হচ্ছে..."
+        : "ক্যাটাগরি ➔ ব্র্যান্ড অনুযায়ী ছবি ও ইনভয়েস টেবিল সাজানো হচ্ছে..."
+    );
 
     try {
       await generateWholesalePdf({
@@ -528,6 +541,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
         clientInfo: infoToPrint,
         profitPercent,
         quoteNumber: quoteNum || currentQuoteNumber,
+        groupBy: targetGroup,
         onProgress: (current, total) => {
           setPdfMessage(`ছবি ও ডাটা প্রসেস হচ্ছে: ${current} / ${total}`);
         },
@@ -895,7 +909,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                 <span style={{ fontSize: "13px", fontWeight: "600", color: "#64748b" }}>পিস</span>
               </div>
               <div style={{ fontSize: "11px", color: "#0284c7", fontWeight: "700", marginTop: "4px" }}>
-                ব্র্যান্ড গ্রুপ: {brandGroupedSelected.length} টি
+                গ্রুপ: {hierarchicalSelected.length} টি ({groupByMode === "brand" ? "ব্র্যান্ড ➔ ক্যাটাগরি" : "ক্যাটাগরি ➔ ব্র্যান্ড"})
               </div>
             </div>
 
@@ -1204,7 +1218,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                     boxShadow: summaryStats.totalSelected > 0 ? "0 4px 14px rgba(225, 29, 72, 0.3)" : "none",
                   }}
                 >
-                  {isGeneratingPdf ? "⏳ PDF তৈরি হচ্ছে..." : "📥 ব্র্যান্ডেড PDF বিল ডাউনলোড"}
+                  {isGeneratingPdf ? "⏳ PDF তৈরি হচ্ছে..." : `📥 PDF বিল ডাউনলোড (${groupByMode === "brand" ? "ব্র্যান্ড ➔ ক্যাটাগরি" : "ক্যাটাগরি ➔ ব্র্যান্ড"})`}
                 </button>
               </div>
             </div>
@@ -1545,10 +1559,93 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
             </div>
           )}
 
-          {/* VIEW B: BRAND-GROUPED BILLING INVOICE EDITOR */}
+          {/* VIEW B: HIERARCHICAL BILLING INVOICE EDITOR (Brand -> Cat OR Cat -> Brand) */}
           {activeSubTab === "selected" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              {brandGroupedSelected.length === 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {/* Grouping Mode Switcher */}
+              <div
+                style={{
+                  background: "#ffffff",
+                  padding: "14px 18px",
+                  borderRadius: "12px",
+                  border: "1.5px solid #e2e8f0",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: "13.5px", fontWeight: "900", color: "#0f172a" }}>
+                    🔄 ইনভয়েস প্রোডাক্ট বিন্যাস (Grouping Mode)
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
+                    {groupByMode === "brand"
+                      ? "🏷️ ব্র্যান্ড ➔ ক্যাটাগরি: প্রথমে ব্র্যান্ডের নাম, তার নিচে ক্যাটাগরি অনুযায়ী প্রডাক্ট আলাদা হবে।"
+                      : "📁 ক্যাটাগরি ➔ ব্র্যান্ড: প্রথমে ক্যাটাগরি (যেমন: শ্যাম্পু), তার নিচে বিভিন্ন ব্র্যান্ড আলাদা হবে।"}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setGroupByMode("brand")}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      border: groupByMode === "brand" ? "2px solid #e11d48" : "1.5px solid #cbd5e1",
+                      background: groupByMode === "brand" ? "#fff1f2" : "#ffffff",
+                      color: groupByMode === "brand" ? "#e11d48" : "#475569",
+                      fontWeight: "800",
+                      fontSize: "12.5px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      boxShadow: groupByMode === "brand" ? "0 2px 8px rgba(225, 29, 72, 0.15)" : "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <span>🏷️ ব্র্যান্ড ➔ ক্যাটাগরি</span>
+                    {groupByMode === "brand" && (
+                      <span style={{ fontSize: "10px", background: "#e11d48", color: "#fff", padding: "1px 6px", borderRadius: "10px" }}>
+                        Active
+                      </span>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setGroupByMode("category")}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      border: groupByMode === "category" ? "2px solid #0f172a" : "1.5px solid #cbd5e1",
+                      background: groupByMode === "category" ? "#0f172a" : "#ffffff",
+                      color: groupByMode === "category" ? "#ffffff" : "#475569",
+                      fontWeight: "800",
+                      fontSize: "12.5px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      boxShadow: groupByMode === "category" ? "0 2px 8px rgba(15, 23, 42, 0.15)" : "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <span>📁 ক্যাটাগরি ➔ ব্র্যান্ড</span>
+                    {groupByMode === "category" && (
+                      <span style={{ fontSize: "10px", background: "#e11d48", color: "#fff", padding: "1px 6px", borderRadius: "10px" }}>
+                        Active
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {hierarchicalSelected.length === 0 ? (
                 <div
                   style={{
                     background: "#ffffff",
@@ -1563,7 +1660,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                     আপনার ইনভয়েস শিটে এখনো কোনো প্রোডাক্ট নেই!
                   </h3>
                   <p style={{ margin: "0 0 16px", fontSize: "13px", color: "#64748b" }}>
-                    "সব প্রোডাক্ট ক্যাটালগ" ট্যাব থেকে প্রয়োজনীয় প্রোডাক্ট সিলেক্ট করুন অথবা ফিল্টারের সব প্রোডাক্ট এক ক্লিকে যোগ করুন।
+                    &ldquo;সব প্রোডাক্ট ক্যাটালগ&rdquo; ট্যাব থেকে প্রয়োজনীয় প্রোডাক্ট সিলেক্ট করুন অথবা ফিল্টারের সব প্রোডাক্ট এক ক্লিকে যোগ করুন।
                   </p>
                   <button
                     type="button"
@@ -1583,9 +1680,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                   </button>
                 </div>
               ) : (
-                brandGroupedSelected.map((group) => (
+                hierarchicalSelected.map((pGroup) => (
                   <div
-                    key={group.brandName}
+                    key={pGroup.primaryName}
                     style={{
                       background: "#ffffff",
                       borderRadius: "14px",
@@ -1594,7 +1691,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                       boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
                     }}
                   >
-                    {/* Brand Banner Header */}
+                    {/* Primary Banner Header */}
                     <div
                       style={{
                         background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
@@ -1608,290 +1705,356 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontSize: "18px" }}>🏷️</span>
+                        <span style={{ fontSize: "18px" }}>
+                          {groupByMode === "brand" ? "🏷️" : "📁"}
+                        </span>
                         <div>
                           <span style={{ fontSize: "15px", fontWeight: "900", color: "#f8fafc", letterSpacing: "0.5px" }}>
-                            BRAND: {group.brandName.toUpperCase()}
+                            {groupByMode === "brand" ? "BRAND: " : "CATEGORY: "}
+                            {pGroup.primaryName.toUpperCase()}
                           </span>
                           <span style={{ marginLeft: "10px", fontSize: "12px", color: "#94a3b8" }}>
-                            ({group.items.length} টি আইটেম)
+                            ({pGroup.items.length} টি আইটেম)
                           </span>
                         </div>
                       </div>
 
                       <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "12.5px" }}>
                         <span style={{ color: "#cbd5e1" }}>
-                          মোট পিস: <strong style={{ color: "#ffffff", fontSize: "14px" }}>{group.totalPcs} Pcs</strong>
+                          মোট পিস: <strong style={{ color: "#ffffff", fontSize: "14px" }}>{pGroup.totalQty} Pcs</strong>
                         </span>
                         <span style={{ color: "#cbd5e1" }}>
-                          ব্র্যান্ড সাবটোটাল:{" "}
+                          সাবটোটাল:{" "}
                           <strong style={{ color: "#f43f5e", fontSize: "15px" }}>
-                            ৳{group.subtotal.toLocaleString()}
+                            ৳{pGroup.subtotal.toLocaleString()}
                           </strong>
                         </span>
                       </div>
                     </div>
 
-                    {/* Brand Items Table */}
-                    <div style={{ overflowX: "auto" }}>
-                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
-                        <thead style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                          <tr>
-                            <th style={{ padding: "10px", width: "45px", textAlign: "center", color: "#475569" }}>ছবি</th>
-                            <th style={{ padding: "10px", color: "#475569" }}>প্রোডাক্ট ও সাইজ</th>
-                            <th style={{ padding: "10px", textAlign: "right", color: "#475569", width: "80px" }}>কেনার দাম</th>
-                            <th style={{ padding: "10px", textAlign: "right", color: "#475569", width: "90px" }}>খুচরা MRP</th>
-                            <th style={{ padding: "10px", textAlign: "right", color: "#0f172a", width: "140px", fontWeight: "900" }}>
-                              পাইকারি দর (+{profitPercent}%)
-                            </th>
-                            <th style={{ padding: "10px", textAlign: "center", color: "#0f172a", width: "160px", fontWeight: "900" }}>
-                              পরিমাণ (Pcs)
-                            </th>
-                            <th style={{ padding: "10px", textAlign: "right", color: "#e11d48", width: "120px", fontWeight: "900" }}>
-                              টোটাল টাকা (বিল)
-                            </th>
-                            <th style={{ padding: "10px", textAlign: "center", color: "#166534", width: "80px" }}>ছাড়</th>
-                            <th style={{ padding: "10px", textAlign: "center", color: "#475569", width: "50px" }}>বাদ</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {group.items.map((item, iIdx) => {
-                            const id = String(item._id || item.id);
-                            const isStockLow = item.stockQuantity !== undefined && item.stockQuantity < item.quantity;
-                            const isCustom = item.customPrice !== null && item.customPrice !== undefined;
+                    {/* Secondary Sub-groups */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "12px" }}>
+                      {pGroup.secondaryGroups.map((sGroup) => (
+                        <div
+                          key={sGroup.secondaryName}
+                          style={{
+                            borderRadius: "10px",
+                            border: "1px solid #e2e8f0",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {/* Secondary Sub-header Bar */}
+                          <div
+                            style={{
+                              background: "#f8fafc",
+                              padding: "8px 14px",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              flexWrap: "wrap",
+                              gap: "6px",
+                              borderLeft: "4px solid #e11d48",
+                              borderBottom: "1px solid #e2e8f0",
+                            }}
+                          >
+                            <div style={{ fontSize: "12.5px", fontWeight: "800", color: "#1e293b" }}>
+                              {groupByMode === "brand" ? "📁 ক্যাটাগরি: " : "🏷️ ব্র্যান্ড: "}
+                              <span style={{ color: "#0f172a" }}>{sGroup.secondaryName}</span>
+                            </div>
+                            <div style={{ fontSize: "11.5px", color: "#64748b", fontWeight: "700" }}>
+                              <span>{sGroup.items.length} আইটেম</span>
+                              <span style={{ margin: "0 6px" }}>•</span>
+                              <span>{sGroup.totalQty} Pcs</span>
+                              <span style={{ margin: "0 6px" }}>•</span>
+                              <span style={{ color: "#e11d48", fontWeight: "800" }}>
+                                ৳{sGroup.subtotal.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
 
-                            return (
-                              <tr
-                                key={id || iIdx}
-                                style={{
-                                  background: iIdx % 2 === 0 ? "#ffffff" : "#fbfcfe",
-                                  borderBottom: "1px solid #f1f5f9",
-                                }}
-                              >
-                                {/* Thumbnail */}
-                                <td style={{ padding: "8px 10px", textAlign: "center" }}>
-                                  {item.image ? (
-                                    <img
-                                      src={item.image}
-                                      alt=""
+                          {/* Items Table */}
+                          <div style={{ overflowX: "auto" }}>
+                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
+                              <thead style={{ background: "#ffffff", borderBottom: "1px solid #e2e8f0" }}>
+                                <tr>
+                                  <th style={{ padding: "10px", width: "45px", textAlign: "center", color: "#475569" }}>ছবি</th>
+                                  <th style={{ padding: "10px", color: "#475569" }}>প্রোডাক্ট ও সাইজ</th>
+                                  <th style={{ padding: "10px", textAlign: "right", color: "#475569", width: "80px" }}>কেনার দাম</th>
+                                  <th style={{ padding: "10px", textAlign: "right", color: "#334155", width: "95px", fontWeight: "800" }}>
+                                    খুচরা MRP
+                                  </th>
+                                  <th style={{ padding: "10px", textAlign: "center", color: "#166534", width: "85px", fontWeight: "800" }}>
+                                    ছাড় (% OFF)
+                                  </th>
+                                  <th style={{ padding: "10px", textAlign: "right", color: "#0f172a", width: "135px", fontWeight: "900" }}>
+                                    পাইকারি দর (+{profitPercent}%)
+                                  </th>
+                                  <th style={{ padding: "10px", textAlign: "center", color: "#0f172a", width: "155px", fontWeight: "900" }}>
+                                    পরিমাণ (Pcs)
+                                  </th>
+                                  <th style={{ padding: "10px", textAlign: "right", color: "#e11d48", width: "115px", fontWeight: "900" }}>
+                                    টোটাল বিল
+                                  </th>
+                                  <th style={{ padding: "10px", textAlign: "center", color: "#475569", width: "45px" }}>বাদ</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {sGroup.items.map((item, iIdx) => {
+                                  const id = String(item._id || item.id);
+                                  const isStockLow = item.stockQuantity !== undefined && item.stockQuantity < item.quantity;
+                                  const isCustom = item.customPrice !== null && item.customPrice !== undefined;
+
+                                  return (
+                                    <tr
+                                      key={id || iIdx}
                                       style={{
-                                        width: "36px",
-                                        height: "36px",
-                                        objectFit: "contain",
-                                        borderRadius: "6px",
-                                        border: "1px solid #e2e8f0",
-                                        background: "#fff",
-                                      }}
-                                    />
-                                  ) : (
-                                    <div
-                                      style={{
-                                        width: "36px",
-                                        height: "36px",
-                                        borderRadius: "6px",
-                                        background: "#f1f5f9",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        fontSize: "10px",
-                                        color: "#94a3b8",
+                                        background: iIdx % 2 === 0 ? "#ffffff" : "#fbfcfe",
+                                        borderBottom: "1px solid #f1f5f9",
                                       }}
                                     >
-                                      📦
-                                    </div>
-                                  )}
-                                </td>
+                                      {/* Thumbnail */}
+                                      <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                                        {item.image ? (
+                                          <img
+                                            src={item.image}
+                                            alt=""
+                                            style={{
+                                              width: "36px",
+                                              height: "36px",
+                                              objectFit: "contain",
+                                              borderRadius: "6px",
+                                              border: "1px solid #e2e8f0",
+                                              background: "#fff",
+                                            }}
+                                          />
+                                        ) : (
+                                          <div
+                                            style={{
+                                              width: "36px",
+                                              height: "36px",
+                                              borderRadius: "6px",
+                                              background: "#f1f5f9",
+                                              display: "flex",
+                                              alignItems: "center",
+                                              justifyContent: "center",
+                                              fontSize: "10px",
+                                              color: "#94a3b8",
+                                            }}
+                                          >
+                                            📦
+                                          </div>
+                                        )}
+                                      </td>
 
-                                {/* Name & Stock Warning */}
-                                <td style={{ padding: "8px 10px" }}>
-                                  <div style={{ fontWeight: "800", color: "#0f172a", fontSize: "13px" }}>
-                                    {item.name}
-                                  </div>
-                                  <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px", display: "flex", gap: "6px", alignItems: "center" }}>
-                                    {item.categoryName && <span>{item.categoryName}</span>}
-                                    <span style={{ color: isStockLow ? "#dc2626" : "#16a34a", fontWeight: "700" }}>
-                                      • বর্তমান স্টক: {item.stockQuantity ?? "অজানা"}
-                                    </span>
-                                    {isStockLow && (
-                                      <span style={{ background: "#fee2e2", color: "#dc2626", padding: "1px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: "800" }}>
-                                        ⚠️ চাহিদার তুলনায় স্টক কম!
-                                      </span>
-                                    )}
-                                  </div>
-                                </td>
+                                      {/* Name & Subtitle */}
+                                      <td style={{ padding: "8px 10px" }}>
+                                        <div style={{ fontWeight: "800", color: "#0f172a", fontSize: "13px" }}>
+                                          {item.name}
+                                        </div>
+                                        <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px", display: "flex", gap: "6px", alignItems: "center" }}>
+                                          <span>{groupByMode === "brand" ? item.categoryName : item.brandName}</span>
+                                          <span style={{ color: isStockLow ? "#dc2626" : "#16a34a", fontWeight: "700" }}>
+                                            • বর্তমান স্টক: {item.stockQuantity ?? "অজানা"}
+                                          </span>
+                                          {isStockLow && (
+                                            <span style={{ background: "#fee2e2", color: "#dc2626", padding: "1px 6px", borderRadius: "4px", fontSize: "10px", fontWeight: "800" }}>
+                                              ⚠️ স্টক কম!
+                                            </span>
+                                          )}
+                                        </div>
+                                      </td>
 
-                                {/* Purchase Cost */}
-                                <td style={{ padding: "8px 10px", textAlign: "right", color: "#64748b", fontWeight: "600" }}>
-                                  ৳{Number(item.purchasePrice || 0).toLocaleString()}
-                                </td>
+                                      {/* Purchase Cost */}
+                                      <td style={{ padding: "8px 10px", textAlign: "right", color: "#64748b", fontWeight: "600" }}>
+                                        ৳{Number(item.purchasePrice || 0).toLocaleString()}
+                                      </td>
 
-                                {/* Retail MRP */}
-                                <td style={{ padding: "8px 10px", textAlign: "right", color: "#94a3b8" }}>
-                                  <span style={{ textDecoration: "line-through" }}>৳{item.origPrice.toLocaleString()}</span>
-                                </td>
+                                      {/* Retail MRP — NO STRIKETHROUGH */}
+                                      <td style={{ padding: "8px 10px", textAlign: "right" }}>
+                                        <span
+                                          style={{
+                                            fontWeight: "800",
+                                            color: "#334155",
+                                            background: "#f1f5f9",
+                                            padding: "3px 8px",
+                                            borderRadius: "6px",
+                                            border: "1px solid #e2e8f0",
+                                            fontSize: "12px",
+                                            display: "inline-block",
+                                          }}
+                                          title="খুচরা মার্কেট বিক্রয় মূল্য (MRP)"
+                                        >
+                                          ৳{item.origPrice.toLocaleString()}
+                                        </span>
+                                      </td>
 
-                                {/* Wholesale Rate (Editable with Auto Price Sync) */}
-                                <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
-                                  <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                    <span style={{ fontWeight: "800", color: "#e11d48", fontSize: "12px" }}>৳</span>
-                                    <input
-                                      type="number"
-                                      min="0"
-                                      value={item.wholesalePrice}
-                                      onChange={(e) => handleCustomPriceChange(id, e.target.value)}
-                                      title="কাস্টম রেট লিখুন অথবা উপরে % চেঞ্জ করলে অটো আপডেট হবে"
-                                      style={{
-                                        width: "74px",
-                                        padding: "4px 6px",
-                                        borderRadius: "6px",
-                                        border: isCustom ? "2px solid #e11d48" : "1.5px solid #cbd5e1",
-                                        background: isCustom ? "#fff1f2" : "#ffffff",
-                                        color: "#0f172a",
-                                        fontWeight: "800",
-                                        textAlign: "right",
-                                        fontSize: "13px",
-                                        outline: "none",
-                                      }}
-                                    />
-                                    {isCustom && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleResetToAutoPrice(id)}
-                                        title="অটো রেটে ফিরিয়ে নিন"
-                                        style={{
-                                          border: "none",
-                                          background: "none",
-                                          cursor: "pointer",
-                                          fontSize: "12px",
-                                          color: "#2563eb",
-                                          padding: "0 2px",
-                                        }}
-                                      >
-                                        ↺
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
+                                      {/* Discount % badge */}
+                                      <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                                        <span
+                                          style={{
+                                            background: "#dcfce7",
+                                            color: "#15803d",
+                                            border: "1px solid #86efac",
+                                            padding: "2px 7px",
+                                            borderRadius: "6px",
+                                            fontWeight: "900",
+                                            fontSize: "11px",
+                                            display: "inline-block",
+                                          }}
+                                        >
+                                          {item.discountPct}% OFF
+                                        </span>
+                                      </td>
 
-                                {/* Quantity (Pcs) Input with Quick Presets */}
-                                <td style={{ padding: "8px 10px", textAlign: "center" }}>
-                                  <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleQtyChange(id, item.quantity - 1)}
-                                        style={stepBtnStyle}
-                                      >
-                                        -
-                                      </button>
-                                      <input
-                                        type="number"
-                                        min="1"
-                                        value={item.quantity}
-                                        onChange={(e) => handleQtyChange(id, e.target.value)}
-                                        style={{
-                                          width: "50px",
-                                          padding: "4px 4px",
-                                          borderRadius: "6px",
-                                          border: "1.5px solid #0f172a",
-                                          fontWeight: "900",
-                                          textAlign: "center",
-                                          fontSize: "13px",
-                                          color: "#0f172a",
-                                          outline: "none",
-                                        }}
-                                      />
-                                      <button
-                                        type="button"
-                                        onClick={() => handleQtyChange(id, item.quantity + 1)}
-                                        style={stepBtnStyle}
-                                      >
-                                        +
-                                      </button>
-                                      <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748b" }}>Pcs</span>
-                                    </div>
+                                      {/* Wholesale Rate (Editable with Auto Price Sync) */}
+                                      <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
+                                        <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                          <span style={{ fontWeight: "800", color: "#e11d48", fontSize: "12px" }}>৳</span>
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            value={item.wholesalePrice}
+                                            onChange={(e) => handleCustomPriceChange(id, e.target.value)}
+                                            title="কাস্টম রেট লিখুন অথবা উপরে % চেঞ্জ করলে অটো আপডেট হবে"
+                                            style={{
+                                              width: "74px",
+                                              padding: "4px 6px",
+                                              borderRadius: "6px",
+                                              border: isCustom ? "2px solid #e11d48" : "1.5px solid #cbd5e1",
+                                              background: isCustom ? "#fff1f2" : "#ffffff",
+                                              color: "#0f172a",
+                                              fontWeight: "800",
+                                              textAlign: "right",
+                                              fontSize: "13px",
+                                              outline: "none",
+                                            }}
+                                          />
+                                          {isCustom && (
+                                            <button
+                                              type="button"
+                                              onClick={() => handleResetToAutoPrice(id)}
+                                              title="অটো রেটে ফিরিয়ে নিন"
+                                              style={{
+                                                border: "none",
+                                                background: "none",
+                                                cursor: "pointer",
+                                                fontSize: "12px",
+                                                color: "#2563eb",
+                                                padding: "0 2px",
+                                              }}
+                                            >
+                                              ↺
+                                            </button>
+                                          )}
+                                        </div>
+                                      </td>
 
-                                    {/* Quick Increment Presets: +6, +12, +24 */}
-                                    <div style={{ display: "flex", gap: "3px" }}>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleQuickAddQty(id, 6)}
-                                        style={quickQtyBtnStyle}
-                                        title="৬ পিস যোগ করুন"
-                                      >
-                                        +6
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleQuickAddQty(id, 12)}
-                                        style={quickQtyBtnStyle}
-                                        title="১ ডজন (১২ পিস) যোগ করুন"
-                                      >
-                                        +12
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleQuickAddQty(id, 24)}
-                                        style={quickQtyBtnStyle}
-                                        title="২ ডজন (২৪ পিস) যোগ করুন"
-                                      >
-                                        +24
-                                      </button>
-                                    </div>
-                                  </div>
-                                </td>
+                                      {/* Quantity (Pcs) Input with Quick Presets */}
+                                      <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                                        <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleQtyChange(id, item.quantity - 1)}
+                                              style={stepBtnStyle}
+                                            >
+                                              -
+                                            </button>
+                                            <input
+                                              type="number"
+                                              min="1"
+                                              value={item.quantity}
+                                              onChange={(e) => handleQtyChange(id, e.target.value)}
+                                              style={{
+                                                width: "50px",
+                                                padding: "4px 4px",
+                                                borderRadius: "6px",
+                                                border: "1.5px solid #0f172a",
+                                                fontWeight: "900",
+                                                textAlign: "center",
+                                                fontSize: "13px",
+                                                color: "#0f172a",
+                                                outline: "none",
+                                              }}
+                                            />
+                                            <button
+                                              type="button"
+                                              onClick={() => handleQtyChange(id, item.quantity + 1)}
+                                              style={stepBtnStyle}
+                                            >
+                                              +
+                                            </button>
+                                            <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748b" }}>Pcs</span>
+                                          </div>
 
-                                {/* Line Total (Billing Amount) */}
-                                <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
-                                  <div style={{ fontWeight: "900", color: "#e11d48", fontSize: "14px" }}>
-                                    ৳{item.lineTotal.toLocaleString()}
-                                  </div>
-                                  <div style={{ fontSize: "10.5px", color: "#64748b" }}>
-                                    ({item.quantity} × ৳{item.wholesalePrice})
-                                  </div>
-                                </td>
+                                          {/* Quick Increment Presets: +6, +12, +24 */}
+                                          <div style={{ display: "flex", gap: "3px" }}>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleQuickAddQty(id, 6)}
+                                              style={quickQtyBtnStyle}
+                                              title="৬ পিস যোগ করুন"
+                                            >
+                                              +6
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleQuickAddQty(id, 12)}
+                                              style={quickQtyBtnStyle}
+                                              title="১ ডজন (১২ পিস) যোগ করুন"
+                                            >
+                                              +12
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleQuickAddQty(id, 24)}
+                                              style={quickQtyBtnStyle}
+                                              title="২ ডজন (২৪ পিস) যোগ করুন"
+                                            >
+                                              +24
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </td>
 
-                                {/* Discount Badge */}
-                                <td style={{ padding: "8px 10px", textAlign: "center", whiteSpace: "nowrap" }}>
-                                  <span
-                                    style={{
-                                      background: "#dcfce7",
-                                      color: "#15803d",
-                                      padding: "3px 6px",
-                                      borderRadius: "6px",
-                                      fontWeight: "800",
-                                      fontSize: "11px",
-                                    }}
-                                  >
-                                    {item.discountPct}%
-                                  </span>
-                                </td>
+                                      {/* Line Total */}
+                                      <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
+                                        <div style={{ fontWeight: "900", color: "#e11d48", fontSize: "14px" }}>
+                                          ৳{item.lineTotal.toLocaleString()}
+                                        </div>
+                                        <div style={{ fontSize: "10.5px", color: "#64748b" }}>
+                                          ({item.quantity} × ৳{item.wholesalePrice})
+                                        </div>
+                                      </td>
 
-                                {/* Remove Button */}
-                                <td style={{ padding: "8px 10px", textAlign: "center" }}>
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleSelect(item)}
-                                    title="বাদ দিন"
-                                    style={{
-                                      background: "#fee2e2",
-                                      border: "none",
-                                      color: "#dc2626",
-                                      borderRadius: "6px",
-                                      padding: "4px 8px",
-                                      cursor: "pointer",
-                                      fontWeight: "900",
-                                      fontSize: "11px",
-                                    }}
-                                  >
-                                    ✕
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                      {/* Remove Button */}
+                                      <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                                        <button
+                                          type="button"
+                                          onClick={() => toggleSelect(item)}
+                                          title="বাদ দিন"
+                                          style={{
+                                            background: "#fee2e2",
+                                            border: "none",
+                                            color: "#dc2626",
+                                            borderRadius: "6px",
+                                            padding: "4px 8px",
+                                            cursor: "pointer",
+                                            fontWeight: "900",
+                                            fontSize: "11px",
+                                          }}
+                                        >
+                                          ✕
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))

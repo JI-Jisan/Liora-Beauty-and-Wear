@@ -60,19 +60,89 @@ export async function urlToDataUrl(url) {
 }
 
 /**
+ * Helper to build 2-level hierarchy:
+ * - When groupBy === "brand": Brand (Primary) -> Category (Secondary) -> items
+ * - When groupBy === "category": Category (Primary) -> Brand (Secondary) -> items
+ */
+export function buildHierarchicalGroups(items = [], groupBy = "brand") {
+  const isBrandFirst = groupBy === "brand";
+  const primaryMap = new Map();
+
+  items.forEach((item) => {
+    const rawBrand = (item.brandName || "Other Brands").trim();
+    const rawCat = (item.categoryName || "General / Others").trim();
+
+    const primaryKey = isBrandFirst ? rawBrand : rawCat;
+    const secondaryKey = isBrandFirst ? rawCat : rawBrand;
+
+    if (!primaryMap.has(primaryKey)) {
+      primaryMap.set(primaryKey, {
+        primaryName: primaryKey,
+        isBrandPrimary: isBrandFirst,
+        items: [],
+        totalQty: 0,
+        subtotal: 0,
+        subtotalMarket: 0,
+        secondaryMap: new Map(),
+      });
+    }
+
+    const pGroup = primaryMap.get(primaryKey);
+    pGroup.items.push(item);
+    pGroup.totalQty += item.quantity;
+    pGroup.subtotal += item.lineTotal;
+    pGroup.subtotalMarket += item.originalPrice * item.quantity;
+
+    if (!pGroup.secondaryMap.has(secondaryKey)) {
+      pGroup.secondaryMap.set(secondaryKey, {
+        secondaryName: secondaryKey,
+        isBrandSecondary: !isBrandFirst,
+        items: [],
+        totalQty: 0,
+        subtotal: 0,
+        subtotalMarket: 0,
+      });
+    }
+
+    const sGroup = pGroup.secondaryMap.get(secondaryKey);
+    sGroup.items.push(item);
+    sGroup.totalQty += item.quantity;
+    sGroup.subtotal += item.lineTotal;
+    sGroup.subtotalMarket += item.originalPrice * item.quantity;
+  });
+
+  // Convert to sorted arrays
+  return Array.from(primaryMap.values())
+    .sort((a, b) => a.primaryName.localeCompare(b.primaryName))
+    .map((pGroup) => ({
+      ...pGroup,
+      secondaryGroups: Array.from(pGroup.secondaryMap.values()).sort((a, b) =>
+        a.secondaryName.localeCompare(b.secondaryName)
+      ),
+    }));
+}
+
+/**
  * Generates and downloads a wholesale billing invoice & price quotation PDF
- * Features Brand-wise grouping, Quantity/Pcs count, Line Totals, and official billing signatures.
+ * Features:
+ *  - 2 Grouping Options: Brand -> Category OR Category -> Brand
+ *  - Clean Retail MRP column (no strikethrough, clearly showing retail selling price)
+ *  - Product-level Discount % (% OFF) badge
+ *  - High visual elegance with LIORA branding
  */
 export async function generateWholesalePdf({
   items = [],
   clientInfo = {},
   profitPercent = 5,
   quoteNumber = null,
+  groupBy = "brand", // "brand" (Brand -> Category) | "category" (Category -> Brand)
   onProgress = null,
 }) {
   if (!items || items.length === 0) {
     throw new Error("No products selected for quotation.");
   }
+
+  const isBrandFirst = groupBy !== "category";
 
   // 1. Pre-load product thumbnail images in parallel with concurrency
   const total = items.length;
@@ -111,12 +181,13 @@ export async function generateWholesalePdf({
   // Color Palette
   const colorPrimary = [225, 29, 72];    // Rose-600 #e11d48
   const colorDark = [15, 23, 42];         // Slate-900 #0f172a
-  const colorSlate800 = [30, 41, 59];     // Slate-800
-  const colorMuted = [100, 116, 139];     // Slate-500
-  const colorBorder = [226, 232, 240];    // Slate-200
-  const colorBgLight = [248, 250, 252];   // Slate-50
+  const colorSlate800 = [30, 41, 59];     // Slate-800 #1e293b
+  const colorMuted = [100, 116, 139];     // Slate-500 #64748b
+  const colorBorder = [226, 232, 240];    // Slate-200 #e2e8f0
+  const colorBgLight = [248, 250, 252];   // Slate-50 #f8fafc
   const colorGreen = [22, 163, 74];       // Green-600 #16a34a
-  const colorGreenBg = [240, 253, 244];   // Green-50
+  const colorGreenBg = [240, 253, 244];   // Green-50 #f0fdf4
+  const colorMrp = [51, 65, 85];          // Slate-700 #334155 (Crisp, clean for Retail MRP)
 
   const todayStr = new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -133,35 +204,49 @@ export async function generateWholesalePdf({
 
   const preparedItems = items.map((p) => {
     const buyPrice = Number(p.purchasePrice) || 0;
-    const origPrice = Number(p.originalPrice) || Number(p.offerPrice) || (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
+    const origPrice =
+      Number(p.originalPrice) ||
+      Number(p.offerPrice) ||
+      (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
     const customWholesale = Number(p.wholesalePrice);
-    
-    const calculatedWholesale = customWholesale > 0
-      ? customWholesale
-      : Math.round(buyPrice * (1 + Number(profitPercent || 0) / 100));
+
+    const calculatedWholesale =
+      customWholesale > 0
+        ? customWholesale
+        : Math.round(buyPrice * (1 + Number(profitPercent || 0) / 100));
 
     const finalWholesale = Math.max(1, calculatedWholesale);
     const qty = Math.max(1, parseInt(p.quantity) || 1);
     const lineTotal = finalWholesale * qty;
     const lineMarket = origPrice * qty;
 
-    const discountPct = origPrice > finalWholesale
-      ? Math.round(((origPrice - finalWholesale) / origPrice) * 100)
-      : 0;
+    const discountPct =
+      origPrice > finalWholesale
+        ? Math.round(((origPrice - finalWholesale) / origPrice) * 100)
+        : 0;
 
     totalGrandQty += qty;
     totalMarketSum += lineMarket;
     totalWholesaleSum += lineTotal;
     totalDiscountPercentSum += discountPct;
 
-    const rawBrand = (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) || p.brandName || "Other Brands";
+    const rawBrand =
+      (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) ||
+      p.brandName ||
+      "Other Brands";
     const brandName = String(rawBrand).trim() || "Other Brands";
+
+    const rawCategory =
+      (p.category && typeof p.category === "object" ? p.category?.name : p.category) ||
+      p.categoryName ||
+      "General";
+    const categoryName = String(rawCategory).trim() || "General";
 
     return {
       id: String(p._id || p.id || p.productId || p.name),
       name: p.name || "Product Item",
       brandName,
-      categoryName: (p.category && typeof p.category === "object" ? p.category?.name : p.category) || p.categoryName || "",
+      categoryName,
       buyPrice,
       originalPrice: origPrice,
       wholesalePrice: finalWholesale,
@@ -174,18 +259,8 @@ export async function generateWholesalePdf({
   const avgDiscount = total > 0 ? Math.round(totalDiscountPercentSum / total) : 0;
   const totalSavings = Math.max(0, totalMarketSum - totalWholesaleSum);
 
-  // Group items by Brand
-  const brandGroups = {};
-  preparedItems.forEach((item) => {
-    const b = item.brandName || "Other Brands";
-    if (!brandGroups[b]) {
-      brandGroups[b] = [];
-    }
-    brandGroups[b].push(item);
-  });
-
-  // Sort brand keys alphabetically (Unilever brands first if present)
-  const brandNames = Object.keys(brandGroups).sort((a, b) => a.localeCompare(b));
+  // Build hierarchical group structure based on selected groupBy
+  const hierarchicalGroups = buildHierarchicalGroups(preparedItems, groupBy);
 
   // Helper: Draw Header & Top Banner on Page 1
   function drawFirstPageHeader() {
@@ -223,7 +298,7 @@ export async function generateWholesalePdf({
     doc.setFontSize(8);
     doc.setTextColor(...colorMuted);
     doc.text(`Date: ${todayStr}`, 196, 26, { align: "right" });
-    doc.text("Official B2B Wholesale Billing", 196, 29.5, { align: "right" });
+    doc.text(`Grouped By: ${isBrandFirst ? "Brand → Category" : "Category → Brand"}`, 196, 29.5, { align: "right" });
 
     // Thin separator
     doc.setDrawColor(...colorBorder);
@@ -303,15 +378,16 @@ export async function generateWholesalePdf({
     return bannerY + 22;
   }
 
-  // Draw Table Headers (Column Layout)
+  // Draw Table Headers (Column Layout with Retail MRP & Discount % columns)
   // Total width: 182mm (marginX: 14 to 196)
-  // Col 1: # (8mm) -> 14 to 22
-  // Col 2: IMAGE (15mm) -> 22 to 37
-  // Col 3: PRODUCT DETAILS (65mm) -> 37 to 102
-  // Col 4: MARKET MRP (22mm) -> 102 to 124
-  // Col 5: WHOLESALE RATE (22mm) -> 124 to 146
-  // Col 6: QTY (PCS) (16mm) -> 146 to 162
-  // Col 7: LINE TOTAL (34mm) -> 162 to 196
+  // Col 1: # (8mm) -> center at marginX + 4
+  // Col 2: IMAGE (14mm) -> center at marginX + 15
+  // Col 3: PRODUCT DETAILS (54mm) -> left at marginX + 24
+  // Col 4: RETAIL MRP (22mm) -> right at marginX + 104
+  // Col 5: DISCOUNT (18mm) -> center at marginX + 118
+  // Col 6: RATE (TK) (22mm) -> right at marginX + 144
+  // Col 7: QTY (PCS) (16mm) -> center at marginX + 160
+  // Col 8: LINE TOTAL (28mm) -> right at 194
   function drawTableHeader(y) {
     const h = 8;
     doc.setFillColor(241, 245, 249); // Slate-100
@@ -326,31 +402,59 @@ export async function generateWholesalePdf({
 
     doc.text("#", marginX + 4, y + 5.5, { align: "center" });
     doc.text("IMAGE", marginX + 15, y + 5.5, { align: "center" });
-    doc.text("PRODUCT DETAILS", marginX + 26, y + 5.5);
-    doc.text("MRP", marginX + 108, y + 5.5, { align: "right" });
-    doc.text("RATE (TK)", marginX + 130, y + 5.5, { align: "right" });
-    doc.text("QTY (PCS)", marginX + 148, y + 5.5, { align: "center" });
+    doc.text("PRODUCT DETAILS", marginX + 24, y + 5.5);
+    doc.text("RETAIL MRP", marginX + 104, y + 5.5, { align: "right" });
+    doc.text("DISCOUNT", marginX + 118, y + 5.5, { align: "center" });
+    doc.text("RATE (TK)", marginX + 144, y + 5.5, { align: "right" });
+    doc.text("QTY (PCS)", marginX + 160, y + 5.5, { align: "center" });
     doc.text("LINE TOTAL (TK)", 194, y + 5.5, { align: "right" });
 
     return y + h;
   }
 
-  // Draw Brand Group Header Banner
-  function drawBrandHeader(brandName, itemCount, brandQty, brandSubtotal, y) {
+  // Draw Primary Group Header Banner (Brand or Category)
+  function drawPrimaryHeader(name, labelPrefix, itemCount, groupQty, groupSubtotal, y) {
     const h = 7.5;
-    doc.setFillColor(...colorSlate800); // Sleek Slate-800
+    doc.setFillColor(...colorSlate800); // Slate-800
     doc.rect(marginX, y, contentWidth, h, "F");
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.5);
     doc.setTextColor(255, 255, 255);
-    doc.text(`BRAND: ${brandName.toUpperCase()}`, marginX + 4, y + 5.2);
+    doc.text(`${labelPrefix}: ${name.toUpperCase()}`, marginX + 4, y + 5.2);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(226, 232, 240);
-    const summaryStr = `${itemCount} Items  |  ${brandQty} Pcs  |  Subtotal: Tk ${brandSubtotal.toLocaleString()}`;
+    const summaryStr = `${itemCount} Items  |  ${groupQty} Pcs  |  Subtotal: Tk ${groupSubtotal.toLocaleString()}`;
     doc.text(summaryStr, 194, y + 5.2, { align: "right" });
+
+    return y + h;
+  }
+
+  // Draw Secondary Sub-Header Banner (Category within Brand OR Brand within Category)
+  function drawSecondaryHeader(name, labelPrefix, itemCount, subQty, subTotal, y) {
+    const h = 6.2;
+    doc.setFillColor(248, 250, 252); // Slate-50
+    doc.rect(marginX, y, contentWidth, h, "F");
+    doc.setDrawColor(...colorBorder);
+    doc.setLineWidth(0.25);
+    doc.rect(marginX, y, contentWidth, h, "D");
+
+    // Rose accent indicator on left
+    doc.setFillColor(...colorPrimary);
+    doc.rect(marginX, y, 2.5, h, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...colorDark);
+    doc.text(`${labelPrefix}: ${name}`, marginX + 5.5, y + 4.3);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(...colorMuted);
+    const summaryStr = `${itemCount} Items  •  ${subQty} Pcs  •  Tk ${subTotal.toLocaleString()}`;
+    doc.text(summaryStr, 194, y + 4.3, { align: "right" });
 
     return y + h;
   }
@@ -379,141 +483,185 @@ export async function generateWholesalePdf({
   let serialCounter = 1;
   const rowMinHeight = 15;
 
-  for (const bName of brandNames) {
-    const bItems = brandGroups[bName];
-    const bQty = bItems.reduce((acc, it) => acc + it.quantity, 0);
-    const bSubtotal = bItems.reduce((acc, it) => acc + it.lineTotal, 0);
-
-    // Check page break before Brand Header
-    if (currentY + 12 > pageHeight - 20) {
+  for (const pGroup of hierarchicalGroups) {
+    // Check page break before Primary Header
+    if (currentY + 16 > pageHeight - 20) {
       doc.addPage();
       currentY = 14;
       currentY = drawTableHeader(currentY);
     }
 
-    currentY = drawBrandHeader(bName, bItems.length, bQty, bSubtotal, currentY);
+    currentY = drawPrimaryHeader(
+      pGroup.primaryName,
+      isBrandFirst ? "BRAND" : "CATEGORY",
+      pGroup.items.length,
+      pGroup.totalQty,
+      pGroup.subtotal,
+      currentY
+    );
 
-    for (let i = 0; i < bItems.length; i++) {
-      const item = bItems[i];
-      const itemImg = imageMap.get(item.id);
-
-      // Text wrapping for product name
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      const titleLines = doc.splitTextToSize(item.name, 60);
-      const titleHeight = titleLines.length * 3.8;
-      const rowHeight = Math.max(rowMinHeight, titleHeight + 7);
-
-      // Page break check
-      if (currentY + rowHeight > pageHeight - 18) {
+    for (const sGroup of pGroup.secondaryGroups) {
+      // Check page break before Secondary Sub-header
+      if (currentY + 14 > pageHeight - 20) {
         doc.addPage();
-        // Mini header on continuation page
-        doc.setFillColor(...colorPrimary);
-        doc.rect(0, 0, pageWidth, 3, "F");
+        currentY = 14;
+        currentY = drawTableHeader(currentY);
+      }
+
+      currentY = drawSecondaryHeader(
+        sGroup.secondaryName,
+        isBrandFirst ? "Category" : "Brand",
+        sGroup.items.length,
+        sGroup.totalQty,
+        sGroup.subtotal,
+        currentY
+      );
+
+      for (let i = 0; i < sGroup.items.length; i++) {
+        const item = sGroup.items[i];
+        const itemImg = imageMap.get(item.id);
+
+        // Text wrapping for product name
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        const titleLines = doc.splitTextToSize(item.name, 50);
+        const titleHeight = titleLines.length * 3.8;
+        const rowHeight = Math.max(rowMinHeight, titleHeight + 7);
+
+        // Page break check for item row
+        if (currentY + rowHeight > pageHeight - 18) {
+          doc.addPage();
+          // Mini header on continuation page
+          doc.setFillColor(...colorPrimary);
+          doc.rect(0, 0, pageWidth, 3, "F");
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(8);
+          doc.setTextColor(...colorDark);
+          doc.text(`LIORA Wholesale Invoice #${quoteRef} — (Continued)`, marginX, 10);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(...colorMuted);
+          doc.text(`Date: ${todayStr}`, 196, 10, { align: "right" });
+          currentY = drawTableHeader(14);
+        }
+
+        // Zebra striping
+        if (i % 2 === 1) {
+          doc.setFillColor(252, 253, 254);
+          doc.rect(marginX, currentY, contentWidth, rowHeight, "F");
+        }
+
+        // Row Border bottom
+        doc.setDrawColor(...colorBorder);
+        doc.setLineWidth(0.2);
+        doc.line(marginX, currentY + rowHeight, marginX + contentWidth, currentY + rowHeight);
+
+        const rowMidY = currentY + rowHeight / 2 + 1.2;
+
+        // 1. Serial Number
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...colorMuted);
+        doc.text(String(serialCounter++), marginX + 4, rowMidY, { align: "center" });
+
+        // 2. Thumbnail Image
+        const imgX = marginX + 9.5;
+        const imgY = currentY + (rowHeight - 11) / 2;
+        const imgDim = 11;
+
+        if (itemImg) {
+          try {
+            doc.addImage(itemImg, "JPEG", imgX, imgY, imgDim, imgDim);
+            doc.setDrawColor(...colorBorder);
+            doc.setLineWidth(0.2);
+            doc.rect(imgX, imgY, imgDim, imgDim, "D");
+          } catch (e) {
+            doc.setFillColor(241, 245, 249);
+            doc.rect(imgX, imgY, imgDim, imgDim, "F");
+          }
+        } else {
+          doc.setFillColor(241, 245, 249);
+          doc.roundedRect(imgX, imgY, imgDim, imgDim, 1, 1, "F");
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(6);
+          doc.setTextColor(...colorMuted);
+          doc.text("No Pic", imgX + imgDim / 2, imgY + imgDim / 2 + 1, { align: "center" });
+        }
+
+        // 3. Product Details (Name + secondary tag)
+        const textX = marginX + 24;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
         doc.setTextColor(...colorDark);
-        doc.text(`LIORA Wholesale Invoice #${quoteRef} — (Continued)`, marginX, 10);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(...colorMuted);
-        doc.text(`Date: ${todayStr}`, 196, 10, { align: "right" });
-        currentY = drawTableHeader(14);
-      }
+        doc.text(titleLines, textX, currentY + 5);
 
-      // Zebra striping
-      if (i % 2 === 1) {
-        doc.setFillColor(252, 253, 254);
-        doc.rect(marginX, currentY, contentWidth, rowHeight, "F");
-      }
-
-      // Row Border bottom
-      doc.setDrawColor(...colorBorder);
-      doc.setLineWidth(0.2);
-      doc.line(marginX, currentY + rowHeight, marginX + contentWidth, currentY + rowHeight);
-
-      // 1. Serial Number
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.5);
-      doc.setTextColor(...colorMuted);
-      doc.text(String(serialCounter++), marginX + 4, currentY + rowHeight / 2 + 1.2, { align: "center" });
-
-      // 2. Thumbnail Image
-      const imgX = marginX + 9;
-      const imgY = currentY + (rowHeight - 11) / 2;
-      const imgDim = 11;
-
-      if (itemImg) {
-        try {
-          doc.addImage(itemImg, "JPEG", imgX, imgY, imgDim, imgDim);
-          doc.setDrawColor(...colorBorder);
-          doc.setLineWidth(0.2);
-          doc.rect(imgX, imgY, imgDim, imgDim, "D");
-        } catch (e) {
-          doc.setFillColor(241, 245, 249);
-          doc.rect(imgX, imgY, imgDim, imgDim, "F");
+        const detailTag = isBrandFirst ? item.categoryName : item.brandName;
+        if (detailTag) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(6.8);
+          doc.setTextColor(...colorMuted);
+          doc.text(detailTag, textX, currentY + 5.5 + titleHeight);
         }
-      } else {
+
+        // 4. Retail Market Price (MRP) — CLEAR, DISTINCT, NO STRIKETHROUGH
+        const mrpX = marginX + 104;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(...colorMrp);
+        doc.text(`Tk ${item.originalPrice.toLocaleString()}`, mrpX, rowMidY, { align: "right" });
+
+        // 5. Discount Percentage Badge (% OFF from MRP)
+        const discX = marginX + 118;
+        const discBadgeW = 16;
+        const discBadgeH = 5.5;
+        const discBadgeY = currentY + (rowHeight - discBadgeH) / 2;
+
+        doc.setFillColor(...colorGreenBg);
+        doc.roundedRect(discX - discBadgeW / 2, discBadgeY, discBadgeW, discBadgeH, 1.2, 1.2, "F");
+        doc.setDrawColor(134, 239, 172); // Green-300
+        doc.setLineWidth(0.2);
+        doc.roundedRect(discX - discBadgeW / 2, discBadgeY, discBadgeW, discBadgeH, 1.2, 1.2, "D");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.2);
+        doc.setTextColor(...colorGreen);
+        doc.text(
+          item.discountPct > 0 ? `${item.discountPct}% OFF` : "0% OFF",
+          discX,
+          discBadgeY + 4,
+          { align: "center" }
+        );
+
+        // 6. Wholesale Unit Rate (Buying Rate for buyer)
+        const wsX = marginX + 144;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8.5);
+        doc.setTextColor(...colorDark);
+        doc.text(`Tk ${item.wholesalePrice.toLocaleString()}`, wsX, rowMidY, { align: "right" });
+
+        // 7. Quantity (Pcs) Badge
+        const qtyX = marginX + 160;
+        const qtyBadgeW = 16;
+        const qtyBadgeH = 6;
+        const qtyBadgeY = currentY + (rowHeight - qtyBadgeH) / 2;
+
         doc.setFillColor(241, 245, 249);
-        doc.roundedRect(imgX, imgY, imgDim, imgDim, 1, 1, "F");
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(6);
-        doc.setTextColor(...colorMuted);
-        doc.text("No Pic", imgX + imgDim / 2, imgY + imgDim / 2 + 1, { align: "center" });
+        doc.roundedRect(qtyX - qtyBadgeW / 2, qtyBadgeY, qtyBadgeW, qtyBadgeH, 1.5, 1.5, "F");
+        doc.setDrawColor(...colorBorder);
+        doc.roundedRect(qtyX - qtyBadgeW / 2, qtyBadgeY, qtyBadgeW, qtyBadgeH, 1.5, 1.5, "D");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...colorDark);
+        doc.text(`${item.quantity} Pcs`, qtyX, qtyBadgeY + 4.2, { align: "center" });
+
+        // 8. Line Total
+        const totX = 194;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(...colorPrimary);
+        doc.text(`Tk ${item.lineTotal.toLocaleString()}`, totX, rowMidY, { align: "right" });
+
+        currentY += rowHeight;
       }
-
-      // 3. Product Details (Name + Category)
-      const textX = marginX + 24;
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(...colorDark);
-      doc.text(titleLines, textX, currentY + 5);
-
-      if (item.categoryName) {
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(6.8);
-        doc.setTextColor(...colorMuted);
-        doc.text(item.categoryName, textX, currentY + 5.5 + titleHeight);
-      }
-
-      // 4. Market Price (MRP)
-      const mrpX = marginX + 108;
-      const mrpY = currentY + rowHeight / 2 + 1.2;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(7.5);
-      doc.setTextColor(...colorMuted);
-      const mrpStr = `Tk ${item.originalPrice.toLocaleString()}`;
-      doc.text(mrpStr, mrpX, mrpY, { align: "right" });
-      const mrpWidth = doc.getTextWidth(mrpStr);
-      doc.setDrawColor(...colorMuted);
-      doc.setLineWidth(0.2);
-      doc.line(mrpX - mrpWidth, mrpY - 0.8, mrpX, mrpY - 0.8);
-
-      // 5. Wholesale Unit Rate
-      const wsX = marginX + 130;
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8.5);
-      doc.setTextColor(...colorDark);
-      doc.text(`Tk ${item.wholesalePrice.toLocaleString()}`, wsX, mrpY, { align: "right" });
-
-      // 6. Quantity (Pcs) Badge
-      const qtyX = marginX + 148;
-      doc.setFillColor(241, 245, 249);
-      doc.roundedRect(qtyX - 10, currentY + (rowHeight - 6.5) / 2, 20, 6.5, 1.5, 1.5, "F");
-      doc.setDrawColor(...colorBorder);
-      doc.roundedRect(qtyX - 10, currentY + (rowHeight - 6.5) / 2, 20, 6.5, 1.5, 1.5, "D");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.setTextColor(...colorDark);
-      doc.text(`${item.quantity} Pcs`, qtyX, currentY + (rowHeight - 6.5) / 2 + 4.5, { align: "center" });
-
-      // 7. Line Total
-      const totX = 194;
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(9);
-      doc.setTextColor(...colorPrimary);
-      doc.text(`Tk ${item.lineTotal.toLocaleString()}`, totX, mrpY, { align: "right" });
-
-      currentY += rowHeight;
     }
   }
 
@@ -542,7 +690,12 @@ export async function generateWholesalePdf({
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...colorMuted);
-  doc.text(`Retail MRP Value: Tk ${totalMarketSum.toLocaleString()}  |  Total Savings: Tk ${totalSavings.toLocaleString()}`, 115, currentY + 6.5, { align: "right" });
+  doc.text(
+    `Retail MRP Value: Tk ${totalMarketSum.toLocaleString()}  |  Total Savings: Tk ${totalSavings.toLocaleString()}`,
+    115,
+    currentY + 6.5,
+    { align: "right" }
+  );
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
@@ -582,7 +735,8 @@ export async function generateWholesalePdf({
     .trim()
     .replace(/[^a-zA-Z0-9_\u0980-\u09FF]/g, "_")
     .slice(0, 20);
-  const fileName = `LIORA_Wholesale_Invoice_${cleanName}_${new Date().toISOString().slice(0, 10)}.pdf`;
+  const modeTag = isBrandFirst ? "BrandGrouped" : "CategoryGrouped";
+  const fileName = `LIORA_Wholesale_Invoice_${modeTag}_${cleanName}_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(fileName);
 
   return { ok: true, fileName, totalItems: total, totalGrandQty, totalWholesaleSum };

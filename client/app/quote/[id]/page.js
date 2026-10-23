@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { generateWholesalePdf } from "@/lib/wholesalePdf";
+import { generateWholesalePdf, buildHierarchicalGroups } from "@/lib/wholesalePdf";
 
 export default function DigitalQuotationPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
@@ -13,6 +12,8 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  // Grouping Mode: 'brand' (Brand -> Category) | 'category' (Category -> Brand)
+  const [groupByMode, setGroupByMode] = useState("brand");
 
   useEffect(() => {
     if (!quoteId) return;
@@ -78,23 +79,19 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
     );
   }
 
-  // Brand-wise Grouping
-  const brandGroups = {};
-  (quotation.items || []).forEach((item) => {
-    const b = item.brandName || "Other Brands";
-    if (!brandGroups[b]) brandGroups[b] = [];
-    brandGroups[b].push(item);
-  });
+  // Build Hierarchical Grouping (Brand -> Category or Category -> Brand)
+  const isBrandFirst = groupByMode === "brand";
+  const hierarchicalGroups = buildHierarchicalGroups(quotation.items || [], groupByMode);
 
-  const brandNames = Object.keys(brandGroups).sort((a, b) => a.localeCompare(b));
-
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async (customGroupBy = null) => {
+    const targetGroup = customGroupBy || groupByMode;
     setIsDownloadingPdf(true);
     try {
       await generateWholesalePdf({
         items: quotation.items,
         clientInfo: quotation.clientInfo || {},
         quoteNumber: quotation.quoteNumber,
+        groupBy: targetGroup,
       });
     } catch (e) {
       alert("PDF ডাউনলোড ব্যর্থ: " + e.message);
@@ -112,7 +109,7 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f8fafc", padding: "24px 16px" }}>
-      <div style={{ maxWidth: "980px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div style={{ maxWidth: "1020px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" }}>
         {/* Top Header Card */}
         <div
           style={{
@@ -147,10 +144,10 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
             <button
               type="button"
-              onClick={handleDownloadPdf}
+              onClick={() => handleDownloadPdf()}
               disabled={isDownloadingPdf}
               style={{
                 background: "#e11d48",
@@ -162,9 +159,16 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
                 fontSize: "13px",
                 cursor: "pointer",
                 boxShadow: "0 2px 8px rgba(225, 29, 72, 0.25)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
               }}
             >
-              {isDownloadingPdf ? "⏳ ডাউনলোড হচ্ছে..." : "📥 PDF ইনভয়েস ডাউনলোড"}
+              {isDownloadingPdf ? (
+                "⏳ ডাউনলোড হচ্ছে..."
+              ) : (
+                `📥 PDF ডাউনলোড (${isBrandFirst ? "ব্র্যান্ড ➔ ক্যাটাগরি" : "ক্যাটাগরি ➔ ব্র্যান্ড"})`
+              )}
             </button>
 
             <button
@@ -261,7 +265,7 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
 
           <div style={{ background: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
             <div style={{ fontSize: "11.5px", color: "#64748b", fontWeight: "700" }}>খুচরা মার্কেট মূল্য (MRP)</div>
-            <div style={{ fontSize: "20px", fontWeight: "900", color: "#64748b", marginTop: "4px" }}>
+            <div style={{ fontSize: "20px", fontWeight: "900", color: "#334155", marginTop: "4px" }}>
               ৳{Number(quotation.totalMarketSum || 0).toLocaleString()}
             </div>
           </div>
@@ -281,141 +285,292 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
           </div>
         </div>
 
-        {/* Brand-Wise Products Tables */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {brandNames.map((bName) => {
-            const bItems = brandGroups[bName];
-            const bQty = bItems.reduce((acc, it) => acc + (it.quantity || 1), 0);
-            const bSubtotal = bItems.reduce((acc, it) => acc + (it.lineTotal || it.wholesalePrice * it.quantity), 0);
+        {/* 2 GROUPING OPTIONS TOGGLE BAR */}
+        <div
+          style={{
+            background: "#ffffff",
+            padding: "16px 20px",
+            borderRadius: "14px",
+            border: "1.5px solid #e2e8f0",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "12px",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: "900", color: "#0f172a", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>🔄 ইনভয়েস প্রোডাক্ট বিন্যাস (2 Grouping Modes)</span>
+            </div>
+            <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
+              {isBrandFirst
+                ? "🏷️ ব্র্যান্ড অনুযায়ী ভাগ: প্রথমে ব্র্যান্ড (যেমন: Dove), এরপর সাবানের আইটেম আলাদা, শ্যাম্পুর আইটেম আলাদা।"
+                : "📁 ক্যাটাগরি অনুযায়ী ভাগ: প্রথমে ক্যাটাগরি (যেমন: শ্যাম্পু), এরপর Dove ও অন্যান্য ব্র্যান্ড আলাদা।"}
+            </div>
+          </div>
 
-            return (
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => setGroupByMode("brand")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "8px",
+                border: isBrandFirst ? "2px solid #e11d48" : "1.5px solid #cbd5e1",
+                background: isBrandFirst ? "#fff1f2" : "#ffffff",
+                color: isBrandFirst ? "#e11d48" : "#475569",
+                fontWeight: "800",
+                fontSize: "12.5px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: isBrandFirst ? "0 2px 8px rgba(225, 29, 72, 0.15)" : "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span>🏷️ ব্র্যান্ড ➔ ক্যাটাগরি</span>
+              {isBrandFirst && <span style={{ fontSize: "10px", background: "#e11d48", color: "#fff", padding: "1px 6px", borderRadius: "10px" }}>Active</span>}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setGroupByMode("category")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "8px",
+                border: !isBrandFirst ? "2px solid #0f172a" : "1.5px solid #cbd5e1",
+                background: !isBrandFirst ? "#0f172a" : "#ffffff",
+                color: !isBrandFirst ? "#ffffff" : "#475569",
+                fontWeight: "800",
+                fontSize: "12.5px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: !isBrandFirst ? "0 2px 8px rgba(15, 23, 42, 0.15)" : "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <span>📁 ক্যাটাগরি ➔ ব্র্যান্ড</span>
+              {!isBrandFirst && <span style={{ fontSize: "10px", background: "#e11d48", color: "#fff", padding: "1px 6px", borderRadius: "10px" }}>Active</span>}
+            </button>
+          </div>
+        </div>
+
+        {/* Hierarchical Products Display */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+          {hierarchicalGroups.map((pGroup) => (
+            <div
+              key={pGroup.primaryName}
+              style={{
+                background: "#ffffff",
+                borderRadius: "14px",
+                border: "1px solid #cbd5e1",
+                overflow: "hidden",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              }}
+            >
+              {/* Primary Header Banner */}
               <div
-                key={bName}
                 style={{
-                  background: "#ffffff",
-                  borderRadius: "14px",
-                  border: "1px solid #cbd5e1",
-                  overflow: "hidden",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.03)",
+                  background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
+                  color: "#ffffff",
+                  padding: "12px 18px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "8px",
                 }}
               >
-                {/* Brand Banner */}
-                <div
-                  style={{
-                    background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)",
-                    color: "#ffffff",
-                    padding: "10px 16px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: "8px",
-                  }}
-                >
-                  <div style={{ fontWeight: "900", fontSize: "14px" }}>
-                    🏷️ BRAND: {bName.toUpperCase()}{" "}
-                    <span style={{ fontSize: "11.5px", color: "#94a3b8", fontWeight: "600" }}>
-                      ({bItems.length} আইটেম)
-                    </span>
-                  </div>
-                  <div style={{ fontSize: "12.5px" }}>
-                    <span>{bQty} Pcs</span>
-                    <span style={{ margin: "0 8px", color: "#64748b" }}>|</span>
-                    <span style={{ color: "#f43f5e", fontWeight: "800" }}>
-                      সাবটোটাল: ৳{bSubtotal.toLocaleString()}
-                    </span>
-                  </div>
+                <div style={{ fontWeight: "900", fontSize: "14.5px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span>{isBrandFirst ? "🏷️ BRAND:" : "📁 CATEGORY:"}</span>
+                  <span style={{ letterSpacing: "0.5px" }}>{pGroup.primaryName.toUpperCase()}</span>
+                  <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: "600" }}>
+                    ({pGroup.items.length} আইটেম)
+                  </span>
                 </div>
-
-                {/* Table */}
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
-                    <thead style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                      <tr>
-                        <th style={{ padding: "10px 12px", width: "45px", textAlign: "center", color: "#475569" }}>ছবি</th>
-                        <th style={{ padding: "10px 12px", color: "#475569" }}>প্রোডাক্টের বিবরণ</th>
-                        <th style={{ padding: "10px 12px", textAlign: "right", color: "#475569", width: "90px" }}>খুচরা MRP</th>
-                        <th style={{ padding: "10px 12px", textAlign: "right", color: "#0f172a", width: "110px", fontWeight: "800" }}>পাইকারি দর</th>
-                        <th style={{ padding: "10px 12px", textAlign: "center", color: "#0f172a", width: "90px", fontWeight: "800" }}>পরিমাণ</th>
-                        <th style={{ padding: "10px 12px", textAlign: "right", color: "#e11d48", width: "120px", fontWeight: "900" }}>মোট টাকা</th>
-                        <th style={{ padding: "10px 12px", textAlign: "center", color: "#166534", width: "70px" }}>ছাড়</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {bItems.map((it, idx) => (
-                        <tr
-                          key={idx}
-                          style={{
-                            background: idx % 2 === 0 ? "#ffffff" : "#fbfcfe",
-                            borderBottom: "1px solid #f1f5f9",
-                          }}
-                        >
-                          <td style={{ padding: "8px 12px", textAlign: "center" }}>
-                            {it.image ? (
-                              <img
-                                src={it.image}
-                                alt=""
-                                style={{
-                                  width: "36px",
-                                  height: "36px",
-                                  objectFit: "contain",
-                                  borderRadius: "6px",
-                                  border: "1px solid #e2e8f0",
-                                }}
-                              />
-                            ) : (
-                              <div
-                                style={{
-                                  width: "36px",
-                                  height: "36px",
-                                  borderRadius: "6px",
-                                  background: "#f1f5f9",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "10px",
-                                  color: "#94a3b8",
-                                }}
-                              >
-                                📦
-                              </div>
-                            )}
-                          </td>
-                          <td style={{ padding: "8px 12px" }}>
-                            <div style={{ fontWeight: "800", color: "#0f172a" }}>{it.name}</div>
-                            {it.categoryName && (
-                              <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
-                                {it.categoryName}
-                              </div>
-                            )}
-                          </td>
-                          <td style={{ padding: "8px 12px", textAlign: "right", color: "#94a3b8" }}>
-                            <span style={{ textDecoration: "line-through" }}>৳{Number(it.originalPrice || 0).toLocaleString()}</span>
-                          </td>
-                          <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: "800", color: "#0f172a" }}>
-                            ৳{Number(it.wholesalePrice || 0).toLocaleString()}
-                          </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center" }}>
-                            <span style={{ fontWeight: "800", color: "#0f172a", background: "#f1f5f9", padding: "3px 8px", borderRadius: "6px" }}>
-                              {it.quantity} Pcs
-                            </span>
-                          </td>
-                          <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: "900", color: "#e11d48", fontSize: "13.5px" }}>
-                            ৳{Number(it.lineTotal || it.wholesalePrice * it.quantity).toLocaleString()}
-                          </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center" }}>
-                            <span style={{ background: "#dcfce7", color: "#15803d", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", fontWeight: "800" }}>
-                              {it.discountPct}%
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div style={{ fontSize: "12.5px" }}>
+                  <span>{pGroup.totalQty} Pcs</span>
+                  <span style={{ margin: "0 8px", color: "#64748b" }}>|</span>
+                  <span style={{ color: "#f43f5e", fontWeight: "800" }}>
+                    সাবটোটাল: ৳{pGroup.subtotal.toLocaleString()}
+                  </span>
                 </div>
               </div>
-            );
-          })}
+
+              {/* Secondary Sub-groups (Categories under Brand OR Brands under Category) */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", padding: "12px" }}>
+                {pGroup.secondaryGroups.map((sGroup) => (
+                  <div
+                    key={sGroup.secondaryName}
+                    style={{
+                      borderRadius: "10px",
+                      border: "1px solid #e2e8f0",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* Secondary Sub-header Bar */}
+                    <div
+                      style={{
+                        background: "#f8fafc",
+                        padding: "8px 14px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "6px",
+                        borderLeft: "4px solid #e11d48",
+                        borderBottom: "1px solid #e2e8f0",
+                      }}
+                    >
+                      <div style={{ fontSize: "12.5px", fontWeight: "800", color: "#1e293b" }}>
+                        {isBrandFirst ? "📁 ক্যাটাগরি: " : "🏷️ ব্র্যান্ড: "}
+                        <span style={{ color: "#0f172a" }}>{sGroup.secondaryName}</span>
+                      </div>
+                      <div style={{ fontSize: "11.5px", color: "#64748b", fontWeight: "700" }}>
+                        <span>{sGroup.items.length} আইটেম</span>
+                        <span style={{ margin: "0 6px" }}>•</span>
+                        <span>{sGroup.totalQty} Pcs</span>
+                        <span style={{ margin: "0 6px" }}>•</span>
+                        <span style={{ color: "#e11d48", fontWeight: "800" }}>
+                          ৳{sGroup.subtotal.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Table of items */}
+                    <div style={{ overflowX: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
+                        <thead style={{ background: "#ffffff", borderBottom: "1px solid #e2e8f0" }}>
+                          <tr>
+                            <th style={{ padding: "8px 10px", width: "45px", textAlign: "center", color: "#475569" }}>ছবি</th>
+                            <th style={{ padding: "8px 10px", color: "#475569" }}>প্রোডাক্টের বিবরণ</th>
+                            <th style={{ padding: "8px 10px", textAlign: "right", color: "#334155", width: "95px", fontWeight: "800" }}>
+                              খুচরা MRP
+                            </th>
+                            <th style={{ padding: "8px 10px", textAlign: "center", color: "#166534", width: "85px", fontWeight: "800" }}>
+                              ছাড় (% OFF)
+                            </th>
+                            <th style={{ padding: "8px 10px", textAlign: "right", color: "#0f172a", width: "110px", fontWeight: "900" }}>
+                              পাইকারি দর
+                            </th>
+                            <th style={{ padding: "8px 10px", textAlign: "center", color: "#0f172a", width: "85px", fontWeight: "800" }}>
+                              পরিমাণ
+                            </th>
+                            <th style={{ padding: "8px 10px", textAlign: "right", color: "#e11d48", width: "115px", fontWeight: "900" }}>
+                              মোট টাকা
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sGroup.items.map((it, idx) => (
+                            <tr
+                              key={idx}
+                              style={{
+                                background: idx % 2 === 0 ? "#ffffff" : "#fbfcfe",
+                                borderBottom: "1px solid #f1f5f9",
+                              }}
+                            >
+                              <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                                {it.image ? (
+                                  <img
+                                    src={it.image}
+                                    alt=""
+                                    style={{
+                                      width: "36px",
+                                      height: "36px",
+                                      objectFit: "contain",
+                                      borderRadius: "6px",
+                                      border: "1px solid #e2e8f0",
+                                    }}
+                                  />
+                                ) : (
+                                  <div
+                                    style={{
+                                      width: "36px",
+                                      height: "36px",
+                                      borderRadius: "6px",
+                                      background: "#f1f5f9",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      fontSize: "10px",
+                                      color: "#94a3b8",
+                                    }}
+                                  >
+                                    📦
+                                  </div>
+                                )}
+                              </td>
+                              <td style={{ padding: "8px 10px" }}>
+                                <div style={{ fontWeight: "800", color: "#0f172a" }}>{it.name}</div>
+                                <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
+                                  {isBrandFirst ? it.categoryName : it.brandName}
+                                </div>
+                              </td>
+                              {/* MRP - Clean, distinct styling, NO STRIKETHROUGH */}
+                              <td style={{ padding: "8px 10px", textAlign: "right" }}>
+                                <span
+                                  style={{
+                                    fontWeight: "800",
+                                    color: "#334155",
+                                    background: "#f1f5f9",
+                                    padding: "3px 8px",
+                                    borderRadius: "6px",
+                                    border: "1px solid #e2e8f0",
+                                    fontSize: "12px",
+                                    display: "inline-block",
+                                  }}
+                                  title="খুচরা মার্কেট বিক্রয় মূল্য (MRP)"
+                                >
+                                  ৳{Number(it.originalPrice || 0).toLocaleString()}
+                                </span>
+                              </td>
+                              {/* Discount % badge */}
+                              <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                                <span
+                                  style={{
+                                    background: "#dcfce7",
+                                    color: "#15803d",
+                                    border: "1px solid #86efac",
+                                    padding: "2px 7px",
+                                    borderRadius: "6px",
+                                    fontSize: "11px",
+                                    fontWeight: "900",
+                                    display: "inline-block",
+                                  }}
+                                >
+                                  {it.discountPct}% OFF
+                                </span>
+                              </td>
+                              {/* Wholesale Rate */}
+                              <td style={{ padding: "8px 10px", textAlign: "right", fontWeight: "900", color: "#0f172a", fontSize: "13px" }}>
+                                ৳{Number(it.wholesalePrice || 0).toLocaleString()}
+                              </td>
+                              {/* Quantity */}
+                              <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                                <span style={{ fontWeight: "800", color: "#0f172a", background: "#f1f5f9", padding: "3px 8px", borderRadius: "6px" }}>
+                                  {it.quantity} Pcs
+                                </span>
+                              </td>
+                              {/* Line Total */}
+                              <td style={{ padding: "8px 10px", textAlign: "right", fontWeight: "900", color: "#e11d48", fontSize: "13.5px" }}>
+                                ৳{Number(it.lineTotal || it.wholesalePrice * it.quantity).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Footer Help & Branding */}
