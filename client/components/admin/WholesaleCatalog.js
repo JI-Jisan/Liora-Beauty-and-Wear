@@ -7,15 +7,15 @@ import { getAuthHeaders } from "@/lib/api";
 // Helper to determine buying cost
 function getProductBaseCost(p, fallbackSnapshot = null) {
   const bp = Number(p?.purchasePrice);
-  if (!isNaN(bp) && bp > 0) return bp;
+  if (!isNaN(bp) && bp > 0 && bp < 100000) return bp;
   const sp = Number(fallbackSnapshot?.purchasePrice);
-  if (!isNaN(sp) && sp > 0) return sp;
+  if (!isNaN(sp) && sp > 0 && sp < 100000) return sp;
   const wp = Number(p?.wholesalePrice || fallbackSnapshot?.wholesalePrice);
-  if (!isNaN(wp) && wp > 0) return wp;
+  if (!isNaN(wp) && wp > 0 && wp < 100000) return wp;
   const op = Number(p?.offerPrice || fallbackSnapshot?.offerPrice);
-  if (!isNaN(op) && op > 0) return Math.round(op * 0.72);
+  if (!isNaN(op) && op > 0 && op < 100000) return Math.round(op * 0.72);
   const rp = Number(p?.originalPrice || fallbackSnapshot?.originalPrice);
-  if (!isNaN(rp) && rp > 0) return Math.round(rp * 0.65);
+  if (!isNaN(rp) && rp > 0 && rp < 100000) return Math.round(rp * 0.65);
   return 100;
 }
 
@@ -132,7 +132,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
   // Apply Profit Percentage to All Selected Products (Auto Price Set)
   const handleApplyProfitPercent = (pct) => {
-    const newPct = Math.max(0, parseFloat(pct) || 0);
+    const rawPct = parseFloat(pct);
+    const newPct = Math.min(500, Math.max(0, isNaN(rawPct) ? 0 : rawPct));
     setProfitPercent(newPct);
 
     // Auto update prices: reset customPrice to null so each item dynamically uses buyPrice + newPct%
@@ -228,32 +229,40 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
       // Effective Profit %: check if there is a brand-specific override, otherwise use central profitPercent
       const brandOverride = brandProfitOverrides[brandName];
-      const effectiveProfitPct =
+      const rawProfitPct =
         brandOverride !== undefined && brandOverride !== null && brandOverride !== ""
           ? Number(brandOverride)
           : Number(profitPercent || 0);
+      const effectiveProfitPct = Math.min(500, Math.max(0, isNaN(rawProfitPct) ? 0 : rawProfitPct));
 
       const buyPrice = getProductBaseCost(p, entry.snapshot);
       const defaultWholesale = Math.round(buyPrice * (1 + effectiveProfitPct / 100));
 
-      const finalWholesale =
-        entry.customPrice !== undefined && entry.customPrice !== null && entry.customPrice !== ""
-          ? Number(entry.customPrice)
-          : defaultWholesale;
+      let finalWholesale = defaultWholesale;
+      if (entry.customPrice !== undefined && entry.customPrice !== null && entry.customPrice !== "") {
+        const parsedCustom = Number(entry.customPrice);
+        // Safety guard: reject absurd custom price (> 100,000) e.g. accidental phone number or barcode autofill
+        if (!isNaN(parsedCustom) && parsedCustom >= 0 && parsedCustom <= 100000) {
+          finalWholesale = Math.round(parsedCustom);
+        }
+      }
 
-      const qty = Math.max(1, parseInt(entry.qty) || 1);
-      const origPrice =
+      const qty = Math.min(10000, Math.max(1, parseInt(entry.qty) || 1));
+      let origPrice =
         Number(p.originalPrice) ||
         Number(entry.snapshot?.originalPrice) ||
         Number(p.offerPrice) ||
         (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
+      if (isNaN(origPrice) || origPrice <= 0 || origPrice > 200000) {
+        origPrice = buyPrice > 0 ? Math.round(buyPrice * 1.4) : 100;
+      }
 
       const discountPct =
         origPrice > finalWholesale ? Math.round(((origPrice - finalWholesale) / origPrice) * 100) : 0;
 
-      const lineTotal = finalWholesale * qty;
-      const lineMarket = origPrice * qty;
-      const lineCost = buyPrice * qty;
+      const lineTotal = Math.round(finalWholesale * qty);
+      const lineMarket = Math.round(origPrice * qty);
+      const lineCost = Math.round(buyPrice * qty);
 
       list.push({
         ...p,
@@ -377,7 +386,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   // Update Quantity for an item
   const handleQtyChange = (id, newQty) => {
     const strId = String(id);
-    const qty = Math.max(1, parseInt(newQty) || 1);
+    const parsed = parseInt(newQty) || 1;
+    const qty = Math.min(10000, Math.max(1, parsed));
     setSelectedProductMap((prev) => ({
       ...prev,
       [strId]: {
@@ -392,11 +402,12 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     const strId = String(id);
     setSelectedProductMap((prev) => {
       const cur = prev[strId]?.qty || 1;
+      const nextQty = Math.min(10000, Math.max(1, cur + delta));
       return {
         ...prev,
         [strId]: {
           ...(prev[strId] || { customPrice: null }),
-          qty: Math.max(1, cur + delta),
+          qty: nextQty,
         },
       };
     });
@@ -405,11 +416,28 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   // Update custom wholesale price for a specific product
   const handleCustomPriceChange = (id, newPrice, productSnapshot = null) => {
     const strId = String(id);
+    if (newPrice === "" || newPrice === null || newPrice === undefined) {
+      setSelectedProductMap((prev) => ({
+        ...prev,
+        [strId]: {
+          ...(prev[strId] || { qty: 1, snapshot: productSnapshot }),
+          customPrice: null,
+        },
+      }));
+      return;
+    }
+
+    const parsed = parseFloat(newPrice);
+    if (isNaN(parsed) || parsed < 0) return;
+
+    // Safety guard: max price 100,000 to prevent accidental barcode/phone autofill (e.g. 140000000000)
+    const safePrice = Math.min(100000, Math.round(parsed));
+
     setSelectedProductMap((prev) => ({
       ...prev,
       [strId]: {
         ...(prev[strId] || { qty: 1, snapshot: productSnapshot }),
-        customPrice: newPrice === "" ? null : Number(newPrice),
+        customPrice: safePrice,
       },
     }));
   };
@@ -429,9 +457,11 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   // Set custom profit % for a specific brand
   const handleSetBrandProfit = (brandName, pct) => {
     if (!brandName) return;
+    const raw = parseFloat(pct);
+    const safePct = pct === "" ? null : Math.min(500, Math.max(0, isNaN(raw) ? 0 : raw));
     setBrandProfitOverrides((prev) => ({
       ...prev,
-      [brandName]: pct === "" ? null : Math.max(0, parseFloat(pct) || 0),
+      [brandName]: safePct,
     }));
   };
 
@@ -750,11 +780,13 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       // Keep price as null if it matches the formula so changing profit% dynamically recalculates it!
       const buyPrice = Number(it.purchasePrice) || 0;
       const calculatedExpected = Math.round(buyPrice * (1 + savedProfit / 100));
-      const wasCustom = buyPrice > 0 && it.wholesalePrice !== calculatedExpected;
+      const rawWs = Number(it.wholesalePrice);
+      const safeWs = !isNaN(rawWs) && rawWs >= 0 && rawWs <= 100000 ? Math.round(rawWs) : calculatedExpected;
+      const wasCustom = buyPrice > 0 && safeWs !== calculatedExpected;
 
       map[id] = {
-        customPrice: wasCustom ? it.wholesalePrice : null,
-        qty: it.quantity || 1,
+        customPrice: wasCustom ? safeWs : null,
+        qty: Math.min(10000, Math.max(1, parseInt(it.quantity) || 1)),
         snapshot: it,
       };
     });
@@ -1827,6 +1859,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                                     <input
                                       type="number"
                                       min="0"
+                                      max="100000"
+                                      autoComplete="off"
                                       value={finalWholesale}
                                       onChange={(e) => handleCustomPriceChange(id, e.target.value, p)}
                                       title="কাস্টম পাইকারি রেট লিখুন (অটো আপডেট হবে)"
@@ -2548,6 +2582,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                                             <input
                                               type="number"
                                               min="0"
+                                              max="100000"
+                                              autoComplete="off"
                                               value={item.wholesalePrice}
                                               onChange={(e) => handleCustomPriceChange(id, e.target.value)}
                                               title="কাস্টম রেট লিখুন অথবা উপরে % চেঞ্জ করলে অটো আপডেট হবে"
@@ -2604,6 +2640,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                                             <input
                                               type="number"
                                               min="1"
+                                              max="10000"
+                                              autoComplete="off"
                                               value={item.quantity}
                                               onChange={(e) => handleQtyChange(id, e.target.value)}
                                               style={{
