@@ -83,15 +83,17 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
   const isBrandFirst = groupByMode === "brand";
   const hierarchicalGroups = buildHierarchicalGroups(quotation.items || [], groupByMode);
 
-  const handleDownloadPdf = async (customGroupBy = null) => {
+  const handleDownloadPdf = async (customGroupBy = null, customItems = null, groupLabel = null) => {
     const targetGroup = customGroupBy || groupByMode;
+    const targetItems = customItems || quotation.items;
     setIsDownloadingPdf(true);
     try {
       await generateWholesalePdf({
-        items: quotation.items,
+        items: targetItems,
         clientInfo: quotation.clientInfo || {},
         quoteNumber: quotation.quoteNumber,
         groupBy: targetGroup,
+        groupLabel,
       });
     } catch (e) {
       alert("PDF ডাউনলোড ব্যর্থ: " + e.message);
@@ -393,12 +395,37 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
                     ({pGroup.items.length} আইটেম)
                   </span>
                 </div>
-                <div style={{ fontSize: "12.5px" }}>
-                  <span>{pGroup.totalQty} Pcs</span>
-                  <span style={{ margin: "0 8px", color: "#64748b" }}>|</span>
-                  <span style={{ color: "#f43f5e", fontWeight: "800" }}>
-                    সাবটোটাল: ৳{pGroup.subtotal.toLocaleString()}
-                  </span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                  <div style={{ fontSize: "12.5px" }}>
+                    <span>{pGroup.totalQty} Pcs</span>
+                    <span style={{ margin: "0 8px", color: "#64748b" }}>|</span>
+                    <span style={{ color: "#f43f5e", fontWeight: "800" }}>
+                      সাবটোটাল: ৳{pGroup.subtotal.toLocaleString()}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadPdf(groupByMode, pGroup.items, pGroup.primaryName)}
+                    disabled={isDownloadingPdf}
+                    style={{
+                      background: "#e11d48",
+                      color: "#ffffff",
+                      border: "none",
+                      padding: "5px 12px",
+                      borderRadius: "6px",
+                      fontWeight: "800",
+                      fontSize: "11.5px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      boxShadow: "0 2px 6px rgba(225, 29, 72, 0.3)",
+                    }}
+                    title={`শুধুমাত্র ${pGroup.primaryName}-এর প্রোডাক্টের PDF ডাউনলোড করুন`}
+                  >
+                    📥 এই {isBrandFirst ? "ব্র্যান্ডের" : "ক্যাটাগরির"} PDF
+                  </button>
                 </div>
               </div>
 
@@ -431,14 +458,34 @@ export default function DigitalQuotationPage({ params: paramsPromise }) {
                         {isBrandFirst ? "📁 ক্যাটাগরি: " : "🏷️ ব্র্যান্ড: "}
                         <span style={{ color: "#0f172a" }}>{sGroup.secondaryName}</span>
                       </div>
-                      <div style={{ fontSize: "11.5px", color: "#64748b", fontWeight: "700" }}>
+                      <div style={{ fontSize: "11.5px", color: "#64748b", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
                         <span>{sGroup.items.length} আইটেম</span>
-                        <span style={{ margin: "0 6px" }}>•</span>
+                        <span>•</span>
                         <span>{sGroup.totalQty} Pcs</span>
-                        <span style={{ margin: "0 6px" }}>•</span>
+                        <span>•</span>
                         <span style={{ color: "#e11d48", fontWeight: "800" }}>
                           ৳{sGroup.subtotal.toLocaleString()}
                         </span>
+                        {!isBrandFirst && (
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadPdf("brand", sGroup.items, sGroup.secondaryName)}
+                            disabled={isDownloadingPdf}
+                            style={{
+                              background: "#fff1f2",
+                              color: "#e11d48",
+                              border: "1px solid #e11d48",
+                              padding: "2px 8px",
+                              borderRadius: "5px",
+                              fontWeight: "800",
+                              fontSize: "10.5px",
+                              cursor: "pointer",
+                            }}
+                            title={`"${sGroup.secondaryName}" এর আলাদা PDF বিল ডাউনলোড করুন`}
+                          >
+                            📥 এই ব্র্যান্ডের PDF
+                          </button>
+                        )}
                       </div>
                     </div>
 

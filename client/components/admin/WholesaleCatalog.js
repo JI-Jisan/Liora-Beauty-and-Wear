@@ -49,6 +49,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   // Grouping Mode: 'brand' (Brand -> Category) | 'category' (Category -> Brand)
   const [groupByMode, setGroupByMode] = useState("brand");
 
+  // Per-Brand Profit % Overrides: { [brandName]: number }
+  const [brandProfitOverrides, setBrandProfitOverrides] = useState({});
+
   // PDF Generation State
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfMessage, setPdfMessage] = useState("");
@@ -214,10 +217,24 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       const matchedProd =
         prodMap.get(String(id)) ||
         prodMap.get(String(entry.snapshot?.name || "").toLowerCase().trim());
-
       const p = matchedProd || entry.snapshot || {};
+
+      const rawBrand =
+        (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) ||
+        p.brandName ||
+        entry.snapshot?.brandName ||
+        "Other Brands";
+      const brandName = String(rawBrand).trim() || "Other Brands";
+
+      // Effective Profit %: check if there is a brand-specific override, otherwise use central profitPercent
+      const brandOverride = brandProfitOverrides[brandName];
+      const effectiveProfitPct =
+        brandOverride !== undefined && brandOverride !== null && brandOverride !== ""
+          ? Number(brandOverride)
+          : Number(profitPercent || 0);
+
       const buyPrice = getProductBaseCost(p, entry.snapshot);
-      const defaultWholesale = Math.round(buyPrice * (1 + Number(profitPercent || 0) / 100));
+      const defaultWholesale = Math.round(buyPrice * (1 + effectiveProfitPct / 100));
 
       const finalWholesale =
         entry.customPrice !== undefined && entry.customPrice !== null && entry.customPrice !== ""
@@ -237,13 +254,6 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
       const lineTotal = finalWholesale * qty;
       const lineMarket = origPrice * qty;
       const lineCost = buyPrice * qty;
-
-      const rawBrand =
-        (p.brand && typeof p.brand === "object" ? p.brand?.name : p.brand) ||
-        p.brandName ||
-        entry.snapshot?.brandName ||
-        "Other Brands";
-      const brandName = String(rawBrand).trim() || "Other Brands";
 
       list.push({
         ...p,
@@ -273,7 +283,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     });
 
     return list;
-  }, [products, selectedProductMap, profitPercent]);
+  }, [products, selectedProductMap, profitPercent, brandProfitOverrides]);
 
   // Hierarchical Grouping of Selected Products (Brand -> Category or Category -> Brand)
   const hierarchicalSelected = useMemo(() => {
@@ -416,6 +426,24 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     }));
   };
 
+  // Set custom profit % for a specific brand
+  const handleSetBrandProfit = (brandName, pct) => {
+    if (!brandName) return;
+    setBrandProfitOverrides((prev) => ({
+      ...prev,
+      [brandName]: pct === "" ? null : Math.max(0, parseFloat(pct) || 0),
+    }));
+  };
+
+  // Reset a brand's profit % back to default central profit
+  const handleResetBrandProfit = (brandName) => {
+    setBrandProfitOverrides((prev) => {
+      const next = { ...prev };
+      delete next[brandName];
+      return next;
+    });
+  };
+
   // Select all filtered products
   const handleSelectAllFiltered = () => {
     setSelectedProductMap((prev) => {
@@ -431,9 +459,90 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     setActiveSubTab("selected");
   };
 
+  // Select all products of a specific Brand
+  const handleSelectAllByBrand = (targetBrand) => {
+    if (!targetBrand || targetBrand === "all") return;
+    const cleanBrand = String(targetBrand).toLowerCase().trim();
+    setSelectedProductMap((prev) => {
+      const next = { ...prev };
+      products.forEach((p) => {
+        const bName = String((p.brand && typeof p.brand === "object" ? p.brand.name : p.brand) || p.brandName || "").toLowerCase().trim();
+        const bId = String((p.brand && typeof p.brand === "object" ? p.brand._id : p.brand) || "").toLowerCase().trim();
+        if (bName === cleanBrand || bId === cleanBrand) {
+          const id = String(p._id || p.id);
+          if (next[id] === undefined) {
+            next[id] = { customPrice: null, qty: 1, snapshot: p };
+          }
+        }
+      });
+      return next;
+    });
+  };
+
+  // Select all products of a specific Category
+  const handleSelectAllByCategory = (targetCategory) => {
+    if (!targetCategory || targetCategory === "all") return;
+    const cleanCat = String(targetCategory).toLowerCase().trim();
+    setSelectedProductMap((prev) => {
+      const next = { ...prev };
+      products.forEach((p) => {
+        const cName = String((p.category && typeof p.category === "object" ? p.category.name : p.category) || p.categoryName || "").toLowerCase().trim();
+        const cId = String((p.category && typeof p.category === "object" ? p.category._id : p.category) || "").toLowerCase().trim();
+        if (cName === cleanCat || cId === cleanCat) {
+          const id = String(p._id || p.id);
+          if (next[id] === undefined) {
+            next[id] = { customPrice: null, qty: 1, snapshot: p };
+          }
+        }
+      });
+      return next;
+    });
+  };
+
+  // Select all products of BOTH Brand & Category
+  const handleSelectAllByBrandAndCategory = (targetBrand, targetCategory) => {
+    const cleanBrand = targetBrand && targetBrand !== "all" ? String(targetBrand).toLowerCase().trim() : null;
+    const cleanCat = targetCategory && targetCategory !== "all" ? String(targetCategory).toLowerCase().trim() : null;
+
+    setSelectedProductMap((prev) => {
+      const next = { ...prev };
+      products.forEach((p) => {
+        const bName = String((p.brand && typeof p.brand === "object" ? p.brand.name : p.brand) || p.brandName || "").toLowerCase().trim();
+        const bId = String((p.brand && typeof p.brand === "object" ? p.brand._id : p.brand) || "").toLowerCase().trim();
+        const cName = String((p.category && typeof p.category === "object" ? p.category.name : p.category) || p.categoryName || "").toLowerCase().trim();
+        const cId = String((p.category && typeof p.category === "object" ? p.category._id : p.category) || "").toLowerCase().trim();
+
+        const matchBrand = !cleanBrand || bName === cleanBrand || bId === cleanBrand;
+        const matchCat = !cleanCat || cName === cleanCat || cId === cleanCat;
+
+        if (matchBrand && matchCat) {
+          const id = String(p._id || p.id);
+          if (next[id] === undefined) {
+            next[id] = { customPrice: null, qty: 1, snapshot: p };
+          }
+        }
+      });
+      return next;
+    });
+  };
+
+  // Remove all products in a specific group from the selection
+  const handleRemoveGroupItems = (itemsToRemove) => {
+    if (!Array.isArray(itemsToRemove) || itemsToRemove.length === 0) return;
+    setSelectedProductMap((prev) => {
+      const next = { ...prev };
+      itemsToRemove.forEach((it) => {
+        const id = String(it._id || it.id || it.productId);
+        delete next[id];
+      });
+      return next;
+    });
+  };
+
   // Clear all selections
   const handleClearAll = () => {
     setSelectedProductMap({});
+    setBrandProfitOverrides({});
     setCurrentQuoteId(null);
     setCurrentQuoteNumber(null);
   };
@@ -462,6 +571,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
           note: clientNote.trim(),
         },
         profitPercent,
+        brandProfitOverrides,
         items: selectedProductList.map((it) => ({
           productId: it._id || it.id,
           name: it.name,
@@ -514,7 +624,13 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
   };
 
   // Download PDF Handler
-  const handleDownloadPdf = async (customItems = null, customClient = null, quoteNum = null, customGroupBy = null) => {
+  const handleDownloadPdf = async (
+    customItems = null,
+    customClient = null,
+    quoteNum = null,
+    customGroupBy = null,
+    groupLabel = null
+  ) => {
     const listToPrint = customItems || selectedProductList;
     const infoToPrint = customClient || {
       clientName: clientName.trim() || "Wholesale Partner",
@@ -530,7 +646,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     const targetGroup = customGroupBy || groupByMode;
     setIsGeneratingPdf(true);
     setPdfMessage(
-      targetGroup === "brand"
+      groupLabel
+        ? `"${groupLabel}" এর প্রোডাক্ট সাজানো হচ্ছে...`
+        : targetGroup === "brand"
         ? "ব্র্যান্ড ➔ ক্যাটাগরি অনুযায়ী ছবি ও ইনভয়েস টেবিল সাজানো হচ্ছে..."
         : "ক্যাটাগরি ➔ ব্র্যান্ড অনুযায়ী ছবি ও ইনভয়েস টেবিল সাজানো হচ্ছে..."
     );
@@ -542,6 +660,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
         profitPercent,
         quoteNumber: quoteNum || currentQuoteNumber,
         groupBy: targetGroup,
+        groupLabel,
         onProgress: (current, total) => {
           setPdfMessage(`ছবি ও ডাটা প্রসেস হচ্ছে: ${current} / ${total}`);
         },
@@ -621,6 +740,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     setClientNote(q.clientInfo?.note || "");
     const savedProfit = Number(q.profitPercent) || 5;
     setProfitPercent(savedProfit);
+    setBrandProfitOverrides(q.brandProfitOverrides || {});
     setCurrentQuoteId(q._id);
     setCurrentQuoteNumber(q.quoteNumber);
 
@@ -743,8 +863,13 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
         >
           <div>
             <div style={{ fontSize: "11px", color: "#f472b6", fontWeight: "800", textTransform: "uppercase" }}>
-              📈 আপনার ডিফল্ট লাভ (% PROFIT)
+              📈 কেন্দ্রীয় ডিফল্ট লাভ (% PROFIT)
             </div>
+            {Object.keys(brandProfitOverrides).length > 0 && (
+              <div style={{ fontSize: "10px", color: "#fca5a5", fontWeight: "800", marginTop: "2px" }}>
+                ⭐ {Object.keys(brandProfitOverrides).length} টি ব্র্যান্ডে কাস্টম লাভ সক্রিয়
+              </div>
+            )}
             <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
               <input
                 type="number"
@@ -1324,6 +1449,155 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                 </label>
               </div>
             </div>
+
+            {/* Quick Batch Selection Ribbon (Select All for Brand, Category, Filtered) */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "8px",
+                paddingTop: "10px",
+                borderTop: "1px dashed #e2e8f0",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "12px", fontWeight: "800", color: "#475569" }}>
+                  ⚡ এক ক্লিকে সিলেক্ট করুন:
+                </span>
+
+                {/* 1. Select All Filtered */}
+                <button
+                  type="button"
+                  onClick={handleSelectAllFiltered}
+                  disabled={filteredProducts.length === 0}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: "7px",
+                    border: "1.5px solid #0f172a",
+                    background: "#0f172a",
+                    color: "#ffffff",
+                    fontSize: "12px",
+                    fontWeight: "800",
+                    cursor: filteredProducts.length === 0 ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                  title="ফিল্টারের সব প্রোডাক্ট ইনভয়েসে যোগ করুন"
+                >
+                  <span>✓ ফিল্টারের সব প্রোডাক্ট ({filteredProducts.length})</span>
+                </button>
+
+                {/* 2. Select All by Brand (if brand selected) */}
+                {selectedBrand !== "all" && (() => {
+                  const bObj = brands.find((b) => (b._id || b.name) === selectedBrand);
+                  const bName = bObj ? bObj.name : selectedBrand;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => handleSelectAllByBrand(bName)}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "7px",
+                        border: "1.5px solid #2563eb",
+                        background: "#eff6ff",
+                        color: "#1d4ed8",
+                        fontSize: "12px",
+                        fontWeight: "800",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                      }}
+                      title={`"${bName}" ব্র্যান্ডের সব প্রোডাক্ট একসাথে সিলেক্ট করুন`}
+                    >
+                      <span>🏷️ {bName} এর সব প্রোডাক্ট</span>
+                    </button>
+                  );
+                })()}
+
+                {/* 3. Select All by Category (if category selected) */}
+                {selectedCategory !== "all" && (() => {
+                  const cObj = categories.find((c) => (c._id || c.name) === selectedCategory);
+                  const cName = cObj ? cObj.name : selectedCategory;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => handleSelectAllByCategory(selectedCategory)}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "7px",
+                        border: "1.5px solid #7c3aed",
+                        background: "#f5f3ff",
+                        color: "#6d28d9",
+                        fontSize: "12px",
+                        fontWeight: "800",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                      }}
+                      title={`"${cName}" ক্যাটাগরির সব প্রোডাক্ট একসাথে সিলেক্ট করুন`}
+                    >
+                      <span>📂 {cName} এর সব প্রোডাক্ট</span>
+                    </button>
+                  );
+                })()}
+
+                {/* 4. Select All by BOTH Brand & Category */}
+                {selectedBrand !== "all" && selectedCategory !== "all" && (() => {
+                  const bObj = brands.find((b) => (b._id || b.name) === selectedBrand);
+                  const bName = bObj ? bObj.name : selectedBrand;
+                  const cObj = categories.find((c) => (c._id || c.name) === selectedCategory);
+                  const cName = cObj ? cObj.name : selectedCategory;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => handleSelectAllByBrandAndCategory(selectedBrand, selectedCategory)}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "7px",
+                        border: "1.5px solid #e11d48",
+                        background: "#fff1f2",
+                        color: "#be123c",
+                        fontSize: "12px",
+                        fontWeight: "800",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                      }}
+                      title={`"${bName}" এর "${cName}" ক্যাটাগরির সব প্রোডাক্ট সিলেক্ট করুন`}
+                    >
+                      <span>🎯 {bName} ➔ {cName} এর সব</span>
+                    </button>
+                  );
+                })()}
+              </div>
+
+              {/* Clear All Button */}
+              {summaryStats.totalSelected > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: "7px",
+                    border: "1px solid #fca5a5",
+                    background: "#fff1f2",
+                    color: "#dc2626",
+                    fontSize: "11.5px",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                  }}
+                  title="ইনভয়েস থেকে সব প্রোডাক্ট বাদ দিন"
+                >
+                  ✕ সব ক্লিয়ার ({summaryStats.totalSelected})
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Subtabs Switcher: Browse All vs Selected Brand-Grouped Sheet */}
@@ -1399,8 +1673,35 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12.5px", textAlign: "left" }}>
                   <thead style={{ background: "#f8fafc" }}>
                     <tr>
-                      <th style={{ padding: "12px 10px", borderBottom: "1px solid #e2e8f0", color: "#334155", width: "40px", textAlign: "center" }}>
-                        সিলেক্ট
+                      <th style={{ padding: "10px", borderBottom: "1px solid #e2e8f0", color: "#334155", width: "50px", textAlign: "center" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                          <input
+                            type="checkbox"
+                            checked={
+                              filteredProducts.length > 0 &&
+                              filteredProducts.every((p) => selectedProductMap[String(p._id || p.id)] !== undefined)
+                            }
+                            onChange={() => {
+                              const areAllSelected =
+                                filteredProducts.length > 0 &&
+                                filteredProducts.every((p) => selectedProductMap[String(p._id || p.id)] !== undefined);
+                              if (areAllSelected) {
+                                setSelectedProductMap((prev) => {
+                                  const next = { ...prev };
+                                  filteredProducts.forEach((p) => {
+                                    delete next[String(p._id || p.id)];
+                                  });
+                                  return next;
+                                });
+                              } else {
+                                handleSelectAllFiltered();
+                              }
+                            }}
+                            title="ফিল্টারের সব প্রোডাক্ট এক ক্লিকে সিলেক্ট / আনসিলেক্ট করুন"
+                            style={{ width: "17px", height: "17px", cursor: "pointer", accentColor: "#e11d48" }}
+                          />
+                          <span style={{ fontSize: "10px", fontWeight: "800", color: "#64748b" }}>সব</span>
+                        </div>
                       </th>
                       <th style={{ padding: "12px 10px", borderBottom: "1px solid #e2e8f0", color: "#334155", width: "50px", textAlign: "center" }}>
                         ছবি
@@ -1532,22 +1833,44 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                               </span>
                             </td>
                             <td style={{ padding: "10px", textAlign: "center", whiteSpace: "nowrap" }}>
-                              <button
-                                type="button"
-                                onClick={() => toggleSelect(p)}
-                                style={{
-                                  padding: "5px 12px",
-                                  borderRadius: "6px",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  fontSize: "11.5px",
-                                  fontWeight: "800",
-                                  background: isSelected ? "#fee2e2" : "#f1f5f9",
-                                  color: isSelected ? "#dc2626" : "#2563eb",
-                                }}
-                              >
-                                {isSelected ? "✕ বাদ দিন" : "+ ইনভয়েসে যোগ"}
-                              </button>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "center" }}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSelect(p)}
+                                  style={{
+                                    width: "100%",
+                                    padding: "5px 12px",
+                                    borderRadius: "6px",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    fontSize: "11.5px",
+                                    fontWeight: "800",
+                                    background: isSelected ? "#fee2e2" : "#f1f5f9",
+                                    color: isSelected ? "#dc2626" : "#2563eb",
+                                  }}
+                                >
+                                  {isSelected ? "✕ বাদ দিন" : "+ ইনভয়েসে যোগ"}
+                                </button>
+                                {brandName && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectAllByBrand(brandName)}
+                                    title={`"${brandName}" ব্র্যান্ডের সব প্রোডাক্ট সিলেক্ট করুন`}
+                                    style={{
+                                      border: "none",
+                                      background: "none",
+                                      color: "#475569",
+                                      fontSize: "10.5px",
+                                      fontWeight: "700",
+                                      cursor: "pointer",
+                                      textDecoration: "underline",
+                                      padding: "1px 4px",
+                                    }}
+                                  >
+                                    + {brandName} এর সব
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );
@@ -1704,7 +2027,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                         gap: "10px",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                         <span style={{ fontSize: "18px" }}>
                           {groupByMode === "brand" ? "🏷️" : "📁"}
                         </span>
@@ -1717,9 +2040,82 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                             ({pGroup.items.length} টি আইটেম)
                           </span>
                         </div>
+
+                        {/* When Brand mode: Allow overriding this brand's profit % */}
+                        {groupByMode === "brand" && (
+                          <div
+                            style={{
+                              marginLeft: "8px",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "5px",
+                              background:
+                                brandProfitOverrides[pGroup.primaryName] !== undefined
+                                  ? "rgba(225, 29, 72, 0.3)"
+                                  : "rgba(255, 255, 255, 0.12)",
+                              padding: "3px 10px",
+                              borderRadius: "8px",
+                              border:
+                                brandProfitOverrides[pGroup.primaryName] !== undefined
+                                  ? "1.5px solid #f43f5e"
+                                  : "1px solid rgba(255, 255, 255, 0.2)",
+                            }}
+                            title={`"${pGroup.primaryName}" এর জন্য বিশেষ লাভ %। ফাঁকা রাখলে কেন্দ্রীয় লাভ (${profitPercent}%) কার্যকর থাকবে।`}
+                          >
+                            <span style={{ fontSize: "11.5px", color: "#f1f5f9", fontWeight: "700" }}>
+                              📈 লাভ:
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="0.5"
+                              placeholder={String(profitPercent)}
+                              value={
+                                brandProfitOverrides[pGroup.primaryName] !== undefined &&
+                                brandProfitOverrides[pGroup.primaryName] !== null
+                                  ? brandProfitOverrides[pGroup.primaryName]
+                                  : ""
+                              }
+                              onChange={(e) => handleSetBrandProfit(pGroup.primaryName, e.target.value)}
+                              style={{
+                                width: "48px",
+                                padding: "2px 4px",
+                                borderRadius: "4px",
+                                border: "1px solid #ffffff",
+                                background: "#ffffff",
+                                color: "#0f172a",
+                                fontWeight: "900",
+                                fontSize: "12px",
+                                textAlign: "center",
+                                outline: "none",
+                              }}
+                            />
+                            <span style={{ fontSize: "12px", color: "#ffffff", fontWeight: "800" }}>%</span>
+                            {brandProfitOverrides[pGroup.primaryName] !== undefined && (
+                              <button
+                                type="button"
+                                onClick={() => handleResetBrandProfit(pGroup.primaryName)}
+                                title="কেন্দ্রীয় লাভে রিসেট করুন"
+                                style={{
+                                  border: "none",
+                                  background: "#fee2e2",
+                                  color: "#dc2626",
+                                  cursor: "pointer",
+                                  fontSize: "10px",
+                                  padding: "2px 6px",
+                                  borderRadius: "4px",
+                                  fontWeight: "800",
+                                }}
+                              >
+                                রিসেট
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
 
-                      <div style={{ display: "flex", alignItems: "center", gap: "16px", fontSize: "12.5px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "12.5px", flexWrap: "wrap" }}>
                         <span style={{ color: "#cbd5e1" }}>
                           মোট পিস: <strong style={{ color: "#ffffff", fontSize: "14px" }}>{pGroup.totalQty} Pcs</strong>
                         </span>
@@ -1729,6 +2125,57 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                             ৳{pGroup.subtotal.toLocaleString()}
                           </strong>
                         </span>
+
+                        {/* Individual PDF Download for this Brand or Category */}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDownloadPdf(
+                              pGroup.items,
+                              null,
+                              `${currentQuoteNumber || "WS"}-${pGroup.primaryName}`,
+                              groupByMode,
+                              pGroup.primaryName
+                            )
+                          }
+                          disabled={isGeneratingPdf}
+                          style={{
+                            padding: "6px 14px",
+                            borderRadius: "7px",
+                            border: "none",
+                            background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
+                            color: "#ffffff",
+                            fontWeight: "800",
+                            fontSize: "12px",
+                            cursor: isGeneratingPdf ? "not-allowed" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            boxShadow: "0 2px 8px rgba(225, 29, 72, 0.4)",
+                          }}
+                          title={`শুধুমাত্র "${pGroup.primaryName}" এর জন্য আলাদা PDF বিল ডাউনলোড করুন`}
+                        >
+                          <span>📥 {groupByMode === "brand" ? "এই ব্র্যান্ডের PDF" : "এই ক্যাটাগরির PDF"}</span>
+                        </button>
+
+                        {/* Remove Group Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveGroupItems(pGroup.items)}
+                          style={{
+                            padding: "6px 10px",
+                            borderRadius: "7px",
+                            border: "1px solid rgba(239, 68, 68, 0.4)",
+                            background: "rgba(239, 68, 68, 0.2)",
+                            color: "#fca5a5",
+                            fontSize: "11.5px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                          }}
+                          title="এই গ্রুপের সকল পণ্য ইনভয়েস থেকে বাদ দিন"
+                        >
+                          ✕ সব বাদ
+                        </button>
                       </div>
                     </div>
 
@@ -1757,18 +2204,142 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                               borderBottom: "1px solid #e2e8f0",
                             }}
                           >
-                            <div style={{ fontSize: "12.5px", fontWeight: "800", color: "#1e293b" }}>
-                              {groupByMode === "brand" ? "📁 ক্যাটাগরি: " : "🏷️ ব্র্যান্ড: "}
-                              <span style={{ color: "#0f172a" }}>{sGroup.secondaryName}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                              <div style={{ fontSize: "12.5px", fontWeight: "800", color: "#1e293b" }}>
+                                {groupByMode === "brand" ? "📁 ক্যাটাগরি: " : "🏷️ ব্র্যান্ড: "}
+                                <span style={{ color: "#0f172a" }}>{sGroup.secondaryName}</span>
+                              </div>
+
+                              {/* If Category mode: Secondary is Brand, so allow setting brand profit override right here! */}
+                              {groupByMode === "category" && (
+                                <div
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                    background:
+                                      brandProfitOverrides[sGroup.secondaryName] !== undefined
+                                        ? "#fff1f2"
+                                        : "#f1f5f9",
+                                    padding: "2px 8px",
+                                    borderRadius: "6px",
+                                    border:
+                                      brandProfitOverrides[sGroup.secondaryName] !== undefined
+                                        ? "1px solid #f43f5e"
+                                        : "1px solid #cbd5e1",
+                                    marginLeft: "4px",
+                                  }}
+                                  title={`"${sGroup.secondaryName}" ব্র্যান্ডের জন্য লাভ %`}
+                                >
+                                  <span style={{ fontSize: "11px", color: "#475569", fontWeight: "700" }}>
+                                    📈 লাভ:
+                                  </span>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.5"
+                                    placeholder={String(profitPercent)}
+                                    value={
+                                      brandProfitOverrides[sGroup.secondaryName] !== undefined &&
+                                      brandProfitOverrides[sGroup.secondaryName] !== null
+                                        ? brandProfitOverrides[sGroup.secondaryName]
+                                        : ""
+                                    }
+                                    onChange={(e) => handleSetBrandProfit(sGroup.secondaryName, e.target.value)}
+                                    style={{
+                                      width: "42px",
+                                      padding: "1px 4px",
+                                      borderRadius: "4px",
+                                      border: "1px solid #94a3b8",
+                                      background: "#ffffff",
+                                      color: "#0f172a",
+                                      fontWeight: "800",
+                                      fontSize: "11px",
+                                      textAlign: "center",
+                                      outline: "none",
+                                    }}
+                                  />
+                                  <span style={{ fontSize: "11px", color: "#334155", fontWeight: "700" }}>%</span>
+                                  {brandProfitOverrides[sGroup.secondaryName] !== undefined && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleResetBrandProfit(sGroup.secondaryName)}
+                                      title="রিসেট করুন"
+                                      style={{
+                                        border: "none",
+                                        background: "none",
+                                        color: "#dc2626",
+                                        cursor: "pointer",
+                                        fontSize: "11px",
+                                        padding: "0 2px",
+                                        fontWeight: "800",
+                                      }}
+                                    >
+                                      ✕
+                                    </button>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                            <div style={{ fontSize: "11.5px", color: "#64748b", fontWeight: "700" }}>
+
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "11.5px", color: "#64748b", fontWeight: "700", flexWrap: "wrap" }}>
                               <span>{sGroup.items.length} আইটেম</span>
-                              <span style={{ margin: "0 6px" }}>•</span>
+                              <span>•</span>
                               <span>{sGroup.totalQty} Pcs</span>
-                              <span style={{ margin: "0 6px" }}>•</span>
+                              <span>•</span>
                               <span style={{ color: "#e11d48", fontWeight: "800" }}>
                                 ৳{sGroup.subtotal.toLocaleString()}
                               </span>
+
+                              {/* If Category mode: Secondary is Brand, so allow downloading this brand's PDF directly! */}
+                              {groupByMode === "category" && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleDownloadPdf(
+                                      sGroup.items,
+                                      null,
+                                      `${currentQuoteNumber || "WS"}-${sGroup.secondaryName}`,
+                                      "brand",
+                                      sGroup.secondaryName
+                                    )
+                                  }
+                                  disabled={isGeneratingPdf}
+                                  style={{
+                                    padding: "3px 8px",
+                                    borderRadius: "5px",
+                                    border: "1px solid #e11d48",
+                                    background: "#fff1f2",
+                                    color: "#e11d48",
+                                    cursor: isGeneratingPdf ? "not-allowed" : "pointer",
+                                    fontSize: "10.5px",
+                                    fontWeight: "800",
+                                  }}
+                                  title={`শুধুমাত্র "${sGroup.secondaryName}" এর PDF ডাউনলোড`}
+                                >
+                                  📥 এই ব্র্যান্ডের PDF
+                                </button>
+                              )}
+
+                              {/* Remove Subgroup Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveGroupItems(sGroup.items)}
+                                style={{
+                                  padding: "3px 8px",
+                                  borderRadius: "5px",
+                                  border: "1px solid #fecaca",
+                                  background: "#fee2e2",
+                                  color: "#dc2626",
+                                  cursor: "pointer",
+                                  fontSize: "10.5px",
+                                  fontWeight: "700",
+                                }}
+                                title="এই সাব-গ্রুপের আইটেমগুলো ইনভয়েস থেকে বাদ দিন"
+                              >
+                                ✕ সাব-গ্রুপ বাদ
+                              </button>
                             </div>
                           </div>
 
@@ -1787,7 +2358,7 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                                     ছাড় (% OFF)
                                   </th>
                                   <th style={{ padding: "10px", textAlign: "right", color: "#0f172a", width: "135px", fontWeight: "900" }}>
-                                    পাইকারি দর (+{profitPercent}%)
+                                    পাইকারি দর (Wholesale)
                                   </th>
                                   <th style={{ padding: "10px", textAlign: "center", color: "#0f172a", width: "155px", fontWeight: "900" }}>
                                     পরিমাণ (Pcs)
@@ -1908,43 +2479,50 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
 
                                       {/* Wholesale Rate (Editable with Auto Price Sync) */}
                                       <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
-                                        <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                          <span style={{ fontWeight: "800", color: "#e11d48", fontSize: "12px" }}>৳</span>
-                                          <input
-                                            type="number"
-                                            min="0"
-                                            value={item.wholesalePrice}
-                                            onChange={(e) => handleCustomPriceChange(id, e.target.value)}
-                                            title="কাস্টম রেট লিখুন অথবা উপরে % চেঞ্জ করলে অটো আপডেট হবে"
-                                            style={{
-                                              width: "74px",
-                                              padding: "4px 6px",
-                                              borderRadius: "6px",
-                                              border: isCustom ? "2px solid #e11d48" : "1.5px solid #cbd5e1",
-                                              background: isCustom ? "#fff1f2" : "#ffffff",
-                                              color: "#0f172a",
-                                              fontWeight: "800",
-                                              textAlign: "right",
-                                              fontSize: "13px",
-                                              outline: "none",
-                                            }}
-                                          />
-                                          {isCustom && (
-                                            <button
-                                              type="button"
-                                              onClick={() => handleResetToAutoPrice(id)}
-                                              title="অটো রেটে ফিরিয়ে নিন"
+                                        <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                                          <div style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                            <span style={{ fontWeight: "800", color: "#e11d48", fontSize: "12px" }}>৳</span>
+                                            <input
+                                              type="number"
+                                              min="0"
+                                              value={item.wholesalePrice}
+                                              onChange={(e) => handleCustomPriceChange(id, e.target.value)}
+                                              title="কাস্টম রেট লিখুন অথবা উপরে % চেঞ্জ করলে অটো আপডেট হবে"
                                               style={{
-                                                border: "none",
-                                                background: "none",
-                                                cursor: "pointer",
-                                                fontSize: "12px",
-                                                color: "#2563eb",
-                                                padding: "0 2px",
+                                                width: "74px",
+                                                padding: "4px 6px",
+                                                borderRadius: "6px",
+                                                border: isCustom ? "2px solid #e11d48" : "1.5px solid #cbd5e1",
+                                                background: isCustom ? "#fff1f2" : "#ffffff",
+                                                color: "#0f172a",
+                                                fontWeight: "800",
+                                                textAlign: "right",
+                                                fontSize: "13px",
+                                                outline: "none",
                                               }}
-                                            >
-                                              ↺
-                                            </button>
+                                            />
+                                            {isCustom && (
+                                              <button
+                                                type="button"
+                                                onClick={() => handleResetToAutoPrice(id)}
+                                                title="অটো রেটে ফিরিয়ে নিন"
+                                                style={{
+                                                  border: "none",
+                                                  background: "none",
+                                                  cursor: "pointer",
+                                                  fontSize: "12px",
+                                                  color: "#2563eb",
+                                                  padding: "0 2px",
+                                                }}
+                                              >
+                                                ↺
+                                              </button>
+                                            )}
+                                          </div>
+                                          {item.isBrandOverridden && !isCustom && (
+                                            <span style={{ fontSize: "9.5px", color: "#e11d48", fontWeight: "800" }}>
+                                              ব্র্যান্ড +{item.effectiveProfitPct}%
+                                            </span>
                                           )}
                                         </div>
                                       </td>

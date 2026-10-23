@@ -136,6 +136,7 @@ export async function generateWholesalePdf({
   profitPercent = 5,
   quoteNumber = null,
   groupBy = "brand", // "brand" (Brand -> Category) | "category" (Category -> Brand)
+  groupLabel = null, // e.g. "COSRX" when downloading single brand/category PDF
   onProgress = null,
 }) {
   if (!items || items.length === 0) {
@@ -298,7 +299,10 @@ export async function generateWholesalePdf({
     doc.setFontSize(8);
     doc.setTextColor(...colorMuted);
     doc.text(`Date: ${todayStr}`, 196, 26, { align: "right" });
-    doc.text(`Grouped By: ${isBrandFirst ? "Brand → Category" : "Category → Brand"}`, 196, 29.5, { align: "right" });
+    const subDesc = groupLabel
+      ? `Filter: ${groupLabel} (${isBrandFirst ? "Brand View" : "Category View"})`
+      : `Grouped By: ${isBrandFirst ? "Brand → Category" : "Category → Brand"}`;
+    doc.text(subDesc, 196, 29.5, { align: "right" });
 
     // Thin separator
     doc.setDrawColor(...colorBorder);
@@ -736,7 +740,10 @@ export async function generateWholesalePdf({
     .replace(/[^a-zA-Z0-9_\u0980-\u09FF]/g, "_")
     .slice(0, 20);
   const modeTag = isBrandFirst ? "BrandGrouped" : "CategoryGrouped";
-  const fileName = `LIORA_Wholesale_Invoice_${modeTag}_${cleanName}_${new Date().toISOString().slice(0, 10)}.pdf`;
+  const groupTag = groupLabel
+    ? `_${String(groupLabel).trim().replace(/[^a-zA-Z0-9_\u0980-\u09FF]/g, "_").slice(0, 20)}`
+    : "";
+  const fileName = `LIORA_Wholesale_Invoice_${modeTag}${groupTag}_${cleanName}_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(fileName);
 
   return { ok: true, fileName, totalItems: total, totalGrandQty, totalWholesaleSum };

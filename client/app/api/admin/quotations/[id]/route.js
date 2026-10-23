@@ -100,6 +100,10 @@ export async function PUT(req, { params }) {
       existing.profitPercent = Number(body.profitPercent) || 5;
     }
 
+    if (body.brandProfitOverrides !== undefined) {
+      existing.brandProfitOverrides = body.brandProfitOverrides;
+    }
+
     await existing.save();
 
     return NextResponse.json({ ok: true, quotation: existing });

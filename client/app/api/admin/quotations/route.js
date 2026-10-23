@@ -135,6 +135,7 @@ export async function POST(req) {
       },
       items: sanitizedItems,
       profitPercent: Number(body.profitPercent) || 5,
+      brandProfitOverrides: body.brandProfitOverrides || {},
       totalItems: sanitizedItems.length,
       totalQty,
       totalMarketSum,

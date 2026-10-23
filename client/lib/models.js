@@ -381,6 +381,7 @@ const WholesaleQuotationSchema = new mongoose.Schema(
     },
     items: [WholesaleQuotationItemSchema],
     profitPercent: { type: Number, default: 5 },
+    brandProfitOverrides: { type: mongoose.Schema.Types.Mixed, default: {} },
     totalItems: { type: Number, default: 0 },
     totalQty: { type: Number, default: 0 },
     totalMarketSum: { type: Number, default: 0 },
