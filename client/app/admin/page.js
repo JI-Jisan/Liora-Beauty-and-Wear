@@ -10,6 +10,7 @@ import CategoryManager from "@/components/admin/CategoryManager";
 import StatCard from "@/components/StatCard";
 import AdminStorefrontPOS from "@/components/admin/AdminStorefrontPOS";
 import AdminUserManager from "@/components/admin/AdminUserManager";
+import B2BManager from "@/components/admin/B2BManager";
 import WholesaleCatalog from "@/components/admin/WholesaleCatalog";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
@@ -1026,6 +1027,24 @@ export default function AdminPage() {
             }}
           >
             💼 Wholesale & PDF Rate Sheet
+          </li>
+          <li
+            className={activeTab === "b2b" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("b2b");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            style={{
+              background: activeTab === "b2b" ? undefined : "linear-gradient(135deg, #fff1f2, #ffe4e6)",
+              color: activeTab === "b2b" ? "#ffffff" : "#be123c",
+              fontWeight: "800",
+              borderRadius: "8px",
+              boxShadow: "0 2px 6px rgba(190, 18, 60, 0.15)",
+              margin: "4px 0",
+            }}
+          >
+            🤝 Wholesale & Resellers (50+)
           </li>
           <li
             className={activeTab === "users" ? "active-tab" : ""}
@@ -2672,6 +2691,24 @@ export default function AdminPage() {
             <div className="jt-admin-panel jt-admin-panel-wide admin-card">
               <ErrorBoundary>
                 <WholesaleCatalog products={products} categories={categories} />
+              </ErrorBoundary>
+            </div>
+          )}
+
+          {/* B2B Wholesale & Resellers Tab */}
+          {activeTab === "b2b" && (
+            <div className="jt-admin-panel jt-admin-panel-wide admin-card">
+              <ErrorBoundary>
+                <B2BManager />
+              </ErrorBoundary>
+            </div>
+          )}
+
+          {/* Admin & Users Tab */}
+          {activeTab === "users" && (
+            <div className="jt-admin-panel jt-admin-panel-wide admin-card">
+              <ErrorBoundary>
+                <AdminUserManager />
               </ErrorBoundary>
             </div>
           )}

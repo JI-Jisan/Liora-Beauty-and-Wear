@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/components/AuthProvider";
 import { cld } from "@/lib/cloudinary";
 import { getDiscount, getSaved } from "@/lib/price";
 import ProductWatermark from "@/components/ProductWatermark";
@@ -89,6 +90,7 @@ export default function ProductDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { addToCart } = useCart();
+  const { user, isWholesale, isReseller, isAdmin } = useAuth();
   const [product, setProduct] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
@@ -474,6 +476,39 @@ export default function ProductDetailsPage() {
               </>
             )}
           </div>
+
+          {/* Wholesale or Reseller Tier Pricing Banner */}
+          {(isWholesale || isAdmin) && (
+            <div style={{ background: "#ede9fe", border: "1.5px solid #c4b5fd", padding: "10px 14px", borderRadius: "12px", margin: "10px 0" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "22px", fontWeight: "900", color: "#6d28d9" }}>
+                  ৳{product.wholesalePrice > 0 ? product.wholesalePrice : Math.round(product.offerPrice * 0.75)}
+                </span>
+                <span style={{ fontSize: "12px", color: "#6d28d9", fontWeight: "800" }}>
+                  🏬 Wholesale VIP Rate (MOQ: {product.wholesaleMinQty || 6} Pcs)
+                </span>
+              </div>
+              <Link href="/wholesale" style={{ fontSize: "12px", color: "#7c3aed", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
+                Wholesale পোর্টালে বাল্ক কার্টে যোগ করুন &rarr;
+              </Link>
+            </div>
+          )}
+
+          {isReseller && (
+            <div style={{ background: "#ffe4e6", border: "1.5px solid #fecdd3", padding: "10px 14px", borderRadius: "12px", margin: "10px 0" }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "22px", fontWeight: "900", color: "#be123c" }}>
+                  ৳{product.resellerPrice > 0 ? product.resellerPrice : (product.wholesalePrice > 0 ? product.wholesalePrice : Math.round(product.offerPrice * 0.75))}
+                </span>
+                <span style={{ fontSize: "12px", color: "#9f1239", fontWeight: "800" }}>
+                  🚀 Reseller Buy Rate (Your Profit: ৳{Math.max(0, product.offerPrice - (product.resellerPrice > 0 ? product.resellerPrice : Math.round(product.offerPrice * 0.75)))})
+                </span>
+              </div>
+              <Link href="/reseller" style={{ fontSize: "12px", color: "#be123c", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
+                রিসেলার হাবে কাস্টমারের জন্য ড্রপশিপ বুক করুন &rarr;
+              </Link>
+            </div>
+          )}
 
           {/* Price */}
           <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap", margin: "10px 0" }}>

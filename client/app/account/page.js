@@ -248,6 +248,34 @@ export default function AccountDashboardPage() {
                   >
                     👑 ADMIN
                   </span>
+                ) : role === "wholesale" ? (
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                      color: "#fff",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      padding: "3px 10px",
+                      borderRadius: 12,
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    🏬 WHOLESALE PARTNER
+                  </span>
+                ) : role === "reseller" ? (
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg, #e11d48, #be123c)",
+                      color: "#fff",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      padding: "3px 10px",
+                      borderRadius: 12,
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    🚀 OFFICIAL RESELLER
+                  </span>
                 ) : (
                   <span
                     style={{
@@ -266,6 +294,12 @@ export default function AccountDashboardPage() {
               <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: 13 }}>
                 {user.email || profile?.phone || "Liora Verified User"}
               </p>
+              {(profile?.businessName || profile?.resellerStoreName) && (
+                <p style={{ margin: "2px 0 0", color: "#fbcfe8", fontSize: 12, fontWeight: 700 }}>
+                  🏪 {profile.businessName || profile.resellerStoreName}
+                  {role === "reseller" && ` • Wallet: ৳${profile.walletBalance || 0}`}
+                </p>
+              )}
             </div>
           </div>
 
@@ -287,6 +321,44 @@ export default function AccountDashboardPage() {
                 }}
               >
                 ⚙️ Admin Dashboard
+              </Link>
+            )}
+            {role === "wholesale" && (
+              <Link
+                href="/wholesale"
+                style={{
+                  padding: "9px 16px",
+                  borderRadius: 10,
+                  background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                  color: "#fff",
+                  textDecoration: "none",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                💼 Wholesale Catalog & Bulk Orders
+              </Link>
+            )}
+            {role === "reseller" && (
+              <Link
+                href="/reseller"
+                style={{
+                  padding: "9px 16px",
+                  borderRadius: 10,
+                  background: "linear-gradient(135deg, #e11d48, #be123c)",
+                  color: "#fff",
+                  textDecoration: "none",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                🚀 Reseller Hub (Wallet: ৳{profile?.walletBalance || 0})
               </Link>
             )}
             <button

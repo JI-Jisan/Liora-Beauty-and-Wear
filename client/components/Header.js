@@ -22,7 +22,7 @@ export default function Header({
 }) {
   const router = useRouter();
   const cartContext = useCart();
-  const { user, isAdmin, profile } = useAuth();
+  const { user, role, isWholesale, isReseller, isAdmin, profile } = useAuth();
 
   const [localSearch, setLocalSearch] = useState("");
   const [liveSearchResults, setLiveSearchResults] = useState([]);
@@ -412,6 +412,29 @@ export default function Header({
           </Link>
           <Link href="/products?filter=offers" className="jt-tab-pill">
             <span className="jt-tab-icon">🏷️</span> Offers
+          </Link>
+          <Link
+            href="/wholesale"
+            className="jt-tab-pill"
+            style={{
+              background: isWholesale ? "#ede9fe" : undefined,
+              color: isWholesale ? "#6d28d9" : "#be123c",
+              fontWeight: "700",
+            }}
+          >
+            <span className="jt-tab-icon">🏬</span> Wholesale
+            {isWholesale && <span style={{ fontSize: 9, background: "#6d28d9", color: "#fff", padding: "1px 5px", borderRadius: 10, marginLeft: 4 }}>VIP</span>}
+          </Link>
+          <Link
+            href="/reseller"
+            className="jt-tab-pill"
+            style={{
+              background: isReseller ? "#ffe4e6" : undefined,
+              color: isReseller ? "#be123c" : "#9f1239",
+              fontWeight: "700",
+            }}
+          >
+            <span className="jt-tab-icon">🚀</span> Reseller Hub
           </Link>
           <Link href="/order-tracking" className="jt-tab-pill">
             <span className="jt-tab-icon">📦</span> Track Order

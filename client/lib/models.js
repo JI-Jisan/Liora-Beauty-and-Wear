@@ -53,6 +53,9 @@ const ProductSchema = new mongoose.Schema(
     purchasePrice: { type: Number, required: true, default: 0, min: 0 },
     originalPrice: { type: Number, required: true, min: 0 },
     offerPrice: { type: Number, required: true, min: 0 },
+    wholesalePrice: { type: Number, default: 0, min: 0 },
+    wholesaleMinQty: { type: Number, default: 6, min: 1 },
+    resellerPrice: { type: Number, default: 0, min: 0 },
     stockQuantity: { type: Number, required: true, default: 0, min: 0 },
     inStock: { type: Boolean, default: true, index: true },
     discountBadge: { type: String, default: "" },
@@ -280,6 +283,30 @@ const OrderSchema = new mongoose.Schema(
     pendingOrdersCount: { type: Number, default: 0 },
     stockRestored: { type: Boolean, default: false },  // Cancelled এ স্টক ফেরতের জন্য
     isDeleted: { type: Boolean, default: false },      // soft delete
+    orderType: {
+      type: String,
+      enum: ["retail", "wholesale", "reseller"],
+      default: "retail",
+      index: true,
+    },
+    resellerDetails: {
+      resellerUid: { type: String, default: "" },
+      resellerEmail: { type: String, default: "", lowercase: true, trim: true },
+      resellerName: { type: String, default: "" },
+      storeName: { type: String, default: "" },
+      storePhone: { type: String, default: "" },
+      customerCodAmount: { type: Number, default: 0 },
+      baseCost: { type: Number, default: 0 },
+      deliveryFee: { type: Number, default: 0 },
+      resellerProfit: { type: Number, default: 0 },
+      settledToWallet: { type: Boolean, default: false },
+    },
+    wholesaleDetails: {
+      businessName: { type: String, default: "" },
+      tradeLicense: { type: String, default: "" },
+      totalItemsQty: { type: Number, default: 0 },
+      wholesaleSavings: { type: Number, default: 0 },
+    },
   },
   { timestamps: true }
 );
@@ -295,12 +322,30 @@ export const Order =
 // ---------- Customer / User ----------
 const CustomerSchema = new mongoose.Schema(
   {
-    firebaseUid: { type: String, required: true, unique: true, index: true },
+    firebaseUid: { type: String, required: false, unique: true, sparse: true, index: true },
     email: { type: String, lowercase: true, trim: true, index: true },
     name: { type: String, default: "" },
     phone: { type: String, default: "", index: true },
     address: { type: String, default: "" },
-    role: { type: String, enum: ["user", "admin"], default: "user" },
+    role: {
+      type: String,
+      enum: ["user", "admin", "wholesale", "reseller"],
+      default: "user",
+      index: true,
+    },
+    businessName: { type: String, default: "" },
+    resellerStoreName: { type: String, default: "" },
+    resellerStorePhone: { type: String, default: "" },
+    status: {
+      type: String,
+      enum: ["active", "pending", "suspended"],
+      default: "active",
+      index: true,
+    },
+    walletBalance: { type: Number, default: 0 },
+    wholesaleDiscountPct: { type: Number, default: 0 },
+    minWholesaleOrderAmount: { type: Number, default: 5000 },
+    note: { type: String, default: "" },
   },
   { timestamps: true }
 );
@@ -406,4 +451,41 @@ WholesaleQuotationSchema.index({ createdAt: -1 });
 export const WholesaleQuotation =
   mongoose.models.WholesaleQuotation ||
   mongoose.model("WholesaleQuotation", WholesaleQuotationSchema);
+
+// ---------- ResellerLedger (রিসেলার ওয়ালেট ও কমিশন লেজার) ----------
+const ResellerLedgerSchema = new mongoose.Schema(
+  {
+    resellerUid: { type: String, required: false, index: true },
+    resellerEmail: { type: String, required: true, lowercase: true, trim: true, index: true },
+    orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", default: null },
+    orderNumber: { type: String, default: "" },
+    type: {
+      type: String,
+      enum: [
+        "profit_credit",
+        "delivery_fee_charge",
+        "return_deduction",
+        "payout_withdrawal",
+        "manual_adjustment",
+      ],
+      required: true,
+    },
+    amount: { type: Number, required: true },
+    balanceAfter: { type: Number, default: 0 },
+    status: {
+      type: String,
+      enum: ["pending", "completed", "cancelled"],
+      default: "completed",
+    },
+    payoutMethod: { type: String, default: "" },
+    payoutAccount: { type: String, default: "" },
+    note: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+ResellerLedgerSchema.index({ createdAt: -1 });
+
+export const ResellerLedger =
+  mongoose.models.ResellerLedger || mongoose.model("ResellerLedger", ResellerLedgerSchema);
 

@@ -105,10 +105,10 @@ async function handleAuth(req) {
       });
     }
 
-    // Role is normal customer / user
+    // Role is customer / wholesale / reseller
     let customer = await Customer.findOne({ firebaseUid: decodedToken.uid });
     if (!customer) {
-      // Check if existing customer has matching email
+      // Check if existing customer or pre-authorized record has matching email
       if (cleanEmail) {
         customer = await Customer.findOne({ email: cleanEmail });
       }
@@ -122,6 +122,7 @@ async function handleAuth(req) {
           email: cleanEmail,
           name: displayName,
           role: "user",
+          status: "active",
         });
       }
     } else if (displayName && !customer.name) {
@@ -129,9 +130,11 @@ async function handleAuth(req) {
       await customer.save();
     }
 
+    const assignedRole = customer.role || "user";
+
     return NextResponse.json({
       success: true,
-      role: "user",
+      role: assignedRole,
       isAdmin: false,
       user: {
         uid: decodedToken.uid,
@@ -139,7 +142,14 @@ async function handleAuth(req) {
         name: customer.name || displayName || "Customer",
         phone: customer.phone || "",
         address: customer.address || "",
-        role: "user",
+        role: assignedRole,
+        businessName: customer.businessName || "",
+        resellerStoreName: customer.resellerStoreName || "",
+        resellerStorePhone: customer.resellerStorePhone || "",
+        status: customer.status || "active",
+        walletBalance: customer.walletBalance || 0,
+        wholesaleDiscountPct: customer.wholesaleDiscountPct || 0,
+        minWholesaleOrderAmount: customer.minWholesaleOrderAmount || 5000,
       },
     });
   } catch (err) {

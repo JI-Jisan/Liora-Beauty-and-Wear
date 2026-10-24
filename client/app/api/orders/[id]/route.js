@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Order, Product } from "@/lib/models";
+import { Order, Product, Customer, ResellerLedger } from "@/lib/models";
 
 export async function GET(req, { params }) {
   try {
@@ -172,6 +172,35 @@ export async function PUT(req, { params }) {
       order.status = status;
       if (status === "Confirmed" || status === "Shipped" || status === "Delivered") {
         order.isFlagged = false;
+      }
+
+      // অটোমেটিক রিসেলার প্রফিট সেটেলমেন্ট যখন পার্সেল ডেলিভারি সম্পন্ন হয়
+      if (status === "Delivered" && order.orderType === "reseller") {
+        const profit = Number(order.resellerDetails?.resellerProfit) || 0;
+        if (profit > 0 && !order.resellerDetails?.settledToWallet) {
+          const resEmail = (order.resellerDetails?.resellerEmail || "").toLowerCase().trim();
+          if (resEmail) {
+            const resCustomer = await Customer.findOne({ email: resEmail });
+            if (resCustomer) {
+              resCustomer.walletBalance = (resCustomer.walletBalance || 0) + profit;
+              await resCustomer.save();
+
+              await ResellerLedger.create({
+                resellerUid: order.resellerDetails?.resellerUid || resCustomer.firebaseUid || "",
+                resellerEmail: resEmail,
+                orderId: order._id,
+                orderNumber: order.orderNumber,
+                type: "profit_credit",
+                amount: profit,
+                balanceAfter: resCustomer.walletBalance,
+                status: "completed",
+                note: `Order #${order.orderNumber} delivered - dropship profit credited`,
+              });
+
+              order.resellerDetails.settledToWallet = true;
+            }
+          }
+        }
       }
     }
 

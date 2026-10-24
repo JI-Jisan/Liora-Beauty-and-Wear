@@ -111,17 +111,46 @@ export async function POST(req) {
     if (body.items.length > 50)
       return NextResponse.json({ message: "অনেক বেশি আইটেম" }, { status: 400 });
 
+    // Identify user role and order type
+    let authUser = null;
+    let customerDoc = null;
+    try {
+      authUser = await getUserFromRequest(req);
+      if (authUser?.uid) {
+        customerDoc = await Customer.findOne({ firebaseUid: authUser.uid }).lean();
+        if (!customerDoc && authUser.email) {
+          customerDoc = await Customer.findOne({ email: authUser.email.toLowerCase().trim() }).lean();
+        }
+      }
+    } catch (e) {
+      authUser = null;
+    }
+
+    const requestedType = String(body.orderType || "").toLowerCase();
+    const isWholesaleReq =
+      requestedType === "wholesale" ||
+      body.isWholesale === true ||
+      (customerDoc?.role === "wholesale" && requestedType !== "retail");
+    const isResellerReq =
+      requestedType === "reseller" ||
+      body.isReseller === true ||
+      (customerDoc?.role === "reseller" && requestedType !== "retail");
+
+    const orderType = isWholesaleReq ? "wholesale" : isResellerReq ? "reseller" : "retail";
+    const itemMaxLimit = orderType === "wholesale" ? 1000 : MAX_QTY_PER_ITEM;
+
     // ---- দাম ও স্টক: সার্ভার থেকে FIFO ব্যাচ এলগোরিদম দ্বারা (অ্যাডমিন কাস্টম দাম সাপোর্টসহ) ----
     const items = [];
     const doneAllocations = []; // rollback এর জন্য
     let subtotal = 0;
     let totalCost = 0;
+    let totalSavings = 0;
 
     for (const raw of body.items) {
       const qty = Number(raw.quantity);
-      if (!Number.isInteger(qty) || qty < 1 || qty > MAX_QTY_PER_ITEM) {
+      if (!Number.isInteger(qty) || qty < 1 || qty > itemMaxLimit) {
         await releaseAllocations(doneAllocations);
-        return NextResponse.json({ message: "পরিমাণ সঠিক নয়" }, { status: 400 });
+        return NextResponse.json({ message: `পরিমাণ সঠিক নয় (সর্বোচ্চ ${itemMaxLimit} পিস)` }, { status: 400 });
       }
 
       const productId = raw.productId || raw._id;
@@ -150,11 +179,26 @@ export async function POST(req) {
 
       doneAllocations.push(...res.allocations);
 
-      // অ্যাডমিন অর্ডার কাটলে নির্ধারিত কাস্টম প্রাইজ গ্রহণ করবে
-      const defaultPrice = Number(p.offerPrice ?? p.originalPrice ?? 0);
+      // দাম নির্ধারণ: হোলসেল বা রিসেলার অনুযায়ী
+      const defaultRetailPrice = Number(p.offerPrice ?? p.originalPrice ?? 0);
+      let calculatedPrice = defaultRetailPrice;
+
+      if (orderType === "wholesale") {
+        calculatedPrice = Number(p.wholesalePrice > 0 ? p.wholesalePrice : defaultRetailPrice);
+        totalSavings += Math.max(0, defaultRetailPrice - calculatedPrice) * qty;
+      } else if (orderType === "reseller") {
+        calculatedPrice = Number(
+          p.resellerPrice > 0
+            ? p.resellerPrice
+            : p.wholesalePrice > 0
+            ? p.wholesalePrice
+            : defaultRetailPrice
+        );
+      }
+
       const price = (admin && raw.price !== undefined && raw.price !== null && !isNaN(Number(raw.price)))
         ? Math.max(0, Number(raw.price))
-        : defaultPrice;
+        : calculatedPrice;
 
       subtotal += price * qty;
       totalCost += (res.totalCost || res.avgCost * qty);
@@ -212,16 +256,25 @@ export async function POST(req) {
 
     const total = Math.max(0, subtotal + deliveryCharge - discount);
 
-    let user = null;
-    try {
-      user = await getUserFromRequest(req);
-    } catch (e) {
-      console.error("FIREBASE AUTH SKIP:", e?.message);
-      user = null;
+    let user = authUser;
+    if (!user) {
+      try {
+        user = await getUserFromRequest(req);
+      } catch (e) {
+        user = null;
+      }
     }
 
     const firebaseUid = user?.uid || body.firebaseUid || null;
     const customerEmail = (user?.email || body.customerEmail || "").toLowerCase().trim();
+
+    // Reseller profit and customer COD collection setup
+    const customerCodAmount = orderType === "reseller"
+      ? Math.max(subtotal + deliveryCharge, Number(body.customerCodAmount || body.codAmount || total))
+      : total;
+    const resellerProfit = orderType === "reseller"
+      ? Math.max(0, customerCodAmount - subtotal - deliveryCharge)
+      : 0;
 
     // ---- orderNumber, collision হলে ৩ বার retry ----
     let order = null;
@@ -256,6 +309,25 @@ export async function POST(req) {
           isFlagged,
           flagReason,
           pendingOrdersCount: recentOrdersCount,
+          orderType,
+          resellerDetails: orderType === "reseller" ? {
+            resellerUid: user?.uid || customerDoc?.firebaseUid || "",
+            resellerEmail: customerEmail || customerDoc?.email || "",
+            resellerName: customerDoc?.name || user?.name || "Reseller",
+            storeName: body.storeName || customerDoc?.resellerStoreName || "",
+            storePhone: body.storePhone || customerDoc?.resellerStorePhone || "",
+            customerCodAmount,
+            baseCost: subtotal,
+            deliveryFee: deliveryCharge,
+            resellerProfit,
+            settledToWallet: false,
+          } : undefined,
+          wholesaleDetails: orderType === "wholesale" ? {
+            businessName: body.businessName || customerDoc?.businessName || "",
+            tradeLicense: body.tradeLicense || "",
+            totalItemsQty: items.reduce((s, it) => s + it.quantity, 0),
+            wholesaleSavings: totalSavings,
+          } : undefined,
         });
 
         if (firebaseUid) {
