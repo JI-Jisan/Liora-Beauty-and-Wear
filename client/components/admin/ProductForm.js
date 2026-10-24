@@ -8,6 +8,7 @@ import { Card, Field, inputStyle, T } from "@/app/admin/ui";
 
 const EMPTY = {
   name: "", category: "", brand: "", purchasePrice: "", originalPrice: "", offerPrice: "",
+  wholesalePrice: "", wholesaleMinQty: 6, resellerPrice: "",
   stockQuantity: "", description: "",
   image: "", images: ["", "", ""],
   isFeatured: false, isTrending: false, isNewArrival: false, isSlider: false,
@@ -43,6 +44,9 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       purchasePrice: editing.purchasePrice ?? "",
       originalPrice: editing.originalPrice ?? "",
       offerPrice: editing.offerPrice ?? "",
+      wholesalePrice: editing.wholesalePrice ?? "",
+      wholesaleMinQty: editing.wholesaleMinQty ?? 6,
+      resellerPrice: editing.resellerPrice ?? "",
       stockQuantity: editing.stockQuantity || "",
       description: editing.description || "",
       image: editing.image || "",
@@ -134,6 +138,9 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
             originalPrice: orig,
             offerPrice: offer,
             purchasePrice: Number(form.purchasePrice) || 0,
+            wholesalePrice: Number(form.wholesalePrice) || 0,
+            wholesaleMinQty: Math.max(1, parseInt(form.wholesaleMinQty) || 6),
+            resellerPrice: Number(form.resellerPrice) || 0,
             stockQuantity: Math.max(0, parseInt(form.stockQuantity) || 0),
             category: form.category || null,
             brand: form.brand || null,
@@ -288,6 +295,31 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
             {form.offerPrice - form.purchasePrice} Tk</strong> ({Math.round((form.offerPrice - form.purchasePrice) / form.offerPrice * 100)}%)
           </p>
         )}
+
+        <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px dashed #e2e8f0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+            <span style={{ fontSize: 16 }}>🤝</span>
+            <strong style={{ fontSize: 13, color: "#be123c" }}>B2B হোলসেল ও রিসেলার রেট (ঐচ্ছিক)</strong>
+            <span style={{ fontSize: 11, color: "#64748b" }}>— ফাঁকা রাখলে অটোমেটিক ডিফল্ট ফর্মুলা কাজ করবে</span>
+          </div>
+          <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+            <Field label="হোলসেল প্রাইস (Wholesale Rate)" hint="বাল্ক ক্রেতাদের জন্য বিশেষ দাম">
+              <input type="number" min="0" style={inputStyle} value={form.wholesalePrice}
+                     placeholder="যেমন: 850 (ফাঁকা রাখলে অটো হিসাব)"
+                     onChange={e => setForm({ ...form, wholesalePrice: e.target.value })} />
+            </Field>
+            <Field label="হোলসেল ন্যূনতম অর্ডার (MOQ)" hint="কমপক্ষে যত পিস নিতে হবে">
+              <input type="number" min="1" style={inputStyle} value={form.wholesaleMinQty}
+                     placeholder="ডিফল্ট: 6"
+                     onChange={e => setForm({ ...form, wholesaleMinQty: e.target.value })} />
+            </Field>
+            <Field label="রিসেলার কেনা রেট (Reseller Buy Rate)" hint="৫০+ রিসেলারের নিজস্ব ক্রয়মূল্য">
+              <input type="number" min="0" style={inputStyle} value={form.resellerPrice}
+                     placeholder="যেমন: 950 (ফাঁকা রাখলে অটো হিসাব)"
+                     onChange={e => setForm({ ...form, resellerPrice: e.target.value })} />
+            </Field>
+          </div>
+        </div>
       </Card>
 
       <Card title="বিবরণ ও ব্যবহারবিধি">
