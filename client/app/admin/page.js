@@ -1270,6 +1270,16 @@ export default function AdminPage() {
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#e11d48", fontWeight: "900", textAlign: "center" }}>Wholesale PDF</h3>
                 </div>
 
+                {/* Wholesale & Resellers Network Box */}
+                <div 
+                  onClick={() => { setActiveTab("b2b"); window.scrollTo(0,0); }}
+                  style={{ background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)", padding: "18px 10px", borderRadius: "16px", border: "1.5px solid #fecdd3", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 10px rgba(190,18,60,0.12)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🤝</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#be123c", fontWeight: "900", textAlign: "center" }}>Wholesale & Resellers</h3>
+                  <span style={{ fontSize: "11px", color: "#9f1239", textAlign: "center", marginTop: "2px", fontWeight: "700" }}>50+ Resellers & B2B Hub</span>
+                </div>
+
                 {/* Admin & Users Box */}
                 <div 
                   onClick={() => { setActiveTab("users"); window.scrollTo(0,0); }}

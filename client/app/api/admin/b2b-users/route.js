@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import { Customer, Order, ResellerLedger } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
 export const runtime = "nodejs";
 
@@ -14,16 +15,44 @@ export async function GET(req) {
   try {
     await connectToDatabase();
     const { searchParams } = new URL(req.url);
-    const filterRole = searchParams.get("role") || "all"; // 'all' | 'wholesale' | 'reseller' | 'user'
+    const filterRole = searchParams.get("role") || "all"; // 'all' | 'admin' | 'wholesale' | 'reseller' | 'customer' | 'pending'
     const searchQuery = (searchParams.get("search") || "").trim().toLowerCase();
 
-    const query = {};
-    if (filterRole === "b2b") {
-      query.role = { $in: ["wholesale", "reseller"] };
-    } else if (filterRole !== "all") {
-      query.role = filterRole;
+    // 1. Fetch Firestore admins collection and environment variable admins
+    const adminMap = new Map();
+    try {
+      const app = await getFirebaseAdminApp();
+      if (app) {
+        const { getFirestore } = await import("firebase-admin/firestore");
+        const db = getFirestore(app);
+        const adminDocs = await db.collection("admins").get();
+        adminDocs.forEach((doc) => {
+          const data = doc.data() || {};
+          const docId = doc.id.toLowerCase().trim();
+          adminMap.set(docId, data);
+          if (data.email) adminMap.set(data.email.toLowerCase().trim(), data);
+          if (data.uid) adminMap.set(data.uid, data);
+        });
+      }
+    } catch (fsErr) {
+      console.warn("Firestore admins fetch warning in b2b-users:", fsErr?.message);
     }
 
+    const allowedEnvEmails = (process.env.ADMIN_EMAILS || "")
+      .toLowerCase()
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean);
+    allowedEnvEmails.forEach((e) => {
+      adminMap.set(e, { role: "admin", email: e });
+    });
+
+    // Known site admins
+    ["jahidulislam01910889@gmail.com", "liorabeautyandwear@gmail.com"].forEach((e) => {
+      adminMap.set(e, { role: "admin", email: e });
+    });
+
+    const query = {};
     if (searchQuery) {
       query.$or = [
         { email: { $regex: searchQuery, $options: "i" } },
@@ -36,11 +65,11 @@ export async function GET(req) {
 
     const customers = await Customer.find(query)
       .sort({ updatedAt: -1 })
-      .limit(300)
+      .limit(500)
       .lean();
 
     // Attach order counts & stats
-    const customerEmails = customers.map((c) => c.email).filter(Boolean);
+    const customerEmails = customers.map((c) => (c.email || "").toLowerCase().trim()).filter(Boolean);
     const orderAgg = await Order.aggregate([
       {
         $match: {
@@ -50,7 +79,7 @@ export async function GET(req) {
       },
       {
         $group: {
-          _id: "$customerEmail",
+          _id: { $toLower: "$customerEmail" },
           orderCount: { $sum: 1 },
           totalSpend: { $sum: "$total" },
         },
@@ -62,25 +91,84 @@ export async function GET(req) {
       if (stat._id) orderStatsMap.set(String(stat._id).toLowerCase(), stat);
     });
 
-    const enrichedUsers = customers.map((c) => {
-      const email = (c.email || "").toLowerCase();
+    // Sync and enrich users
+    const enrichedUsers = [];
+    const seenEmails = new Set();
+
+    for (const c of customers) {
+      const email = (c.email || "").toLowerCase().trim();
+      const isAdmin =
+        c.role === "admin" ||
+        adminMap.has(email) ||
+        (c.firebaseUid && adminMap.has(c.firebaseUid));
+
+      let effectiveRole = c.role;
+      if (isAdmin) {
+        effectiveRole = "admin";
+        if (c.role !== "admin") {
+          Customer.updateOne({ _id: c._id }, { $set: { role: "admin" } }).catch(() => {});
+        }
+      } else if (c.role === "wholesale") {
+        effectiveRole = "wholesale";
+      } else if (c.role === "reseller") {
+        effectiveRole = "reseller";
+      } else {
+        effectiveRole = "user"; // standard customer
+      }
+
+      if (email) seenEmails.add(email);
+
       const stats = orderStatsMap.get(email) || { orderCount: 0, totalSpend: 0 };
-      return {
+      enrichedUsers.push({
         ...c,
+        role: effectiveRole,
         orderCount: stats.orderCount,
         totalSpend: stats.totalSpend,
-      };
-    });
+      });
+    }
 
-    // Summary counts
-    const [wholesaleCount, resellerCount, pendingCount, liabilityAgg] = await Promise.all([
-      Customer.countDocuments({ role: "wholesale" }),
-      Customer.countDocuments({ role: "reseller" }),
-      Customer.countDocuments({ status: "pending" }),
-      Customer.aggregate([
-        { $match: { role: "reseller" } },
-        { $group: { _id: null, totalBalance: { $sum: "$walletBalance" } } },
-      ]),
+    // Include any Firestore / ENV admins that are not in MongoDB customers yet
+    for (const [key, data] of adminMap.entries()) {
+      if (key.includes("@") && !seenEmails.has(key)) {
+        seenEmails.add(key);
+        enrichedUsers.push({
+          _id: "admin_" + key.replace(/[^a-zA-Z0-9]/g, "_"),
+          email: key,
+          name: data?.name || data?.displayName || "Admin",
+          role: "admin",
+          status: "active",
+          walletBalance: 0,
+          orderCount: 0,
+          totalSpend: 0,
+          createdAt: new Date().toISOString(),
+        });
+      }
+    }
+
+    // Filter by role if requested
+    let finalUsers = enrichedUsers;
+    if (filterRole === "admin") {
+      finalUsers = enrichedUsers.filter((u) => u.role === "admin");
+    } else if (filterRole === "wholesale") {
+      finalUsers = enrichedUsers.filter((u) => u.role === "wholesale");
+    } else if (filterRole === "reseller") {
+      finalUsers = enrichedUsers.filter((u) => u.role === "reseller");
+    } else if (filterRole === "customer" || filterRole === "user") {
+      finalUsers = enrichedUsers.filter((u) => u.role === "user" || u.role === "customer");
+    } else if (filterRole === "pending") {
+      finalUsers = enrichedUsers.filter((u) => u.status === "pending");
+    }
+
+    // Role Counts
+    const adminCount = enrichedUsers.filter((u) => u.role === "admin").length;
+    const wholesaleCount = enrichedUsers.filter((u) => u.role === "wholesale").length;
+    const resellerCount = enrichedUsers.filter((u) => u.role === "reseller").length;
+    const customerCount = enrichedUsers.filter((u) => u.role === "user" || u.role === "customer").length;
+    const pendingCount = enrichedUsers.filter((u) => u.status === "pending").length;
+
+    const liabilityAgg = await Customer.aggregate([
+      { $match: { role: "reseller" } },
+      { $group: { _id: null, totalBalance: { $sum: "$walletBalance" } } },
     ]);
 
     // Recent ledger transactions
@@ -91,10 +179,12 @@ export async function GET(req) {
 
     return NextResponse.json({
       success: true,
-      users: enrichedUsers,
+      users: finalUsers,
       stats: {
+        adminCount,
         wholesaleCount,
         resellerCount,
+        customerCount,
         pendingCount,
         totalWalletLiability: liabilityAgg[0]?.totalBalance || 0,
       },
@@ -117,7 +207,7 @@ export async function POST(req) {
     const body = await req.json();
     const {
       email,
-      role = "wholesale",
+      role = "wholesale", // 'admin' | 'wholesale' | 'reseller' | 'user'
       businessName = "",
       resellerStoreName = "",
       resellerStorePhone = "",
@@ -136,11 +226,12 @@ export async function POST(req) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const normalizedRole = role === "customer" ? "user" : role;
 
     let customer = await Customer.findOne({ email: cleanEmail });
 
     if (customer) {
-      customer.role = role;
+      customer.role = normalizedRole;
       if (businessName) customer.businessName = businessName.trim();
       if (resellerStoreName) customer.resellerStoreName = resellerStoreName.trim();
       if (resellerStorePhone) customer.resellerStorePhone = resellerStorePhone.trim();
@@ -173,7 +264,7 @@ export async function POST(req) {
         name: name.trim() || cleanEmail.split("@")[0],
         phone: phone.trim(),
         address: address.trim(),
-        role,
+        role: normalizedRole,
         businessName: businessName.trim(),
         resellerStoreName: resellerStoreName.trim(),
         resellerStorePhone: resellerStorePhone.trim(),
@@ -197,9 +288,38 @@ export async function POST(req) {
       }
     }
 
+    // Sync Firestore admins if role is admin
+    if (normalizedRole === "admin") {
+      try {
+        const app = await getFirebaseAdminApp();
+        if (app) {
+          const { getFirestore } = await import("firebase-admin/firestore");
+          const db = getFirestore(app);
+          await db.collection("admins").doc(cleanEmail).set(
+            {
+              email: cleanEmail,
+              role: "admin",
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+        }
+      } catch (fsErr) {
+        console.warn("Firestore admin sync warning on POST:", fsErr?.message);
+      }
+    }
+
+    const roleLabels = {
+      admin: "Admin (অ্যাডমিন)",
+      wholesale: "Wholesale Buyer (হোলসেলার)",
+      reseller: "Reseller (রিসেলার)",
+      user: "Customer (সাধারণ কাস্টমার)",
+    };
+
     return NextResponse.json({
       success: true,
-      message: `${cleanEmail} কে সফলভাবে ${role === "wholesale" ? "Wholesale Buyer" : "Reseller"} এক্সেস দেওয়া হয়েছে!`,
+      message: `${cleanEmail} কে সফলভাবে ${roleLabels[normalizedRole] || normalizedRole} হিসেবে সেট করা হয়েছে!`,
       user: customer,
     });
   } catch (err) {
@@ -238,12 +358,56 @@ export async function PUT(req) {
       return NextResponse.json({ message: "ইউজার আইডি প্রয়োজন" }, { status: 400 });
     }
 
-    const customer = await Customer.findById(id);
+    let customer = null;
+    if (String(id).startsWith("admin_")) {
+      const email = body.email?.toLowerCase().trim();
+      if (email) customer = await Customer.findOne({ email });
+      if (!customer && email) {
+        customer = await Customer.create({
+          email,
+          name: name || "Admin",
+          role: "admin",
+          status: status || "active",
+        });
+      }
+    } else {
+      customer = await Customer.findById(id);
+    }
+
     if (!customer) {
       return NextResponse.json({ message: "ইউজার পাওয়া যায়নি" }, { status: 404 });
     }
 
-    if (role !== undefined) customer.role = role;
+    const cleanEmail = (customer.email || "").toLowerCase().trim();
+
+    if (role !== undefined) {
+      const normalizedRole = role === "customer" ? "user" : role;
+      customer.role = normalizedRole;
+
+      // Sync with Firestore admins
+      try {
+        const app = await getFirebaseAdminApp();
+        if (app && cleanEmail) {
+          const { getFirestore } = await import("firebase-admin/firestore");
+          const db = getFirestore(app);
+          if (normalizedRole === "admin") {
+            await db.collection("admins").doc(cleanEmail).set(
+              {
+                email: cleanEmail,
+                role: "admin",
+                updatedAt: new Date().toISOString(),
+              },
+              { merge: true }
+            );
+          } else {
+            await db.collection("admins").doc(cleanEmail).delete();
+          }
+        }
+      } catch (fsErr) {
+        console.warn("Firestore admin sync warning on PUT:", fsErr?.message);
+      }
+    }
+
     if (status !== undefined) customer.status = status;
     if (businessName !== undefined) customer.businessName = String(businessName).trim();
     if (resellerStoreName !== undefined) customer.resellerStoreName = String(resellerStoreName).trim();
@@ -302,15 +466,26 @@ export async function DELETE(req) {
       return NextResponse.json({ message: "ইউজার পাওয়া যায়নি" }, { status: 404 });
     }
 
+    const cleanEmail = (customer.email || "").toLowerCase().trim();
     customer.role = "user";
     await customer.save();
 
+    // If was admin, remove from Firestore admins
+    try {
+      const app = await getFirebaseAdminApp();
+      if (app && cleanEmail) {
+        const { getFirestore } = await import("firebase-admin/firestore");
+        const db = getFirestore(app);
+        await db.collection("admins").doc(cleanEmail).delete();
+      }
+    } catch (_) {}
+
     return NextResponse.json({
       success: true,
-      message: `${customer.email}-এর B2B এক্সেস প্রত্যাহার করে সাধারণ ইউজার করা হয়েছে।`,
+      message: `${customer.email}-এর রোল পরিবর্তন করে সাধারণ কাস্টমার (Customer) করা হয়েছে।`,
     });
   } catch (err) {
     console.error("DELETE /api/admin/b2b-users error:", err);
-    return NextResponse.json({ message: "ডিলিট করতে সমস্যা: " + err.message }, { status: 500 });
+    return NextResponse.json({ message: "রোল পরিবর্তন করতে সমস্যা: " + err.message }, { status: 500 });
   }
 }

@@ -5,8 +5,10 @@ import React, { useState, useEffect, useMemo } from "react";
 export default function B2BManager() {
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState({
+    adminCount: 0,
     wholesaleCount: 0,
     resellerCount: 0,
+    customerCount: 0,
     pendingCount: 0,
     totalWalletLiability: 0,
   });
@@ -85,10 +87,14 @@ export default function B2BManager() {
   // Filtered Users
   const filteredUsers = useMemo(() => {
     let list = [...users];
-    if (roleFilter === "wholesale") {
+    if (roleFilter === "admin") {
+      list = list.filter((u) => u.role === "admin");
+    } else if (roleFilter === "wholesale") {
       list = list.filter((u) => u.role === "wholesale");
     } else if (roleFilter === "reseller") {
       list = list.filter((u) => u.role === "reseller");
+    } else if (roleFilter === "customer" || roleFilter === "user") {
+      list = list.filter((u) => u.role === "user" || u.role === "customer" || !u.role);
     } else if (roleFilter === "pending") {
       list = list.filter((u) => u.status === "pending");
     }
@@ -260,7 +266,7 @@ export default function B2BManager() {
   };
 
   const handleRevoke = async (user) => {
-    if (!confirm(`আপনি কি নিশ্চিতভাবে ${user.email}-এর B2B এক্সেস প্রত্যাহার করে সাধারণ ইউজার করতে চান?`)) {
+    if (!confirm(`আপনি কি নিশ্চিতভাবে ${user.email}-এর রোল পরিবর্তন করে সাধারণ কাস্টমার (Customer) করতে চান?`)) {
       return;
     }
 
@@ -329,52 +335,63 @@ export default function B2BManager() {
         </div>
       )}
 
-      {/* 4 Executive KPI Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 14, marginBottom: 22 }}>
+      {/* 5 Executive KPI Cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 22 }}>
         <div style={{ background: "#ffffff", padding: "16px 18px", borderRadius: 14, border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Wholesale Buyers</span>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>System Admins</span>
+            <span style={{ fontSize: 20 }}>🛡️</span>
+          </div>
+          <div style={{ fontSize: 24, fontWeight: 900, color: "#065f46", marginTop: 6 }}>
+            {stats.adminCount || 0} <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>Admins</span>
+          </div>
+          <span style={{ fontSize: 11, color: "#059669", fontWeight: 700 }}>Full system control</span>
+        </div>
+
+        <div style={{ background: "#ffffff", padding: "16px 18px", borderRadius: 14, border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Wholesale Buyers</span>
             <span style={{ fontSize: 20 }}>🏬</span>
           </div>
-          <div style={{ fontSize: 26, fontWeight: 900, color: "#1e1b4b", marginTop: 6 }}>
-            {stats.wholesaleCount} <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>Accounts</span>
+          <div style={{ fontSize: 24, fontWeight: 900, color: "#6d28d9", marginTop: 6 }}>
+            {stats.wholesaleCount || 0} <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>Accounts</span>
           </div>
-          <span style={{ fontSize: 11, color: "#6366f1", fontWeight: 700 }}>Bulk order & MOQ access</span>
+          <span style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700 }}>Bulk order & MOQ access</span>
         </div>
 
         <div style={{ background: "#ffffff", padding: "16px 18px", borderRadius: 14, border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Active Resellers</span>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Active Resellers</span>
             <span style={{ fontSize: 20 }}>🚀</span>
           </div>
-          <div style={{ fontSize: 26, fontWeight: 900, color: "#9f1239", marginTop: 6 }}>
-            {stats.resellerCount} <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>/ 50+ Target</span>
+          <div style={{ fontSize: 24, fontWeight: 900, color: "#be123c", marginTop: 6 }}>
+            {stats.resellerCount || 0} <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>/ 50+ Target</span>
           </div>
           <div style={{ height: 6, background: "#f1f5f9", borderRadius: 3, marginTop: 6, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${Math.min(100, (stats.resellerCount / 50) * 100)}%`, background: "#e11d48", borderRadius: 3 }} />
+            <div style={{ height: "100%", width: `${Math.min(100, (((stats.resellerCount || 0) / 50) * 100))}%`, background: "#e11d48", borderRadius: 3 }} />
           </div>
         </div>
 
         <div style={{ background: "#ffffff", padding: "16px 18px", borderRadius: 14, border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Reseller Wallet Liability</span>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Retail Customers</span>
+            <span style={{ fontSize: 20 }}>👤</span>
+          </div>
+          <div style={{ fontSize: 24, fontWeight: 900, color: "#334155", marginTop: 6 }}>
+            {stats.customerCount || 0} <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>Users</span>
+          </div>
+          <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>Standard retail accounts</span>
+        </div>
+
+        <div style={{ background: "#ffffff", padding: "16px 18px", borderRadius: 14, border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Wallet Liability</span>
             <span style={{ fontSize: 20 }}>💰</span>
           </div>
-          <div style={{ fontSize: 26, fontWeight: 900, color: "#047857", marginTop: 6 }}>
+          <div style={{ fontSize: 24, fontWeight: 900, color: "#047857", marginTop: 6 }}>
             ৳{Number(stats.totalWalletLiability || 0).toLocaleString()}
           </div>
-          <span style={{ fontSize: 11, color: "#059669", fontWeight: 700 }}>Total pending payout liability</span>
-        </div>
-
-        <div style={{ background: "#ffffff", padding: "16px 18px", borderRadius: 14, border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Pending Applications</span>
-            <span style={{ fontSize: 20 }}>⏳</span>
-          </div>
-          <div style={{ fontSize: 26, fontWeight: 900, color: "#d97706", marginTop: 6 }}>
-            {stats.pendingCount}
-          </div>
-          <span style={{ fontSize: 11, color: "#b45309", fontWeight: 700 }}>Awaiting admin verification</span>
+          <span style={{ fontSize: 11, color: "#059669", fontWeight: 700 }}>Reseller pending payout</span>
         </div>
       </div>
 
@@ -420,10 +437,12 @@ export default function B2BManager() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {[
-                { key: "all", label: "All Members" },
-                { key: "wholesale", label: "🏬 Wholesale Only" },
-                { key: "reseller", label: "🚀 Resellers (50+)" },
-                { key: "pending", label: "⏳ Pending Approval" },
+                { key: "all", label: `👥 All (${users.length})` },
+                { key: "admin", label: `🛡️ Admins (${stats.adminCount || 0})` },
+                { key: "wholesale", label: `🏬 Wholesalers (${stats.wholesaleCount || 0})` },
+                { key: "reseller", label: `🚀 Resellers (${stats.resellerCount || 0})` },
+                { key: "customer", label: `👤 Customers (${stats.customerCount || 0})` },
+                { key: "pending", label: `⏳ Pending (${stats.pendingCount || 0})` },
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -504,24 +523,24 @@ export default function B2BManager() {
                           {u.note && <div style={{ fontSize: 11, color: "#94a3b8" }}>📝 {u.note}</div>}
                         </td>
                         <td style={{ padding: "12px 14px" }}>
+                          {u.role === "admin" && (
+                            <span style={{ background: "#ecfdf5", color: "#065f46", border: "1px solid #a7f3d0", padding: "4px 10px", borderRadius: 12, fontWeight: 900, fontSize: 11, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                              🛡️ Admin
+                            </span>
+                          )}
                           {u.role === "wholesale" && (
-                            <span style={{ background: "#ede9fe", color: "#6d28d9", padding: "4px 10px", borderRadius: 12, fontWeight: 800, fontSize: 11 }}>
-                              🏬 Wholesale
+                            <span style={{ background: "#ede9fe", color: "#6d28d9", border: "1px solid #ddd6fe", padding: "4px 10px", borderRadius: 12, fontWeight: 900, fontSize: 11, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                              🏬 Wholesaler
                             </span>
                           )}
                           {u.role === "reseller" && (
-                            <span style={{ background: "#ffe4e6", color: "#be123c", padding: "4px 10px", borderRadius: 12, fontWeight: 800, fontSize: 11 }}>
+                            <span style={{ background: "#ffe4e6", color: "#be123c", border: "1px solid #fecdd3", padding: "4px 10px", borderRadius: 12, fontWeight: 900, fontSize: 11, display: "inline-flex", alignItems: "center", gap: 4 }}>
                               🚀 Reseller
                             </span>
                           )}
-                          {u.role === "user" && (
-                            <span style={{ background: "#f1f5f9", color: "#64748b", padding: "4px 10px", borderRadius: 12, fontWeight: 700, fontSize: 11 }}>
-                              👤 Retail
-                            </span>
-                          )}
-                          {u.role === "admin" && (
-                            <span style={{ background: "#ecfdf5", color: "#059669", padding: "4px 10px", borderRadius: 12, fontWeight: 800, fontSize: 11 }}>
-                              🛡️ Admin
+                          {(u.role === "user" || u.role === "customer" || !u.role) && (
+                            <span style={{ background: "#f1f5f9", color: "#475569", border: "1px solid #e2e8f0", padding: "4px 10px", borderRadius: 12, fontWeight: 800, fontSize: 11, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                              👤 Customer
                             </span>
                           )}
                         </td>
@@ -586,10 +605,10 @@ export default function B2BManager() {
                             >
                               ✏️ Edit
                             </button>
-                            {u.role !== "user" && (
+                            {(u.role !== "user" && u.role !== "customer") && (
                               <button
                                 type="button"
-                                title="Revoke B2B Privileges"
+                                title="Reset to Customer"
                                 onClick={() => handleRevoke(u)}
                                 style={{
                                   background: "#fee2e2",
@@ -602,7 +621,7 @@ export default function B2BManager() {
                                   cursor: "pointer",
                                 }}
                               >
-                                ✕ Revoke
+                                ↺ Reset
                               </button>
                             )}
                           </div>
@@ -742,8 +761,10 @@ export default function B2BManager() {
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, background: "#f8fafc" }}
                   >
-                    <option value="wholesale">🏬 Wholesale Buyer (বাল্ক ক্রেতা)</option>
-                    <option value="reseller">🚀 Reseller (ড্রপশিপার)</option>
+                    <option value="wholesale">🏬 Wholesaler (পাইকারি বাল্ক ক্রেতা)</option>
+                    <option value="reseller">🚀 Reseller (৫০+ রিসেলার / ড্রপশিপার)</option>
+                    <option value="admin">🛡️ Admin (সিস্টেম অ্যাডমিন)</option>
+                    <option value="user">👤 Customer (সাধারণ রিটেইল কাস্টমার)</option>
                   </select>
                 </div>
 
@@ -909,9 +930,10 @@ export default function B2BManager() {
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
                   >
-                    <option value="wholesale">🏬 Wholesale</option>
-                    <option value="reseller">🚀 Reseller</option>
-                    <option value="user">👤 Retail User</option>
+                    <option value="admin">🛡️ Admin (সিস্টেম অ্যাডমিন)</option>
+                    <option value="wholesale">🏬 Wholesaler (পাইকারি ক্রেতা)</option>
+                    <option value="reseller">🚀 Reseller (৫০+ ড্রপশিপার)</option>
+                    <option value="user">👤 Customer (সাধারণ রিটেইল কাস্টমার)</option>
                   </select>
                 </div>
                 <div>

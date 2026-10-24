@@ -329,7 +329,7 @@ const CustomerSchema = new mongoose.Schema(
     address: { type: String, default: "" },
     role: {
       type: String,
-      enum: ["user", "admin", "wholesale", "reseller"],
+      enum: ["user", "customer", "admin", "wholesale", "reseller"],
       default: "user",
       index: true,
     },
