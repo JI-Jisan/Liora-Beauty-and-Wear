@@ -1,40 +1,21 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { Product, Brand } from '@/lib/models';
+import { cleanSearchTerm, scoreProductRelevance } from '@/lib/searchEngine';
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// Cache brand names in memory for fast matching
-let cachedBrandNames = null;
-let lastBrandCacheTime = 0;
-
-async function getBrandNames() {
-  const now = Date.now();
-  if (cachedBrandNames && now - lastBrandCacheTime < 300000) {
-    return cachedBrandNames;
-  }
-  try {
-    const brands = await Brand.find({}, { name: 1, slug: 1 }).lean();
-    cachedBrandNames = brands.map(b => ({
-      _id: b._id,
-      name: b.name.toLowerCase().trim(),
-      rawName: b.name
-    }));
-    lastBrandCacheTime = now;
-    return cachedBrandNames;
-  } catch (e) {
-    return [];
-  }
-}
-
-// Common cosmetics stopwords to ignore in search
-const STOPWORDS = new Set([
-  'the', 'and', 'for', 'with', 'from', 'all', 'new', 'free', 'net', 'vol', 'wt', 'qty',
-  'original', 'best', 'ml', 'gm', 'pcs', 'pack', 'care', 'beauty', 'skin', 'body',
-  'face', 'daily', 'use', 'formula', 'ingredients', 'dermatologist', 'tested', 'natural'
+// Common generic cosmetics words and volumes
+const COMMON_WORDS = new Set([
+  'skin', 'care', 'beauty', 'face', 'wash', 'body', 'lotion', 'cream', 'gel', 'soap',
+  'oil', 'serum', 'the', 'and', 'for', 'with', 'from', 'all', 'new', 'free', 'net',
+  'vol', 'wt', 'qty', 'original', 'best', 'pcs', 'pack', 'daily', 'use', 'formula',
+  'ingredients', 'dermatologist', 'tested', 'natural'
 ]);
+
+const isVolume = (w) => /^\d+(ml|gm|g|kg|l|oz|pcs)?$/i.test(w);
 
 export async function POST(req) {
   try {
@@ -63,57 +44,59 @@ export async function POST(req) {
       });
     }
 
-    // Clean and normalize text
-    const cleanRaw = extractedText
-      .replace(/[^\w\s-]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .toLowerCase()
-      .trim();
+    const { cleanPhrase, tokens } = cleanSearchTerm(extractedText);
 
-    const allBrands = await getBrandNames();
-    const detectedBrands = [];
+    // Extract specific (distinctive) and common tokens
+    const specificTokens = tokens.filter(t => t.length >= 3 && !COMMON_WORDS.has(t) && !isVolume(t));
+    const allTokens = tokens.filter(t => t.length >= 2 && !isVolume(t));
 
-    // Detect brand in text
-    for (const b of allBrands) {
-      if (b.name.length >= 3 && cleanRaw.includes(b.name)) {
-        detectedBrands.push(b);
+    let candidateProducts = [];
+
+    // 1. First Priority: Pair Token Matching (e.g. "saffron" + "glow" or "cosrx" + "snail")
+    if (specificTokens.length >= 2) {
+      const pairConditions = [];
+      const topSpecific = specificTokens.slice(0, 5);
+      for (let i = 0; i < topSpecific.length - 1; i++) {
+        for (let j = i + 1; j < topSpecific.length; j++) {
+          pairConditions.push({
+            $and: [
+              { name: { $regex: topSpecific[i], $options: 'i' } },
+              { name: { $regex: topSpecific[j], $options: 'i' } }
+            ]
+          });
+        }
+      }
+      if (pairConditions.length > 0) {
+        candidateProducts = await Product.find({ $or: pairConditions })
+          .populate('brand', 'name slug')
+          .populate('category', 'name')
+          .limit(60)
+          .lean();
       }
     }
 
-    // Extract significant keywords
-    const rawTokens = cleanRaw.split(' ').filter(t => t.length >= 3 && !STOPWORDS.has(t));
-    const uniqueTokens = Array.from(new Set(rawTokens)).slice(0, 12);
-
-    // Build MongoDB query
-    const searchConditions = [];
-
-    // 1. If brand matched, query products of that brand
-    if (detectedBrands.length > 0) {
-      searchConditions.push({ brand: { $in: detectedBrands.map(b => b._id) } });
-    }
-
-    // 2. Keyword regex searches
-    const tokenRegexes = uniqueTokens.map(t => new RegExp(t, 'i'));
-    if (tokenRegexes.length > 0) {
-      searchConditions.push({ name: { $in: tokenRegexes } });
-    }
-
-    let candidateProducts = [];
-    if (searchConditions.length > 0) {
-      candidateProducts = await Product.find({
-        $or: searchConditions
+    // 2. Second Priority: Individual specific tokens
+    if (candidateProducts.length < 15 && specificTokens.length > 0) {
+      const extra = await Product.find({
+        name: { $regex: specificTokens.slice(0, 5).join('|'), $options: 'i' }
       })
         .populate('brand', 'name slug')
         .populate('category', 'name')
-        .limit(60)
+        .limit(50)
         .lean();
+
+      const existingIds = new Set(candidateProducts.map(p => p._id.toString()));
+      for (const ep of extra) {
+        if (!existingIds.has(ep._id.toString())) {
+          candidateProducts.push(ep);
+        }
+      }
     }
 
-    // If candidate products are too few, try a broader search with the top tokens
-    if (candidateProducts.length < 5 && uniqueTokens.length > 0) {
-      const broadRegex = new RegExp(uniqueTokens.slice(0, 4).join('|'), 'i');
-      const broadCandidates = await Product.find({
-        name: { $regex: broadRegex }
+    // 3. Fallback: Broader search if still too few candidates
+    if (candidateProducts.length < 5 && allTokens.length > 0) {
+      const fallback = await Product.find({
+        name: { $regex: allTokens.slice(0, 4).join('|'), $options: 'i' }
       })
         .populate('brand', 'name slug')
         .populate('category', 'name')
@@ -121,55 +104,31 @@ export async function POST(req) {
         .lean();
 
       const existingIds = new Set(candidateProducts.map(p => p._id.toString()));
-      for (const bp of broadCandidates) {
-        if (!existingIds.has(bp._id.toString())) {
-          candidateProducts.push(bp);
+      for (const fp of fallback) {
+        if (!existingIds.has(fp._id.toString())) {
+          candidateProducts.push(fp);
         }
       }
     }
 
-    // Score and rank candidates by relevance
-    const scored = candidateProducts.map(prod => {
-      let score = 0;
-      const prodNameLower = prod.name.toLowerCase();
+    // 4. Rank using Liora's Search Relevance Engine
+    const scored = candidateProducts.map(prod => ({
+      ...prod,
+      matchScore: scoreProductRelevance(prod, cleanPhrase, allTokens)
+    }));
 
-      // Brand match bonus (+50 points)
-      if (prod.brand && detectedBrands.some(db => db._id.toString() === prod.brand._id?.toString())) {
-        score += 50;
-      }
-
-      // Token match bonus (+15 points per matched word)
-      for (const tok of uniqueTokens) {
-        if (prodNameLower.includes(tok)) {
-          score += 15;
-        }
-      }
-
-      // In stock bonus (+10 points)
-      if (prod.inStock && prod.stockStatus !== 'Out of Stock') {
-        score += 10;
-      }
-
-      return {
-        ...prod,
-        matchScore: score
-      };
-    });
-
-    // Sort by match score descending
     scored.sort((a, b) => b.matchScore - a.matchScore);
     const topResults = scored.slice(0, 16);
 
-    // Format tags for UI display
-    const detectedTags = [
-      ...detectedBrands.map(b => b.rawName),
-      ...uniqueTokens.slice(0, 5).map(t => t.charAt(0).toUpperCase() + t.slice(1))
-    ];
+    // Filter tags for display
+    const detectedTags = specificTokens
+      .slice(0, 6)
+      .map(t => t.charAt(0).toUpperCase() + t.slice(1));
 
     return NextResponse.json({
       success: true,
       extractedSnippet: extractedText.slice(0, 120),
-      detectedTags: Array.from(new Set(detectedTags)),
+      detectedTags: detectedTags.length > 0 ? detectedTags : tokens.slice(0, 4),
       totalMatches: topResults.length,
       products: topResults.map(p => ({
         _id: p._id,
