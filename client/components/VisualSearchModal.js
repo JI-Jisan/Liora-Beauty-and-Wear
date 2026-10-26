@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 
@@ -9,6 +8,7 @@ export default function VisualSearchModal({ isOpen, onClose }) {
   const [file, setFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
   const [scanStep, setScanStep] = useState("");
   const [results, setResults] = useState([]);
   const [detectedTags, setDetectedTags] = useState([]);
@@ -25,6 +25,7 @@ export default function VisualSearchModal({ isOpen, onClose }) {
       setFile(null);
       setImagePreview(null);
       setIsScanning(false);
+      setScanProgress(0);
       setScanStep("");
       setResults([]);
       setDetectedTags([]);
@@ -46,6 +47,27 @@ export default function VisualSearchModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  // Load Tesseract.js dynamically on demand from high-speed CDN
+  const getTesseract = async () => {
+    if (typeof window !== "undefined" && window.Tesseract) {
+      return window.Tesseract;
+    }
+    return new Promise((resolve, reject) => {
+      const existing = document.getElementById("tesseract-cdn-script");
+      if (existing) {
+        existing.onload = () => resolve(window.Tesseract);
+        return;
+      }
+      const script = document.createElement("script");
+      script.id = "tesseract-cdn-script";
+      script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+      script.async = true;
+      script.onload = () => resolve(window.Tesseract);
+      script.onerror = () => reject(new Error("Failed to load OCR engine"));
+      document.head.appendChild(script);
+    });
+  };
+
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
@@ -57,6 +79,7 @@ export default function VisualSearchModal({ isOpen, onClose }) {
     setErrorMsg("");
     setResults([]);
     setDetectedTags([]);
+    setScanProgress(10);
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -65,16 +88,31 @@ export default function VisualSearchModal({ isOpen, onClose }) {
     reader.readAsDataURL(imgFile);
 
     setIsScanning(true);
-    setScanStep("Scanning product packaging & labels...");
+    setScanStep("Initializing Google Lens scanner...");
 
     try {
-      const formData = new FormData();
-      formData.append("image", imgFile);
+      setScanStep("Scanning product bottle & text...");
+      const tesseract = await getTesseract();
 
-      setScanStep("Extracting brand & product details...");
+      const ocrResult = await tesseract.recognize(imgFile, "eng", {
+        logger: (m) => {
+          if (m.status === "recognizing text") {
+            const pct = Math.round((m.progress || 0) * 80) + 10;
+            setScanProgress(pct);
+            setScanStep(`Reading label text: ${pct}%...`);
+          }
+        },
+      });
+
+      const extractedText = ocrResult?.data?.text || "";
+
+      setScanStep("Matching with 4,131 products in LIORA...");
+      setScanProgress(95);
+
       const res = await fetch("/api/visual-search", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: extractedText }),
       });
 
       const data = await res.json();
@@ -86,14 +124,15 @@ export default function VisualSearchModal({ isOpen, onClose }) {
       } else {
         setErrorMsg(
           data.message ||
-            "No matching products found. Try capturing the front bottle label with clear lighting."
+            "Could not clearly identify the product name on this packaging. Please try a clearer front photo."
         );
       }
     } catch (err) {
       console.error("Visual search error:", err);
-      setErrorMsg("Failed to scan image. Please check your connection and try again.");
+      setErrorMsg("Failed to scan image. Please try again or test a sample.");
     } finally {
       setIsScanning(false);
+      setScanProgress(100);
     }
   };
 
@@ -163,7 +202,6 @@ export default function VisualSearchModal({ isOpen, onClose }) {
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            className="hidden"
             style={{ display: "none" }}
             onChange={handleFileChange}
           />
@@ -172,7 +210,6 @@ export default function VisualSearchModal({ isOpen, onClose }) {
             type="file"
             accept="image/*"
             capture="environment"
-            className="hidden"
             style={{ display: "none" }}
             onChange={handleFileChange}
           />
@@ -210,17 +247,17 @@ export default function VisualSearchModal({ isOpen, onClose }) {
               <div className="jt-lens-samples-strip">
                 <span className="jt-lens-samples-label">Or try a quick demo:</span>
                 <div className="jt-lens-sample-chips">
+                  <button type="button" onClick={() => handleSampleSearch("My Skin Saffron Glow Boost Face Wash")}>
+                    ✨ My Skin Saffron
+                  </button>
                   <button type="button" onClick={() => handleSampleSearch("Simple Kind to Skin Moisturiser")}>
                     🧴 Simple Moisturiser
                   </button>
                   <button type="button" onClick={() => handleSampleSearch("COSRX Snail Mucin Essence")}>
                     🐌 COSRX Snail Mucin
                   </button>
-                  <button type="button" onClick={() => handleSampleSearch("Beauty Glazed Lipstick")}>
-                    💄 Beauty Glazed
-                  </button>
-                  <button type="button" onClick={() => handleSampleSearch("Centella Madagascar Ampoule")}>
-                    🌿 SKIN1004 Centella
+                  <button type="button" onClick={() => handleSampleSearch("WishCare Sunscreen SPF 50")}>
+                    ☀️ WishCare Sunscreen
                   </button>
                 </div>
               </div>
@@ -293,7 +330,7 @@ export default function VisualSearchModal({ isOpen, onClose }) {
           {results.length > 0 && (
             <div className="jt-lens-results-section">
               <div className="jt-lens-results-header">
-                <h4>Matching Products in Stock ({results.length})</h4>
+                <h4>Matching Products ({results.length})</h4>
               </div>
 
               <div className="jt-lens-results-grid">

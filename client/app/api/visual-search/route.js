@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { Product, Brand } from '@/lib/models';
-import sharp from 'sharp';
-import { createWorker } from 'tesseract.js';
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 // Cache brand names in memory for fast matching
 let cachedBrandNames = null;
@@ -43,28 +45,9 @@ export async function POST(req) {
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
-      const file = formData.get('image');
       const textParam = formData.get('text');
-
-      if (textParam && typeof textParam === 'string' && textParam.trim()) {
+      if (textParam && typeof textParam === 'string') {
         extractedText = textParam.trim();
-      } else if (file && typeof file === 'object') {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        // Preprocess image with sharp for optimal OCR speed & accuracy
-        const processedBuffer = await sharp(buffer)
-          .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-          .grayscale()
-          .normalize()
-          .sharpen()
-          .toBuffer();
-
-        // Run Tesseract OCR in-memory
-        const worker = await createWorker('eng');
-        const ret = await worker.recognize(processedBuffer);
-        extractedText = ret.data.text || '';
-        await worker.terminate();
       }
     } else {
       const body = await req.json().catch(() => ({}));
@@ -74,7 +57,7 @@ export async function POST(req) {
     if (!extractedText || !extractedText.trim()) {
       return NextResponse.json({
         success: false,
-        message: 'No text or recognizable image detected. Please try a clearer photo of the product packaging.',
+        message: 'No text or recognizable product name detected. Please try a clearer photo.',
         products: [],
         detectedTags: []
       });
@@ -126,9 +109,9 @@ export async function POST(req) {
         .lean();
     }
 
-    // If candidate products are too few, try a broader search with the top 3 tokens
+    // If candidate products are too few, try a broader search with the top tokens
     if (candidateProducts.length < 5 && uniqueTokens.length > 0) {
-      const broadRegex = new RegExp(uniqueTokens.slice(0, 3).join('|'), 'i');
+      const broadRegex = new RegExp(uniqueTokens.slice(0, 4).join('|'), 'i');
       const broadCandidates = await Product.find({
         name: { $regex: broadRegex }
       })
@@ -137,7 +120,6 @@ export async function POST(req) {
         .limit(40)
         .lean();
 
-      // Merge unique
       const existingIds = new Set(candidateProducts.map(p => p._id.toString()));
       for (const bp of broadCandidates) {
         if (!existingIds.has(bp._id.toString())) {
@@ -156,7 +138,7 @@ export async function POST(req) {
         score += 50;
       }
 
-      // Token match bonus (+10 points per matched word)
+      // Token match bonus (+15 points per matched word)
       for (const tok of uniqueTokens) {
         if (prodNameLower.includes(tok)) {
           score += 15;
