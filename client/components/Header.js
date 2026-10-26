@@ -507,6 +507,11 @@ export default function Header({
     <VisualSearchModal
       isOpen={isVisualSearchOpen}
       onClose={() => setIsVisualSearchOpen(false)}
+      onSearch={(q) => {
+        onSearchChange?.(q);
+        router.push(`/products?search=${encodeURIComponent(q)}`);
+        setIsVisualSearchOpen(false);
+      }}
     />
     </>
   );
