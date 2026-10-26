@@ -30,6 +30,64 @@ const getCategoryName = (category) => {
   return "Beauty & Wear";
 };
 
+const getProductBrandInfo = (product) => {
+  if (!product) return null;
+  if (product.brand && typeof product.brand === "object" && product.brand.name) {
+    const name = product.brand.name.trim();
+    const slug = product.brand.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return { name, slug };
+  }
+  if (typeof product.brand === "string" && product.brand.trim()) {
+    const name = product.brand.trim();
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return { name, slug };
+  }
+  const name = (product.name || "").trim();
+  if (!name) return null;
+
+  const multiWord = [
+    { name: "Swiss Beauty", slug: "swiss-beauty" },
+    { name: "Beauty Glazed", slug: "beauty-glazed" },
+    { name: "The Ordinary", slug: "the-ordinary" },
+    { name: "The Face Shop", slug: "the-face-shop" },
+    { name: "SKIN1004", slug: "skin1004", match: /^skin\s*1004\b/i },
+    { name: "Dot & Key", slug: "dot-key", match: /^dot\s*&\s*key\b/i },
+    { name: "Some By Mi", slug: "some-by-mi", match: /^some\s+by\s+mi\b/i },
+    { name: "Chemist at Play", slug: "chemist-at-play", match: /^chemist\s+at\s+play\b/i },
+    { name: "Nirvana Color", slug: "nirvana-color" },
+    { name: "Earth Beauty", slug: "earth-beauty" },
+    { name: "Wet n Wild", slug: "wet-n-wild", match: /^wet\s*n\s*wild\b/i },
+    { name: "L.A. Girl", slug: "la-girl", match: /^l\.?a\.?\s*girl\b/i },
+    { name: "Makeup Revolution", slug: "makeup-revolution" },
+    { name: "Skin Cafe", slug: "skin-cafe" },
+    { name: "3W Clinic", slug: "3w-clinic" },
+    { name: "Bio Glow", slug: "bio-glow" },
+    { name: "Pax Moly", slug: "pax-moly", match: /^pax\s*moly\b/i },
+    { name: "Natura Republic", slug: "natura-republic" },
+  ];
+
+  for (const b of multiWord) {
+    const re = b.match || new RegExp(`^${b.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+    if (re.test(name)) {
+      return { name: b.name, slug: b.slug };
+    }
+  }
+
+  const firstWord = name.split(/\s+/)[0];
+  if (firstWord && firstWord.length >= 2) {
+    const cleanWord = firstWord.replace(/[^a-zA-Z0-9]/g, "");
+    const ignored = new Set(["The", "A", "An", "New", "Pro", "Hot", "Best", "Sale", "Mini", "Big", "Original", "Combo", "Super", "Set", "Pack"]);
+    if (cleanWord.length >= 2 && !ignored.has(cleanWord)) {
+      return {
+        name: cleanWord,
+        slug: cleanWord.toLowerCase()
+      };
+    }
+  }
+
+  return null;
+};
+
 function ProductGridContent({
   onAddToCart,
   searchTerm: propSearchTerm,
@@ -267,6 +325,7 @@ function ProductGridContent({
 
           const fallbackUrl = getSmartFallback(catName, product.name, product._id);
           const imageSrc = getImageUrl(product.image) || fallbackUrl;
+          const brandData = getProductBrandInfo(product);
 
           return (
             <div
@@ -315,8 +374,21 @@ function ProductGridContent({
                 </Link>
 
                 <div style={{ marginTop: 8 }}>
+                  {brandData && (
+                    <div style={{ marginBottom: 4 }}>
+                      <Link
+                        href={`/brands/${brandData.slug}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="jt-card-brand-pill"
+                        title={`View all ${brandData.name} products`}
+                      >
+                        {brandData.name}
+                      </Link>
+                    </div>
+                  )}
+
                   <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none" }}>
-                    <h3 style={{ fontSize: 13.5, margin: "6px 0 2px", lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", height: 38, color: "#0f172a", fontWeight: 700 }}>
+                    <h3 style={{ fontSize: 13.5, margin: "2px 0 2px", lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", height: 38, color: "#0f172a", fontWeight: 700 }}>
                       {product.name}
                     </h3>
                   </Link>
@@ -329,14 +401,24 @@ function ProductGridContent({
 
               <div style={{ marginTop: "auto", paddingTop: 4 }}>
                 <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none", display: "block" }}>
-                  <p className="jt-price" style={{ margin: "0 0 2px", fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
-                    {product.offerPrice} Tk
-                    {product.originalPrice && (
-                      <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through", marginLeft: 6 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
+                    <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
+                      {product.offerPrice} Tk
+                    </p>
+                    {product.originalPrice > product.offerPrice && (
+                      <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through" }}>
                         {product.originalPrice} Tk
                       </span>
                     )}
-                  </p>
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                      marginLeft: "auto"
+                    }}>
+                      {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                    </span>
+                  </div>
 
                   <div style={{ minHeight: 18, marginBottom: 8, display: "flex", alignItems: "center" }}>
                     {getSaved(product) > 0 ? (

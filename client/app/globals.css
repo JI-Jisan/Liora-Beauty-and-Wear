@@ -319,6 +319,36 @@ button {
   text-decoration: line-through;
 }
 
+/* Ogerio-style Brand Pill on Product Cards */
+.jt-card-brand-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 1.5px 7px;
+  background: #faf5ff;
+  border: 1px solid #d8b4fe;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b21a8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.jt-card-brand-pill:hover {
+  background: #f3e8ff;
+  border-color: #a855f7;
+  color: #581c87;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.18);
+}
+
 .jt-stock {
   color: #4e5968;
   font-weight: 700;

@@ -12,3 +12,4 @@ server/uploads/cutouts/*
 
 .vercel
 .env*
+client/scripts/*.json

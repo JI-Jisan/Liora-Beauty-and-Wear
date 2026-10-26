@@ -452,14 +452,26 @@ export default function ProductDetailsPage() {
           </h1>
 
           {/* Brand */}
-          {product.brand && (
-            <div style={{ marginBottom: "8px", fontSize: "14px" }}>
-              <span style={{ color: "#64748b" }}>Brand: </span>
-              <Link href={`/brands/${product.brand.slug}`} style={{ color: "#e11d48", fontWeight: "600", textDecoration: "none" }}>
-                {product.brand.name}
-              </Link>
-            </div>
-          )}
+          {(() => {
+            const b = typeof product.brand === "object" && product.brand?.name
+              ? { name: product.brand.name, slug: product.brand.slug || product.brand.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") }
+              : typeof product.brand === "string" && product.brand.trim()
+              ? { name: product.brand.trim(), slug: product.brand.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-") }
+              : null;
+            if (!b) return null;
+            return (
+              <div style={{ marginBottom: "8px", fontSize: "14px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ color: "#64748b" }}>Brand: </span>
+                <Link
+                  href={`/brands/${b.slug}`}
+                  className="jt-card-brand-pill"
+                  style={{ textDecoration: "none", fontSize: "12px", padding: "2px 10px" }}
+                >
+                  {b.name} →
+                </Link>
+              </div>
+            );
+          })()}
 
           <div style={{ display: "flex", alignItems: "center", gap: "6px", margin: "6px 0" }}>
             {product.reviewCount > 0 && (
