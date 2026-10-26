@@ -10,7 +10,6 @@ export const revalidate = 0;
 
 export async function POST(req) {
   try {
-    await connectToDatabase();
     const contentType = req.headers.get('content-type') || '';
 
     let extractedText = '';
@@ -125,6 +124,7 @@ export async function POST(req) {
     }
 
     // 4. Query Database
+    await connectToDatabase();
     const { cleanPhrase, tokens } = cleanSearchTerm(bestQuery);
     const meaningfulTokens = tokens.filter(t => !SEARCH_STOP_WORDS.has(t) && t.length >= 2);
 
