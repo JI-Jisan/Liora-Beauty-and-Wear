@@ -1,7 +1,6 @@
 "use client";
-
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useState, useEffect, useRef, useMemo } from "react";
 import LioraLogo from "./LioraLogo";
@@ -23,6 +22,25 @@ export default function Header({
   onProductTabClick,
 }) {
   const router = useRouter();
+  const pathname = usePathname() || "";
+  const [filterParam, setFilterParam] = useState("");
+  const [searchParam, setSearchParam] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      setFilterParam(sp.get("filter") || "");
+      setSearchParam(sp.get("search") || "");
+    }
+  }, [pathname]);
+
+  const isHome = pathname === "/";
+  const isProducts = (pathname === "/products" || pathname.startsWith("/products/")) && !filterParam && !searchParam;
+  const isOffers = filterParam === "offers";
+  const isWholesalePage = pathname === "/wholesale";
+  const isResellerPage = pathname === "/reseller";
+  const isTrackingPage = pathname === "/order-tracking";
+
   const cartContext = useCart();
   const { user, role, isWholesale, isReseller, isAdmin, profile } = useAuth();
 
@@ -334,7 +352,7 @@ export default function Header({
           width: '100%', minWidth: 0,
           padding: '8px 12px', scrollbarWidth: 'none'
         }}>
-          <Link href="/" className="jt-tab-pill active">
+          <Link href="/" className={`jt-tab-pill ${isHome ? "active" : ""}`}>
             <span className="jt-tab-icon">🏠</span> Home
           </Link>
           <div
@@ -431,15 +449,15 @@ export default function Header({
               </div>
             )}
           </div>
-          <Link href="/products" className="jt-tab-pill">
+          <Link href="/products" className={`jt-tab-pill ${isProducts ? "active" : ""}`}>
             <span className="jt-tab-icon">🛍️</span> Products
           </Link>
-          <Link href="/products?filter=offers" className="jt-tab-pill">
+          <Link href="/products?filter=offers" className={`jt-tab-pill ${isOffers ? "active" : ""}`}>
             <span className="jt-tab-icon">🏷️</span> Offers
           </Link>
           <Link
             href="/wholesale"
-            className="jt-tab-pill"
+            className={`jt-tab-pill ${isWholesalePage ? "active" : ""}`}
             style={{
               background: isWholesale ? "#ede9fe" : undefined,
               color: isWholesale ? "#6d28d9" : "#be123c",
@@ -451,7 +469,7 @@ export default function Header({
           </Link>
           <Link
             href="/reseller"
-            className="jt-tab-pill"
+            className={`jt-tab-pill ${isResellerPage ? "active" : ""}`}
             style={{
               background: isReseller ? "#ffe4e6" : undefined,
               color: isReseller ? "#be123c" : "#9f1239",
@@ -460,7 +478,7 @@ export default function Header({
           >
             <span className="jt-tab-icon">🚀</span> Reseller Hub
           </Link>
-          <Link href="/order-tracking" className="jt-tab-pill">
+          <Link href="/order-tracking" className={`jt-tab-pill ${isTrackingPage ? "active" : ""}`}>
             <span className="jt-tab-icon">📦</span> Track Order
           </Link>
         </div>

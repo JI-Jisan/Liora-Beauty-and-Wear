@@ -264,31 +264,39 @@ function ProductGridContent({
         />
       )}
 
-      <div className="jt-section-head" style={{ textAlign: "center", marginBottom: "32px", padding: "0 16px" }}>
-        {badge && (
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            background: badgeBg || "linear-gradient(135deg, #ff4d6d 0%, #ff758f 100%)",
-            color: "#ffffff",
-            padding: "5px 16px",
-            borderRadius: "999px",
-            fontSize: "12px",
-            fontWeight: "800",
-            letterSpacing: "0.8px",
-            textTransform: "uppercase",
-            marginBottom: "12px",
-            boxShadow: "0 4px 12px rgba(255, 77, 109, 0.25)"
-          }}>
-            {badge}
-          </div>
-        )}
-        <h3 style={{ fontSize: "36px", color: "#0F172A", fontFamily: "Georgia, serif", margin: "0 0 8px", fontWeight: "900" }}>{title}</h3>
-        <p style={{ color: "#64748B", fontSize: "15px", margin: 0, maxWidth: "640px", marginLeft: "auto", marginRight: "auto" }}>
-          {subtitle || "Explore authentic cosmetics, skincare, luxury watches & trendy fashion wear"}
-        </p>
-      </div>
+      {Boolean(title || badge) && (
+        <div className="jt-section-head" style={{ textAlign: "center", marginBottom: "28px", padding: "0 16px" }}>
+          {badge && (
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              background: badgeBg || "linear-gradient(135deg, #ff4d6d 0%, #ff758f 100%)",
+              color: "#ffffff",
+              padding: "5px 16px",
+              borderRadius: "999px",
+              fontSize: "12px",
+              fontWeight: "800",
+              letterSpacing: "0.8px",
+              textTransform: "uppercase",
+              marginBottom: "12px",
+              boxShadow: "0 4px 12px rgba(255, 77, 109, 0.25)"
+            }}>
+              {badge}
+            </div>
+          )}
+          {title && (
+            <h3 style={{ fontSize: "28px", color: "#0F172A", margin: "0 0 8px", fontWeight: "900", letterSpacing: "-0.5px" }}>
+              {title}
+            </h3>
+          )}
+          {subtitle && (
+            <p style={{ color: "#64748B", fontSize: "14px", margin: 0, maxWidth: "640px", marginLeft: "auto", marginRight: "auto" }}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="jt-product-grid">
         {filteredProducts.map((product) => {
