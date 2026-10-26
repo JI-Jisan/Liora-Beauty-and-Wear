@@ -22,7 +22,7 @@ export async function GET(req) {
       return NextResponse.json({ message: "অ্যাকাউন্ট পাওয়া যায়নি" }, { status: 404 });
     }
 
-    if (customer.role !== "reseller" && customer.role !== "admin") {
+    if (customer.role !== "reseller" && customer.role !== "team_leader" && customer.role !== "admin") {
       return NextResponse.json({ message: "আপনি রিসেলার অ্যাকাউন্টে অনুমোদিত নন" }, { status: 403 });
     }
 
@@ -70,6 +70,10 @@ export async function GET(req) {
       walletBalance: customer.walletBalance || 0,
       resellerStoreName: customer.resellerStoreName || "",
       resellerStorePhone: customer.resellerStorePhone || "",
+      isWeeklyStar: Boolean(customer.isWeeklyStar),
+      starDiscountPct: customer.isWeeklyStar ? 10 : 8,
+      teamLeaderEmail: customer.teamLeaderEmail || "",
+      teamLeaderName: customer.teamLeaderName || "",
       ordersCount: orders.length,
       pendingProfit,
       totalEarned,
@@ -95,7 +99,7 @@ export async function POST(req) {
       customer = await Customer.findOne({ email: user.email.toLowerCase().trim() });
     }
 
-    if (!customer || (customer.role !== "reseller" && customer.role !== "admin")) {
+    if (!customer || (customer.role !== "reseller" && customer.role !== "team_leader" && customer.role !== "admin")) {
       return NextResponse.json({ message: "অননুমোদিত অ্যাকশন" }, { status: 403 });
     }
 

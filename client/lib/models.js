@@ -35,11 +35,13 @@ export const Menu = mongoose.models.Menu || mongoose.model('Menu', MenuSchema);
 
 // ---------- Brand ----------
 const BrandSchema = new mongoose.Schema({
-  name:     { type: String, required: true, trim: true },
-  slug:     { type: String, required: true, unique: true, lowercase: true, index: true },
-  logo:     { type: String, default: '' },
-  isActive: { type: Boolean, default: true },
-  order:    { type: Number, default: 0 }
+  name:               { type: String, required: true, trim: true },
+  slug:               { type: String, required: true, unique: true, lowercase: true, index: true },
+  logo:               { type: String, default: '' },
+  wholesaleMarginPct: { type: Number, default: 7 }, // e.g. 5 for 5%, 20 for 20%
+  minWholesaleQty:    { type: Number, default: 6 },
+  isActive:           { type: Boolean, default: true },
+  order:              { type: Number, default: 0 }
 }, { timestamps: true });
 
 export const Brand = mongoose.models.Brand || mongoose.model('Brand', BrandSchema);
@@ -329,10 +331,15 @@ const CustomerSchema = new mongoose.Schema(
     address: { type: String, default: "" },
     role: {
       type: String,
-      enum: ["user", "customer", "admin", "wholesale", "reseller"],
+      enum: ["user", "customer", "admin", "wholesale", "reseller", "team_leader"],
       default: "user",
       index: true,
     },
+    teamLeader: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", default: null, index: true },
+    teamLeaderEmail: { type: String, default: "", lowercase: true, trim: true },
+    teamLeaderName: { type: String, default: "" },
+    isWeeklyStar: { type: Boolean, default: false, index: true },
+    weeklyStarMarkedAt: { type: Date, default: null },
     businessName: { type: String, default: "" },
     resellerStoreName: { type: String, default: "" },
     resellerStorePhone: { type: String, default: "" },

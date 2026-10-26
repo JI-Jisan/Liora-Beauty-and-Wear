@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Customer, Order, ResellerLedger } from "@/lib/models";
+import { Customer, Order, ResellerLedger, Brand } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
 import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
 
@@ -112,6 +112,8 @@ export async function GET(req) {
         effectiveRole = "wholesale";
       } else if (c.role === "reseller") {
         effectiveRole = "reseller";
+      } else if (c.role === "team_leader") {
+        effectiveRole = "team_leader";
       } else {
         effectiveRole = "user"; // standard customer
       }
@@ -153,6 +155,8 @@ export async function GET(req) {
       finalUsers = enrichedUsers.filter((u) => u.role === "wholesale");
     } else if (filterRole === "reseller") {
       finalUsers = enrichedUsers.filter((u) => u.role === "reseller");
+    } else if (filterRole === "team_leader") {
+      finalUsers = enrichedUsers.filter((u) => u.role === "team_leader");
     } else if (filterRole === "customer" || filterRole === "user") {
       finalUsers = enrichedUsers.filter((u) => u.role === "user" || u.role === "customer");
     } else if (filterRole === "pending") {
@@ -163,6 +167,7 @@ export async function GET(req) {
     const adminCount = enrichedUsers.filter((u) => u.role === "admin").length;
     const wholesaleCount = enrichedUsers.filter((u) => u.role === "wholesale").length;
     const resellerCount = enrichedUsers.filter((u) => u.role === "reseller").length;
+    const teamLeaderRoleCount = enrichedUsers.filter((u) => u.role === "team_leader").length;
     const customerCount = enrichedUsers.filter((u) => u.role === "user" || u.role === "customer").length;
     const pendingCount = enrichedUsers.filter((u) => u.status === "pending").length;
 
@@ -177,15 +182,27 @@ export async function GET(req) {
       .limit(30)
       .lean();
 
+    const teamLeaders = await Customer.find({
+      $or: [{ role: "team_leader" }, { role: "admin" }],
+    })
+      .select("_id name email phone role")
+      .lean();
+
+    const brands = await Brand.find({}).sort({ name: 1 }).select("_id name slug logo wholesaleMarginPct").lean();
+
     return NextResponse.json({
       success: true,
       users: finalUsers,
+      teamLeaders,
+      brands,
       stats: {
         adminCount,
         wholesaleCount,
         resellerCount,
         customerCount,
         pendingCount,
+        starResellerCount: enrichedUsers.filter((u) => u.isWeeklyStar).length,
+        teamLeaderCount: teamLeaders.length,
         totalWalletLiability: liabilityAgg[0]?.totalBalance || 0,
       },
       recentLedger,
@@ -207,10 +224,14 @@ export async function POST(req) {
     const body = await req.json();
     const {
       email,
-      role = "wholesale", // 'admin' | 'wholesale' | 'reseller' | 'user'
+      role = "wholesale", // 'admin' | 'wholesale' | 'reseller' | 'team_leader' | 'user'
       businessName = "",
       resellerStoreName = "",
       resellerStorePhone = "",
+      teamLeaderEmail = "",
+      teamLeaderName = "",
+      teamLeaderId = "",
+      isWeeklyStar = false,
       name = "",
       phone = "",
       address = "",
@@ -235,6 +256,11 @@ export async function POST(req) {
       if (businessName) customer.businessName = businessName.trim();
       if (resellerStoreName) customer.resellerStoreName = resellerStoreName.trim();
       if (resellerStorePhone) customer.resellerStorePhone = resellerStorePhone.trim();
+      if (teamLeaderEmail) customer.teamLeaderEmail = teamLeaderEmail.toLowerCase().trim();
+      if (teamLeaderName) customer.teamLeaderName = teamLeaderName.trim();
+      if (teamLeaderId) customer.teamLeader = teamLeaderId;
+      customer.isWeeklyStar = Boolean(isWeeklyStar);
+      if (customer.isWeeklyStar) customer.weeklyStarMarkedAt = new Date();
       if (name && !customer.name) customer.name = name.trim();
       if (phone && !customer.phone) customer.phone = phone.trim();
       if (address && !customer.address) customer.address = address.trim();
@@ -268,6 +294,11 @@ export async function POST(req) {
         businessName: businessName.trim(),
         resellerStoreName: resellerStoreName.trim(),
         resellerStorePhone: resellerStorePhone.trim(),
+        teamLeaderEmail: teamLeaderEmail.toLowerCase().trim(),
+        teamLeaderName: teamLeaderName.trim(),
+        teamLeader: teamLeaderId || null,
+        isWeeklyStar: Boolean(isWeeklyStar),
+        weeklyStarMarkedAt: isWeeklyStar ? new Date() : null,
         status,
         walletBalance: Number(initialWalletBalance) || 0,
         wholesaleDiscountPct: Number(wholesaleDiscountPct) || 0,
@@ -354,6 +385,52 @@ export async function PUT(req) {
       adjustmentNote = "Admin balance adjustment",
     } = body;
 
+    // 1. Brand Wholesale Margins update
+    if (Array.isArray(body.brandMargins)) {
+      for (const bm of body.brandMargins) {
+        if (bm.id && bm.margin !== undefined) {
+          await Brand.findByIdAndUpdate(bm.id, { wholesaleMarginPct: Math.max(0, Number(bm.margin) || 0) });
+        }
+      }
+      return NextResponse.json({
+        success: true,
+        message: "ব্র্যান্ড হোলসেল প্রফিট মার্জিন সফলভাবে সেভ হয়েছে!",
+      });
+    }
+
+    // 2. Bulk Squad Assignment to Team Leader
+    if (body.bulkAssignSquad && Array.isArray(body.resellerIds) && body.teamLeaderEmail) {
+      await Customer.updateMany(
+        { _id: { $in: body.resellerIds } },
+        {
+          $set: {
+            teamLeaderEmail: body.teamLeaderEmail.toLowerCase().trim(),
+            teamLeaderName: body.teamLeaderName || "",
+            teamLeader: body.teamLeaderId || null,
+          },
+        }
+      );
+      return NextResponse.json({
+        success: true,
+        message: `${body.resellerIds.length} জন রিসেলারকে টিম লিডারের আন্ডারে এসাইন করা হয়েছে!`,
+      });
+    }
+
+    // 3. Quick Toggle Weekly Star Performer (8% -> 10% Margin)
+    if (body.toggleWeeklyStar && id) {
+      const cust = await Customer.findById(id);
+      if (cust) {
+        cust.isWeeklyStar = !cust.isWeeklyStar;
+        cust.weeklyStarMarkedAt = cust.isWeeklyStar ? new Date() : null;
+        await cust.save();
+        return NextResponse.json({
+          success: true,
+          message: `${cust.email} কে ${cust.isWeeklyStar ? "⭐ Weekly Star (10% Margin)" : "Standard (8% Margin)"} করা হয়েছে!`,
+          isWeeklyStar: cust.isWeeklyStar,
+        });
+      }
+    }
+
     if (!id) {
       return NextResponse.json({ message: "ইউজার আইডি প্রয়োজন" }, { status: 400 });
     }
@@ -416,6 +493,16 @@ export async function PUT(req) {
     if (phone !== undefined) customer.phone = String(phone).trim();
     if (address !== undefined) customer.address = String(address).trim();
     if (note !== undefined) customer.note = String(note).trim();
+    if (body.isWeeklyStar !== undefined) {
+      customer.isWeeklyStar = Boolean(body.isWeeklyStar);
+      customer.weeklyStarMarkedAt = customer.isWeeklyStar ? new Date() : null;
+    }
+    if (body.teamLeaderEmail !== undefined) {
+      customer.teamLeaderEmail = String(body.teamLeaderEmail || "").toLowerCase().trim();
+      customer.teamLeaderName = String(body.teamLeaderName || "").trim();
+      customer.teamLeader = body.teamLeaderId || null;
+    }
+
     if (wholesaleDiscountPct !== undefined) customer.wholesaleDiscountPct = Number(wholesaleDiscountPct) || 0;
     if (minWholesaleOrderAmount !== undefined) customer.minWholesaleOrderAmount = Number(minWholesaleOrderAmount) || 5000;
 

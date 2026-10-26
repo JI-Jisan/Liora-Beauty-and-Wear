@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
-import { Order, Product, Category, SiteSettings, Customer, nextOrderIdentity } from "@/lib/models";
+import { Order, Product, Category, SiteSettings, Customer, Brand, nextOrderIdentity } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
 import { getUserFromRequest } from "@/lib/firebaseAdmin";
 import crypto from "crypto";
@@ -134,7 +134,7 @@ export async function POST(req) {
     const isResellerReq =
       requestedType === "reseller" ||
       body.isReseller === true ||
-      (customerDoc?.role === "reseller" && requestedType !== "retail");
+      ((customerDoc?.role === "reseller" || customerDoc?.role === "team_leader") && requestedType !== "retail");
 
     const orderType = isWholesaleReq ? "wholesale" : isResellerReq ? "reseller" : "retail";
     const itemMaxLimit = orderType === "wholesale" ? 1000 : MAX_QTY_PER_ITEM;
@@ -184,16 +184,34 @@ export async function POST(req) {
       let calculatedPrice = defaultRetailPrice;
 
       if (orderType === "wholesale") {
-        calculatedPrice = Number(p.wholesalePrice > 0 ? p.wholesalePrice : defaultRetailPrice);
+        if (p.wholesalePrice > 0) {
+          calculatedPrice = Number(p.wholesalePrice);
+        } else {
+          let marginPct = 7;
+          if (p.brand) {
+            const b = await Brand.findById(p.brand).select("wholesaleMarginPct").lean();
+            if (b && typeof b.wholesaleMarginPct === "number") {
+              marginPct = b.wholesaleMarginPct;
+            }
+          }
+          const baseCost = Number(p.purchasePrice > 0 ? p.purchasePrice : defaultRetailPrice * 0.70);
+          calculatedPrice = Math.round(baseCost * (1 + marginPct / 100));
+        }
         totalSavings += Math.max(0, defaultRetailPrice - calculatedPrice) * qty;
       } else if (orderType === "reseller") {
-        calculatedPrice = Number(
-          p.resellerPrice > 0
-            ? p.resellerPrice
-            : p.wholesalePrice > 0
-            ? p.wholesalePrice
-            : defaultRetailPrice
-        );
+        if (p.resellerPrice > 0) {
+          calculatedPrice = Number(p.resellerPrice);
+        } else {
+          // Standard: 8% discount from retail. Weekly Star: 10% discount from retail!
+          let isStar = false;
+          const rEmail = (body.resellerDetails?.resellerEmail || customerEmail || "").toLowerCase().trim();
+          if (rEmail) {
+            const rc = await Customer.findOne({ email: rEmail }).select("isWeeklyStar").lean();
+            if (rc?.isWeeklyStar) isStar = true;
+          }
+          const discountPct = isStar ? 10 : 8;
+          calculatedPrice = Math.round(defaultRetailPrice * (1 - discountPct / 100));
+        }
       }
 
       const price = (admin && raw.price !== undefined && raw.price !== null && !isNaN(Number(raw.price)))

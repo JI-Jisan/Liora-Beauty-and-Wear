@@ -90,7 +90,7 @@ export default function ProductDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { addToCart } = useCart();
-  const { user, isWholesale, isReseller, isAdmin } = useAuth();
+  const { user, isWholesale, isReseller, isAdmin, profile } = useAuth();
   const [product, setProduct] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
@@ -494,21 +494,36 @@ export default function ProductDetailsPage() {
             </div>
           )}
 
-          {isReseller && (
-            <div style={{ background: "#ffe4e6", border: "1.5px solid #fecdd3", padding: "10px 14px", borderRadius: "12px", margin: "10px 0" }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "22px", fontWeight: "900", color: "#be123c" }}>
-                  ৳{product.resellerPrice > 0 ? product.resellerPrice : (product.wholesalePrice > 0 ? product.wholesalePrice : Math.round(product.offerPrice * 0.75))}
-                </span>
-                <span style={{ fontSize: "12px", color: "#9f1239", fontWeight: "800" }}>
-                  🚀 Reseller Buy Rate (Your Profit: ৳{Math.max(0, product.offerPrice - (product.resellerPrice > 0 ? product.resellerPrice : Math.round(product.offerPrice * 0.75)))})
-                </span>
+          {isReseller && (() => {
+            const isStar = Boolean(profile?.isWeeklyStar);
+            const resellerDiscountPct = isStar ? 10 : 8;
+            const resellerBuyRate = product.resellerPrice > 0
+              ? product.resellerPrice
+              : Math.round(product.offerPrice * (isStar ? 0.90 : 0.92));
+            const resellerProfit = Math.max(0, product.offerPrice - resellerBuyRate);
+
+            return (
+              <div style={{
+                background: isStar ? "linear-gradient(135deg, #fefce8, #fef3c7)" : "#ffe4e6",
+                border: isStar ? "1.5px solid #fde047" : "1.5px solid #fecdd3",
+                padding: "12px 16px",
+                borderRadius: "12px",
+                margin: "10px 0",
+              }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "22px", fontWeight: "900", color: isStar ? "#b45309" : "#be123c" }}>
+                    ৳{resellerBuyRate}
+                  </span>
+                  <span style={{ fontSize: "12px", color: isStar ? "#92400e" : "#9f1239", fontWeight: "800" }}>
+                    {isStar ? "⭐ VIP Star Club (10% Booster Discount)" : "🚀 Reseller Buy Rate (8% Base Margin)"} (Your Profit: ৳{resellerProfit})
+                  </span>
+                </div>
+                <Link href="/reseller" style={{ fontSize: "12px", color: isStar ? "#b45309" : "#be123c", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
+                  রিসেলার হাবে কাস্টমারের জন্য ড্রপশিপ বুক করুন &rarr;
+                </Link>
               </div>
-              <Link href="/reseller" style={{ fontSize: "12px", color: "#be123c", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
-                রিসেলার হাবে কাস্টমারের জন্য ড্রপশিপ বুক করুন &rarr;
-              </Link>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Price */}
           <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap", margin: "10px 0" }}>

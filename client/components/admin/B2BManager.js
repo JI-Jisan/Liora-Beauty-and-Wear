@@ -17,10 +17,17 @@ export default function B2BManager() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Filters
+  // Filters & Subtabs
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all"); // 'all' | 'wholesale' | 'reseller' | 'pending'
-  const [activeSubTab, setActiveSubTab] = useState("members"); // 'members' | 'ledger'
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [activeSubTab, setActiveSubTab] = useState("members"); // 'members' | 'squads' | 'brandMargins' | 'ledger'
+
+  // Team Leader & Brand Margin States
+  const [teamLeaders, setTeamLeaders] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [brandMargins, setBrandMargins] = useState({});
+  const [selectedSquadResellers, setSelectedSquadResellers] = useState([]);
+  const [targetTeamLeader, setTargetTeamLeader] = useState("");
 
   // Modal / Form States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -37,6 +44,10 @@ export default function B2BManager() {
     businessName: "",
     resellerStoreName: "",
     resellerStorePhone: "",
+    teamLeaderEmail: "",
+    teamLeaderName: "",
+    teamLeaderId: "",
+    isWeeklyStar: false,
     note: "",
     wholesaleDiscountPct: 0,
     minWholesaleOrderAmount: 5000,
@@ -66,9 +77,18 @@ export default function B2BManager() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to load data");
       setUsers(data.users || []);
+      setTeamLeaders(data.teamLeaders || []);
+      setBrands(data.brands || []);
+      const margins = {};
+      (data.brands || []).forEach((b) => {
+        margins[b._id] = b.wholesaleMarginPct ?? 7;
+      });
+      setBrandMargins(margins);
       setStats(data.stats || {
+        adminCount: 0,
         wholesaleCount: 0,
         resellerCount: 0,
+        customerCount: 0,
         pendingCount: 0,
         totalWalletLiability: 0,
       });
@@ -77,6 +97,94 @@ export default function B2BManager() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleStar = async (user) => {
+    try {
+      setError("");
+      setSuccess("");
+      const res = await fetch("/api/admin/b2b-users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAdminToken()}`,
+        },
+        body: JSON.stringify({
+          id: user._id,
+          toggleWeeklyStar: true,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to toggle star");
+      setSuccess(data.message);
+      loadData();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleBulkAssignSquad = async () => {
+    if (!selectedSquadResellers.length || !targetTeamLeader) {
+      alert("কমপক্ষে একজন রিসেলার এবং একজন টিম লিডার নির্বাচন করুন");
+      return;
+    }
+    const leaderObj = teamLeaders.find((l) => l.email === targetTeamLeader);
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+      const res = await fetch("/api/admin/b2b-users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAdminToken()}`,
+        },
+        body: JSON.stringify({
+          bulkAssignSquad: true,
+          resellerIds: selectedSquadResellers,
+          teamLeaderEmail: targetTeamLeader,
+          teamLeaderName: leaderObj?.name || "",
+          teamLeaderId: leaderObj?._id || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to assign squad");
+      setSuccess(data.message);
+      setSelectedSquadResellers([]);
+      loadData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveBrandMargins = async () => {
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+      const payload = Object.keys(brandMargins).map((id) => ({
+        id,
+        margin: Number(brandMargins[id]) || 0,
+      }));
+      const res = await fetch("/api/admin/b2b-users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAdminToken()}`,
+        },
+        body: JSON.stringify({ brandMargins: payload }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to save margins");
+      setSuccess(data.message);
+      loadData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -93,6 +201,8 @@ export default function B2BManager() {
       list = list.filter((u) => u.role === "wholesale");
     } else if (roleFilter === "reseller") {
       list = list.filter((u) => u.role === "reseller");
+    } else if (roleFilter === "team_leader") {
+      list = list.filter((u) => u.role === "team_leader");
     } else if (roleFilter === "customer" || roleFilter === "user") {
       list = list.filter((u) => u.role === "user" || u.role === "customer" || !u.role);
     } else if (roleFilter === "pending") {
@@ -122,6 +232,10 @@ export default function B2BManager() {
       businessName: "",
       resellerStoreName: "",
       resellerStorePhone: "",
+      teamLeaderEmail: "",
+      teamLeaderName: "",
+      teamLeaderId: "",
+      isWeeklyStar: false,
       note: "",
       wholesaleDiscountPct: 0,
       minWholesaleOrderAmount: 5000,
@@ -141,6 +255,10 @@ export default function B2BManager() {
       businessName: user.businessName || "",
       resellerStoreName: user.resellerStoreName || "",
       resellerStorePhone: user.resellerStorePhone || "",
+      teamLeaderEmail: user.teamLeaderEmail || "",
+      teamLeaderName: user.teamLeaderName || "",
+      teamLeaderId: user.teamLeader || "",
+      isWeeklyStar: Boolean(user.isWeeklyStar),
       note: user.note || "",
       wholesaleDiscountPct: user.wholesaleDiscountPct || 0,
       minWholesaleOrderAmount: user.minWholesaleOrderAmount || 5000,
@@ -395,8 +513,8 @@ export default function B2BManager() {
         </div>
       </div>
 
-      {/* Sub Tab Switcher: Members vs Ledger */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: "1px solid #e2e8f0", paddingBottom: 10 }}>
+      {/* Sub Tab Switcher: Members vs Squads vs Brand Margins vs Ledger */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, borderBottom: "1px solid #e2e8f0", paddingBottom: 10, overflowX: "auto" }}>
         <button
           type="button"
           onClick={() => setActiveSubTab("members")}
@@ -409,9 +527,44 @@ export default function B2BManager() {
             fontSize: 12.5,
             fontWeight: 800,
             cursor: "pointer",
+            whiteSpace: "nowrap",
           }}
         >
           👥 B2B Members ({filteredUsers.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("squads")}
+          style={{
+            background: activeSubTab === "squads" ? "#0f172a" : "#f1f5f9",
+            color: activeSubTab === "squads" ? "#fff" : "#475569",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: 8,
+            fontSize: 12.5,
+            fontWeight: 800,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          👑 Team Leaders & Squads ({teamLeaders.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("brandMargins")}
+          style={{
+            background: activeSubTab === "brandMargins" ? "#0f172a" : "#f1f5f9",
+            color: activeSubTab === "brandMargins" ? "#fff" : "#475569",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: 8,
+            fontSize: 12.5,
+            fontWeight: 800,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          🏷️ Brand Wholesale Margins ({brands.length})
         </button>
         <button
           type="button"
@@ -425,9 +578,10 @@ export default function B2BManager() {
             fontSize: 12.5,
             fontWeight: 800,
             cursor: "pointer",
+            whiteSpace: "nowrap",
           }}
         >
-          📜 Reseller Profit & Payout Ledger ({recentLedger.length})
+          📜 Reseller Profit Ledger ({recentLedger.length})
         </button>
       </div>
 
@@ -439,6 +593,7 @@ export default function B2BManager() {
               {[
                 { key: "all", label: `👥 All (${users.length})` },
                 { key: "admin", label: `🛡️ Admins (${stats.adminCount || 0})` },
+                { key: "team_leader", label: `👑 Team Leaders (${teamLeaders.length})` },
                 { key: "wholesale", label: `🏬 Wholesalers (${stats.wholesaleCount || 0})` },
                 { key: "reseller", label: `🚀 Resellers (${stats.resellerCount || 0})` },
                 { key: "customer", label: `👤 Customers (${stats.customerCount || 0})` },
@@ -489,6 +644,7 @@ export default function B2BManager() {
                     <th style={{ padding: "12px 14px", fontWeight: 800, color: "#334155" }}>Member Info</th>
                     <th style={{ padding: "12px 14px", fontWeight: 800, color: "#334155" }}>Business / Store</th>
                     <th style={{ padding: "12px 14px", fontWeight: 800, color: "#334155" }}>Role</th>
+                    <th style={{ padding: "12px 14px", fontWeight: 800, color: "#334155" }}>Squad & Margin</th>
                     <th style={{ padding: "12px 14px", fontWeight: 800, color: "#334155", textAlign: "right" }}>Orders / Volume</th>
                     <th style={{ padding: "12px 14px", fontWeight: 800, color: "#334155", textAlign: "right" }}>Wallet Balance</th>
                     <th style={{ padding: "12px 14px", fontWeight: 800, color: "#334155", textAlign: "center" }}>Status</th>
@@ -538,10 +694,51 @@ export default function B2BManager() {
                               🚀 Reseller
                             </span>
                           )}
+                          {u.role === "team_leader" && (
+                            <span style={{ background: "#ede9fe", color: "#6d28d9", border: "1px solid #ddd6fe", padding: "4px 10px", borderRadius: 12, fontWeight: 900, fontSize: 11, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                              👑 Team Leader
+                            </span>
+                          )}
                           {(u.role === "user" || u.role === "customer" || !u.role) && (
                             <span style={{ background: "#f1f5f9", color: "#475569", border: "1px solid #e2e8f0", padding: "4px 10px", borderRadius: 12, fontWeight: 800, fontSize: 11, display: "inline-flex", alignItems: "center", gap: 4 }}>
                               👤 Customer
                             </span>
+                          )}
+                        </td>
+                        <td style={{ padding: "12px 14px" }}>
+                          {u.role === "reseller" ? (
+                            <div>
+                              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>
+                                👑 {u.teamLeaderName || u.teamLeaderEmail ? `${u.teamLeaderName || u.teamLeaderEmail}` : "Unassigned"}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleToggleStar(u)}
+                                style={{
+                                  marginTop: 4,
+                                  padding: "3px 8px",
+                                  borderRadius: 12,
+                                  fontSize: 10.5,
+                                  fontWeight: 900,
+                                  cursor: "pointer",
+                                  border: u.isWeeklyStar ? "1px solid #f59e0b" : "1px solid #cbd5e1",
+                                  background: u.isWeeklyStar ? "#fef3c7" : "#f8fafc",
+                                  color: u.isWeeklyStar ? "#b45309" : "#64748b",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                }}
+                                title="ক্লিক করে ৮% থেকে ১০% স্টার ক্লাবে টগল করুন"
+                              >
+                                {u.isWeeklyStar ? "⭐ 10% Star Club" : "⚪ 8% Standard"}
+                              </button>
+                            </div>
+                          ) : u.role === "team_leader" ? (
+                            <span style={{ background: "#f5f3ff", color: "#7c3aed", border: "1px solid #ddd6fe", padding: "3px 8px", borderRadius: 8, fontSize: 10.5, fontWeight: 800 }}>
+                              👑 Squad Leader
+                            </span>
+                          ) : (
+                            <span style={{ color: "#94a3b8", fontSize: 11 }}>—</span>
                           )}
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "right" }}>
@@ -634,6 +831,465 @@ export default function B2BManager() {
             </div>
           </div>
         </>
+      )}
+
+      {/* Squads & Team Leaders View */}
+      {activeSubTab === "squads" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Top Banner */}
+          <div style={{ background: "linear-gradient(135deg, #1e1b4b, #312e81)", color: "#fff", padding: "18px 20px", borderRadius: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, display: "flex", alignItems: "center", gap: 8 }}>
+                  <span>👑</span> Team Leader Hierarchy & Reseller Squads
+                </h3>
+                <p style={{ margin: "4px 0 0", fontSize: 12, color: "#c7d2fe" }}>
+                  টিম লিডারদের আন্ডারে রিসেলারদের অ্যাসাইন করুন। ভালো সেল করা রিসেলারদের ১-ক্লিকে &quot;⭐ 10% Star Club&quot; দিন এবং বাকিরা ৮% বেস রেট পাবে।
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <span style={{ background: "rgba(255,255,255,0.15)", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                  👑 {teamLeaders.length} Team Leaders
+                </span>
+                <span style={{ background: "rgba(255,255,255,0.15)", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 800 }}>
+                  🚀 {users.filter((u) => u.role === "reseller").length} Resellers
+                </span>
+                <span style={{ background: "#fef3c7", color: "#b45309", padding: "6px 12px", borderRadius: 20, fontSize: 12, fontWeight: 900 }}>
+                  ⭐ {users.filter((u) => u.isWeeklyStar).length} Star Performers
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Bulk Squad Assignment Tool */}
+          <div style={{ background: "#fff", padding: "18px 20px", borderRadius: 14, border: "1px solid #cbd5e1" }}>
+            <h4 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 800, color: "#0f172a", display: "flex", alignItems: "center", gap: 6 }}>
+              <span>⚡</span> Quick Squad Assignment (বাল্ক টিম বণ্টন)
+            </h4>
+            <p style={{ margin: "0 0 14px", fontSize: 12, color: "#64748b" }}>
+              নিচের তালিকা থেকে এক বা একাধিক রিসেলার নির্বাচন করে তাদের নির্দিষ্ট টিম লিডারের স্কোয়াডে যুক্ত করুন:
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(240px, 320px) 1fr auto", gap: 12, alignItems: "center", flexWrap: "wrap", marginBottom: 14 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 11.5, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                  টার্গেট টিম লিডার নির্বাচন করুন:
+                </label>
+                <select
+                  value={targetTeamLeader}
+                  onChange={(e) => setTargetTeamLeader(e.target.value)}
+                  style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 12.5, background: "#f8fafc" }}
+                >
+                  <option value="">-- টিম লিডার সিলেক্ট করুন --</option>
+                  {teamLeaders.map((tl) => (
+                    <option key={tl._id} value={tl.email}>
+                      👑 {tl.name ? `${tl.name} (${tl.email})` : tl.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const allResellers = users.filter((u) => u.role === "reseller").map((u) => u._id);
+                    setSelectedSquadResellers(allResellers);
+                  }}
+                  style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", padding: "6px 12px", borderRadius: 6, fontSize: 11.5, fontWeight: 700, cursor: "pointer" }}
+                >
+                  Select All Resellers
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const unassigned = users.filter((u) => u.role === "reseller" && !u.teamLeaderEmail).map((u) => u._id);
+                    setSelectedSquadResellers(unassigned);
+                  }}
+                  style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", padding: "6px 12px", borderRadius: 6, fontSize: 11.5, fontWeight: 700, cursor: "pointer" }}
+                >
+                  Select Unassigned Only
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSquadResellers([])}
+                  style={{ background: "#fee2e2", border: "1px solid #fecaca", color: "#dc2626", padding: "6px 12px", borderRadius: 6, fontSize: 11.5, fontWeight: 700, cursor: "pointer" }}
+                >
+                  Clear Selection
+                </button>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={handleBulkAssignSquad}
+                  disabled={saving || !selectedSquadResellers.length || !targetTeamLeader}
+                  style={{
+                    background: selectedSquadResellers.length && targetTeamLeader ? "linear-gradient(135deg, #4f46e5, #4338ca)" : "#94a3b8",
+                    color: "#fff",
+                    border: "none",
+                    padding: "10px 20px",
+                    borderRadius: 8,
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    cursor: selectedSquadResellers.length && targetTeamLeader ? "pointer" : "not-allowed",
+                  }}
+                >
+                  {saving ? "অ্যাসাইন হচ্ছে..." : `🤝 Assign (${selectedSquadResellers.length}) to Squad`}
+                </button>
+              </div>
+            </div>
+
+            {/* Checkbox grid of Resellers */}
+            <div style={{ maxHeight: 220, overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: 8, padding: 8, background: "#fafafa" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 8 }}>
+                {users.filter((u) => u.role === "reseller").length === 0 ? (
+                  <div style={{ padding: 12, color: "#64748b", fontSize: 12 }}>কোনো রিসেলার নেই।</div>
+                ) : (
+                  users
+                    .filter((u) => u.role === "reseller")
+                    .map((r) => {
+                      const isSelected = selectedSquadResellers.includes(r._id);
+                      return (
+                        <label
+                          key={r._id}
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 8,
+                            padding: "8px 10px",
+                            borderRadius: 6,
+                            background: isSelected ? "#e0e7ff" : "#fff",
+                            border: isSelected ? "1px solid #6366f1" : "1px solid #e2e8f0",
+                            cursor: "pointer",
+                            fontSize: 12,
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedSquadResellers([...selectedSquadResellers, r._id]);
+                              } else {
+                                setSelectedSquadResellers(selectedSquadResellers.filter((id) => id !== r._id));
+                              }
+                            }}
+                            style={{ marginTop: 2, accentColor: "#4f46e5" }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 800, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {r.name || r.email}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#64748b" }}>{r.email}</div>
+                            <div style={{ fontSize: 10.5, color: r.teamLeaderEmail ? "#4338ca" : "#94a3b8", fontWeight: 700, marginTop: 2 }}>
+                              {r.teamLeaderEmail ? `👑 ${r.teamLeaderName || r.teamLeaderEmail}` : "⚪ Unassigned"}
+                              {r.isWeeklyStar && " • ⭐ 10% Star"}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Squad Cards Breakdown */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 16 }}>
+            {teamLeaders.map((leader) => {
+              const squadMembers = users.filter(
+                (u) => u.role === "reseller" && (u.teamLeaderEmail === leader.email || u.teamLeader === leader._id)
+              );
+              const starCount = squadMembers.filter((m) => m.isWeeklyStar).length;
+              return (
+                <div
+                  key={leader._id}
+                  style={{
+                    background: "#fff",
+                    borderRadius: 14,
+                    border: "1px solid #cbd5e1",
+                    overflow: "hidden",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                  }}
+                >
+                  <div style={{ background: "linear-gradient(135deg, #f8fafc, #ede9fe)", padding: "14px 16px", borderBottom: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: 18 }}>👑</span>
+                          <h4 style={{ margin: 0, fontSize: 15, fontWeight: 900, color: "#1e1b4b" }}>
+                            {leader.name || leader.email}
+                          </h4>
+                        </div>
+                        <div style={{ fontSize: 11.5, color: "#475569", marginTop: 2 }}>{leader.email}</div>
+                        {leader.phone && <div style={{ fontSize: 11, color: "#6b21a8" }}>📞 {leader.phone}</div>}
+                      </div>
+
+                      <div style={{ textAlign: "right" }}>
+                        <span style={{ background: "#4338ca", color: "#fff", padding: "3px 10px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>
+                          {squadMembers.length} Resellers
+                        </span>
+                        <div style={{ fontSize: 11, color: "#b45309", fontWeight: 800, marginTop: 4 }}>
+                          ⭐ {starCount} Star Club
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: 12 }}>
+                    {squadMembers.length === 0 ? (
+                      <div style={{ padding: "20px 10px", textAlign: "center", color: "#94a3b8", fontSize: 12 }}>
+                        এই টিম লিডারের অধীনে এখনো কোনো রিসেলার যোগ করা হয়নি। উপরের টুল দিয়ে রিসেলার অ্যাসাইন করুন।
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {squadMembers.map((member) => (
+                          <div
+                            key={member._id}
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              background: member.isWeeklyStar ? "#fefce8" : "#f8fafc",
+                              border: member.isWeeklyStar ? "1px solid #fde047" : "1px solid #e2e8f0",
+                              padding: "8px 12px",
+                              borderRadius: 8,
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontWeight: 800, color: "#0f172a", fontSize: 12.5 }}>
+                                {member.name || member.email}
+                              </div>
+                              <div style={{ fontSize: 11, color: "#64748b" }}>
+                                {member.resellerStoreName ? `🏪 ${member.resellerStoreName} • ` : ""}
+                                ৳{member.walletBalance || 0} wallet
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStar(member)}
+                              style={{
+                                padding: "4px 10px",
+                                borderRadius: 14,
+                                fontSize: 11,
+                                fontWeight: 900,
+                                cursor: "pointer",
+                                border: member.isWeeklyStar ? "1px solid #f59e0b" : "1px solid #cbd5e1",
+                                background: member.isWeeklyStar ? "#fef3c7" : "#fff",
+                                color: member.isWeeklyStar ? "#b45309" : "#64748b",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                              }}
+                              title="ক্লিক করে ৮% এবং ১০% স্টার মার্জিনে টগল করুন"
+                            >
+                              {member.isWeeklyStar ? "⭐ 10% Star Club" : "⚪ 8% Standard"}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Unassigned Resellers Card */}
+            {(() => {
+              const unassignedMembers = users.filter((u) => u.role === "reseller" && !u.teamLeaderEmail);
+              if (unassignedMembers.length === 0) return null;
+              return (
+                <div style={{ background: "#fff", borderRadius: 14, border: "1px dashed #cbd5e1", overflow: "hidden" }}>
+                  <div style={{ background: "#f8fafc", padding: "14px 16px", borderBottom: "1px dashed #e2e8f0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: 14, fontWeight: 900, color: "#475569" }}>
+                          ⚪ Unassigned Resellers (টিম ছাড়া রিসেলার)
+                        </h4>
+                        <div style={{ fontSize: 11.5, color: "#94a3b8" }}>এরা এখনো কোনো টিম লিডারের স্কোয়াডে যুক্ত হয়নি</div>
+                      </div>
+                      <span style={{ background: "#f1f5f9", color: "#64748b", padding: "3px 10px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>
+                        {unassignedMembers.length} Members
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                    {unassignedMembers.map((member) => (
+                      <div
+                        key={member._id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          background: "#fafafa",
+                          border: "1px solid #e2e8f0",
+                          padding: "8px 12px",
+                          borderRadius: 8,
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 800, color: "#0f172a", fontSize: 12 }}>{member.name || member.email}</div>
+                          <div style={{ fontSize: 11, color: "#64748b" }}>{member.email}</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStar(member)}
+                          style={{
+                            padding: "4px 8px",
+                            borderRadius: 12,
+                            fontSize: 10.5,
+                            fontWeight: 800,
+                            cursor: "pointer",
+                            border: member.isWeeklyStar ? "1px solid #f59e0b" : "1px solid #cbd5e1",
+                            background: member.isWeeklyStar ? "#fef3c7" : "#fff",
+                            color: member.isWeeklyStar ? "#b45309" : "#64748b",
+                          }}
+                        >
+                          {member.isWeeklyStar ? "⭐ 10% Star" : "⚪ 8% Std"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Brand Wholesale Margins View */}
+      {activeSubTab === "brandMargins" && (
+        <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #cbd5e1", overflow: "hidden" }}>
+          <div style={{ padding: "18px 20px", background: "linear-gradient(135deg, #fff1f2, #ffe4e6)", borderBottom: "1px solid #fecdd3" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: "#9f1239", display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>🏷️</span> Brand Wholesale Profit Margins (ব্র্যান্ডভিত্তিক পাইকারি লাভের হার)
+                </h3>
+                <p style={{ margin: "4px 0 0", fontSize: 12, color: "#881337" }}>
+                  অ্যাডমিন থেকে প্রতিটি ব্র্যান্ডের জন্য পাইকারি লাভের % সেট করুন (যেমন Anua 5%, Liora 20%, Cerave 7%)। হোলসেলাররা কেনা দামের সাথে এই মার্জিন অনুযায়ী অটোমেটিক পাইকারি দাম পাবে।
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSaveBrandMargins}
+                disabled={saving}
+                style={{
+                  background: "linear-gradient(135deg, #e11d48, #be123c)",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 22px",
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 900,
+                  cursor: saving ? "not-allowed" : "pointer",
+                  boxShadow: "0 4px 12px rgba(225,29,72,0.3)",
+                }}
+              >
+                {saving ? "সংরক্ষণ হচ্ছে..." : "💾 Save All Brand Margins"}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, textAlign: "left" }}>
+              <thead style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                <tr>
+                  <th style={{ padding: "12px 16px", fontWeight: 800, color: "#334155" }}>Brand Name</th>
+                  <th style={{ padding: "12px 16px", fontWeight: 800, color: "#334155" }}>Slug</th>
+                  <th style={{ padding: "12px 16px", fontWeight: 800, color: "#334155", textAlign: "center", width: 200 }}>Wholesale Margin %</th>
+                  <th style={{ padding: "12px 16px", fontWeight: 800, color: "#334155" }}>Dynamic Price Preview (৳১,০০০ কেনা দামে)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {brands.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} style={{ padding: 30, textAlign: "center", color: "#64748b" }}>
+                      কোনো ব্র্যান্ড পাওয়া যায়নি।
+                    </td>
+                  </tr>
+                ) : (
+                  brands.map((b, idx) => {
+                    const currentMargin = Number(brandMargins[b._id] ?? b.wholesaleMarginPct ?? 7);
+                    const sampleCost = 1000;
+                    const sampleWholesalePrice = Math.round(sampleCost * (1 + currentMargin / 100));
+                    const sampleProfit = sampleWholesalePrice - sampleCost;
+
+                    return (
+                      <tr key={b._id} style={{ borderBottom: "1px solid #f1f5f9", background: idx % 2 === 0 ? "#fff" : "#fafafa" }}>
+                        <td style={{ padding: "12px 16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            {b.logo ? (
+                              <img src={b.logo} alt={b.name} style={{ width: 28, height: 28, objectFit: "contain", borderRadius: 4 }} />
+                            ) : (
+                              <span style={{ fontSize: 20 }}>🏷️</span>
+                            )}
+                            <div style={{ fontWeight: 800, color: "#0f172a" }}>{b.name}</div>
+                          </div>
+                        </td>
+                        <td style={{ padding: "12px 16px", color: "#64748b", fontFamily: "monospace", fontSize: 12 }}>
+                          {b.slug}
+                        </td>
+                        <td style={{ padding: "12px 16px", textAlign: "center" }}>
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={brandMargins[b._id] !== undefined ? brandMargins[b._id] : (b.wholesaleMarginPct ?? 7)}
+                              onChange={(e) => setBrandMargins({ ...brandMargins, [b._id]: e.target.value })}
+                              style={{
+                                width: 70,
+                                padding: "6px 8px",
+                                borderRadius: 6,
+                                border: "1px solid #cbd5e1",
+                                textAlign: "center",
+                                fontWeight: 800,
+                                fontSize: 13,
+                                outline: "none",
+                              }}
+                            />
+                            <span style={{ fontWeight: 800, color: "#334155" }}>%</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: "12px 16px" }}>
+                          <div style={{ fontSize: 12 }}>
+                            কেনা খরচ <strong>৳{sampleCost}</strong> হলে পাইকারি দাম হবে{" "}
+                            <strong style={{ color: "#be123c", fontSize: 13 }}>৳{sampleWholesalePrice}</strong>{" "}
+                            <span style={{ color: "#059669", fontWeight: 700 }}>(লাভ +৳{sampleProfit})</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ padding: "14px 20px", background: "#f8fafc", borderTop: "1px solid #e2e8f0", display: "flex", justifyContent: "flex-end" }}>
+            <button
+              type="button"
+              onClick={handleSaveBrandMargins}
+              disabled={saving}
+              style={{
+                background: "linear-gradient(135deg, #e11d48, #be123c)",
+                color: "#fff",
+                border: "none",
+                padding: "10px 22px",
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 900,
+                cursor: saving ? "not-allowed" : "pointer",
+              }}
+            >
+              {saving ? "সংরক্ষণ হচ্ছে..." : "💾 Save All Brand Margins"}
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Ledger View */}
@@ -763,6 +1419,7 @@ export default function B2BManager() {
                   >
                     <option value="wholesale">🏬 Wholesaler (পাইকারি বাল্ক ক্রেতা)</option>
                     <option value="reseller">🚀 Reseller (৫০+ রিসেলার / ড্রপশিপার)</option>
+                    <option value="team_leader">👑 Team Leader (টিম লিডার / স্কোয়াড হেড)</option>
                     <option value="admin">🛡️ Admin (সিস্টেম অ্যাডমিন)</option>
                     <option value="user">👤 Customer (সাধারণ রিটেইল কাস্টমার)</option>
                   </select>
@@ -854,18 +1511,61 @@ export default function B2BManager() {
               </div>
 
               {formData.role === "reseller" && (
-                <div style={{ marginBottom: 12 }}>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
-                    প্রাথমিক ওয়ালেট ব্যালেন্স (ঐচ্ছিক ক্রেডিট / সিকিউরিটি ডিপোজিট)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={formData.initialWalletBalance}
-                    onChange={(e) => setFormData({ ...formData, initialWalletBalance: e.target.value })}
-                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
-                  />
-                </div>
+                <>
+                  <div style={{ marginBottom: 12, background: "#f8fafc", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                      👑 অ্যাসাইনড টিম লিডার (Team Leader / Squad)
+                    </label>
+                    <select
+                      value={formData.teamLeaderEmail}
+                      onChange={(e) => {
+                        const leader = teamLeaders.find((l) => l.email === e.target.value);
+                        setFormData({
+                          ...formData,
+                          teamLeaderEmail: e.target.value,
+                          teamLeaderName: leader?.name || "",
+                          teamLeaderId: leader?._id || "",
+                        });
+                      }}
+                      style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, background: "#fff" }}
+                    >
+                      <option value="">— কোনো টিম লিডার নেই (Unassigned) —</option>
+                      {teamLeaders.map((tl) => (
+                        <option key={tl._id} value={tl.email}>
+                          👑 {tl.name ? `${tl.name} (${tl.email})` : tl.email}
+                        </option>
+                      ))}
+                    </select>
+
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.isWeeklyStar}
+                        onChange={(e) => setFormData({ ...formData, isWeeklyStar: e.target.checked })}
+                        style={{ width: 16, height: 16, accentColor: "#e11d48", cursor: "pointer" }}
+                      />
+                      <span style={{ fontSize: 12.5, fontWeight: 800, color: "#b45309" }}>
+                        ⭐ Weekly Star Performer (10% Booster Margin)
+                      </span>
+                    </label>
+                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 2, paddingLeft: 24 }}>
+                      টিক দিলে সে রিটেইল থেকে ১০% কমে প্রডাক্ট পাবে। আনচেক রাখলে ৮% স্ট্যান্ডার্ড রেট পাবে।
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                      প্রাথমিক ওয়ালেট ব্যালেন্স (ঐচ্ছিক ক্রেডিট / সিকিউরিটি ডিপোজিট)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={formData.initialWalletBalance}
+                      onChange={(e) => setFormData({ ...formData, initialWalletBalance: e.target.value })}
+                      style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
+                    />
+                  </div>
+                </>
               )}
 
               <div style={{ marginBottom: 16 }}>
@@ -931,6 +1631,7 @@ export default function B2BManager() {
                     style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 }}
                   >
                     <option value="admin">🛡️ Admin (সিস্টেম অ্যাডমিন)</option>
+                    <option value="team_leader">👑 Team Leader (টিম লিডার / স্কোয়াড হেড)</option>
                     <option value="wholesale">🏬 Wholesaler (পাইকারি ক্রেতা)</option>
                     <option value="reseller">🚀 Reseller (৫০+ ড্রপশিপার)</option>
                     <option value="user">👤 Customer (সাধারণ রিটেইল কাস্টমার)</option>
@@ -949,6 +1650,49 @@ export default function B2BManager() {
                   </select>
                 </div>
               </div>
+
+              {formData.role === "reseller" && (
+                <div style={{ marginBottom: 12, background: "#f8fafc", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                    👑 অ্যাসাইনড টিম লিডার (Team Leader / Squad)
+                  </label>
+                  <select
+                    value={formData.teamLeaderEmail}
+                    onChange={(e) => {
+                      const leader = teamLeaders.find((l) => l.email === e.target.value);
+                      setFormData({
+                        ...formData,
+                        teamLeaderEmail: e.target.value,
+                        teamLeaderName: leader?.name || "",
+                        teamLeaderId: leader?._id || "",
+                      });
+                    }}
+                    style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, background: "#fff" }}
+                  >
+                    <option value="">— কোনো টিম লিডার নেই (Unassigned) —</option>
+                    {teamLeaders.map((tl) => (
+                      <option key={tl._id} value={tl.email}>
+                        👑 {tl.name ? `${tl.name} (${tl.email})` : tl.email}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.isWeeklyStar}
+                      onChange={(e) => setFormData({ ...formData, isWeeklyStar: e.target.checked })}
+                      style={{ width: 16, height: 16, accentColor: "#e11d48", cursor: "pointer" }}
+                    />
+                    <span style={{ fontSize: 12.5, fontWeight: 800, color: "#b45309" }}>
+                      ⭐ Weekly Star Performer (10% Booster Margin)
+                    </span>
+                  </label>
+                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 2, paddingLeft: 24 }}>
+                    টিক দিলে রিটেইল থেকে ১০% কমে প্রোডাক্ট পাবে। আনচেক রাখলে ৮% স্ট্যান্ডার্ড রেট পাবে।
+                  </div>
+                </div>
+              )}
 
               <div style={{ marginBottom: 12 }}>
                 <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>

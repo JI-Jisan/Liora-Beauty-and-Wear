@@ -97,6 +97,11 @@ export default function ResellerPage() {
     }
   }, [user, isApproved]);
 
+  // Reseller dynamic margin rates: Standard 8% vs Weekly Star 10%
+  const isWeeklyStar = Boolean(walletData?.isWeeklyStar || profile?.isWeeklyStar);
+  const currentMarginDiscountPct = isWeeklyStar ? 10 : 8;
+  const discountMultiplier = isWeeklyStar ? 0.90 : 0.92;
+
   // Load Products
   useEffect(() => {
     async function fetchProducts() {
@@ -108,7 +113,6 @@ export default function ResellerPage() {
         setProducts(list);
         if (list.length > 0) {
           setSelectedProduct(list[0]);
-          const baseRate = Number(list[0].resellerPrice > 0 ? list[0].resellerPrice : Math.round((list[0].offerPrice || 100) * 0.75));
           const ret = Number(list[0].offerPrice || list[0].originalPrice || 200);
           setDropshipForm((prev) => ({
             ...prev,
@@ -141,7 +145,7 @@ export default function ResellerPage() {
     ? Number(
         selectedProduct.resellerPrice > 0
           ? selectedProduct.resellerPrice
-          : Math.round(Number(selectedProduct.offerPrice || selectedProduct.originalPrice || 100) * 0.75)
+          : Math.round(Number(selectedProduct.offerPrice || selectedProduct.originalPrice || 100) * discountMultiplier)
       )
     : 0;
   const totalCost = unitResellerCost * (Number(dropshipForm.qty) || 1);
@@ -335,6 +339,73 @@ export default function ResellerPage() {
         {/* If Logged in and Approved as Reseller */}
         {isApproved ? (
           <>
+            {/* VIP Star Club & Squad Leader Status Banner */}
+            <div
+              style={{
+                background: isWeeklyStar
+                  ? "linear-gradient(135deg, #78350f 0%, #b45309 50%, #d97706 100%)"
+                  : "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+                color: "#fff",
+                borderRadius: 16,
+                padding: "20px 24px",
+                marginBottom: 20,
+                boxShadow: isWeeklyStar ? "0 8px 24px rgba(217, 119, 6, 0.25)" : "0 4px 14px rgba(0,0,0,0.06)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 16,
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 260 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 24 }}>{isWeeklyStar ? "⭐" : "🚀"}</span>
+                  <h2 style={{ margin: 0, fontSize: "clamp(17px, 3.5vw, 20px)", fontWeight: 900 }}>
+                    {isWeeklyStar ? "VIP Star Performer of the Week" : "Standard Reseller Tier"}
+                  </h2>
+                  <span
+                    style={{
+                      background: isWeeklyStar ? "#fef3c7" : "#334155",
+                      color: isWeeklyStar ? "#b45309" : "#e2e8f0",
+                      fontSize: 11.5,
+                      fontWeight: 900,
+                      padding: "4px 12px",
+                      borderRadius: 20,
+                      letterSpacing: 0.3,
+                    }}
+                  >
+                    {isWeeklyStar ? "⭐ 10% OFF RETAIL ACTIVE" : "⚪ 8% BASE MARGIN"}
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: 13, color: isWeeklyStar ? "#fef3c7" : "#94a3b8", lineHeight: 1.5 }}>
+                  {isWeeklyStar
+                    ? "অভিনন্দন! আপনার সেলস পারফরম্যান্সের কারণে আপনি এই সপ্তাহের Star Club-এ অন্তর্ভুক্ত হয়েছেন। রিটেইল থেকে ১০% কমে প্রোডাক্ট কিনে অধিক প্রফিট উপভোগ করুন!"
+                    : "আপনার বর্তমান বেস মার্জিন ৮%। চলতি সপ্তাহে বেশি সেল দিলে অথবা টিম লিডারের রিকমেন্ডেশনে আপনি পাবেন '⭐ 10% Star Club' বুস্টার সুযোগ!"}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.12)",
+                  backdropFilter: "blur(4px)",
+                  padding: "12px 18px",
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  minWidth: 200,
+                }}
+              >
+                <div style={{ fontSize: 11, color: isWeeklyStar ? "#fde68a" : "#cbd5e1", fontWeight: 700 }}>
+                  👑 অ্যাসাইনড টিম লিডার (Squad)
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: "#fff", marginTop: 2 }}>
+                  {walletData.teamLeaderName || walletData.teamLeaderEmail ? `${walletData.teamLeaderName || walletData.teamLeaderEmail}` : "Liora Headquarter"}
+                </div>
+                <div style={{ fontSize: 10.5, color: isWeeklyStar ? "#fed7aa" : "#94a3b8", marginTop: 2 }}>
+                  {isWeeklyStar ? "Star Performer Marked" : "Standard Squad"}
+                </div>
+              </div>
+            </div>
+
             {/* Reseller KPI Bar */}
             <div
               style={{
@@ -501,7 +572,11 @@ export default function ResellerPage() {
                   >
                     {filteredProducts.slice(0, 15).map((p) => {
                       const isSel = selectedProduct?._id === p._id;
-                      const resCost = Number(p.resellerPrice > 0 ? p.resellerPrice : Math.round((p.offerPrice || 100) * 0.75));
+                      const resCost = Number(
+                        p.resellerPrice > 0
+                          ? p.resellerPrice
+                          : Math.round((p.offerPrice || p.originalPrice || 100) * discountMultiplier)
+                      );
                       return (
                         <div
                           key={p._id}
@@ -526,7 +601,7 @@ export default function ResellerPage() {
                             {p.name}
                           </div>
                           <div style={{ fontSize: 11, color: "#be123c", fontWeight: 800 }}>
-                            Buy Rate: ৳{resCost}
+                            Buy Rate: ৳{resCost} <span style={{ fontSize: 9.5, color: "#64748b" }}>({currentMarginDiscountPct}%)</span>
                           </div>
                         </div>
                       );
@@ -547,8 +622,10 @@ export default function ResellerPage() {
                   >
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, textAlign: "center" }}>
                       <div>
-                        <span style={{ fontSize: 11, color: "#64748b" }}>Liora Base Rate</span>
-                        <div style={{ fontSize: 16, fontWeight: 800, color: "#0f172a" }}>৳{unitResellerCost}</div>
+                        <span style={{ fontSize: 11, color: "#64748b" }}>
+                          Liora Buy Rate ({currentMarginDiscountPct}% Off)
+                        </span>
+                        <div style={{ fontSize: 16, fontWeight: 900, color: "#be123c" }}>৳{unitResellerCost}</div>
                       </div>
                       <div>
                         <span style={{ fontSize: 11, color: "#64748b" }}>Recommended Retail</span>
