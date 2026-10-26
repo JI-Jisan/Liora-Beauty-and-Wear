@@ -44,47 +44,52 @@ export async function POST(req) {
     // 1. If GEMINI_API_KEY is available, use Google Vision AI (True Google Lens)
     const geminiKey = process.env.GEMINI_API_KEY;
     if (geminiKey && imageBase64) {
-      try {
-        const aiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  {
-                    text: "You are the Google Lens vision engine for LIORA Beauty & Wear cosmetics store in Bangladesh. Analyze this product image carefully. Identify the exact brand, product name, shade, or cosmetic type (for example 'Swiss Beauty More Than Glitter Lipstick' or 'IMAGIC Mascara Giant Brush' or 'COSRX Snail Mucin' or 'My Skin Saffron Face Wash'). Return strictly valid JSON: {\"brand\": \"...\", \"product\": \"...\", \"searchQuery\": \"...\"}"
-                  },
-                  {
-                    inlineData: {
-                      mimeType: imageMime,
-                      data: imageBase64
+      const visionModels = ['gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite'];
+      for (const model of visionModels) {
+        if (detectedFromAI) break;
+        try {
+          const aiRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    {
+                      text: "You are the Google Lens vision engine for LIORA Beauty & Wear cosmetics store in Bangladesh. Analyze this product image carefully. Identify the exact brand, product name, shade, or cosmetic type (for example 'Swiss Beauty More Than Glitter Lipstick' or 'IMAGIC Mascara Giant Brush' or 'COSRX Snail Mucin' or 'My Skin Saffron Face Wash'). Return strictly valid JSON: {\"brand\": \"...\", \"product\": \"...\", \"searchQuery\": \"...\"}"
+                    },
+                    {
+                      inlineData: {
+                        mimeType: imageMime,
+                        data: imageBase64
+                      }
                     }
-                  }
-                ]
-              }],
-              generationConfig: {
-                responseMimeType: "application/json"
-              }
-            }),
-            signal: AbortSignal.timeout(6000)
-          }
-        );
+                  ]
+                }],
+                generationConfig: {
+                  responseMimeType: "application/json"
+                }
+              }),
+              signal: AbortSignal.timeout(6000)
+            }
+          );
 
-        if (aiRes.ok) {
-          const aiJson = await aiRes.json();
-          const rawReply = aiJson.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (rawReply) {
-            try {
-              detectedFromAI = JSON.parse(rawReply);
-            } catch {
-              // fallback if not pure json
+          if (aiRes.ok) {
+            const aiJson = await aiRes.json();
+            const rawReply = aiJson.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (rawReply) {
+              try {
+                detectedFromAI = JSON.parse(rawReply);
+                break;
+              } catch {
+                // fallback if not pure json
+              }
             }
           }
+        } catch (aiErr) {
+          console.warn(`Gemini vision API error on ${model}:`, aiErr.message);
         }
-      } catch (aiErr) {
-        console.warn('Gemini vision API error:', aiErr.message);
       }
     }
 
