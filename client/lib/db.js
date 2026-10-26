@@ -20,6 +20,11 @@ export async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10, // Prevent serverless functions from exhausting M0 connection limits
+      minPoolSize: 0,
+      maxIdleTimeMS: 15000, // Close idle connections after 15 seconds
+      serverSelectionTimeoutMS: 8000,
+      socketTimeoutMS: 45000,
     };
 
     cached.promise = mongoose.connect(MONGO_URI, opts).then((m) => {
