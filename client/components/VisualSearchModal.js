@@ -201,21 +201,22 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
         setScanStep("Connecting to LIORA catalog...");
         setScanProgress(90);
 
-        // Query API to find best verified product phrase
+        // Send both image and extracted text in FormData to visual search engine
+        const formData = new FormData();
+        formData.append("image", imgFile);
+        formData.append("text", rawText);
+
         const res = await fetch("/api/visual-search", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: rawText }),
+          body: formData,
         });
 
         const data = await res.json().catch(() => ({}));
 
-        const finalSearchTerm =
-          data.bestQuery || clientParsed.query || rawText.trim().slice(0, 35);
-
-        if (finalSearchTerm && finalSearchTerm.trim().length >= 2) {
+        if (data.success && data.bestQuery) {
+          const finalSearchTerm = data.bestQuery;
           setDetectedQuery(finalSearchTerm);
-          setDetectedTags(data.keywords || clientParsed.keywords || [finalSearchTerm]);
+          setDetectedTags(data.keywords || [finalSearchTerm]);
           setScanStep(`Found: "${finalSearchTerm}"`);
           setScanProgress(100);
           setIsScanning(false);
@@ -226,7 +227,8 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
           setIsScanning(false);
           setScanProgress(100);
           setErrorMsg(
-            "Could not clearly read the product brand from this photo. You can type the product name below to search immediately."
+            data.message ||
+              "Could not clearly read the product brand from this photo. You can type the product name below to search immediately."
           );
         }
       } catch (err) {
