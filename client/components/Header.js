@@ -11,6 +11,8 @@ import { buildTree } from "@/lib/categoryTree";
 import useHideOnScroll from "@/lib/useHideOnScroll";
 import { useAuth } from "./AuthProvider";
 
+import VisualSearchModal from "./VisualSearchModal";
+
 export default function Header({
   cartCount: propsCartCount,
   onOpenCart: propsOnOpenCart,
@@ -27,6 +29,7 @@ export default function Header({
   const [localSearch, setLocalSearch] = useState("");
   const [liveSearchResults, setLiveSearchResults] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isVisualSearchOpen, setIsVisualSearchOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -152,6 +155,27 @@ export default function Header({
           ✕
         </button>
       )}
+
+      {/* GOOGLE LENS / VISUAL SEARCH BUTTON */}
+      <button
+        type="button"
+        className="jt-lens-trigger-btn"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsVisualSearchOpen(true);
+        }}
+        title="Search by image (Google Lens)"
+        aria-label="Search by image"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#e07a82" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M4 8V6C4 4.89543 4.89543 4 6 4H8" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M16 4H18C19.1046 4 20 4.89543 20 6V8" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M20 16V18C20 19.1046 19.1046 20 18 20H16" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M8 20H6C4.89543 20 4 19.1046 4 18V16" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
 
       {/* INSTANT LIVE SEARCH POPUP DROPDOWN */}
       {isSearchOpen && currentSearchValue.trim().length > 0 && (
@@ -478,6 +502,12 @@ export default function Header({
         </div>
       )}
     </header>
+
+    {/* GOOGLE LENS VISUAL SEARCH MODAL */}
+    <VisualSearchModal
+      isOpen={isVisualSearchOpen}
+      onClose={() => setIsVisualSearchOpen(false)}
+    />
     </>
   );
 }

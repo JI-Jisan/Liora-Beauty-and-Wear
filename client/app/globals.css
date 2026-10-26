@@ -7778,6 +7778,637 @@ html, body {
   }
 }
 
+/* ==========================================================================
+   LIORA VISUAL LENS (GOOGLE LENS STYLE SEARCH)
+   ========================================================================== */
 
+/* TRIGGER BUTTON IN SEARCH BAR */
+.jt-lens-trigger-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+  line-height: 1;
+}
 
+.jt-lens-trigger-btn:hover {
+  transform: scale(1.15);
+  background: rgba(244, 63, 94, 0.12);
+}
 
+.jt-lens-trigger-btn:active {
+  transform: scale(0.95);
+}
+
+/* MODAL OVERLAY */
+.jt-lens-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: jtFadeIn 0.25s ease-out;
+}
+
+@keyframes jtFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* MODAL CONTENT */
+.jt-lens-modal-content {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 60px -15px rgba(244, 63, 94, 0.2), 0 0 0 1px rgba(254, 205, 211, 0.6);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: jtScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes jtScaleUp {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* MODAL HEADER */
+.jt-lens-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #fecdd3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #fff5f7 0%, #ffffff 100%);
+}
+
+.jt-lens-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jt-lens-icon-gradient {
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jt-lens-brand-title h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.3px;
+}
+
+.jt-lens-brand-title p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.jt-lens-close-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jt-lens-close-btn:hover {
+  background: #fecdd3;
+  color: #f43f5e;
+}
+
+/* MODAL BODY */
+.jt-lens-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+/* UPLOAD BOX (INITIAL STATE) */
+.jt-lens-upload-box {
+  border: 2px dashed #fecdd3;
+  background: #fff8f9;
+  border-radius: 20px;
+  padding: 36px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease;
+}
+
+.jt-lens-upload-box:hover {
+  border-color: #f43f5e;
+}
+
+.jt-lens-upload-icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ffe4e6;
+  color: #f43f5e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 20px rgba(244, 63, 94, 0.15);
+}
+
+.jt-lens-upload-box h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.jt-lens-upload-box p {
+  font-size: 13px;
+  color: #64748b;
+  max-width: 420px;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.jt-lens-actions-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.jt-lens-btn-primary {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 16px rgba(244, 63, 94, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jt-lens-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(244, 63, 94, 0.35);
+}
+
+.jt-lens-btn-secondary {
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  border-radius: 50px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.jt-lens-btn-secondary:hover {
+  border-color: #f43f5e;
+  color: #f43f5e;
+  background: #fff5f7;
+}
+
+/* SAMPLES STRIP */
+.jt-lens-samples-strip {
+  width: 100%;
+  border-top: 1px solid #fecdd3;
+  padding-top: 18px;
+  margin-top: 8px;
+}
+
+.jt-lens-samples-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.jt-lens-sample-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.jt-lens-sample-chips button {
+  background: #ffffff;
+  border: 1px solid #fecdd3;
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jt-lens-sample-chips button:hover {
+  background: #f43f5e;
+  border-color: #f43f5e;
+  color: #ffffff;
+}
+
+/* IMAGE PREVIEW & SCANNING RETICLE */
+.jt-lens-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.jt-lens-image-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 240px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.jt-lens-scanned-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* GOOGLE LENS 4-CORNER RETICLE */
+.jt-lens-reticle {
+  position: absolute;
+  inset: 16px;
+  pointer-events: none;
+}
+
+.jt-lens-reticle .corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: #f43f5e;
+  border-style: solid;
+  border-width: 0;
+}
+
+.jt-lens-reticle .corner.top-left {
+  top: 0; left: 0;
+  border-top-width: 3.5px;
+  border-left-width: 3.5px;
+  border-top-left-radius: 8px;
+}
+
+.jt-lens-reticle .corner.top-right {
+  top: 0; right: 0;
+  border-top-width: 3.5px;
+  border-right-width: 3.5px;
+  border-top-right-radius: 8px;
+}
+
+.jt-lens-reticle .corner.bottom-left {
+  bottom: 0; left: 0;
+  border-bottom-width: 3.5px;
+  border-left-width: 3.5px;
+  border-bottom-left-radius: 8px;
+}
+
+.jt-lens-reticle .corner.bottom-right {
+  bottom: 0; right: 0;
+  border-bottom-width: 3.5px;
+  border-right-width: 3.5px;
+  border-bottom-right-radius: 8px;
+}
+
+/* LASER SCANNING BEAM */
+.jt-lens-laser-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #f43f5e, #fb7185, transparent);
+  box-shadow: 0 0 12px 3px rgba(244, 63, 94, 0.8);
+  animation: jtLaserSweep 1.8s infinite ease-in-out;
+}
+
+@keyframes jtLaserSweep {
+  0% { top: 0%; opacity: 0.8; }
+  50% { top: 100%; opacity: 1; }
+  100% { top: 0%; opacity: 0.8; }
+}
+
+/* SCANNING INDICATOR */
+.jt-lens-scan-info {
+  width: 100%;
+  text-align: center;
+}
+
+.jt-lens-scanning-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e11d48;
+}
+
+.jt-lens-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fecdd3;
+  border-top-color: #f43f5e;
+  border-radius: 50%;
+  animation: jtSpin 0.7s linear infinite;
+}
+
+@keyframes jtSpin {
+  to { transform: rotate(360deg); }
+}
+
+.jt-lens-retake-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jt-lens-retake-btn:hover {
+  background: #ffe4e6;
+  border-color: #fecdd3;
+  color: #f43f5e;
+}
+
+/* DETECTED TAGS */
+.jt-lens-tags-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.jt-lens-tags-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.jt-lens-tags-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.jt-lens-tag-pill {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 50px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* ERROR BOX */
+.jt-lens-error-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+/* RESULTS SECTION */
+.jt-lens-results-section {
+  margin-top: 20px;
+}
+
+.jt-lens-results-header h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 14px;
+}
+
+.jt-lens-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.jt-lens-prod-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.jt-lens-prod-card:hover {
+  transform: translateY(-3px);
+  border-color: #fecdd3;
+  box-shadow: 0 12px 24px rgba(244, 63, 94, 0.12);
+}
+
+.jt-lens-prod-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.jt-lens-prod-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.jt-lens-prod-card:hover .jt-lens-prod-img {
+  transform: scale(1.05);
+}
+
+.jt-lens-discount-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #f43f5e;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.jt-lens-oos-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #475569;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.jt-lens-prod-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.jt-lens-brand-name {
+  font-size: 11px;
+  color: #f43f5e;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.jt-lens-prod-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 8px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 35px;
+}
+
+.jt-lens-pricing-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.jt-lens-offer-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.jt-lens-original-price {
+  font-size: 12px;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.jt-lens-add-btn {
+  width: 100%;
+  background: #fff1f2;
+  color: #f43f5e;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  padding: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+}
+
+.jt-lens-add-btn:hover:not(:disabled) {
+  background: #f43f5e;
+  color: #ffffff;
+}
+
+.jt-lens-add-btn.added {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.jt-lens-add-btn:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .jt-lens-modal-content {
+    border-radius: 20px 20px 0 0;
+    max-height: 94vh;
+    margin-top: auto;
+  }
+  .jt-lens-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .jt-lens-body {
+    padding: 16px;
+  }
+  .jt-lens-results-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
