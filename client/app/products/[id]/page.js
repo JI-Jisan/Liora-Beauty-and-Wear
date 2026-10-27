@@ -520,7 +520,12 @@ export default function ProductDetailsPage() {
             <div style={{ background: "#ede9fe", border: "1.5px solid #c4b5fd", padding: "10px 14px", borderRadius: "12px", margin: "10px 0" }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
                 <span style={{ fontSize: "22px", fontWeight: "900", color: "#6d28d9" }}>
-                  ৳{product.wholesalePrice > 0 ? product.wholesalePrice : Math.round(product.offerPrice * 0.75)}
+                  ৳{(() => {
+                    const retail = Number(product.offerPrice || product.originalPrice || 0);
+                    const cost = Number(product.purchasePrice || retail * 0.70);
+                    const isExplicit = Number(product.wholesalePrice) > cost;
+                    return isExplicit ? product.wholesalePrice : Math.round(cost * 1.07);
+                  })()}
                 </span>
                 <span style={{ fontSize: "12px", color: "#6d28d9", fontWeight: "800" }}>
                   🏬 Wholesale VIP Rate (MOQ: {product.wholesaleMinQty || 6} Pcs)

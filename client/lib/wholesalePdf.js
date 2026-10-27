@@ -211,10 +211,12 @@ export async function generateWholesalePdf({
       (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
     const customWholesale = Number(p.wholesalePrice);
 
+    const hasValidMarkup = customWholesale > buyPrice;
+    const defaultProfit = Number(profitPercent) > 0 ? Number(profitPercent) : 7;
     const calculatedWholesale =
-      customWholesale > 0
+      hasValidMarkup
         ? customWholesale
-        : Math.round(buyPrice * (1 + Number(profitPercent || 0) / 100));
+        : Math.round(buyPrice * (1 + defaultProfit / 100));
 
     const finalWholesale = Math.max(1, calculatedWholesale);
     const qty = Math.max(1, parseInt(p.quantity) || 1);

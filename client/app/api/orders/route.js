@@ -185,19 +185,17 @@ export async function POST(req) {
       let calculatedPrice = defaultRetailPrice;
 
       if (orderType === "wholesale") {
-        if (p.wholesalePrice > 0) {
-          calculatedPrice = Number(p.wholesalePrice);
-        } else {
-          let marginPct = 7;
-          if (p.brand) {
-            const b = await Brand.findById(p.brand).select("wholesaleMarginPct").lean();
-            if (b && typeof b.wholesaleMarginPct === "number") {
-              marginPct = b.wholesaleMarginPct;
-            }
+        let marginPct = 7;
+        if (p.brand) {
+          const b = await Brand.findById(p.brand).select("wholesaleMarginPct").lean();
+          if (b && typeof b.wholesaleMarginPct === "number" && b.wholesaleMarginPct > 0) {
+            marginPct = b.wholesaleMarginPct;
           }
-          const baseCost = Number(p.purchasePrice > 0 ? p.purchasePrice : defaultRetailPrice * 0.70);
-          calculatedPrice = Math.round(baseCost * (1 + marginPct / 100));
         }
+        const baseCost = Number(p.purchasePrice > 0 ? p.purchasePrice : defaultRetailPrice * 0.70);
+        const dynamicRate = Math.round(baseCost * (1 + marginPct / 100));
+        const hasValidMarkup = Number(p.wholesalePrice) > baseCost;
+        calculatedPrice = hasValidMarkup ? Number(p.wholesalePrice) : dynamicRate;
         totalSavings += Math.max(0, defaultRetailPrice - calculatedPrice) * qty;
       } else if (orderType === "reseller") {
         if (p.resellerPrice > 0) {

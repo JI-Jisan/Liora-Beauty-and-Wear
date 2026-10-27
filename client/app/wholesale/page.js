@@ -137,10 +137,12 @@ export default function WholesalePage() {
       return;
     }
 
+    const retailPrice = Number(p.offerPrice || p.originalPrice || 0);
     const brandMargin = Number(p.brand?.wholesaleMarginPct ?? 7);
-    const baseCost = Number(p.purchasePrice || p.costPrice || (p.offerPrice ? p.offerPrice * 0.70 : 100));
+    const baseCost = Number(p.purchasePrice || p.costPrice || (retailPrice ? retailPrice * 0.70 : 100));
     const dynamicRate = Math.round(baseCost * (1 + brandMargin / 100));
-    const wholesaleRate = Number(p.wholesalePrice > 0 ? p.wholesalePrice : dynamicRate);
+    const hasValidMarkup = Number(p.wholesalePrice) > baseCost;
+    const wholesaleRate = Number(hasValidMarkup ? p.wholesalePrice : dynamicRate);
 
     setWholesaleCart((prev) => ({
       ...prev,
@@ -575,7 +577,8 @@ export default function WholesalePage() {
               const brandMargin = Number(p.brand?.wholesaleMarginPct ?? 7);
               const baseCost = Number(p.purchasePrice || p.costPrice || (retailPrice ? retailPrice * 0.70 : 100));
               const dynamicRate = Math.round(baseCost * (1 + brandMargin / 100));
-              const wholesaleRate = Number(p.wholesalePrice > 0 ? p.wholesalePrice : dynamicRate);
+              const hasValidMarkup = Number(p.wholesalePrice) > baseCost;
+              const wholesaleRate = Number(hasValidMarkup ? p.wholesalePrice : dynamicRate);
               const savingsPerPiece = Math.max(0, retailPrice - wholesaleRate);
               const cartItem = wholesaleCart[p._id];
               const currentQty = cartItem?.qty || 0;
