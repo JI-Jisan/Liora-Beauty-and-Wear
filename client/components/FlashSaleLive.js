@@ -14,6 +14,7 @@ const FALLBACK_FLASH_PRODUCTS = [
     category: { name: "Cleansers" },
     originalPrice: 2200,
     offerPrice: 1750,
+    campusDiscountPct: 15,
   },
   {
     _id: "flash-demo-2",
@@ -22,6 +23,7 @@ const FALLBACK_FLASH_PRODUCTS = [
     category: { name: "Serums" },
     originalPrice: 1350,
     offerPrice: 1090,
+    campusDiscountPct: 15,
   },
   {
     _id: "flash-demo-3",
@@ -30,6 +32,7 @@ const FALLBACK_FLASH_PRODUCTS = [
     category: { name: "Sunscreen" },
     originalPrice: 1750,
     offerPrice: 1440,
+    campusDiscountPct: 15,
   },
   {
     _id: "flash-demo-4",
@@ -38,6 +41,7 @@ const FALLBACK_FLASH_PRODUCTS = [
     category: { name: "Essence" },
     originalPrice: 1850,
     offerPrice: 1490,
+    campusDiscountPct: 15,
   },
 ];
 
@@ -52,7 +56,7 @@ export default function FlashSaleLive({ onAddToCart }) {
   const [addedIds, setAddedIds] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products?paginate=1&limit=40`)
+    fetch(`${API_BASE_URL}/api/products?type=campus15&paginate=1&limit=30`)
       .then((res) => res.json())
       .then((data) => {
         const list = Array.isArray(data?.products)
@@ -67,6 +71,9 @@ export default function FlashSaleLive({ onAddToCart }) {
             return p.offerPrice && p.originalPrice && p.offerPrice < p.originalPrice;
           })
           .sort((a, b) => {
+            const campA = Number(a.campusDiscountPct) || 0;
+            const campB = Number(b.campusDiscountPct) || 0;
+            if (campB !== campA) return campB - campA;
             const discA = (a.originalPrice - a.offerPrice) / a.originalPrice;
             const discB = (b.originalPrice - b.offerPrice) / b.originalPrice;
             return discB - discA;

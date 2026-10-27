@@ -228,9 +228,12 @@ function ProductGridContent({
           : Array.isArray(data)
           ? data
           : [];
-        const sortedList = activeCoupon
-          ? [...rawList].sort((a, b) => (Number(b.campusDiscountPct) || 0) - (Number(a.campusDiscountPct) || 0))
-          : rawList;
+        const sortedList = [...rawList].sort((a, b) => {
+          const campA = Number(a.campusDiscountPct) || 0;
+          const campB = Number(b.campusDiscountPct) || 0;
+          if (campB !== campA) return campB - campA;
+          return 0;
+        });
         setProducts(sortedList);
         setTotalPages(data?.totalPages || 1);
         setTotalProducts(data?.total || rawList.length);

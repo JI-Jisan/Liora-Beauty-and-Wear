@@ -123,7 +123,13 @@ export async function GET(req) {
         query.category = { $in: Array.from(allMatchingIds).map((id) => new mongoose.Types.ObjectId(id)) };
       }
     }
-    if (type === "featured") {
+    if (type === "campus15" || type === "max-discount") {
+      query.campusDiscountPct = 15;
+      if (!isAdmin) {
+        query.inStock = true;
+        query.name = { $not: /skino|lifebuoy|shower gel|bath soap|cleansing brush/i };
+      }
+    } else if (type === "featured") {
       query.isFeatured = true;
       if (!isAdmin) {
         query.inStock = true;
@@ -321,8 +327,10 @@ export async function GET(req) {
           .populate("category", "name")
           .populate("brand", "name slug")
           .sort(
-            type === "featured"
-              ? { campusDiscountPct: -1, offerPrice: -1, createdAt: -1 }
+            type === "campus15" || type === "max-discount"
+              ? { campusDiscountPct: -1, isFeatured: -1, isTrending: -1, createdAt: -1 }
+              : type === "featured"
+              ? { campusDiscountPct: -1, isFeatured: -1, offerPrice: -1, createdAt: -1 }
               : type && type !== "all"
               ? { campusDiscountPct: -1, createdAt: -1 }
               : { inStock: -1, campusDiscountPct: -1, isFeatured: -1, createdAt: -1 }

@@ -95,15 +95,29 @@ export default function HomePage() {
       {/* 4. ⚡ FLASH SALE DEALS WITH LIVE COUNTDOWN TIMER */}
       <FlashSaleLive onAddToCart={addToCart} />
 
-      {/* 5. 🎯 DUAL MINI PROMO BANNERS (KOREAN SKINCARE & LUXURY PERFUMES) */}
+      {/* 5. 🔥 EXCLUSIVE 15% MAX STUDENT DISCOUNT DEALS */}
+      <section id="view-offers" style={{ padding: "24px 0", background: "linear-gradient(180deg, #fff0f3 0%, #ffffff 100%)", borderRadius: "24px", margin: "14px auto 28px", maxWidth: "1440px" }}>
+        <ProductGrid
+          onAddToCart={addToCart}
+          type="campus15"
+          title="🔥 সর্বোচ্চ ১৫% স্পেশাল ছাড়ের ডিল (15% Max Campus Deals)"
+          subtitle="DIU স্টুডেন্টদের জন্য সর্বোচ্চ ১৫% স্পেশাল ফ্ল্যাট ছাড় — ট্রেন্ডিং মেকআপ, লিপস্টিক, সিরাম ও ভাইরাল স্কিনকেয়ার"
+          badge="🎓 সর্বোচ্চ ১৫% ছাড়"
+          badgeBg="linear-gradient(135deg, #e11d48 0%, #be123c 100%)"
+          limit={8}
+          showCategoryBar={false}
+          showPagination={false}
+        />
+      </section>
+
+      {/* 6. 🎯 DUAL MINI PROMO BANNERS (KOREAN SKINCARE & LUXURY PERFUMES) */}
       <DualMiniBanners />
 
-      {/* 6. 🌿 SHOP BY CONCERN (ACNE, GLOW, DARK SPOTS, SUN, DRY SKIN, HAIR) */}
+      {/* 7. 🌿 SHOP BY CONCERN (ACNE, GLOW, DARK SPOTS, SUN, DRY SKIN, HAIR) */}
       <ShopByConcern />
 
-      {/* 7. ⭐ FEATURED COLLECTION (CURATED PICKS) */}
-      {/* 7. 🌸 KOREAN GLASS SKIN & VIRAL SKINCARE COLLECTION */}
-      <section id="view-offers" style={{ padding: "16px 0" }}>
+      {/* 8. 🌸 KOREAN GLASS SKIN & VIRAL SKINCARE COLLECTION */}
+      <section id="korean-skincare" style={{ padding: "16px 0" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="featured"

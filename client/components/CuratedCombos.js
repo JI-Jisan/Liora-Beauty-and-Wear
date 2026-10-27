@@ -13,6 +13,7 @@ const FALLBACK_COMBOS = [
     image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop&q=80",
     offerPrice: 2150,
     originalPrice: 2850,
+    campusDiscountPct: 15,
     category: { name: "Value Combo" },
   },
   {
@@ -21,6 +22,7 @@ const FALLBACK_COMBOS = [
     image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80",
     offerPrice: 1690,
     originalPrice: 2200,
+    campusDiscountPct: 15,
     category: { name: "Acne Combo" },
   },
   {
@@ -29,6 +31,7 @@ const FALLBACK_COMBOS = [
     image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&auto=format&fit=crop&q=80",
     offerPrice: 2450,
     originalPrice: 3100,
+    campusDiscountPct: 15,
     category: { name: "Glow Combo" },
   },
   {
@@ -37,6 +40,7 @@ const FALLBACK_COMBOS = [
     image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&auto=format&fit=crop&q=80",
     offerPrice: 1850,
     originalPrice: 2350,
+    campusDiscountPct: 15,
     category: { name: "Sun Care Duo" },
   },
 ];
@@ -47,7 +51,7 @@ export default function CuratedCombos({ onAddToCart }) {
   const [addedIds, setAddedIds] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products?collection=combo&limit=4`)
+    fetch(`${API_BASE_URL}/api/products?collection=combo&limit=10`)
       .then((res) => res.json())
       .then((data) => {
         const list = Array.isArray(data?.products)
@@ -56,7 +60,8 @@ export default function CuratedCombos({ onAddToCart }) {
           ? data
           : [];
         if (list.length > 0) {
-          setCombos(list.slice(0, 4));
+          const sorted = [...list].sort((a, b) => (Number(b.campusDiscountPct) || 0) - (Number(a.campusDiscountPct) || 0));
+          setCombos(sorted.slice(0, 4));
         } else {
           setCombos(FALLBACK_COMBOS);
         }
