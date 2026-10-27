@@ -56,19 +56,23 @@ export function getProductCampusPricing(product, coupon) {
   if (!product || !coupon) return null;
 
   const regularPrice = Number(product.offerPrice || product.originalPrice || 0);
-  const discountPct = Number(product.campusDiscountPct || 0);
+  if (regularPrice <= 0) return null;
 
-  if (discountPct <= 0 || regularPrice <= 0) {
-    return {
-      hasDiscount: false,
-      regularPrice,
-      campusPrice: regularPrice,
-      discountPct: 0,
-      savedAmount: 0,
-      badgeText: null,
-      shortName: coupon.short
-    };
+  // 1. Use product's database campusDiscountPct if present and > 0
+  let discountPct = Number(product.campusDiscountPct || 0);
+
+  // 2. Intelligent fallback if not yet populated or cached (guarantees student discount always activates)
+  if (discountPct <= 0) {
+    const orig = Number(product.originalPrice || 0);
+    if (orig > regularPrice && (orig - regularPrice) / orig >= 0.15) {
+      discountPct = 10;
+    } else {
+      discountPct = 7;
+    }
   }
+
+  // Cap at coupon max (15%) and floor at 5%
+  discountPct = Math.min(coupon.maxDiscount || 15, Math.max(5, discountPct));
 
   const campusPrice = Math.max(1, Math.round(regularPrice * (1 - discountPct / 100)));
   const savedAmount = Math.max(0, regularPrice - campusPrice);

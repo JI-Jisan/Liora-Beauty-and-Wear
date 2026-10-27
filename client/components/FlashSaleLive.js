@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { getDiscount, getSaved } from "@/lib/price";
+import { useCampus } from "@/context/CampusContext";
 
 const FALLBACK_FLASH_PRODUCTS = [
   {
@@ -41,6 +42,7 @@ const FALLBACK_FLASH_PRODUCTS = [
 ];
 
 export default function FlashSaleLive({ onAddToCart }) {
+  const { activeCoupon, getProductPrice } = useCampus();
   const [timeLeft, setTimeLeft] = useState({
     hours: "05",
     minutes: "48",
@@ -111,7 +113,20 @@ export default function FlashSaleLive({ onAddToCart }) {
     e.preventDefault();
     e.stopPropagation();
     if (onAddToCart) {
-      onAddToCart(product);
+      const campusPricing = getProductPrice(product);
+      const itemToAdd = campusPricing?.hasDiscount
+        ? {
+            ...product,
+            offerPrice: campusPricing.campusPrice,
+            originalOfferPrice: product.offerPrice,
+            isCampusSpecial: true,
+            campusCode: activeCoupon?.code,
+            campusName: activeCoupon?.short,
+            campusDiscountPct: campusPricing.discountPct
+          }
+        : product;
+
+      onAddToCart(itemToAdd);
       setAddedIds((prev) => [...prev, product._id]);
       setTimeout(() => {
         setAddedIds((prev) => prev.filter((id) => id !== product._id));
@@ -174,6 +189,7 @@ export default function FlashSaleLive({ onAddToCart }) {
             const discountPct = getDiscount(product);
             const savedTk = getSaved(product);
             const isAdded = addedIds.includes(product._id);
+            const campusPricing = getProductPrice(product);
 
             return (
               <div key={product._id} className="jt-flash-card">
@@ -191,11 +207,21 @@ export default function FlashSaleLive({ onAddToCart }) {
                           "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=80";
                       }}
                     />
-                    {discountPct > 0 && (
+                    {campusPricing?.hasDiscount ? (
+                      <span
+                        className="jt-flash-discount-badge"
+                        style={{
+                          background: activeCoupon?.tagColor || "#ff4d6d",
+                          boxShadow: "0 4px 12px rgba(225,29,72,.35)"
+                        }}
+                      >
+                        🎓 {activeCoupon?.short} -{campusPricing.discountPct}%
+                      </span>
+                    ) : discountPct > 0 ? (
                       <span className="jt-flash-discount-badge">
                         -{discountPct}% OFF
                       </span>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="jt-flash-card-body">
@@ -204,22 +230,37 @@ export default function FlashSaleLive({ onAddToCart }) {
                       {product.name}
                     </h4>
 
-                    <div className="jt-flash-price-row">
-                      <strong className="jt-flash-offer-price">
-                        {product.offerPrice} Tk
-                      </strong>
-                      {product.originalPrice > product.offerPrice && (
-                        <span className="jt-flash-orig-price">
-                          {product.originalPrice} Tk
+                    {campusPricing?.hasDiscount ? (
+                      <div className="jt-flash-price-row" style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+                        <strong className="jt-flash-offer-price" style={{ color: "#e11d48", fontWeight: 900 }}>
+                          {campusPricing.campusPrice} Tk
+                        </strong>
+                        <span className="jt-flash-orig-price" style={{ textDecoration: "line-through", color: "#94a3b8" }}>
+                          {product.offerPrice} Tk
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="jt-flash-price-row">
+                        <strong className="jt-flash-offer-price">
+                          {product.offerPrice} Tk
+                        </strong>
+                        {product.originalPrice > product.offerPrice && (
+                          <span className="jt-flash-orig-price">
+                            {product.originalPrice} Tk
+                          </span>
+                        )}
+                      </div>
+                    )}
 
-                    {savedTk > 0 && (
+                    {campusPricing?.hasDiscount ? (
+                      <div className="jt-flash-save-text" style={{ color: "#16a34a", fontWeight: 800 }}>
+                        🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}
+                      </div>
+                    ) : savedTk > 0 ? (
                       <div className="jt-flash-save-text">
                         ৳{savedTk} সাশ্রয়
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </Link>
 

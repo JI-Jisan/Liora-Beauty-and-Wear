@@ -335,7 +335,7 @@ export async function GET(req) {
 
     const cacheHeader = isAdmin
       ? "no-store, no-cache, must-revalidate, max-age=0"
-      : "public, s-maxage=60, stale-while-revalidate=300";
+      : "public, s-maxage=5, stale-while-revalidate=15";
 
     if (isPaginated) {
       return NextResponse.json(

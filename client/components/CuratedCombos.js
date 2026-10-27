@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { getDiscount, getSaved } from "@/lib/price";
+import { useCampus } from "@/context/CampusContext";
 
 const FALLBACK_COMBOS = [
   {
@@ -41,6 +42,7 @@ const FALLBACK_COMBOS = [
 ];
 
 export default function CuratedCombos({ onAddToCart }) {
+  const { activeCoupon, getProductPrice } = useCampus();
   const [combos, setCombos] = useState([]);
   const [addedIds, setAddedIds] = useState([]);
 
@@ -68,7 +70,20 @@ export default function CuratedCombos({ onAddToCart }) {
     e.preventDefault();
     e.stopPropagation();
     if (onAddToCart) {
-      onAddToCart(item);
+      const campusPricing = getProductPrice(item);
+      const itemToAdd = campusPricing?.hasDiscount
+        ? {
+            ...item,
+            offerPrice: campusPricing.campusPrice,
+            originalOfferPrice: item.offerPrice,
+            isCampusSpecial: true,
+            campusCode: activeCoupon?.code,
+            campusName: activeCoupon?.short,
+            campusDiscountPct: campusPricing.discountPct
+          }
+        : item;
+
+      onAddToCart(itemToAdd);
       setAddedIds((prev) => [...prev, item._id]);
       setTimeout(() => {
         setAddedIds((prev) => prev.filter((id) => id !== item._id));
@@ -107,6 +122,7 @@ export default function CuratedCombos({ onAddToCart }) {
             const discountPct = getDiscount(item);
             const savedTk = getSaved(item);
             const isAdded = addedIds.includes(item._id);
+            const campusPricing = getProductPrice(item);
 
             return (
               <div key={item._id} className="jt-combo-card">
@@ -122,11 +138,21 @@ export default function CuratedCombos({ onAddToCart }) {
                       }}
                     />
                     <span className="jt-combo-badge">🎁 BUNDLE SAVE</span>
-                    {discountPct > 0 && (
+                    {campusPricing?.hasDiscount ? (
+                      <span
+                        className="jt-combo-discount-tag"
+                        style={{
+                          background: activeCoupon?.tagColor || "#ff4d6d",
+                          boxShadow: "0 4px 12px rgba(225,29,72,.35)"
+                        }}
+                      >
+                        🎓 {activeCoupon?.short} -{campusPricing.discountPct}%
+                      </span>
+                    ) : discountPct > 0 ? (
                       <span className="jt-combo-discount-tag">
                         {discountPct}% OFF
                       </span>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="jt-combo-content">
@@ -134,22 +160,37 @@ export default function CuratedCombos({ onAddToCart }) {
                       {item.name}
                     </h3>
 
-                    <div className="jt-combo-price-box">
-                      <strong className="jt-combo-offer-price">
-                        {item.offerPrice} Tk
-                      </strong>
-                      {item.originalPrice > item.offerPrice && (
-                        <span className="jt-combo-orig-price">
-                          {item.originalPrice} Tk
+                    {campusPricing?.hasDiscount ? (
+                      <div className="jt-combo-price-box" style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+                        <strong className="jt-combo-offer-price" style={{ color: "#e11d48", fontWeight: 900 }}>
+                          {campusPricing.campusPrice} Tk
+                        </strong>
+                        <span className="jt-combo-orig-price" style={{ textDecoration: "line-through", color: "#94a3b8" }}>
+                          {item.offerPrice} Tk
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="jt-combo-price-box">
+                        <strong className="jt-combo-offer-price">
+                          {item.offerPrice} Tk
+                        </strong>
+                        {item.originalPrice > item.offerPrice && (
+                          <span className="jt-combo-orig-price">
+                            {item.originalPrice} Tk
+                          </span>
+                        )}
+                      </div>
+                    )}
 
-                    {savedTk > 0 && (
+                    {campusPricing?.hasDiscount ? (
+                      <div className="jt-combo-save-pill" style={{ background: "#dcfce7", color: "#16a34a", fontWeight: 800 }}>
+                        🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}
+                      </div>
+                    ) : savedTk > 0 ? (
                       <div className="jt-combo-save-pill">
                         🎉 মোট ৳{savedTk} সাশ্রয়
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </Link>
 

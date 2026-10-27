@@ -24,6 +24,12 @@ export default function CampusCouponBar() {
       if (res.success) {
         setFeedback({ type: "success", message: res.message });
         setInputCode("");
+        setTimeout(() => {
+          const el = document.getElementById("view-offers") || document.getElementById("hot-items");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 400);
       } else {
         setFeedback({ type: "error", message: res.message });
       }
@@ -253,7 +259,31 @@ export default function CampusCouponBar() {
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById("view-offers") || document.getElementById("hot-items");
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                style={{
+                  padding: "8px 14px",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  borderRadius: "10px",
+                  background: activeCoupon.tagColor || "#ff4d6d",
+                  color: "#ffffff",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  boxShadow: "0 4px 12px rgba(255, 77, 109, 0.25)",
+                  transition: "all 0.2s",
+                }}
+              >
+                <span>🏷️ View Products with Discount ↓</span>
+              </button>
               <button
                 type="button"
                 onClick={removeCampusCoupon}

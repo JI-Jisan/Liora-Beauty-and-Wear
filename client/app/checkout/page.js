@@ -131,8 +131,9 @@ export default function CheckoutPage() {
   const unitPrice = (item) => {
     const base = Number(item.offerPrice ?? item.price ?? 0);
     if (item.isCampusSpecial) return base;
-    if (activeCoupon && item.campusDiscountPct > 0) {
-      return Math.max(1, Math.round(base * (1 - item.campusDiscountPct / 100)));
+    if (activeCoupon) {
+      const pct = Number(item.campusDiscountPct || 0) > 0 ? Number(item.campusDiscountPct) : 7;
+      return Math.max(1, Math.round(base * (1 - pct / 100)));
     }
     return base;
   };

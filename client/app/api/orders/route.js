@@ -215,8 +215,9 @@ export async function POST(req) {
         }
       } else if (orderType === "retail" && body.couponCode) {
         const campusCoupon = getCampusCoupon(body.couponCode);
-        if (campusCoupon && p.campusDiscountPct > 0) {
-          calculatedPrice = Math.round(defaultRetailPrice * (1 - p.campusDiscountPct / 100));
+        if (campusCoupon) {
+          const discountPct = Number(p.campusDiscountPct || 0) > 0 ? Number(p.campusDiscountPct) : 7;
+          calculatedPrice = Math.round(defaultRetailPrice * (1 - discountPct / 100));
           totalSavings += Math.max(0, defaultRetailPrice - calculatedPrice) * qty;
         }
       }
