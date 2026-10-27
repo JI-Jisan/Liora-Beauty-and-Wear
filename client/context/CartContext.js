@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import CartDrawer from "@/components/CartDrawer";
+import CartQuickBar from "@/components/CartQuickBar";
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [recentlyAdded, setRecentlyAdded] = useState(null);
 
   useEffect(() => {
     Promise.resolve().then(() => {
@@ -51,7 +53,12 @@ export function CartProvider({ children }) {
       }
       return updated;
     });
-    setIsCartOpen(true);
+
+    // Seamless, non-intrusive notification instead of locking the screen with the full drawer
+    setRecentlyAdded({
+      product,
+      timestamp: Date.now(),
+    });
   };
 
   const increaseQty = (id) => {
@@ -108,10 +115,19 @@ export function CartProvider({ children }) {
     return cartItems.reduce((sum, item) => sum + item.quantity, 0);
   }, [cartItems]);
 
+  const subtotal = useMemo(() => {
+    return cartItems.reduce(
+      (sum, item) => sum + Number(item.offerPrice ?? item.price ?? 0) * (Number(item.quantity) || 1),
+      0
+    );
+  }, [cartItems]);
+
   const value = {
     cartItems,
     cartCount,
+    subtotal,
     isCartOpen,
+    recentlyAdded,
     addToCart,
     increaseQty,
     decreaseQty,
@@ -133,6 +149,7 @@ export function CartProvider({ children }) {
         onDecrease={decreaseQty}
         onRemove={removeItem}
       />
+      <CartQuickBar />
     </CartContext.Provider>
   );
 }

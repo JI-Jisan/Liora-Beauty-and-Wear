@@ -8548,3 +8548,30 @@ html, body {
     gap: 10px;
   }
 }
+
+/* 🛍️ Sleek Non-intrusive Cart Toast & Floating Checkout Pill */
+@keyframes jtToastSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .jt-cart-toast-wrap {
+    bottom: calc(74px + env(safe-area-inset-bottom, 8px)) !important;
+    left: 12px !important;
+    right: 12px !important;
+    max-width: calc(100vw - 24px) !important;
+    border-radius: 14px !important;
+  }
+
+  .jt-floating-cart-pill-wrap {
+    bottom: calc(74px + env(safe-area-inset-bottom, 8px)) !important;
+    left: 14px !important;
+  }
+}

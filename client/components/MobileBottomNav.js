@@ -6,11 +6,13 @@ import { useState } from "react";
 import CategoryDrawer from "./CategoryDrawer";
 
 import { useAuth } from "./AuthProvider";
+import { useCart } from "@/context/CartContext";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const { user, isAdmin } = useAuth();
+  const { cartCount, openCart } = useCart();
 
   const accountHref = user ? (isAdmin ? "/admin" : "/account") : "/login";
   const isAccountActive = pathname?.startsWith("/admin") || pathname?.startsWith("/account") || pathname === "/login";
@@ -48,13 +50,38 @@ export default function MobileBottomNav() {
           <span className="jt-bottom-nav-label">Orders</span>
         </Link>
 
-        <Link
-          href="/products"
-          className={`jt-bottom-nav-item ${pathname === "/products" ? "active" : ""}`}
+        <button
+          type="button"
+          className="jt-bottom-nav-item"
+          onClick={openCart}
+          style={{ position: "relative" }}
         >
-          <span className="jt-bottom-nav-icon">🤍</span>
-          <span className="jt-bottom-nav-label">Wishlist</span>
-        </Link>
+          <span className="jt-bottom-nav-icon">🛍️</span>
+          {cartCount > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: 4,
+                right: "calc(50% - 18px)",
+                background: "#e11d48",
+                color: "#fff",
+                borderRadius: "999px",
+                fontSize: 10,
+                fontWeight: 900,
+                padding: "0 4px",
+                minWidth: 16,
+                height: 16,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 1,
+              }}
+            >
+              {cartCount}
+            </span>
+          )}
+          <span className="jt-bottom-nav-label">Cart</span>
+        </button>
 
         <Link
           href={accountHref}
