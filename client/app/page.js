@@ -14,12 +14,24 @@ import CustomerLove from "../components/CustomerLove";
 import DualMiniBanners from "../components/DualMiniBanners";
 import MiddleStripBanner from "../components/MiddleStripBanner";
 import CampusCouponBar from "../components/CampusCouponBar";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 
 export default function HomePage() {
+  const router = useRouter();
+  const { user, isWholesale, isReseller, loading: authLoading } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    if (isWholesale) {
+      router.replace("/wholesale");
+    } else if (isReseller) {
+      router.replace("/reseller");
+    }
+  }, [isWholesale, isReseller, router]);
 
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
@@ -70,6 +82,20 @@ export default function HomePage() {
         console.error(err);
       });
   }, []);
+
+  if (isWholesale || isReseller) {
+    return (
+      <main className="jt-page" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fcfaf8" }}>
+        <div style={{ textAlign: "center", padding: "40px 20px" }}>
+          <div style={{ fontSize: "42px", marginBottom: "16px" }}>{isWholesale ? "🏬" : "🚀"}</div>
+          <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "8px" }}>
+            {isWholesale ? "Wholesale B2B পোর্টালে নিয়ে যাওয়া হচ্ছে..." : "Reseller Hub-এ নিয়ে যাওয়া হচ্ছে..."}
+          </h2>
+          <p style={{ color: "#64748b", fontSize: "14px" }}>অনুগ্রহ করে এক মুহূর্ত অপেক্ষা করুন...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="jt-page">

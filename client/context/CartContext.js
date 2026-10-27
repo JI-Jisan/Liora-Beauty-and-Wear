@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import CartDrawer from "@/components/CartDrawer";
 import CartQuickBar from "@/components/CartQuickBar";
+import { useAuth } from "@/components/AuthProvider";
 
 const CartContext = createContext(null);
 
@@ -10,6 +11,7 @@ export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [recentlyAdded, setRecentlyAdded] = useState(null);
+  const { isWholesale, isReseller } = useAuth();
 
   useEffect(() => {
     Promise.resolve().then(() => {
@@ -33,18 +35,50 @@ export function CartProvider({ children }) {
     }
   };
 
-  const addToCart = (product) => {
+  const addToCart = (product, customQty, customPrice) => {
+    const isWs = isWholesale || product.orderType === "wholesale";
+    const isRes = isReseller || product.orderType === "reseller";
+
+    let unitPrice = Number(product.offerPrice ?? product.price ?? 0);
+    let minMoq = 1;
+
+    if (isWs) {
+      minMoq = Math.max(1, product.wholesaleMinQty || 3);
+      const baseCost = Number(product.purchasePrice || (product.offerPrice ? product.offerPrice * 0.70 : 100));
+      const hasValidMarkup = Number(product.wholesalePrice) > baseCost;
+      unitPrice = hasValidMarkup ? Number(product.wholesalePrice) : Math.round(baseCost * 1.07);
+    } else if (isRes) {
+      unitPrice = Number(product.resellerPrice > 0 ? product.resellerPrice : Math.round((product.offerPrice || 100) * 0.92));
+    }
+
+    if (customPrice !== undefined && Number.isFinite(Number(customPrice))) {
+      unitPrice = Number(customPrice);
+    }
+
+    const initialQty = customQty !== undefined ? Number(customQty) : (isWs ? minMoq : 1);
+
     setCartItems((prev) => {
       const existing = prev.find((item) => item._id === product._id);
       let updated;
       if (existing) {
+        const step = customQty !== undefined ? Number(customQty) : 1;
         updated = prev.map((item) =>
           item._id === product._id
-            ? { ...item, quantity: Math.min(item.quantity + 1, item.stockQuantity || 20) }
+            ? { ...item, quantity: item.quantity + step, price: unitPrice }
             : item
         );
       } else {
-        updated = [...prev, { ...product, quantity: 1 }];
+        updated = [
+          ...prev,
+          {
+            ...product,
+            price: unitPrice,
+            offerPrice: isWs ? unitPrice : product.offerPrice,
+            wholesalePrice: isWs ? unitPrice : product.wholesalePrice,
+            quantity: initialQty,
+            orderType: isWs ? "wholesale" : isRes ? "reseller" : "retail",
+          },
+        ];
       }
       try {
         localStorage.setItem("jt_cart", JSON.stringify(updated));
@@ -54,9 +88,8 @@ export function CartProvider({ children }) {
       return updated;
     });
 
-    // Seamless, non-intrusive notification instead of locking the screen with the full drawer
     setRecentlyAdded({
-      product,
+      product: { ...product, price: unitPrice },
       timestamp: Date.now(),
     });
   };
@@ -77,11 +110,57 @@ export function CartProvider({ children }) {
 
   const decreaseQty = (id) => {
     setCartItems((prev) => {
-      const updated = prev
-        .map((item) =>
-          item._id === id ? { ...item, quantity: item.quantity - 1 } : item
-        )
-        .filter((item) => item.quantity > 0);
+      const target = prev.find((item) => item._id === id);
+      if (!target) return prev;
+      const isWs = isWholesale || target.orderType === "wholesale";
+      const moq = isWs ? Math.max(1, target.wholesaleMinQty || 3) : 1;
+
+      let updated;
+      if (isWs && target.quantity <= moq) {
+        updated = prev.filter((item) => item._id !== id);
+      } else {
+        updated = prev
+          .map((item) => (item._id === id ? { ...item, quantity: item.quantity - 1 } : item))
+          .filter((item) => item.quantity > 0);
+      }
+      try {
+        localStorage.setItem("jt_cart", JSON.stringify(updated));
+      } catch (err) {
+        console.error("Cart save error:", err);
+      }
+      return updated;
+    });
+  };
+
+  const updateItemQty = (product, qty, customPrice) => {
+    const isWs = isWholesale || product.orderType === "wholesale";
+    const minMoq = isWs ? Math.max(1, product.wholesaleMinQty || 3) : 1;
+    if (qty <= 0) {
+      removeItem(product._id);
+      return;
+    }
+    const finalQty = isWs ? Math.max(minMoq, qty) : qty;
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item._id === product._id);
+      let updated;
+      if (existing) {
+        updated = prev.map((item) =>
+          item._id === product._id
+            ? { ...item, quantity: finalQty, ...(customPrice !== undefined ? { price: Number(customPrice) } : {}) }
+            : item
+        );
+      } else {
+        const unitPrice = customPrice !== undefined ? Number(customPrice) : Number(product.wholesalePrice || product.offerPrice || 0);
+        updated = [
+          ...prev,
+          {
+            ...product,
+            price: unitPrice,
+            quantity: finalQty,
+            orderType: isWs ? "wholesale" : "retail",
+          },
+        ];
+      }
       try {
         localStorage.setItem("jt_cart", JSON.stringify(updated));
       } catch (err) {
@@ -117,7 +196,7 @@ export function CartProvider({ children }) {
 
   const subtotal = useMemo(() => {
     return cartItems.reduce(
-      (sum, item) => sum + Number(item.offerPrice ?? item.price ?? 0) * (Number(item.quantity) || 1),
+      (sum, item) => sum + Number(item.price ?? item.offerPrice ?? 0) * (Number(item.quantity) || 1),
       0
     );
   }, [cartItems]);
@@ -129,6 +208,7 @@ export function CartProvider({ children }) {
     isCartOpen,
     recentlyAdded,
     addToCart,
+    updateItemQty,
     increaseQty,
     decreaseQty,
     removeItem,

@@ -129,6 +129,12 @@ export default function CheckoutPage() {
   }, []);
 
   const unitPrice = (item) => {
+    if (item.orderType === "wholesale" || role === "wholesale") {
+      return Number(item.price ?? item.wholesalePrice ?? item.offerPrice ?? 0);
+    }
+    if (item.orderType === "reseller" || role === "reseller") {
+      return Number(item.price ?? item.resellerPrice ?? item.offerPrice ?? 0);
+    }
     const base = Number(item.offerPrice ?? item.price ?? 0);
     if (item.isCampusSpecial) return base;
     if (activeCoupon) {
@@ -254,12 +260,22 @@ export default function CheckoutPage() {
           firebaseUid: user?.uid || null,
           couponCode: activeCoupon?.code || undefined,
           campusName: activeCoupon?.campus || undefined,
+          orderType: (role === "wholesale" || cartItems.some((i) => i.orderType === "wholesale"))
+            ? "wholesale"
+            : (role === "reseller" || cartItems.some((i) => i.orderType === "reseller"))
+            ? "reseller"
+            : "retail",
+          isWholesale: role === "wholesale" || cartItems.some((i) => i.orderType === "wholesale"),
           items: cartItems.map((item) => ({
             productId: item._id,
             quantity: item.quantity || 1,
             price:
               isAdminUser && customPrices[item._id] !== undefined && customPrices[item._id] !== ""
                 ? Number(customPrices[item._id])
+                : (item.orderType === "wholesale" || role === "wholesale")
+                ? Number(item.price ?? item.wholesalePrice ?? getItemPrice(item))
+                : (item.orderType === "reseller" || role === "reseller")
+                ? Number(item.price ?? item.resellerPrice ?? getItemPrice(item))
                 : undefined,
           })),
         }),

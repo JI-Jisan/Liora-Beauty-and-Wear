@@ -50,7 +50,7 @@ export default function CartDrawer({
     };
   }, [isOpen]);
 
-  const unit = (i) => Number(i.offerPrice ?? i.price ?? 0);
+  const unit = (i) => Number(i.price !== undefined ? i.price : (i.offerPrice ?? 0));
   const qty = (i) => Number(i.quantity) || 1;
   const subtotal = cartItems.reduce((s, i) => s + unit(i) * qty(i), 0);
   const totalQty = cartItems.reduce((s, i) => s + qty(i), 0);
@@ -190,7 +190,21 @@ export default function CartDrawer({
 
                     {/* পাশে: unit × qty এবং ওই আইটেমের মোট */}
                     <div style={{ textAlign: "right" }}>
-                      {item.isCampusSpecial && (
+                      {item.orderType === "wholesale" && (
+                        <div style={{ marginBottom: "2px" }}>
+                          <span style={{ fontSize: "10px", fontWeight: 800, background: "#ede9fe", color: "#6d28d9", padding: "2px 6px", borderRadius: "4px" }}>
+                            🏬 পাইকারি রেট
+                          </span>
+                        </div>
+                      )}
+                      {item.orderType === "reseller" && (
+                        <div style={{ marginBottom: "2px" }}>
+                          <span style={{ fontSize: "10px", fontWeight: 800, background: "#ffe4e6", color: "#be123c", padding: "2px 6px", borderRadius: "4px" }}>
+                            🚀 রিসেলার রেট
+                          </span>
+                        </div>
+                      )}
+                      {item.isCampusSpecial && !item.orderType && (
                         <div style={{ marginBottom: "2px" }}>
                           <span style={{ fontSize: "10px", fontWeight: 800, background: "#ffe4e6", color: "#e11d48", padding: "2px 6px", borderRadius: "4px" }}>
                             🎓 {item.campusName} Special
@@ -200,7 +214,7 @@ export default function CartDrawer({
                       <div style={{ fontSize: "12px", color: "#64748b" }}>
                         {unit(item).toLocaleString("en-US")} × {qty(item)}
                       </div>
-                      <strong style={{ fontSize: "15px", color: "#0f172a" }}>
+                      <strong style={{ fontSize: "15px", color: item.orderType === "wholesale" ? "#6d28d9" : "#0f172a" }}>
                         {(unit(item) * qty(item)).toLocaleString("en-US")} Tk
                       </strong>
                     </div>
@@ -259,7 +273,7 @@ export default function CartDrawer({
                 }}
               >
                 <span style={{ fontSize: "16px", fontWeight: 700 }}>Subtotal</span>
-                <strong style={{ fontSize: "20px", color: "#0f172a" }}>
+                <strong style={{ fontSize: "20px", color: cartItems.some((i) => i.orderType === "wholesale") ? "#6d28d9" : "#0f172a" }}>
                   {subtotal.toLocaleString("en-US")} Tk
                 </strong>
               </div>
@@ -278,15 +292,22 @@ export default function CartDrawer({
                   display: "block",
                   textAlign: "center",
                   padding: "15px",
-                  background: "#ef4444",
+                  background: cartItems.some((i) => i.orderType === "wholesale")
+                    ? "linear-gradient(135deg, #6d28d9, #9333ea)"
+                    : "#ef4444",
                   color: "#fff",
                   borderRadius: "12px",
                   fontWeight: 700,
                   fontSize: "16px",
                   textDecoration: "none",
+                  boxShadow: cartItems.some((i) => i.orderType === "wholesale")
+                    ? "0 4px 16px rgba(109, 40, 217, 0.3)"
+                    : "none",
                 }}
               >
-                Checkout করুন ({subtotal.toLocaleString("en-US")} Tk) &rarr;
+                {cartItems.some((i) => i.orderType === "wholesale")
+                  ? `Wholesale Checkout (${subtotal.toLocaleString("en-US")} Tk) →`
+                  : `Checkout করুন (${subtotal.toLocaleString("en-US")} Tk) →`}
               </Link>
             </div>
           </div>

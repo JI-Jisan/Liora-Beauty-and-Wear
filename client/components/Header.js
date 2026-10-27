@@ -43,6 +43,7 @@ export default function Header({
 
   const cartContext = useCart();
   const { user, role, isWholesale, isReseller, isAdmin, profile } = useAuth();
+  const homeHref = isWholesale ? "/wholesale" : isReseller ? "/reseller" : "/";
 
   const [localSearch, setLocalSearch] = useState("");
   const [liveSearchResults, setLiveSearchResults] = useState([]);
@@ -308,11 +309,31 @@ export default function Header({
       {/* MAIN FULL HEADER (AT TOP OF PAGE) */}
       <header className="jt-header-new">
         {/* TOP ANNOUNCEMENT BAR */}
-        <div className="jt-top-announcement-bar">
+        <div className="jt-top-announcement-bar" style={isWholesale ? { background: "linear-gradient(135deg, #881337, #9f1239)" } : isReseller ? { background: "linear-gradient(135deg, #be123c, #881337)" } : undefined}>
           <div className="jt-announcement-content">
-            <span>🚚 Free Delivery on orders above ৳1999</span>
-            <span className="jt-announcement-divider">|</span>
-            <span>🛡️ 100% Authentic Products</span>
+            {isWholesale ? (
+              <>
+                <span>🏬 LIORA B2B Wholesale Portal</span>
+                <span className="jt-announcement-divider">|</span>
+                <span>Verified Partner: <strong>{profile?.businessName || profile?.name || user?.email}</strong></span>
+                <span className="jt-announcement-divider">|</span>
+                <span>📞 B2B Helpline: +8801837223147</span>
+              </>
+            ) : isReseller ? (
+              <>
+                <span>🚀 LIORA Reseller Dropship Hub</span>
+                <span className="jt-announcement-divider">|</span>
+                <span>Reseller Partner: <strong>{profile?.resellerStoreName || profile?.name || user?.email}</strong></span>
+                <span className="jt-announcement-divider">|</span>
+                <span>💰 Wallet: ৳{profile?.walletBalance || 0}</span>
+              </>
+            ) : (
+              <>
+                <span>🚚 Free Delivery on orders above ৳1999</span>
+                <span className="jt-announcement-divider">|</span>
+                <span>🛡️ 100% Authentic Products</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -329,7 +350,7 @@ export default function Header({
               ☰
             </button>
 
-            <Link href="/" className="jt-logo-center-link">
+            <Link href={homeHref} className="jt-logo-center-link">
               <LioraLogo />
             </Link>
 
@@ -352,9 +373,48 @@ export default function Header({
           width: '100%', minWidth: 0,
           padding: '8px 12px', scrollbarWidth: 'none'
         }}>
-          <Link href="/" className={`jt-tab-pill ${isHome ? "active" : ""}`}>
-            <span className="jt-tab-icon">🏠</span> Home
-          </Link>
+          {isWholesale ? (
+            <>
+              <Link href="/wholesale" className={`jt-tab-pill ${pathname === "/wholesale" ? "active" : ""}`} style={{ background: "#881337", color: "#fff", fontWeight: 800 }}>
+                <span className="jt-tab-icon">🏬</span> Wholesale Home
+              </Link>
+              <button
+                type="button"
+                className="jt-tab-pill"
+                onClick={() => setIsCategoryDrawerOpen(true)}
+              >
+                <span className="jt-tab-icon">🔲</span> Wholesale Categories
+              </button>
+              <Link href="/wholesale#quotation" className="jt-tab-pill" style={{ color: "#be123c", fontWeight: 700 }}>
+                <span className="jt-tab-icon">📋</span> Price Quotation & PDF
+              </Link>
+              <Link href="/account/orders" className="jt-tab-pill">
+                <span className="jt-tab-icon">📦</span> My Wholesale Orders
+              </Link>
+              <a href="https://wa.me/8801837223147" target="_blank" rel="noopener noreferrer" className="jt-tab-pill" style={{ color: "#16a34a", fontWeight: 700 }}>
+                <span className="jt-tab-icon">💬</span> B2B VIP Helpline
+              </a>
+            </>
+          ) : isReseller ? (
+            <>
+              <Link href="/reseller" className={`jt-tab-pill ${pathname === "/reseller" ? "active" : ""}`} style={{ background: "#be123c", color: "#fff", fontWeight: 800 }}>
+                <span className="jt-tab-icon">🚀</span> Reseller Hub
+              </Link>
+              <Link href="/reseller#wallet" className="jt-tab-pill" style={{ color: "#059669", fontWeight: 700 }}>
+                <span className="jt-tab-icon">💰</span> Wallet (৳{profile?.walletBalance || 0})
+              </Link>
+              <Link href="/account/orders" className="jt-tab-pill">
+                <span className="jt-tab-icon">📦</span> Reseller Orders
+              </Link>
+              <Link href="/products" className="jt-tab-pill">
+                <span className="jt-tab-icon">🛍️</span> Browse Products
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/" className={`jt-tab-pill ${isHome ? "active" : ""}`}>
+                <span className="jt-tab-icon">🏠</span> Home
+              </Link>
           <div
             className="jt-tab-pill-dropdown-wrapper"
             style={{ position: "relative" }}
@@ -481,6 +541,8 @@ export default function Header({
           <Link href="/order-tracking" className={`jt-tab-pill ${isTrackingPage ? "active" : ""}`}>
             <span className="jt-tab-icon">📦</span> Track Order
           </Link>
+            </>
+          )}
         </div>
       </div>
 

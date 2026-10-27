@@ -204,39 +204,89 @@ export default function ProductDetailsPage() {
   const { activeCoupon, getProductPrice } = useCampus();
   const campusPricing = getProductPrice(product);
 
-  const handleAddToCart = () => {
+  const [wsQuantity, setWsQuantity] = useState(3);
+  const [addedId, setAddedId] = useState(null);
+
+  useEffect(() => {
     if (product) {
-      const itemToAdd = campusPricing?.hasDiscount
-        ? {
-            ...product,
-            offerPrice: campusPricing.campusPrice,
-            originalOfferPrice: product.offerPrice,
-            isCampusSpecial: true,
-            campusCode: activeCoupon?.code,
-            campusName: activeCoupon?.short,
-            campusDiscountPct: campusPricing.discountPct
-          }
-        : product;
-      addToCart(itemToAdd);
+      setWsQuantity(Math.max(1, product.wholesaleMinQty || 3));
     }
+  }, [product]);
+
+  const regularMrp = Number(product?.originalPrice || product?.offerPrice || 0);
+  const cost = Number(product?.purchasePrice || (regularMrp ? regularMrp * 0.70 : 100));
+  const isExplicit = Number(product?.wholesalePrice) > cost;
+  const wsPrice = isExplicit ? Number(product.wholesalePrice) : Math.round(cost * 1.07);
+  const profitPerPc = Math.max(0, regularMrp - wsPrice);
+  const minMoq = Math.max(1, product?.wholesaleMinQty || 3);
+
+  const isStar = Boolean(profile?.isWeeklyStar);
+  const resellerBuyRate = Number(product?.resellerPrice) > 0
+    ? Number(product.resellerPrice)
+    : Math.round(Number(product?.offerPrice || 100) * (isStar ? 0.90 : 0.92));
+  const resellerProfit = Math.max(0, Number(product?.offerPrice || 0) - resellerBuyRate);
+
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    if (isWholesale) {
+      addToCart(product, wsQuantity, wsPrice);
+      setAddedId(product._id);
+      setTimeout(() => setAddedId(null), 1500);
+      return;
+    }
+
+    if (isReseller) {
+      addToCart(product, 1, resellerBuyRate);
+      setAddedId(product._id);
+      setTimeout(() => setAddedId(null), 1500);
+      return;
+    }
+
+    const itemToAdd = campusPricing?.hasDiscount
+      ? {
+          ...product,
+          offerPrice: campusPricing.campusPrice,
+          originalOfferPrice: product.offerPrice,
+          isCampusSpecial: true,
+          campusCode: activeCoupon?.code,
+          campusName: activeCoupon?.short,
+          campusDiscountPct: campusPricing.discountPct
+        }
+      : product;
+    addToCart(itemToAdd);
+    setAddedId(product._id);
+    setTimeout(() => setAddedId(null), 1500);
   };
 
   const handleBuyNow = () => {
-    if (product) {
-      const itemToAdd = campusPricing?.hasDiscount
-        ? {
-            ...product,
-            offerPrice: campusPricing.campusPrice,
-            originalOfferPrice: product.offerPrice,
-            isCampusSpecial: true,
-            campusCode: activeCoupon?.code,
-            campusName: activeCoupon?.short,
-            campusDiscountPct: campusPricing.discountPct
-          }
-        : product;
-      addToCart(itemToAdd);
+    if (!product) return;
+
+    if (isWholesale) {
+      addToCart(product, wsQuantity, wsPrice);
       router.push("/checkout");
+      return;
     }
+
+    if (isReseller) {
+      addToCart(product, 1, resellerBuyRate);
+      router.push("/checkout");
+      return;
+    }
+
+    const itemToAdd = campusPricing?.hasDiscount
+      ? {
+          ...product,
+          offerPrice: campusPricing.campusPrice,
+          originalOfferPrice: product.offerPrice,
+          isCampusSpecial: true,
+          campusCode: activeCoupon?.code,
+          campusName: activeCoupon?.short,
+          campusDiscountPct: campusPricing.discountPct
+        }
+      : product;
+    addToCart(itemToAdd);
+    router.push("/checkout");
   };
 
   useEffect(() => {
@@ -515,216 +565,407 @@ export default function ProductDetailsPage() {
             )}
           </div>
 
-          {/* Wholesale or Reseller Tier Pricing Banner */}
-          {(isWholesale || isAdmin) && (() => {
-            const regularMrp = Number(product.originalPrice || product.offerPrice || 0);
-            const cost = Number(product.purchasePrice || regularMrp * 0.70);
-            const isExplicit = Number(product.wholesalePrice) > cost;
-            const wsPrice = isExplicit ? product.wholesalePrice : Math.round(cost * 1.07);
-            const profitPerPc = Math.max(0, regularMrp - wsPrice);
-            return (
-              <div style={{ background: "#ede9fe", border: "1.5px solid #c4b5fd", padding: "10px 14px", borderRadius: "12px", margin: "10px 0" }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "22px", fontWeight: "900", color: "#6d28d9" }}>
-                    ৳{wsPrice}
+          {/* ── ROLE-BASED PRICING & ACTION SECTION ── */}
+          {isWholesale ? (
+            /* 🏬 WHOLESALER EXCLUSIVE INTERFACE */
+            <div>
+              <div style={{
+                background: "linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)",
+                border: "2px solid #8b5cf6",
+                borderRadius: "16px",
+                padding: "16px 20px",
+                margin: "14px 0",
+                boxShadow: "0 8px 24px rgba(139, 92, 246, 0.15)"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                  <span style={{
+                    fontSize: "12px",
+                    fontWeight: 900,
+                    background: "#6d28d9",
+                    color: "#fff",
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    letterSpacing: "0.04em"
+                  }}>
+                    🏬 LIORA B2B WHOLESALE VIP RATE
                   </span>
-                  <span style={{ fontSize: "12px", color: "#6d28d9", fontWeight: "800" }}>
-                    🏬 Wholesale VIP Rate (MOQ: {product.wholesaleMinQty || 3} Pcs)
+                  <span style={{ fontSize: "12px", color: "#059669", fontWeight: 800, background: "#d1fae5", padding: "2px 8px", borderRadius: "6px" }}>
+                    ✓ অথেনটিক পাইকারি রেট
                   </span>
-                  {profitPerPc > 0 && (
-                    <span style={{ fontSize: "11px", fontWeight: "800", color: "#059669", background: "#d1fae5", padding: "2px 6px", borderRadius: "4px" }}>
-                      লাভ ৳{profitPerPc}/pc (MRP: ৳{regularMrp})
+                </div>
+
+                <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "clamp(28px, 8vw, 38px)", fontWeight: "900", color: "#6d28d9" }}>
+                    ৳{wsPrice} Tk
+                  </span>
+                  <span style={{ fontSize: "13px", color: "#475569", fontWeight: 700 }}>
+                    (প্রতি পিস পাইকারি রেট)
+                  </span>
+                  {regularMrp > wsPrice && (
+                    <span style={{ fontSize: "16px", color: "#64748b", textDecoration: "line-through" }} title="দোকানের বিক্রয় মূল্য (MRP)">
+                      MRP: ৳{regularMrp}
                     </span>
                   )}
                 </div>
-                <div style={{ fontSize: "11px", color: "#475569", marginTop: "3px" }}>
-                  রেগুলার MRP: <strong>৳{regularMrp}</strong> {product.offerPrice < regularMrp && `(খুচরা অফার: ৳${product.offerPrice})`}
+
+                <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  {profitPerPc > 0 && (
+                    <span style={{ fontSize: "13.5px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "3px 10px", borderRadius: "8px" }}>
+                      💰 দোকানদার নিট লাভ: ৳{profitPerPc} প্রতি পিস (মোট লাভ ৳{profitPerPc * wsQuantity})
+                    </span>
+                  )}
                 </div>
-                <Link href="/wholesale" style={{ fontSize: "12px", color: "#7c3aed", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
-                  Wholesale পোর্টালে বাল্ক কার্টে যোগ করুন &rarr;
-                </Link>
+
+                {/* 3 পিস সর্বনিম্ন ও ১টি ১টি করে বাড়ানোর অপশন */}
+                <div style={{
+                  marginTop: "16px",
+                  padding: "12px 14px",
+                  background: "#ffffff",
+                  borderRadius: "12px",
+                  border: "1.5px solid #ddd6fe",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "10px"
+                }}>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: "800", color: "#1e1b4b" }}>
+                      📦 পাইকারি পরিমাণ (Quantity):
+                    </div>
+                    <div style={{ fontSize: "11.5px", color: "#6b7280" }}>
+                      কমপক্ষে ৩ পিস, এরপর ১টি ১টি করে প্রয়োজনমতো বাড়াতে পারবেন
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setWsQuantity((q) => Math.max(minMoq, q - 1))}
+                      disabled={wsQuantity <= minMoq}
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "8px",
+                        border: "none",
+                        background: wsQuantity <= minMoq ? "#e2e8f0" : "#6d28d9",
+                        color: wsQuantity <= minMoq ? "#94a3b8" : "#ffffff",
+                        fontSize: 20,
+                        fontWeight: "900",
+                        cursor: wsQuantity <= minMoq ? "not-allowed" : "pointer"
+                      }}
+                    >
+                      −
+                    </button>
+                    <span style={{ fontSize: "18px", fontWeight: "900", color: "#0f172a", minWidth: 32, textAlign: "center" }}>
+                      {wsQuantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setWsQuantity((q) => q + 1)}
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "8px",
+                        border: "none",
+                        background: "#6d28d9",
+                        color: "#ffffff",
+                        fontSize: 20,
+                        fontWeight: "900",
+                        cursor: "pointer"
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: "12px", display: "flex", justifyContent: "space-between", fontSize: "14px", fontWeight: "800", color: "#5b21b6" }}>
+                  <span>মোট পাইকারি মূল্য ({wsQuantity} পিস):</span>
+                  <span style={{ fontSize: "16px", color: "#6d28d9" }}>৳{(wsPrice * wsQuantity).toLocaleString()} Tk</span>
+                </div>
               </div>
-            );
-          })()}
 
-          {isReseller && (() => {
-            const isStar = Boolean(profile?.isWeeklyStar);
-            const resellerDiscountPct = isStar ? 10 : 8;
-            const resellerBuyRate = product.resellerPrice > 0
-              ? product.resellerPrice
-              : Math.round(product.offerPrice * (isStar ? 0.90 : 0.92));
-            const resellerProfit = Math.max(0, product.offerPrice - resellerBuyRate);
+              {/* Wholesale Buttons */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  disabled={product.stockQuantity <= 0}
+                  style={{
+                    background: product.stockQuantity <= 0
+                      ? "#94a3b8"
+                      : "linear-gradient(135deg, #6d28d9 0%, #9333ea 100%)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "50px",
+                    padding: "16px 24px",
+                    fontWeight: "900",
+                    fontSize: "16px",
+                    cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
+                    width: "100%",
+                    boxShadow: product.stockQuantity <= 0 ? "none" : "0 6px 20px rgba(109, 40, 217, 0.35)",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {product.stockQuantity <= 0 ? "Out of Stock" : `🏬 Wholesale Order Now (${wsQuantity} পিস - ৳${(wsPrice * wsQuantity).toLocaleString()})`}
+                </button>
 
-            return (
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={product.stockQuantity <= 0}
+                  style={{
+                    background: "transparent",
+                    color: "#6d28d9",
+                    border: "2.5px solid #6d28d9",
+                    borderRadius: "50px",
+                    padding: "14px 24px",
+                    fontWeight: "800",
+                    fontSize: "15px",
+                    cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
+                    width: "100%",
+                  }}
+                >
+                  {product.stockQuantity <= 0
+                    ? "স্টক শেষ"
+                    : addedId === product._id
+                    ? `✓ ${wsQuantity} পিস Wholesale কার্টে যোগ হয়েছে!`
+                    : `+ Wholesale কার্টে যোগ করুন (${wsQuantity} পিস)`}
+                </button>
+              </div>
+            </div>
+          ) : isReseller ? (
+            /* 🚀 RESELLER EXCLUSIVE INTERFACE */
+            <div>
               <div style={{
                 background: isStar ? "linear-gradient(135deg, #fefce8, #fef3c7)" : "#ffe4e6",
-                border: isStar ? "1.5px solid #fde047" : "1.5px solid #fecdd3",
-                padding: "12px 16px",
-                borderRadius: "12px",
-                margin: "10px 0",
+                border: isStar ? "2px solid #fde047" : "2px solid #fecdd3",
+                borderRadius: "16px",
+                padding: "16px 20px",
+                margin: "14px 0",
               }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "22px", fontWeight: "900", color: isStar ? "#b45309" : "#be123c" }}>
-                    ৳{resellerBuyRate}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                  <span style={{
+                    fontSize: "12px",
+                    fontWeight: 900,
+                    background: isStar ? "#b45309" : "#be123c",
+                    color: "#fff",
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                  }}>
+                    {isStar ? "⭐ VIP Star Club (10% Booster Discount)" : "🚀 Reseller Buy Rate (8% Base Margin)"}
                   </span>
-                  <span style={{ fontSize: "12px", color: isStar ? "#92400e" : "#9f1239", fontWeight: "800" }}>
-                    {isStar ? "⭐ VIP Star Club (10% Booster Discount)" : "🚀 Reseller Buy Rate (8% Base Margin)"} (Your Profit: ৳{resellerProfit})
+                  <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "2px 8px", borderRadius: "6px" }}>
+                    প্রফিট ৳{resellerProfit}
                   </span>
                 </div>
-                <Link href="/reseller" style={{ fontSize: "12px", color: isStar ? "#b45309" : "#be123c", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
-                  রিসেলার হাবে কাস্টমারের জন্য ড্রপশিপ বুক করুন &rarr;
-                </Link>
-              </div>
-            );
-          })()}
 
-          {/* 🎓 Campus Student VIP Offer Box */}
-          {campusPricing?.hasDiscount && (
-            <div style={{
-              background: "linear-gradient(135deg, #fff0f3, #ffe4e8)",
-              border: `1.5px solid ${activeCoupon?.tagColor || "#f43f5e"}`,
-              borderRadius: "14px",
-              padding: "12px 16px",
-              margin: "12px 0",
-              boxShadow: "0 6px 20px rgba(244,63,94,0.14)"
-            }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
-                <span style={{
-                  fontSize: "11px",
-                  fontWeight: 900,
-                  background: activeCoupon?.tagColor || "#ff4d6d",
-                  color: "#fff",
-                  padding: "3px 10px",
-                  borderRadius: "6px",
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase"
-                }}>
-                  🎓 {activeCoupon?.short || "CAMPUS"} SPECIAL STUDENT PRIVILEGE
-                </span>
-                <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "2px 8px", borderRadius: "6px" }}>
-                  ✓ Extra {campusPricing.discountPct}% OFF
-                </span>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "clamp(28px, 8vw, 38px)", fontWeight: "900", color: isStar ? "#b45309" : "#be123c" }}>
+                    ৳{resellerBuyRate} Tk
+                  </span>
+                  <span style={{ fontSize: "13px", color: "#64748b" }}>
+                    (কাস্টমার বিক্রয় রেট: ৳{product.offerPrice} Tk)
+                  </span>
+                </div>
               </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginTop: "8px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "clamp(26px, 8vw, 36px)", fontWeight: "900", color: "#e11d48" }}>
-                  {campusPricing.campusPrice} Tk
-                </span>
-                {campusPricing.mrp > campusPricing.campusPrice && (
-                  <span style={{ fontSize: "17px", color: "#94a3b8", textDecoration: "line-through" }} title="Market Retail Price (MRP)">
-                    MRP {campusPricing.mrp} Tk
-                  </span>
-                )}
-                {product.offerPrice && campusPricing.mrp > product.offerPrice && product.offerPrice > campusPricing.campusPrice && (
-                  <span style={{ fontSize: "14px", color: "#64748b" }}>
-                    (রেগুলার: <span style={{ textDecoration: "line-through" }}>{product.offerPrice} Tk</span>)
-                  </span>
-                )}
-              </div>
-              <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                {campusPricing.savedFromMrp > campusPricing.savedAmount ? (
-                  <span style={{ fontSize: "13.5px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "3px 10px", borderRadius: "8px" }}>
-                    🎉 MRP থেকে মোট সেভ: ৳{campusPricing.savedFromMrp} ({campusPricing.savedFromMrpPct}% লাভ)
-                  </span>
-                ) : (
-                  <span style={{ fontSize: "13.5px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "3px 10px", borderRadius: "8px" }}>
-                    🎉 {activeCoupon?.short} স্পেশাল সেভিংস: ৳{campusPricing.savedAmount}
-                  </span>
-                )}
+
+              {/* Reseller Buttons */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  disabled={product.stockQuantity <= 0}
+                  style={{
+                    background: product.stockQuantity <= 0
+                      ? "#94a3b8"
+                      : "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "50px",
+                    padding: "16px 24px",
+                    fontWeight: "900",
+                    fontSize: "16px",
+                    cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
+                    width: "100%",
+                  }}
+                >
+                  🚀 Reseller Order Now (৳{resellerBuyRate} Tk)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  disabled={product.stockQuantity <= 0}
+                  style={{
+                    background: "transparent",
+                    color: "#be123c",
+                    border: "2.5px solid #be123c",
+                    borderRadius: "50px",
+                    padding: "14px 24px",
+                    fontWeight: "800",
+                    fontSize: "15px",
+                    cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
+                    width: "100%",
+                  }}
+                >
+                  {addedId === product._id ? "✓ Reseller কার্টে যোগ হয়েছে!" : "+ Reseller কার্টে যোগ করুন"}
+                </button>
               </div>
             </div>
-          )}
-
-          {/* Regular Price (shown if no campus discount or for regular visitors) */}
-          {!campusPricing?.hasDiscount && (
-            <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap", margin: "10px 0" }}>
-              <span style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: "900", color: "#e11d48" }}>
-                {product.offerPrice} Tk
-              </span>
-              {product.originalPrice && (
-                <span style={{ fontSize: "16px", color: "#94a3b8", textDecoration: "line-through" }}>
-                  {product.originalPrice} Tk
-                </span>
-              )}
-              {getDiscount(product) > 0 && (
-                <span style={{
-                  background: "linear-gradient(135deg, #e11d48, #f97316)",
-                  color: "#fff", fontSize: "12px", fontWeight: "800",
-                  padding: "3px 10px", borderRadius: "50px",
-                }}>
-                  {getDiscount(product)}% OFF
-                </span>
-              )}
-              {getSaved(product) > 0 && (
-                <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, width: "100%", display: "block", marginTop: 4 }}>
-                  ৳{getSaved(product)} সাশ্রয়
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Stock */}
-          {product.stockQuantity > 0 ? (
-            <p style={{
-              margin: "0 0 14px",
-              fontSize: "13px", fontWeight: "700",
-              color: product.stockQuantity <= 5 ? "#d97706" : "#059669"
-            }}>
-              ● {product.stockQuantity <= 5
-                ? `তাড়াতাড়ি করুন! মাত্র ${product.stockQuantity} টি বাকি`
-                : `স্টকে আছে`}
-            </p>
           ) : (
-            <p style={{
-              margin: "0 0 14px",
-              fontSize: "13px", fontWeight: "700",
-              color: "#dc2626"
-            }}>
-              ● স্টক শেষ
-            </p>
+            /* 🛍️ RETAIL CUSTOMER INTERFACE */
+            <div>
+              {campusPricing?.hasDiscount ? (
+                <div style={{
+                  background: "linear-gradient(135deg, #fff0f3, #ffe4e8)",
+                  border: `1.5px solid ${activeCoupon?.tagColor || "#f43f5e"}`,
+                  borderRadius: "14px",
+                  padding: "12px 16px",
+                  margin: "12px 0",
+                  boxShadow: "0 6px 20px rgba(244,63,94,0.14)"
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                    <span style={{
+                      fontSize: "11px",
+                      fontWeight: 900,
+                      background: activeCoupon?.tagColor || "#ff4d6d",
+                      color: "#fff",
+                      padding: "3px 10px",
+                      borderRadius: "6px",
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase"
+                    }}>
+                      🎓 {activeCoupon?.short || "CAMPUS"} SPECIAL STUDENT PRIVILEGE
+                    </span>
+                    <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "2px 8px", borderRadius: "6px" }}>
+                      ✓ Extra {campusPricing.discountPct}% OFF
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginTop: "8px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "clamp(26px, 8vw, 36px)", fontWeight: "900", color: "#e11d48" }}>
+                      {campusPricing.campusPrice} Tk
+                    </span>
+                    {campusPricing.mrp > campusPricing.campusPrice && (
+                      <span style={{ fontSize: "17px", color: "#94a3b8", textDecoration: "line-through" }} title="Market Retail Price (MRP)">
+                        MRP {campusPricing.mrp} Tk
+                      </span>
+                    )}
+                    {product.offerPrice && campusPricing.mrp > product.offerPrice && product.offerPrice > campusPricing.campusPrice && (
+                      <span style={{ fontSize: "14px", color: "#64748b" }}>
+                        (রেগুলার: <span style={{ textDecoration: "line-through" }}>{product.offerPrice} Tk</span>)
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                    {campusPricing.savedFromMrp > campusPricing.savedAmount ? (
+                      <span style={{ fontSize: "13.5px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "3px 10px", borderRadius: "8px" }}>
+                        🎉 MRP থেকে মোট সেভ: ৳{campusPricing.savedFromMrp} ({campusPricing.savedFromMrpPct}% লাভ)
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: "13.5px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "3px 10px", borderRadius: "8px" }}>
+                        🎉 {activeCoupon?.short} স্পেশাল সেভিংস: ৳{campusPricing.savedAmount}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap", margin: "10px 0" }}>
+                  <span style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: "900", color: "#e11d48" }}>
+                    {product.offerPrice} Tk
+                  </span>
+                  {product.originalPrice && (
+                    <span style={{ fontSize: "16px", color: "#94a3b8", textDecoration: "line-through" }}>
+                      {product.originalPrice} Tk
+                    </span>
+                  )}
+                  {getDiscount(product) > 0 && (
+                    <span style={{
+                      background: "linear-gradient(135deg, #e11d48, #f97316)",
+                      color: "#fff", fontSize: "12px", fontWeight: "800",
+                      padding: "3px 10px", borderRadius: "50px",
+                    }}>
+                      {getDiscount(product)}% OFF
+                    </span>
+                  )}
+                  {getSaved(product) > 0 && (
+                    <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, width: "100%", display: "block", marginTop: 4 }}>
+                      ৳{getSaved(product)} সাশ্রয়
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Retail Stock Notice */}
+              {product.stockQuantity > 0 ? (
+                <p style={{
+                  margin: "0 0 14px",
+                  fontSize: "13px", fontWeight: "700",
+                  color: product.stockQuantity <= 5 ? "#d97706" : "#059669"
+                }}>
+                  ● {product.stockQuantity <= 5
+                    ? `তাড়াতাড়ি করুন! মাত্র ${product.stockQuantity} টি বাকি`
+                    : `স্টকে আছে`}
+                </p>
+              ) : (
+                <p style={{
+                  margin: "0 0 14px",
+                  fontSize: "13px", fontWeight: "700",
+                  color: "#dc2626"
+                }}>
+                  ● স্টক শেষ
+                </p>
+              )}
+
+              {/* Retail Buttons */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
+                <button
+                  onClick={handleBuyNow}
+                  disabled={product.stockQuantity <= 0}
+                  style={{
+                    background: product.stockQuantity <= 0
+                      ? "#94a3b8"
+                      : "linear-gradient(135deg, #e11d48 0%, #f97316 100%)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "50px",
+                    padding: "16px 24px",
+                    fontWeight: "900",
+                    fontSize: "16px",
+                    cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
+                    width: "100%",
+                    boxShadow: product.stockQuantity <= 0 ? "none" : "0 6px 20px rgba(225,29,72,0.35)",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {product.stockQuantity <= 0 ? "Unavailable" : "🛒 Buy Now"}
+                </button>
+
+                <button
+                  onClick={handleAddToCart}
+                  disabled={product.stockQuantity <= 0}
+                  style={{
+                    background: "transparent",
+                    color: "#e11d48",
+                    border: "2.5px solid #e11d48",
+                    borderRadius: "50px",
+                    padding: "14px 24px",
+                    fontWeight: "800",
+                    fontSize: "15px",
+                    cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
+                    width: "100%",
+                  }}
+                >
+                  {product.stockQuantity <= 0
+                    ? "স্টক শেষ"
+                    : addedId === product._id
+                    ? "✓ কার্টে যোগ হয়েছে!"
+                    : "+ Add to Cart"}
+                </button>
+              </div>
+            </div>
           )}
-
-          {/* Buttons */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "14px" }}>
-            <button
-              onClick={handleBuyNow}
-              disabled={product.stockQuantity <= 0}
-              style={{
-                background: product.stockQuantity <= 0
-                  ? "#94a3b8"
-                  : "linear-gradient(135deg, #e11d48 0%, #f97316 100%)",
-                color: "#fff",
-                border: "none",
-                borderRadius: "50px",
-                padding: "16px 24px",
-                fontWeight: "900",
-                fontSize: "16px",
-                cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
-                width: "100%",
-                boxShadow: product.stockQuantity <= 0 ? "none" : "0 6px 20px rgba(225,29,72,0.35)",
-                letterSpacing: "0.5px",
-              }}
-            >
-              {product.stockQuantity <= 0 ? "Unavailable" : "🛒 Buy Now"}
-            </button>
-
-            <button
-              onClick={handleAddToCart}
-              disabled={product.stockQuantity <= 0}
-              style={{
-                background: "transparent",
-                color: "#e11d48",
-                border: "2.5px solid #e11d48",
-                borderRadius: "50px",
-                padding: "14px 24px",
-                fontWeight: "800",
-                fontSize: "15px",
-                cursor: product.stockQuantity <= 0 ? "not-allowed" : "pointer",
-                width: "100%",
-              }}
-            >
-              {product.stockQuantity > 0 ? "+ Add to Cart" : "স্টক শেষ"}
-            </button>
-          </div>
 
           <div style={{
             display: "flex", gap: "14px", flexWrap: "wrap",

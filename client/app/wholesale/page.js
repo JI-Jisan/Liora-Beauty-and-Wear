@@ -8,10 +8,12 @@ import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth, getIdToken } from "@/components/AuthProvider";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
+import { useCart } from "@/context/CartContext";
 
 export default function WholesalePage() {
   const router = useRouter();
   const { user, role, isWholesale, isAdmin, profile, loading: authLoading } = useAuth();
+  const { updateItemQty } = useCart();
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -134,6 +136,9 @@ export default function WholesalePage() {
         delete copy[p._id];
         return copy;
       });
+      if (typeof updateItemQty === "function") {
+        updateItemQty(p, 0);
+      }
       return;
     }
 
@@ -153,6 +158,10 @@ export default function WholesalePage() {
         price: wholesaleRate,
       },
     }));
+
+    if (typeof updateItemQty === "function") {
+      updateItemQty(p, finalQty, wholesaleRate);
+    }
   };
 
   const handleApply = async (e) => {

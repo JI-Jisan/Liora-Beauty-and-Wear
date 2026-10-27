@@ -16,7 +16,7 @@ export default function CartQuickBar() {
 
   // Calculate cart subtotal
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + Number(item.offerPrice ?? item.price ?? 0) * (Number(item.quantity) || 1),
+    (sum, item) => sum + Number(item.price !== undefined ? item.price : (item.offerPrice ?? 0)) * (Number(item.quantity) || 1),
     0
   );
 

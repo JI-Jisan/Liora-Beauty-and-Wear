@@ -7,10 +7,13 @@ import Header from "@/components/Header";
 import ProductGrid from "@/components/ProductGrid";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/components/AuthProvider";
 
 function ProductsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isWholesale, isReseller } = useAuth();
+  const homeHref = isWholesale ? "/wholesale" : isReseller ? "/reseller" : "/";
   const urlSearch = searchParams ? searchParams.get("search") || "" : "";
   const filterParam = searchParams ? searchParams.get("filter") || "" : "";
   const [searchTerm, setSearchTerm] = useState(urlSearch);
@@ -91,7 +94,7 @@ function ProductsPageContent() {
             <div style={{ zIndex: 1 }}>
               {/* Breadcrumb */}
               <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#64748b", marginBottom: "8px" }}>
-                <Link href="/" style={{ color: "#64748b", textDecoration: "none" }}>Home</Link>
+                <Link href={homeHref} style={{ color: "#64748b", textDecoration: "none" }}>Home</Link>
                 <span>/</span>
                 <Link href="/products" style={{ color: "#64748b", textDecoration: "none" }}>Products</Link>
                 <span>/</span>
@@ -187,7 +190,7 @@ function ProductsPageContent() {
             <div>
               {/* Breadcrumb */}
               <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#64748b", marginBottom: "8px" }}>
-                <Link href="/" style={{ color: "#64748b", textDecoration: "none" }}>Home</Link>
+                <Link href={homeHref} style={{ color: "#64748b", textDecoration: "none" }}>Home</Link>
                 <span>/</span>
                 <span style={{ color: "#ff4d6d", fontWeight: 700 }}>
                   {filterParam === "offers" ? "Special Offers" : "All Products"}

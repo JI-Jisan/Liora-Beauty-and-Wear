@@ -10,6 +10,7 @@ import { cld } from "@/lib/cloudinary";
 import { getDiscount, getSaved } from "@/lib/price";
 import { useCart } from "@/context/CartContext";
 import { useCampus } from "@/context/CampusContext";
+import { useAuth } from "@/components/AuthProvider";
 
 function getPaginationItems(current, total) {
   if (total <= 7) {
@@ -109,6 +110,7 @@ function ProductGridContent({
   const searchParams = useSearchParams();
   const cartContext = useCart();
   const { activeCoupon, getProductPrice } = useCampus();
+  const { isWholesale, isReseller } = useAuth();
   const [addedId, setAddedId] = useState(null);
 
   const handleAddToCart = (product, e) => {
@@ -120,6 +122,30 @@ function ProductGridContent({
     setTimeout(() => {
       setAddedId((curr) => (curr === product._id ? null : curr));
     }, 1500);
+
+    if (isWholesale) {
+      const regularMrp = Number(product.originalPrice || product.offerPrice || 0);
+      const baseCost = Number(product.purchasePrice || (regularMrp ? regularMrp * 0.70 : 100));
+      const isExplicit = Number(product.wholesalePrice) > baseCost;
+      const wsPrice = isExplicit ? Number(product.wholesalePrice) : Math.round(baseCost * 1.07);
+      const minQty = Math.max(1, product.wholesaleMinQty || 3);
+      if (typeof onAddToCart === "function") {
+        onAddToCart({ ...product, price: wsPrice, quantity: minQty, orderType: "wholesale" });
+      } else if (cartContext && typeof cartContext.addToCart === "function") {
+        cartContext.addToCart(product, minQty, wsPrice);
+      }
+      return;
+    }
+
+    if (isReseller) {
+      const resellerRate = product.resellerPrice > 0 ? product.resellerPrice : Math.round(product.offerPrice * 0.92);
+      if (typeof onAddToCart === "function") {
+        onAddToCart({ ...product, price: resellerRate, quantity: 1, orderType: "reseller" });
+      } else if (cartContext && typeof cartContext.addToCart === "function") {
+        cartContext.addToCart(product, 1, resellerRate);
+      }
+      return;
+    }
 
     const campusPricing = getProductPrice(product);
     const itemToAdd = campusPricing?.hasDiscount
@@ -452,7 +478,94 @@ function ProductGridContent({
 
               <div style={{ marginTop: "auto", paddingTop: 4 }}>
                 <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none", display: "block" }}>
-                  {campusPricing?.hasDiscount ? (
+                  {isWholesale ? (() => {
+                    const regularMrp = Number(product.originalPrice || product.offerPrice || 0);
+                    const baseCost = Number(product.purchasePrice || (regularMrp ? regularMrp * 0.70 : 100));
+                    const isExplicit = Number(product.wholesalePrice) > baseCost;
+                    const wsPrice = isExplicit ? Number(product.wholesalePrice) : Math.round(baseCost * 1.07);
+                    const profitPerPc = Math.max(0, regularMrp - wsPrice);
+                    const minQty = Math.max(1, product.wholesaleMinQty || 3);
+
+                    return (
+                      <div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
+                          <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 900, color: "#6d28d9" }}>
+                            ৳{wsPrice} Tk
+                          </p>
+                          <span style={{
+                            fontSize: 10,
+                            fontWeight: 800,
+                            background: "#ede9fe",
+                            color: "#6d28d9",
+                            padding: "1px 6px",
+                            borderRadius: "4px",
+                          }}>
+                            🏬 পাইকারি (MOQ {minQty})
+                          </span>
+                          <span style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                            marginLeft: "auto"
+                          }}>
+                            {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                          </span>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 18, marginBottom: 8, fontSize: 11.5 }}>
+                          <span style={{ color: "#64748b" }}>
+                            MRP: <span style={{ textDecoration: "line-through" }}>{regularMrp} Tk</span>
+                          </span>
+                          {profitPerPc > 0 && (
+                            <span style={{ color: "#16a34a", fontWeight: 800 }}>
+                              লাভ ৳{profitPerPc}/pc
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })() : isReseller ? (() => {
+                    const resellerRate = product.resellerPrice > 0 ? product.resellerPrice : Math.round(product.offerPrice * 0.92);
+                    const resellerProfit = Math.max(0, product.offerPrice - resellerRate);
+                    return (
+                      <div>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
+                          <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 900, color: "#be123c" }}>
+                            ৳{resellerRate} Tk
+                          </p>
+                          <span style={{
+                            fontSize: 10,
+                            fontWeight: 800,
+                            background: "#ffe4e6",
+                            color: "#be123c",
+                            padding: "1px 6px",
+                            borderRadius: "4px",
+                          }}>
+                            🚀 রিসেলার রেট
+                          </span>
+                          <span style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                            marginLeft: "auto"
+                          }}>
+                            {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                          </span>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 18, marginBottom: 8, fontSize: 11.5 }}>
+                          <span style={{ color: "#64748b" }}>
+                            খুচরা: {product.offerPrice} Tk
+                          </span>
+                          {resellerProfit > 0 && (
+                            <span style={{ color: "#16a34a", fontWeight: 800 }}>
+                              প্রফিট ৳{resellerProfit}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })() : campusPricing?.hasDiscount ? (
                     <div>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
                         <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 900, color: "#e11d48" }}>
@@ -546,7 +659,19 @@ function ProductGridContent({
                     width: "100%",
                     boxSizing: "border-box",
                     transition: "all 0.25s ease",
-                    ...(addedId === product._id
+                    ...(isWholesale
+                      ? {
+                          backgroundColor: addedId === product._id ? "#10b981" : "#6d28d9",
+                          borderColor: addedId === product._id ? "#10b981" : "#6d28d9",
+                          color: "#ffffff",
+                        }
+                      : isReseller
+                      ? {
+                          backgroundColor: addedId === product._id ? "#10b981" : "#be123c",
+                          borderColor: addedId === product._id ? "#10b981" : "#be123c",
+                          color: "#ffffff",
+                        }
+                      : addedId === product._id
                       ? {
                           backgroundColor: "#10b981",
                           borderColor: "#10b981",
@@ -558,7 +683,13 @@ function ProductGridContent({
                   {product.stockStatus === "Out of Stock"
                     ? "Out of Stock"
                     : addedId === product._id
-                    ? "✓ Added to Cart!"
+                    ? isWholesale
+                      ? `✓ Added ${product.wholesaleMinQty || 3} pcs!`
+                      : "✓ Added to Cart!"
+                    : isWholesale
+                    ? `+ Add MOQ (${product.wholesaleMinQty || 3} pcs)`
+                    : isReseller
+                    ? "+ Reseller কার্ট"
                     : "Add to Cart"}
                 </button>
               </div>

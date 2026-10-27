@@ -40,6 +40,10 @@ function LoginFormContent() {
     if (!authLoading && user && role) {
       if (role === "admin") {
         router.push("/admin");
+      } else if (role === "wholesale") {
+        router.push("/wholesale");
+      } else if (role === "reseller" || role === "team_leader") {
+        router.push("/reseller");
       } else {
         const dest = redirectUrl.startsWith("/admin") ? "/account" : redirectUrl;
         router.push(dest);
@@ -116,8 +120,14 @@ function LoginFormContent() {
         localStorage.removeItem("jt_admin_logged_in");
         localStorage.removeItem("jt_admin_token");
         localStorage.removeItem("jt_admin_user");
-        const dest = redirectUrl.startsWith("/admin") ? "/account" : redirectUrl;
-        router.push(dest);
+        if (data.role === "wholesale") {
+          router.push("/wholesale");
+        } else if (data.role === "reseller" || data.role === "team_leader") {
+          router.push("/reseller");
+        } else {
+          const dest = redirectUrl.startsWith("/admin") ? "/account" : redirectUrl;
+          router.push(dest);
+        }
       }
     } catch (err) {
       console.error("Post-auth error:", err);

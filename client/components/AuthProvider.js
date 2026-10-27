@@ -18,7 +18,12 @@ const AuthCtx = createContext({
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("jt_user_role") || null;
+    }
+    return null;
+  });
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +32,7 @@ export function AuthProvider({ children }) {
       setRole(null);
       setProfile(null);
       if (typeof window !== "undefined") {
+        localStorage.removeItem("jt_user_role");
         localStorage.removeItem("jt_admin_token");
         localStorage.removeItem("jt_admin_logged_in");
         localStorage.removeItem("jt_admin_user");
@@ -64,6 +70,9 @@ export function AuthProvider({ children }) {
         const effectiveRole = data.role || (clientIsAdmin ? "admin" : "user");
         setRole(effectiveRole);
         setProfile(data.user || null);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("jt_user_role", effectiveRole);
+        }
 
         if (effectiveRole === "admin" && data.token) {
           localStorage.setItem("jt_admin_logged_in", "true");
@@ -85,11 +94,19 @@ export function AuthProvider({ children }) {
           localStorage.removeItem("jt_admin_user");
         }
       } else {
-        setRole(clientIsAdmin ? "admin" : "user");
+        const fallbackRole = clientIsAdmin ? "admin" : "user";
+        setRole(fallbackRole);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("jt_user_role", fallbackRole);
+        }
       }
     } catch (err) {
       console.error("Auth sync error:", err);
-      setRole(clientIsAdmin ? "admin" : "user");
+      const fallbackRole = clientIsAdmin ? "admin" : "user";
+      setRole(fallbackRole);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("jt_user_role", fallbackRole);
+      }
     }
   }, []);
 
@@ -101,6 +118,9 @@ export function AuthProvider({ children }) {
       } else {
         setRole(null);
         setProfile(null);
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("jt_user_role");
+        }
       }
       setLoading(false);
     });
@@ -112,6 +132,7 @@ export function AuthProvider({ children }) {
     try {
       await signOut(auth);
       if (typeof window !== "undefined") {
+        localStorage.removeItem("jt_user_role");
         localStorage.removeItem("jt_admin_token");
         localStorage.removeItem("jt_admin_logged_in");
         localStorage.removeItem("jt_admin_user");

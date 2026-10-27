@@ -11,8 +11,13 @@ import { useCart } from "@/context/CartContext";
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isWholesale, isReseller } = useAuth();
   const { cartCount, openCart } = useCart();
+
+  const homeHref = isWholesale ? "/wholesale" : isReseller ? "/reseller" : "/";
+  const homeLabel = isWholesale ? "Wholesale" : isReseller ? "Reseller" : "Home";
+  const homeIcon = isWholesale ? "🏬" : isReseller ? "🚀" : "🏠";
+  const isHomeActive = pathname === "/" || (isWholesale && pathname === "/wholesale") || (isReseller && pathname === "/reseller");
 
   const accountHref = user ? (isAdmin ? "/admin" : "/account") : "/login";
   const isAccountActive = pathname?.startsWith("/admin") || pathname?.startsWith("/account") || pathname === "/login";
@@ -26,11 +31,11 @@ export default function MobileBottomNav() {
 
       <nav className="jt-mobile-bottom-nav">
         <Link
-          href="/"
-          className={`jt-bottom-nav-item ${pathname === "/" ? "active" : ""}`}
+          href={homeHref}
+          className={`jt-bottom-nav-item ${isHomeActive ? "active" : ""}`}
         >
-          <span className="jt-bottom-nav-icon">🏠</span>
-          <span className="jt-bottom-nav-label">Home</span>
+          <span className="jt-bottom-nav-icon">{homeIcon}</span>
+          <span className="jt-bottom-nav-label">{homeLabel}</span>
         </Link>
 
         <button
