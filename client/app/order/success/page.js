@@ -112,48 +112,50 @@ function OrderSuccessContent() {
               ? `${siteUrl}/order/verify?no=${encodeURIComponent(orderNo)}&k=${encodeURIComponent(order?.accessToken)}`
               : `${siteUrl}/order-tracking?query=${encodeURIComponent(orderNo)}`;
 
+            const cleanNote = (order?.note || "").replace(/\[.*?Privilege:.*?\]/gi, "").trim();
+            const couponCode = order?.couponCode || "DIU15";
+
             return (
-              <div style={{ background: "#f8fafc", padding: "16px 20px", borderRadius: "12px", margin: "20px 0", border: "1px solid #e2e8f0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
-                  <strong style={{ fontSize: "12px", color: "#0f172a", letterSpacing: "0.5px" }}>BILL TO / DELIVERY DETAILS:</strong>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#eef2ff", border: "1px solid #c7d2fe", padding: "3px 8px", borderRadius: "6px" }}>
-                    <img src="/diu-logo-trimmed.png" alt="DIU" style={{ height: "14px", width: "auto" }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                    <span style={{ fontSize: "10px", fontWeight: "800", color: "#4338ca" }}>DIU STUDENT SPECIAL PRIVILEGE</span>
+              <div style={{ background: "#ffffff", padding: "12px 18px", borderRadius: "10px", margin: "14px 0 18px", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
+                  <strong style={{ fontSize: "11.5px", color: "#0f172a", letterSpacing: "0.5px" }}>BILL TO / DELIVERY DETAILS:</strong>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "2px 8px", borderRadius: "6px" }}>
+                    <span style={{ fontSize: "10.5px", fontWeight: "800", color: "#16a34a" }}>Coupon: {couponCode}</span>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
-                  {/* Left Column: Customer & Delivery Info */}
-                  <div style={{ flex: "1 1 240px", fontSize: "13px", color: "#475569", lineHeight: "1.6" }}>
-                    <p style={{ margin: "2px 0" }}><strong>Customer Name:</strong> {order?.customerName}</p>
-                    <p style={{ margin: "2px 0" }}><strong>Phone Number:</strong> {order?.phone}</p>
-                    <p style={{ margin: "2px 0" }}><strong>District:</strong> {order?.district || "Dhaka"}</p>
-                    <p style={{ margin: "2px 0" }}><strong>Delivery Address:</strong> {order?.address}</p>
-                    {order?.note && <p style={{ margin: "2px 0" }}><strong>Note:</strong> {order.note}</p>}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "14px" }}>
+                  {/* Left Column: Customer & Delivery Info (Compact, values bolded) */}
+                  <div style={{ flex: "1 1 250px", fontSize: "12px", color: "#475569", lineHeight: "1.5" }}>
+                    <p style={{ margin: "1px 0" }}>Customer Name: <strong style={{ color: "#0f172a", fontWeight: "800" }}>{order?.customerName}</strong></p>
+                    <p style={{ margin: "1px 0" }}>Phone Number: <strong style={{ color: "#0f172a", fontWeight: "800" }}>{order?.phone}</strong></p>
+                    <p style={{ margin: "1px 0" }}>District: <strong style={{ color: "#0f172a", fontWeight: "800" }}>{order?.district || "Dhaka"}</strong></p>
+                    <p style={{ margin: "1px 0" }}>Address: <strong style={{ color: "#0f172a", fontWeight: "800" }}>{order?.address}</strong></p>
+                    {cleanNote && <p style={{ margin: "1px 0" }}>Note: <strong style={{ color: "#0f172a" }}>{cleanNote}</strong></p>}
                   </div>
 
-                  {/* Middle Column: Payment Info */}
-                  <div style={{ flex: "0 1 170px", fontSize: "13px", color: "#475569" }}>
-                    <strong style={{ fontSize: "12px", color: "#0f172a", display: "block", marginBottom: "4px" }}>PAYMENT METHOD:</strong>
-                    <p style={{ margin: "2px 0", color: "#0f172a", fontWeight: "600" }}>Cash on Delivery (COD)</p>
-                    <p style={{ margin: "2px 0", color: "#64748b" }}>Currency: BDT (Tk)</p>
+                  {/* Middle Column: Payment Info (Compact) */}
+                  <div style={{ flex: "0 1 170px", fontSize: "12px", color: "#475569", lineHeight: "1.5" }}>
+                    <strong style={{ fontSize: "11px", color: "#0f172a", display: "block", marginBottom: "3px" }}>PAYMENT METHOD:</strong>
+                    <p style={{ margin: "1px 0", color: "#0f172a", fontWeight: "700" }}>Cash on Delivery (COD)</p>
+                    <p style={{ margin: "1px 0", color: "#64748b" }}>Currency: BDT (Tk)</p>
                   </div>
 
                   {/* Right Column: QR Code Scanner */}
                   <div style={{
                     background: "#ffffff",
                     border: "1px solid #cbd5e1",
-                    borderRadius: "10px",
-                    padding: "8px 10px",
+                    borderRadius: "8px",
+                    padding: "6px 8px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.03)",
                     flexShrink: 0
                   }}>
-                    <QRCodeSVG value={verifyUrl} size={78} level="M" />
-                    <span style={{ fontSize: "8.5px", fontWeight: "800", color: "#e11d48", marginTop: "4px", letterSpacing: "0.5px" }}>
+                    <QRCodeSVG value={verifyUrl} size={72} level="M" />
+                    <span style={{ fontSize: "8px", fontWeight: "800", color: "#e11d48", marginTop: "3px", letterSpacing: "0.5px" }}>
                       SCAN TO VERIFY
                     </span>
                   </div>

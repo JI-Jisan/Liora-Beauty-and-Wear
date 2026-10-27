@@ -307,9 +307,7 @@ export async function POST(req) {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const { orderNumber, serial } = await nextOrderIdentity();
-        const campusCoupon = body.couponCode ? getCampusCoupon(body.couponCode) : null;
-        const campusTag = campusCoupon ? ` [🎓 ${campusCoupon.campus} (${campusCoupon.short}) Privilege: ${campusCoupon.code}]` : "";
-        const finalOrderNote = (note + campusTag).trim();
+        const finalOrderNote = (note || "").trim();
 
         order = await Order.create({
           customerName,

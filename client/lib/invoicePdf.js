@@ -112,45 +112,74 @@ export async function downloadInvoicePdf(order) {
   doc.setLineWidth(0.4);
   doc.line(14, 37, 196, 37);
 
-  // 3. Customer & Delivery Info Box
+  // 3. Customer & Delivery Info Box (Compact & Bold values)
   doc.setFillColor(...lightBg);
-  doc.roundedRect(14, 41, 182, 36, 3, 3, "F");
+  doc.roundedRect(14, 41, 182, 33, 2, 2, "F");
   doc.setDrawColor(...borderLine);
-  doc.roundedRect(14, 41, 182, 36, 3, 3, "D");
+  doc.roundedRect(14, 41, 182, 33, 2, 2, "D");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
+  doc.setFontSize(8.5);
   doc.setTextColor(...darkNavy);
-  doc.text("BILL TO / DELIVERY DETAILS:", 19, 48);
+  doc.text("BILL TO / DELIVERY DETAILS:", 19, 47);
 
-  // DIU Student Badge Pill in Customer Box
-  doc.setFillColor(238, 242, 255);
-  doc.roundedRect(77, 43.5, 68, 5, 1.5, 1.5, "F");
-  doc.setDrawColor(99, 102, 241);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(77, 43.5, 68, 5, 1.5, 1.5, "D");
+  // Corner Pill: Coupon: DIU15
+  const couponCode = order.couponCode || "DIU15";
+  doc.setFillColor(240, 253, 244);
+  doc.roundedRect(128, 43, 30, 4.5, 1.2, 1.2, "F");
+  doc.setDrawColor(34, 197, 94);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(128, 43, 30, 4.5, 1.2, 1.2, "D");
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.5);
-  doc.setTextColor(67, 56, 202);
-  doc.text("DIU STUDENT SPECIAL PRIVILEGE", 111, 47.1, { align: "center" });
+  doc.setFontSize(6.2);
+  doc.setTextColor(...diuGreen);
+  doc.text(`Coupon: ${couponCode}`, 143, 46.2, { align: "center" });
+
+  // Customer details with BOLD values
+  const textYStart = 53;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.2);
+  doc.setTextColor(...textMuted);
+  doc.text("Customer Name: ", 19, textYStart);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...darkNavy);
+  doc.text(customerName, 19 + doc.getTextWidth("Customer Name: "), textYStart);
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setTextColor(...textMuted);
+  doc.text("Phone Number: ", 19, textYStart + 4.5);
+  doc.setFont("helvetica", "bold");
   doc.setTextColor(...darkNavy);
-  doc.text(`Customer Name: ${customerName}`, 19, 55);
-  doc.text(`Phone Number: ${phone}`, 19, 60);
-  doc.text(`District: ${district}`, 19, 65);
-  doc.text(`Address: ${address.slice(0, 50)}`, 19, 70);
-  if (address.length > 50) {
-    doc.text(address.slice(50, 100), 19, 74);
+  doc.text(phone, 19 + doc.getTextWidth("Phone Number: "), textYStart + 4.5);
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...textMuted);
+  doc.text("District: ", 19, textYStart + 9);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...darkNavy);
+  doc.text(district, 19 + doc.getTextWidth("District: "), textYStart + 9);
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...textMuted);
+  doc.text("Address: ", 19, textYStart + 13.5);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...darkNavy);
+  doc.text(address.slice(0, 48), 19 + doc.getTextWidth("Address: "), textYStart + 13.5);
+  if (address.length > 48) {
+    doc.text(address.slice(48, 96), 19, textYStart + 17.5);
   }
 
+  // Payment Method
   doc.setFont("helvetica", "bold");
-  doc.text("PAYMENT METHOD:", 114, 55);
+  doc.setFontSize(8.5);
+  doc.setTextColor(...darkNavy);
+  doc.text("PAYMENT METHOD:", 114, textYStart);
+  doc.setFont("helvetica", "bold");
+  doc.text("Cash on Delivery (COD)", 114, textYStart + 4.5);
   doc.setFont("helvetica", "normal");
-  doc.text("Cash on Delivery (COD)", 114, 60);
-  doc.text("Currency: BDT (Tk)", 114, 65);
+  doc.setTextColor(...textMuted);
+  doc.text("Currency: BDT (Tk)", 114, textYStart + 9);
 
   // QR Code Generation & Embedding (Offline Base64 PNG)
   try {
@@ -174,21 +203,21 @@ export async function downloadInvoicePdf(order) {
 
     // White card background for QR Code
     doc.setFillColor(255, 255, 255);
-    doc.roundedRect(165, 43, 28, 32, 2, 2, "F");
+    doc.roundedRect(165, 43, 28, 29, 2, 2, "F");
     doc.setDrawColor(...borderLine);
-    doc.roundedRect(165, 43, 28, 32, 2, 2, "D");
+    doc.roundedRect(165, 43, 28, 29, 2, 2, "D");
 
-    doc.addImage(qrDataUrl, "PNG", 167, 44.5, 24, 24);
+    doc.addImage(qrDataUrl, "PNG", 167.5, 44.5, 23, 23);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(6);
+    doc.setFontSize(5.5);
     doc.setTextColor(...primaryColor);
-    doc.text("SCAN TO VERIFY", 179, 72.5, { align: "center" });
+    doc.text("SCAN TO VERIFY", 179, 70, { align: "center" });
   } catch (qrErr) {
     console.warn("Could not generate QR code for PDF invoice:", qrErr);
   }
 
   // 4. Products Table Header
-  let tableY = 82;
+  let tableY = 78;
   doc.setFillColor(...darkNavy);
   doc.rect(14, tableY, 182, 8, "F");
 
