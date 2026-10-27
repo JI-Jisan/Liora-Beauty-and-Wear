@@ -22,6 +22,7 @@ export async function middleware(req) {
       path.startsWith('/api/reseller/wallet') ||
       path.startsWith('/api/quotations') ||
       path.startsWith('/api/visual-search') ||
+      path.startsWith('/api/skinora') ||
       (method === 'POST' && /^\/api\/orders\/?$/.test(path))
     ) {
       return NextResponse.next();
