@@ -249,7 +249,7 @@ export async function downloadInvoicePdf(order) {
   const productSavings = Math.max(0, totalMrp - subtotal);
   const orderDiscount = discount > 0 ? discount : 0;
   const totalSaved = productSavings + orderDiscount;
-  const savedPercent = totalMrp > 0 ? Math.round((totalSaved / (totalMrp + deliveryCharge)) * 100) : 0;
+  const savedPercent = totalMrp > 0 ? Math.min(100, Math.round((totalSaved / totalMrp) * 100)) : 0;
 
   // 6. Summary Block (Subtotal, Delivery, Discount, Total)
   const summaryStartY = tableY + 4;
