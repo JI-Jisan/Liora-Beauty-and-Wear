@@ -8575,3 +8575,471 @@ html, body {
     left: 14px !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   WHOLESALE PORTAL RESPONSIVE (2-COL MOBILE BOX LAYOUT)
+   ───────────────────────────────────────────────────────────── */
+
+.jt-ws-hero-banner {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fecdd3 100%);
+  border-bottom: 1px solid #fecdd3;
+  padding: clamp(28px, 6vw, 48px) 16px;
+  text-align: center;
+}
+.jt-ws-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 14px;
+}
+.jt-ws-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.jt-ws-cat-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+.jt-ws-search-input {
+  padding: 9px 16px;
+  border-radius: 50px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+  min-width: 260px;
+  outline: none;
+  background: #ffffff;
+}
+
+/* 1. Top Feature Cards */
+.jt-ws-features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.jt-ws-feature-card {
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #fecdd3;
+  display: flex;
+  flex-direction: column;
+}
+.jt-ws-feature-card span {
+  font-size: 20px;
+}
+.jt-ws-feature-card h4 {
+  margin: 4px 0 2px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #881337;
+}
+.jt-ws-feature-card p {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* 2. Product Grid */
+.jt-ws-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+/* 3. Product Card (Box Shape) */
+.jt-ws-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #fecdd3;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(190, 18, 60, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+  box-sizing: border-box;
+}
+.jt-ws-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(190, 18, 60, 0.08);
+}
+
+/* Image Box: Perfect Square 1:1 Box */
+.jt-ws-img-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #ffffff;
+  overflow: hidden;
+  border-bottom: 1px solid #f1f5f9;
+}
+.jt-ws-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 6px;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.jt-ws-moq-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #881337;
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  z-index: 2;
+  letter-spacing: 0.02em;
+}
+.jt-ws-stock-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(220, 38, 38, 0.9);
+  color: #ffffff;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 9.5px;
+  font-weight: 700;
+  z-index: 2;
+}
+
+/* Card Content Area */
+.jt-ws-card-content {
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.jt-ws-brand {
+  font-size: 11px;
+  font-weight: 800;
+  color: #e11d48;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.jt-ws-title {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 36px;
+}
+
+/* Pricing Box (Compact, informative) */
+.jt-ws-pricing-box {
+  background: #fff1f2;
+  padding: 8px 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ffe4e6;
+}
+.jt-ws-rate-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.jt-ws-rate-val-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.jt-ws-rate-label {
+  font-size: 11px;
+  color: #9f1239;
+  font-weight: 700;
+}
+.jt-ws-rate-num {
+  font-size: 19px;
+  font-weight: 900;
+  color: #be123c;
+  line-height: 1;
+}
+.jt-ws-profit-pill {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #059669;
+  background: #d1fae5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.jt-ws-mrp-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.jt-ws-mrp-text {
+  color: #334155;
+  font-weight: 700;
+}
+.jt-ws-retail-offer {
+  color: #64748b;
+  font-size: 10px;
+}
+.jt-ws-moq-info {
+  font-size: 10px;
+  color: #881337;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Actions: Button & Stepper */
+.jt-ws-add-btn {
+  width: 100%;
+  background: #be123c;
+  color: #ffffff;
+  border: none;
+  padding: 10px 8px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+}
+.jt-ws-add-btn:hover {
+  background: #9f1239;
+}
+.jt-ws-stepper-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.jt-ws-stepper-btn {
+  width: 34px;
+  height: 36px;
+  border-radius: 6px;
+  font-weight: 900;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.jt-ws-stepper-minus {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+.jt-ws-stepper-remove {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #e11d48;
+}
+.jt-ws-stepper-plus {
+  background: #be123c;
+  color: #ffffff;
+  border: none;
+}
+.jt-ws-stepper-center {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 2px 4px;
+  height: 36px;
+}
+.jt-ws-stepper-input {
+  width: 32px;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-weight: 900;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  padding: 0;
+}
+.jt-ws-stepper-total {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #059669;
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MOBILE VIEW (max-width: 768px): 2 PRODUCTS PER ROW, BOX LAYOUT
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .jt-ws-hero-banner {
+    padding: 20px 12px !important;
+  }
+  .jt-ws-container {
+    padding: 10px 8px !important;
+  }
+  .jt-ws-toolbar {
+    margin-bottom: 12px !important;
+    gap: 8px !important;
+  }
+  .jt-ws-search-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+
+  .jt-ws-features-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+  }
+  .jt-ws-feature-card {
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+  }
+  .jt-ws-feature-card span {
+    font-size: 16px !important;
+  }
+  .jt-ws-feature-card h4 {
+    font-size: 12px !important;
+    margin: 2px 0 1px !important;
+  }
+  .jt-ws-feature-card p {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+
+  .jt-ws-product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .jt-ws-card {
+    border-radius: 12px !important;
+  }
+
+  .jt-ws-img-box {
+    aspect-ratio: 1 / 1 !important;
+    height: auto !important;
+  }
+  .jt-ws-img-box img {
+    padding: 4px !important;
+  }
+
+  .jt-ws-moq-badge {
+    top: 6px !important;
+    left: 6px !important;
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+    border-radius: 5px !important;
+  }
+  .jt-ws-stock-badge {
+    bottom: 6px !important;
+    left: 6px !important;
+    font-size: 8.5px !important;
+    padding: 1px 5px !important;
+  }
+
+  .jt-ws-card-content {
+    padding: 8px !important;
+  }
+
+  .jt-ws-brand {
+    font-size: 9.5px !important;
+  }
+
+  .jt-ws-title {
+    font-size: 11.5px !important;
+    min-height: 28px !important;
+    line-height: 1.25 !important;
+    margin: 1px 0 4px !important;
+  }
+
+  .jt-ws-pricing-box {
+    padding: 5px 6px !important;
+    border-radius: 8px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .jt-ws-rate-label {
+    font-size: 9.5px !important;
+  }
+  .jt-ws-rate-num {
+    font-size: 15px !important;
+  }
+  .jt-ws-profit-pill {
+    font-size: 9px !important;
+    padding: 1px 4px !important;
+  }
+
+  .jt-ws-mrp-row {
+    font-size: 9.5px !important;
+    margin-top: 2px !important;
+    gap: 3px !important;
+  }
+  .jt-ws-retail-offer {
+    font-size: 9px !important;
+  }
+
+  .jt-ws-moq-info {
+    font-size: 8.5px !important;
+    margin-top: 2px !important;
+  }
+
+  .jt-ws-add-btn {
+    padding: 7px 4px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+  }
+
+  .jt-ws-stepper-wrap {
+    gap: 4px !important;
+  }
+  .jt-ws-stepper-btn {
+    width: 28px !important;
+    height: 30px !important;
+    font-size: 13px !important;
+    border-radius: 5px !important;
+  }
+  .jt-ws-stepper-center {
+    height: 30px !important;
+    padding: 1px 2px !important;
+    border-radius: 5px !important;
+  }
+  .jt-ws-stepper-input {
+    width: 24px !important;
+    font-size: 11.5px !important;
+  }
+  .jt-ws-stepper-total {
+    font-size: 9.5px !important;
+  }
+}

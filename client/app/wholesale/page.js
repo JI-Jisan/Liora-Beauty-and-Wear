@@ -2,18 +2,14 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth, getIdToken } from "@/components/AuthProvider";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { getWholesalePrice } from "@/lib/price";
 
 export default function WholesalePage() {
-  const router = useRouter();
-  const { user, role, isWholesale, isAdmin, profile, loading: authLoading } = useAuth();
+  const { user, isWholesale, isAdmin, profile } = useAuth();
   const { updateItemQty } = useCart();
 
   const [products, setProducts] = useState([]);
@@ -245,6 +241,7 @@ export default function WholesalePage() {
 
       {/* Hero Banner */}
       <section
+        className="jt-ws-hero-banner"
         style={{
           background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fecdd3 100%)",
           borderBottom: "1px solid #fecdd3",
@@ -357,7 +354,7 @@ export default function WholesalePage() {
       </section>
 
       {/* Main Content Area */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 14px" }}>
+      <div className="jt-ws-container">
         {/* Success Modal / Banner */}
         {orderSuccess && (
           <div
@@ -412,33 +409,26 @@ export default function WholesalePage() {
         )}
 
         {/* Wholesale Benefits Bar */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 12,
-            marginBottom: 24,
-          }}
-        >
-          <div style={{ background: "#fff", padding: "14px 16px", borderRadius: 12, border: "1px solid #fecdd3" }}>
-            <span style={{ fontSize: 20 }}>📦</span>
-            <h4 style={{ margin: "4px 0 2px", fontSize: 14, fontWeight: 800, color: "#881337" }}>নূন্যতম MOQ</h4>
-            <p style={{ margin: 0, fontSize: 12, color: "#64748b" }}>প্রতি আইটেম মাত্র ৩ পিস বা মোট ৳৩,০০০ থেকে শুরু</p>
+        <div className="jt-ws-features-grid">
+          <div className="jt-ws-feature-card">
+            <span>📦</span>
+            <h4>নূন্যতম MOQ</h4>
+            <p>প্রতি আইটেম মাত্র ৩ পিস বা মোট ৳৩,০০০ থেকে শুরু</p>
           </div>
-          <div style={{ background: "#fff", padding: "14px 16px", borderRadius: 12, border: "1px solid #fecdd3" }}>
-            <span style={{ fontSize: 20 }}>🏷️</span>
-            <h4 style={{ margin: "4px 0 2px", fontSize: 14, fontWeight: 800, color: "#881337" }}>সর্বোচ্চ মার্জিন</h4>
-            <p style={{ margin: 0, fontSize: 12, color: "#64748b" }}>খুচরা মূল্যের চেয়ে ২০% থেকে ৪০% পর্যন্ত ছাড়</p>
+          <div className="jt-ws-feature-card">
+            <span>🏷️</span>
+            <h4>সর্বোচ্চ মার্জিন</h4>
+            <p>খুচরা মূল্যের চেয়ে ২০% থেকে ৪০% পর্যন্ত ছাড়</p>
           </div>
-          <div style={{ background: "#fff", padding: "14px 16px", borderRadius: 12, border: "1px solid #fecdd3" }}>
-            <span style={{ fontSize: 20 }}>🚚</span>
-            <h4 style={{ margin: "4px 0 2px", fontSize: 14, fontWeight: 800, color: "#881337" }}>দ্রুত শিপমেন্ট</h4>
-            <p style={{ margin: 0, fontSize: 12, color: "#64748b" }}>সারা দেশে ২৪-৪৮ ঘণ্টায় নিরাপদ কন্ডিশন ডেলিভারি</p>
+          <div className="jt-ws-feature-card">
+            <span>🚚</span>
+            <h4>দ্রুত শিপমেন্ট</h4>
+            <p>সারা দেশে ২৪-৪৮ ঘণ্টায় নিরাপদ কন্ডিশন ডেলিভারি</p>
           </div>
-          <div style={{ background: "#fff", padding: "14px 16px", borderRadius: 12, border: "1px solid #fecdd3" }}>
-            <span style={{ fontSize: 20 }}>💯</span>
-            <h4 style={{ margin: "4px 0 2px", fontSize: 14, fontWeight: 800, color: "#881337" }}>১০০% অথেনটিক</h4>
-            <p style={{ margin: 0, fontSize: 12, color: "#64748b" }}>অরিজিনাল ব্র্যান্ড ও বারকোড ভেরিফাইড প্রডাক্ট</p>
+          <div className="jt-ws-feature-card">
+            <span>💯</span>
+            <h4>১০০% অথেনটিক</h4>
+            <p>অরিজিনাল ব্র্যান্ড ও বারকোড ভেরিফাইড প্রডাক্ট</p>
           </div>
         </div>
 
@@ -490,17 +480,8 @@ export default function WholesalePage() {
         )}
 
         {/* Search & Category Filter Toolbar */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 10,
-            flexWrap: "wrap",
-            marginBottom: 20,
-          }}
-        >
-          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4, maxWidth: "100%" }}>
+        <div className="jt-ws-toolbar">
+          <div className="jt-ws-cat-scroll">
             <button
               type="button"
               onClick={() => setSelectedCategory("all")}
@@ -547,15 +528,7 @@ export default function WholesalePage() {
             placeholder="🔍 Search wholesale products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              padding: "9px 16px",
-              borderRadius: 50,
-              border: "1px solid #cbd5e1",
-              fontSize: 13,
-              minWidth: 260,
-              outline: "none",
-              background: "#fff",
-            }}
+            className="jt-ws-search-input"
           />
         </div>
 
@@ -569,14 +542,7 @@ export default function WholesalePage() {
             কোনো প্রোডাক্ট পাওয়া যায়নি।
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-              gap: 16,
-              marginBottom: 40,
-            }}
-          >
+          <div className="jt-ws-product-grid">
             {filteredProducts.map((p) => {
               const moq = p.wholesaleMinQty || 3;
               const regularMrp = Number(p.originalPrice || p.offerPrice || 0);
@@ -588,138 +554,80 @@ export default function WholesalePage() {
               const currentQty = cartItem?.qty || 0;
 
               return (
-                <div
-                  key={p._id}
-                  style={{
-                    background: "#ffffff",
-                    borderRadius: 16,
-                    border: "1px solid #fecdd3",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    boxShadow: "0 2px 10px rgba(190, 18, 60, 0.04)",
-                  }}
-                >
-                  <div style={{ position: "relative", width: "100%", height: 200, background: "#f8fafc" }}>
+                <div key={p._id} className="jt-ws-card">
+                  <div className="jt-ws-img-box">
                     <img
                       src={getImageUrl(p.image)}
                       alt={p.name}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       onError={(e) => {
                         e.currentTarget.src =
                           "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&auto=format&fit=crop&q=80";
                       }}
                     />
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: 10,
-                        left: 10,
-                        background: "#881337",
-                        color: "#fff",
-                        padding: "3px 8px",
-                        borderRadius: 6,
-                        fontSize: 10.5,
-                        fontWeight: 800,
-                      }}
-                    >
+                    <span className="jt-ws-moq-badge">
                       MOQ: {moq} Pcs
                     </span>
                     {p.stockQuantity <= 5 && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          bottom: 10,
-                          left: 10,
-                          background: "rgba(220, 38, 38, 0.9)",
-                          color: "#fff",
-                          padding: "2px 8px",
-                          borderRadius: 6,
-                          fontSize: 10,
-                          fontWeight: 700,
-                        }}
-                      >
+                      <span className="jt-ws-stock-badge">
                         Low Stock ({p.stockQuantity})
                       </span>
                     )}
                   </div>
 
-                  <div style={{ padding: 14, flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  <div className="jt-ws-card-content">
                     <div>
                       {p.brand?.name && (
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "#e11d48", textTransform: "uppercase" }}>
+                        <div className="jt-ws-brand">
                           {p.brand.name}
                         </div>
                       )}
-                      <h3
-                        style={{
-                          margin: "4px 0 8px",
-                          fontSize: 14,
-                          fontWeight: 800,
-                          color: "#0f172a",
-                          lineHeight: 1.35,
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
+                      <h3 className="jt-ws-title">
                         {p.name}
                       </h3>
 
                       {/* Pricing Box */}
-                      <div
-                        style={{
-                          background: "#fff1f2",
-                          padding: "10px 12px",
-                          borderRadius: 10,
-                          marginBottom: 12,
-                          border: "1px solid #ffe4e6",
-                        }}
-                      >
+                      <div className="jt-ws-pricing-box">
                         {isApproved ? (
                           <>
-                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 4 }}>
-                              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                                <span style={{ fontSize: 11, color: "#9f1239", fontWeight: 700 }}>পাইকারি:</span>
-                                <span style={{ fontSize: 20, fontWeight: 900, color: "#be123c" }}>
-                                  ৳{wholesaleRate}
-                                </span>
+                            <div className="jt-ws-rate-row">
+                              <div className="jt-ws-rate-val-wrap">
+                                <span className="jt-ws-rate-label">পাইকারি:</span>
+                                <span className="jt-ws-rate-num">৳{wholesaleRate}</span>
                               </div>
-                              <span style={{ fontSize: 11, fontWeight: 800, color: "#059669", background: "#d1fae5", padding: "2px 7px", borderRadius: 4 }}>
+                              <span className="jt-ws-profit-pill">
                                 লাভ ৳{savingsPerPiece}/pc ({marginPct}%)
                               </span>
                             </div>
 
-                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5, flexWrap: "wrap", fontSize: 11.5 }}>
-                              <span style={{ color: "#334155", fontWeight: 700 }}>
-                                রেগুলার MRP: <strong style={{ color: "#0f172a" }}>৳{regularMrp}</strong>
+                            <div className="jt-ws-mrp-row">
+                              <span className="jt-ws-mrp-text">
+                                রেগুলার MRP: <strong>৳{regularMrp}</strong>
                               </span>
                               {retailOffer < regularMrp && (
-                                <span style={{ color: "#64748b", fontSize: 10.5 }}>
-                                  (অনলাইন অফার: ৳{retailOffer})
+                                <span className="jt-ws-retail-offer">
+                                  (অফার: ৳{retailOffer})
                                 </span>
                               )}
                             </div>
 
-                            <div style={{ fontSize: 10.5, color: "#881337", fontWeight: 700, marginTop: 4 }}>
-                              ✓ নূন্যতম {moq} পিস (এরপর ১ পিস করে বাড়ানো যাবে)
+                            <div className="jt-ws-moq-info">
+                              ✓ নূন্যতম {moq} পিস (এরপর ১ পিস করে বৃদ্ধি)
                             </div>
                           </>
                         ) : (
                           <div>
-                            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                              <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>রেগুলার MRP:</span>
-                              <span style={{ fontSize: 16, fontWeight: 800, color: "#0f172a" }}>
+                            <div className="jt-ws-rate-row">
+                              <span className="jt-ws-rate-label">রেগুলার MRP:</span>
+                              <span style={{ fontSize: 15, fontWeight: 800, color: "#0f172a" }}>
                                 ৳{regularMrp}
                               </span>
                               {retailOffer < regularMrp && (
-                                <span style={{ fontSize: 12, color: "#059669", fontWeight: 700 }}>
+                                <span style={{ fontSize: 11, color: "#059669", fontWeight: 700 }}>
                                   (অফার ৳{retailOffer})
                                 </span>
                               )}
                             </div>
-                            <div style={{ fontSize: 11, color: "#e11d48", fontWeight: 700, marginTop: 4 }}>
+                            <div style={{ fontSize: 10, color: "#e11d48", fontWeight: 700, marginTop: 3 }}>
                               🔒 পাইকারি রেট আনলক করতে অনুমোদন প্রয়োজন
                             </div>
                           </div>
@@ -734,23 +642,12 @@ export default function WholesalePage() {
                           <button
                             type="button"
                             onClick={() => handleUpdateQty(p, moq)}
-                            style={{
-                              width: "100%",
-                              background: "#be123c",
-                              color: "#fff",
-                              border: "none",
-                              padding: "10px",
-                              borderRadius: 8,
-                              fontSize: 13,
-                              fontWeight: 800,
-                              cursor: "pointer",
-                              transition: "all 0.2s ease",
-                            }}
+                            className="jt-ws-add-btn"
                           >
-                            + Add MOQ ({moq} pcs) = ৳{wholesaleRate * moq}
+                            + Add ({moq} pcs) • ৳{wholesaleRate * moq}
                           </button>
                         ) : (
-                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <div className="jt-ws-stepper-wrap">
                             <button
                               type="button"
                               onClick={() => {
@@ -760,36 +657,13 @@ export default function WholesalePage() {
                                   handleUpdateQty(p, currentQty - 1);
                                 }
                               }}
-                              style={{
-                                width: 34,
-                                height: 36,
-                                background: "#f1f5f9",
-                                border: "1px solid #cbd5e1",
-                                borderRadius: 6,
-                                fontWeight: 900,
-                                fontSize: 16,
-                                cursor: "pointer",
-                                color: currentQty <= moq ? "#e11d48" : "#0f172a",
-                              }}
+                              className={`jt-ws-stepper-btn ${currentQty <= moq ? "jt-ws-stepper-remove" : "jt-ws-stepper-minus"}`}
                               title={currentQty <= moq ? "কার্ট থেকে সরান" : "১ পিস কমান"}
                             >
                               {currentQty <= moq ? "✕" : "−"}
                             </button>
 
-                            <div
-                              style={{
-                                flex: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 3,
-                                background: "#f8fafc",
-                                border: "1px solid #e2e8f0",
-                                borderRadius: 6,
-                                padding: "2px 4px",
-                                height: 36,
-                              }}
-                            >
+                            <div className="jt-ws-stepper-center">
                               <input
                                 type="number"
                                 min={moq}
@@ -803,19 +677,9 @@ export default function WholesalePage() {
                                     handleUpdateQty(p, Math.max(moq, val));
                                   }
                                 }}
-                                style={{
-                                  width: 40,
-                                  border: "none",
-                                  background: "transparent",
-                                  textAlign: "center",
-                                  fontWeight: 900,
-                                  fontSize: 13.5,
-                                  color: "#0f172a",
-                                  outline: "none",
-                                }}
+                                className="jt-ws-stepper-input"
                               />
-                              <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b" }}>পিস</span>
-                              <span style={{ fontSize: 11, fontWeight: 800, color: "#059669" }}>
+                              <span className="jt-ws-stepper-total">
                                 • ৳{currentQty * wholesaleRate}
                               </span>
                             </div>
@@ -823,17 +687,7 @@ export default function WholesalePage() {
                             <button
                               type="button"
                               onClick={() => handleUpdateQty(p, currentQty + 1)}
-                              style={{
-                                width: 34,
-                                height: 36,
-                                background: "#be123c",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: 6,
-                                fontWeight: 900,
-                                fontSize: 18,
-                                cursor: "pointer",
-                              }}
+                              className="jt-ws-stepper-btn jt-ws-stepper-plus"
                               title="১ পিস বাড়ান (+1)"
                             >
                               +
@@ -853,9 +707,9 @@ export default function WholesalePage() {
                           background: "#f1f5f9",
                           color: "#64748b",
                           border: "1px solid #cbd5e1",
-                          padding: "9px",
-                          borderRadius: 8,
-                          fontSize: 12,
+                          padding: "8px",
+                          borderRadius: 6,
+                          fontSize: 11,
                           fontWeight: 700,
                           cursor: "pointer",
                         }}
@@ -1262,9 +1116,6 @@ export default function WholesalePage() {
           </div>
         </div>
       )}
-
-      <Footer />
-      <MobileBottomNav />
     </div>
   );
 }
