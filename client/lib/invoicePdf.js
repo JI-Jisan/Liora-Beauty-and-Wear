@@ -364,14 +364,14 @@ export async function downloadInvoicePdf(order) {
 
   // 100% Authentic Product Guarantee Badge Box
   doc.setFillColor(248, 250, 252); // Slate-50
-  doc.roundedRect(14, leftBoxY, 94, 18, 2, 2, "F");
+  doc.roundedRect(14, leftBoxY, 94, 15, 2, 2, "F");
   doc.setDrawColor(226, 232, 240); // Slate-200
   doc.setLineWidth(0.3);
-  doc.roundedRect(14, leftBoxY, 94, 18, 2, 2, "D");
+  doc.roundedRect(14, leftBoxY, 94, 15, 2, 2, "D");
 
   // Emerald accent bar on left of guarantee card
   doc.setFillColor(34, 197, 94); // Green-500
-  doc.roundedRect(14, leftBoxY, 3, 18, 1, 1, "F");
+  doc.roundedRect(14, leftBoxY, 3, 15, 1, 1, "F");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
@@ -383,12 +383,9 @@ export async function downloadInvoicePdf(order) {
   doc.setTextColor(...textMuted);
   doc.text("All skincare & cosmetics are 100% genuine & directly sourced.", 20, leftBoxY + 8.8);
   doc.text("We guarantee uncompromised quality & freshness for every product.", 20, leftBoxY + 12.2);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...diuGreen);
-  doc.text("[ DIU CAMPUS ] Exclusively privileged for Daffodil University students.", 20, leftBoxY + 15.6);
 
   // TERMS & CONDITIONS below the guarantee card
-  const termsY = leftBoxY + 22;
+  const termsY = leftBoxY + 19;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...darkNavy);
@@ -397,30 +394,8 @@ export async function downloadInvoicePdf(order) {
   doc.setFontSize(7.2);
   doc.setTextColor(...textMuted);
   doc.text("• Please check product authenticity & condition in front of delivery rider.", 14, termsY + 4.5);
-  doc.text("• Check & receive in front of rider. No return/exchange after rider departs.", 14, termsY + 8.5);
+  doc.text("• Check and accept product at delivery time. No returns once accepted.", 14, termsY + 8.5);
   doc.text("• Track your live order progress anytime at liorabeautyandwear.com/order-tracking", 14, termsY + 12.5);
-
-  // Special Daffodil Campus Privilege Banner Box
-  const diuBannerY = termsY + 17;
-  doc.setFillColor(240, 249, 255); // Sky-50
-  doc.roundedRect(14, diuBannerY, 94, 16, 2, 2, "F");
-  doc.setDrawColor(186, 230, 253); // Sky-200
-  doc.setLineWidth(0.35);
-  doc.roundedRect(14, diuBannerY, 94, 16, 2, 2, "D");
-
-  doc.setFillColor(...diuBlue);
-  doc.roundedRect(14, diuBannerY, 3, 16, 1, 1, "F");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...diuBlue);
-  doc.text("DAFFODIL (DIU) STUDENT PRIVILEGE", 20, diuBannerY + 5);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.8);
-  doc.setTextColor(71, 85, 105);
-  doc.text("Special student campus discount was verified on this order.", 20, diuBannerY + 8.8);
-  doc.text("Priority packaging & 100% verified authentic products guaranteed.", 20, diuBannerY + 12.5);
 
   // 8. Official DIU Certified Partner Stamp (Positioned neatly under summary)
   const stampX = 155;
