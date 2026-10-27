@@ -145,7 +145,7 @@ export default function CampusCouponBar() {
                     setInputCode(e.target.value.toUpperCase());
                     if (feedback) setFeedback(null);
                   }}
-                  placeholder="Enter Campus Coupon (e.g. DIU15)"
+                  placeholder="Enter Campus Coupon (e.g. LIORA09)"
                   style={{
                     width: "100%",
                     padding: "10px 14px",

@@ -47,7 +47,7 @@ export function CampusProvider({ children }) {
     if (!coupon) {
       return {
         success: false,
-        message: "অকার্যকর কুপন কোড! দয়া করে সঠিক ক্যাম্পাস কুপন কোড লিখুন (যেমন: DIU15)।"
+        message: "অকার্যকর কুপন কোড! দয়া করে সঠিক কুপন কোড লিখুন (যেমন: LIORA09)।"
       };
     }
 

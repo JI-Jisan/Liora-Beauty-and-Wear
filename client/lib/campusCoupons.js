@@ -1,4 +1,13 @@
 export const VALID_CAMPUS_COUPONS = {
+  "LIORA09": {
+    code: "LIORA09",
+    campus: "LIORA VIP Privilege",
+    short: "LIORA",
+    maxDiscount: 15,
+    tagColor: "#e11d48",
+    welcomeTitle: "✨ LIORA VIP Privilege Active!",
+    welcomeSubtitle: "Special VIP discount pricing unlocked (Up to 15% OFF) ✨"
+  },
   "DIU15": {
     code: "DIU15",
     campus: "Daffodil International University",
