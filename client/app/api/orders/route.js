@@ -192,10 +192,15 @@ export async function POST(req) {
             marginPct = b.wholesaleMarginPct;
           }
         }
-        const baseCost = Number(p.purchasePrice > 0 ? p.purchasePrice : defaultRetailPrice * 0.70);
-        const dynamicRate = Math.round(baseCost * (1 + marginPct / 100));
-        const hasValidMarkup = Number(p.wholesalePrice) > baseCost;
-        calculatedPrice = hasValidMarkup ? Number(p.wholesalePrice) : dynamicRate;
+        const explicitWs = Number(p.wholesalePrice || 0);
+        if (explicitWs > 0 && defaultRetailPrice > 0 && explicitWs < defaultRetailPrice) {
+          calculatedPrice = explicitWs;
+        } else {
+          const baseCost = Number(p.purchasePrice > 0 ? p.purchasePrice : defaultRetailPrice * 0.70);
+          const dynamicRate = Math.round(baseCost * (1 + marginPct / 100));
+          const safeCappedRate = defaultRetailPrice > 0 ? Math.min(dynamicRate, Math.round(defaultRetailPrice * 0.88)) : dynamicRate;
+          calculatedPrice = Math.max(1, safeCappedRate);
+        }
         totalSavings += Math.max(0, defaultRetailPrice - calculatedPrice) * qty;
       } else if (orderType === "reseller") {
         if (p.resellerPrice > 0) {

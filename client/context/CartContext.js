@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import CartDrawer from "@/components/CartDrawer";
 import CartQuickBar from "@/components/CartQuickBar";
 import { useAuth } from "@/components/AuthProvider";
+import { getWholesalePrice } from "@/lib/price";
 
 const CartContext = createContext(null);
 
@@ -44,9 +45,7 @@ export function CartProvider({ children }) {
 
     if (isWs) {
       minMoq = Math.max(1, product.wholesaleMinQty || 3);
-      const baseCost = Number(product.purchasePrice || (product.offerPrice ? product.offerPrice * 0.70 : 100));
-      const hasValidMarkup = Number(product.wholesalePrice) > baseCost;
-      unitPrice = hasValidMarkup ? Number(product.wholesalePrice) : Math.round(baseCost * 1.07);
+      unitPrice = getWholesalePrice(product);
     } else if (isRes) {
       unitPrice = Number(product.resellerPrice > 0 ? product.resellerPrice : Math.round((product.offerPrice || 100) * 0.92));
     }
@@ -150,7 +149,7 @@ export function CartProvider({ children }) {
             : item
         );
       } else {
-        const unitPrice = customPrice !== undefined ? Number(customPrice) : Number(product.wholesalePrice || product.offerPrice || 0);
+        const unitPrice = customPrice !== undefined ? Number(customPrice) : (isWs ? getWholesalePrice(product) : Number(product.offerPrice || 0));
         updated = [
           ...prev,
           {

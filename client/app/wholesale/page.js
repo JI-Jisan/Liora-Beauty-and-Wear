@@ -9,6 +9,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth, getIdToken } from "@/components/AuthProvider";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { getWholesalePrice } from "@/lib/price";
 
 export default function WholesalePage() {
   const router = useRouter();
@@ -143,12 +144,7 @@ export default function WholesalePage() {
     }
 
     const finalQty = Math.max(minMoq, qty);
-    const regularMrp = Number(p.originalPrice || p.offerPrice || 0);
-    const brandMargin = Number(p.brand?.wholesaleMarginPct ?? 7);
-    const baseCost = Number(p.purchasePrice || p.costPrice || (regularMrp ? regularMrp * 0.70 : 100));
-    const dynamicRate = Math.round(baseCost * (1 + brandMargin / 100));
-    const hasValidMarkup = Number(p.wholesalePrice) > baseCost;
-    const wholesaleRate = Number(hasValidMarkup ? p.wholesalePrice : dynamicRate);
+    const wholesaleRate = getWholesalePrice(p);
 
     setWholesaleCart((prev) => ({
       ...prev,
@@ -585,11 +581,7 @@ export default function WholesalePage() {
               const moq = p.wholesaleMinQty || 3;
               const regularMrp = Number(p.originalPrice || p.offerPrice || 0);
               const retailOffer = Number(p.offerPrice || p.originalPrice || 0);
-              const brandMargin = Number(p.brand?.wholesaleMarginPct ?? 7);
-              const baseCost = Number(p.purchasePrice || p.costPrice || (regularMrp ? regularMrp * 0.70 : 100));
-              const dynamicRate = Math.round(baseCost * (1 + brandMargin / 100));
-              const hasValidMarkup = Number(p.wholesalePrice) > baseCost;
-              const wholesaleRate = Number(hasValidMarkup ? p.wholesalePrice : dynamicRate);
+              const wholesaleRate = getWholesalePrice(p);
               const savingsPerPiece = Math.max(0, regularMrp - wholesaleRate);
               const marginPct = regularMrp > 0 ? Math.round((savingsPerPiece / regularMrp) * 100) : 0;
               const cartItem = wholesaleCart[p._id];

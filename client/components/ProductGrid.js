@@ -7,7 +7,7 @@ import CategoryBar from "./CategoryBar";
 import ProductWatermark from "./ProductWatermark";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { cld } from "@/lib/cloudinary";
-import { getDiscount, getSaved } from "@/lib/price";
+import { getDiscount, getSaved, getWholesalePrice } from "@/lib/price";
 import { useCart } from "@/context/CartContext";
 import { useCampus } from "@/context/CampusContext";
 import { useAuth } from "@/components/AuthProvider";
@@ -124,10 +124,7 @@ function ProductGridContent({
     }, 1500);
 
     if (isWholesale) {
-      const regularMrp = Number(product.originalPrice || product.offerPrice || 0);
-      const baseCost = Number(product.purchasePrice || (regularMrp ? regularMrp * 0.70 : 100));
-      const isExplicit = Number(product.wholesalePrice) > baseCost;
-      const wsPrice = isExplicit ? Number(product.wholesalePrice) : Math.round(baseCost * 1.07);
+      const wsPrice = getWholesalePrice(product);
       const minQty = Math.max(1, product.wholesaleMinQty || 3);
       if (typeof onAddToCart === "function") {
         onAddToCart({ ...product, price: wsPrice, quantity: minQty, orderType: "wholesale" });
@@ -480,9 +477,7 @@ function ProductGridContent({
                 <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none", display: "block" }}>
                   {isWholesale ? (() => {
                     const regularMrp = Number(product.originalPrice || product.offerPrice || 0);
-                    const baseCost = Number(product.purchasePrice || (regularMrp ? regularMrp * 0.70 : 100));
-                    const isExplicit = Number(product.wholesalePrice) > baseCost;
-                    const wsPrice = isExplicit ? Number(product.wholesalePrice) : Math.round(baseCost * 1.07);
+                    const wsPrice = getWholesalePrice(product);
                     const profitPerPc = Math.max(0, regularMrp - wsPrice);
                     const minQty = Math.max(1, product.wholesaleMinQty || 3);
 
@@ -512,9 +507,12 @@ function ProductGridContent({
                           </span>
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 18, marginBottom: 8, fontSize: 11.5 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 18, marginBottom: 8, fontSize: 11.5, flexWrap: "wrap", gap: 4 }}>
                           <span style={{ color: "#64748b" }}>
                             MRP: <span style={{ textDecoration: "line-through" }}>{regularMrp} Tk</span>
+                            {product.offerPrice && Number(product.offerPrice) < regularMrp && (
+                              <span style={{ marginLeft: 4, color: "#64748b" }}>(অফার ৳{product.offerPrice})</span>
+                            )}
                           </span>
                           {profitPerPc > 0 && (
                             <span style={{ color: "#16a34a", fontWeight: 800 }}>

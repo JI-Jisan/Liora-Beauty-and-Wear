@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import { getWholesalePrice } from "./price";
 
 /**
  * Converts an image URL to a scaled-down Base64 JPEG data URL
@@ -209,14 +210,17 @@ export async function generateWholesalePdf({
       Number(p.originalPrice) ||
       Number(p.offerPrice) ||
       (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
-    const customWholesale = Number(p.wholesalePrice);
+    const explicitPrice = Number(p.price || p.unitPrice || 0);
 
-    const hasValidMarkup = customWholesale > buyPrice;
-    const defaultProfit = Number(profitPercent) > 0 ? Number(profitPercent) : 7;
-    const calculatedWholesale =
-      hasValidMarkup
-        ? customWholesale
-        : Math.round(buyPrice * (1 + defaultProfit / 100));
+    let calculatedWholesale = explicitPrice > 0 ? explicitPrice : getWholesalePrice(p);
+    // If admin explicitly set profitPercent and purchasePrice is available, honor markup:
+    if (explicitPrice <= 0 && buyPrice > 0 && Number(profitPercent) > 0) {
+      calculatedWholesale = Math.round(buyPrice * (1 + Number(profitPercent) / 100));
+    }
+    // Safety check: wholesale rate must never exceed retail price if retail price is known
+    if (origPrice > 0 && calculatedWholesale >= origPrice) {
+      calculatedWholesale = Math.round(origPrice * 0.88);
+    }
 
     const finalWholesale = Math.max(1, calculatedWholesale);
     const qty = Math.max(1, parseInt(p.quantity) || 1);

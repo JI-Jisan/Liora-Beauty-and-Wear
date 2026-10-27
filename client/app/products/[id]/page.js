@@ -9,7 +9,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/components/AuthProvider";
 import { useCampus } from "@/context/CampusContext";
 import { cld } from "@/lib/cloudinary";
-import { getDiscount, getSaved } from "@/lib/price";
+import { getDiscount, getSaved, getWholesalePrice } from "@/lib/price";
 import ProductWatermark from "@/components/ProductWatermark";
 
 
@@ -214,9 +214,8 @@ export default function ProductDetailsPage() {
   }, [product]);
 
   const regularMrp = Number(product?.originalPrice || product?.offerPrice || 0);
-  const cost = Number(product?.purchasePrice || (regularMrp ? regularMrp * 0.70 : 100));
-  const isExplicit = Number(product?.wholesalePrice) > cost;
-  const wsPrice = isExplicit ? Number(product.wholesalePrice) : Math.round(cost * 1.07);
+  const retailOffer = Number(product?.offerPrice || product?.originalPrice || 0);
+  const wsPrice = getWholesalePrice(product);
   const profitPerPc = Math.max(0, regularMrp - wsPrice);
   const minMoq = Math.max(1, product?.wholesaleMinQty || 3);
 
@@ -603,7 +602,12 @@ export default function ProductDetailsPage() {
                   </span>
                   {regularMrp > wsPrice && (
                     <span style={{ fontSize: "16px", color: "#64748b", textDecoration: "line-through" }} title="দোকানের বিক্রয় মূল্য (MRP)">
-                      MRP: ৳{regularMrp}
+                      রেগুলার MRP: ৳{regularMrp}
+                    </span>
+                  )}
+                  {retailOffer > wsPrice && (
+                    <span style={{ fontSize: "13px", color: "#64748b" }}>
+                      (অনলাইন অফার: ৳{retailOffer})
                     </span>
                   )}
                 </div>
