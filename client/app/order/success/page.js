@@ -67,12 +67,8 @@ function OrderSuccessContent() {
           overflow: "hidden"
         }}
       >
-        {/* Duo-tone DIU x LIORA Top Bar */}
-        <div style={{ height: "6px", display: "flex", width: "100%" }}>
-          <div style={{ flex: 1, background: "#e11d48" }}></div>
-          <div style={{ flex: 1, background: "#004b87" }}></div>
-        </div>
-        <div style={{ height: "2px", background: "#22c55e", width: "100%" }}></div>
+        {/* Top Decorative Bar */}
+        <div style={{ height: "5px", background: "#e11d48", width: "100%" }}></div>
 
         <div style={{ padding: "28px" }}>
           {/* Header Section: LIORA (Left) | INVOICE Meta (Right) */}
@@ -113,15 +109,17 @@ function OrderSuccessContent() {
               : `${siteUrl}/order-tracking?query=${encodeURIComponent(orderNo)}`;
 
             const cleanNote = (order?.note || "").replace(/\[.*?Privilege:.*?\]/gi, "").trim();
-            const couponCode = order?.couponCode || "DIU15";
+            const couponCode = order?.couponCode || (order?.discount > 0 ? "DIU15" : "");
 
             return (
               <div style={{ background: "#ffffff", padding: "12px 18px", borderRadius: "10px", margin: "14px 0 18px", border: "1px solid #e2e8f0" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
                   <strong style={{ fontSize: "11.5px", color: "#0f172a", letterSpacing: "0.5px" }}>BILL TO / DELIVERY DETAILS:</strong>
-                  <div style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "2px 8px", borderRadius: "6px" }}>
-                    <span style={{ fontSize: "10.5px", fontWeight: "800", color: "#16a34a" }}>Coupon: {couponCode}</span>
-                  </div>
+                  {couponCode && (
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "5px", background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "2px 8px", borderRadius: "6px" }}>
+                      <span style={{ fontSize: "10.5px", fontWeight: "800", color: "#16a34a" }}>Coupon: {couponCode}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "14px" }}>
@@ -323,6 +321,12 @@ function OrderSuccessContent() {
                 </div>
               );
             })()}
+          </div>
+
+          {/* Invoice Footer */}
+          <div style={{ marginTop: "28px", borderTop: "1px solid #e2e8f0", paddingTop: "14px", textAlign: "center", color: "#64748b", fontSize: "11px" }}>
+            <p style={{ margin: "0 0 3px" }}>Thank you for choosing LIORA Beauty & Wear! Beauty. Style. You.</p>
+            <p style={{ margin: 0 }}><a href="https://liorabeautyandwear.com" style={{ color: "#e11d48", textDecoration: "none" }}>https://liorabeautyandwear.com</a></p>
           </div>
         </div>
       </div>

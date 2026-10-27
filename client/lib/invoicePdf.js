@@ -1,6 +1,5 @@
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
-import { DIU_LOGO_BASE64 } from "./diuLogoBase64";
 
 export async function downloadInvoicePdf(order) {
   if (!order) return;
@@ -46,13 +45,9 @@ export async function downloadInvoicePdf(order) {
   const lightBg = [248, 250, 252]; // Slate-50
   const borderLine = [226, 232, 240]; // Slate-200
 
-  // 1. Top Decorative Bar (LIORA Rose + DIU Royal Blue + DIU Green accent line)
+  // 1. Top Decorative Bar (Solid LIORA Rose)
   doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, 105, 5, "F");
-  doc.setFillColor(...diuBlue);
-  doc.rect(105, 0, 105, 5, "F");
-  doc.setFillColor(34, 197, 94);
-  doc.rect(0, 5, 210, 1.2, "F");
+  doc.rect(0, 0, 210, 5, "F");
 
   // 2. Header Section
   doc.setFont("helvetica", "bold");
@@ -69,26 +64,6 @@ export async function downloadInvoicePdf(order) {
   doc.setTextColor(...textMuted);
   doc.text("Authentic Skincare, Cosmetics & Fashion Wear", 14, 27);
   doc.text("Web: liorabeautyandwear.com  |  Email: liorabeautyandwear@gmail.com", 14, 31);
-
-  // Center: DIU Logo + Official Campus Privilege Badge
-  if (DIU_LOGO_BASE64) {
-    try {
-      doc.addImage(DIU_LOGO_BASE64, "PNG", 79, 11.5, 45, 12.5);
-
-      doc.setFillColor(240, 253, 244);
-      doc.roundedRect(77, 26, 49, 4.4, 1.2, 1.2, "F");
-      doc.setDrawColor(34, 197, 94);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(77, 26, 49, 4.4, 1.2, 1.2, "D");
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(6.2);
-      doc.setTextColor(...diuGreen);
-      doc.text("CAMPUS PRIVILEGE PARTNER", 101.5, 29.2, { align: "center" });
-    } catch (imgErr) {
-      console.warn("Could not add DIU logo to PDF:", imgErr);
-    }
-  }
 
   // Invoice Title on Right
   doc.setFont("helvetica", "bold");
@@ -123,18 +98,20 @@ export async function downloadInvoicePdf(order) {
   doc.setTextColor(...darkNavy);
   doc.text("BILL TO / DELIVERY DETAILS:", 19, 47);
 
-  // Corner Pill: Coupon: DIU15
-  const couponCode = order.couponCode || "DIU15";
-  doc.setFillColor(240, 253, 244);
-  doc.roundedRect(128, 43, 30, 4.5, 1.2, 1.2, "F");
-  doc.setDrawColor(34, 197, 94);
-  doc.setLineWidth(0.25);
-  doc.roundedRect(128, 43, 30, 4.5, 1.2, 1.2, "D");
+  // Corner Pill: Coupon (e.g. DIU15)
+  const couponCode = order.couponCode || (order.discount > 0 ? "DIU15" : "");
+  if (couponCode) {
+    doc.setFillColor(240, 253, 244);
+    doc.roundedRect(128, 43, 30, 4.5, 1.2, 1.2, "F");
+    doc.setDrawColor(34, 197, 94);
+    doc.setLineWidth(0.25);
+    doc.roundedRect(128, 43, 30, 4.5, 1.2, 1.2, "D");
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(6.2);
-  doc.setTextColor(...diuGreen);
-  doc.text(`Coupon: ${couponCode}`, 143, 46.2, { align: "center" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(6.2);
+    doc.setTextColor(...diuGreen);
+    doc.text(`Coupon: ${couponCode}`, 143, 46.2, { align: "center" });
+  }
 
   // Customer details with BOLD values
   const textYStart = 53;
@@ -426,36 +403,7 @@ export async function downloadInvoicePdf(order) {
   doc.text("• Check and accept product at delivery time. No returns once accepted.", 14, termsY + 8.5);
   doc.text("• Track your live order progress anytime at liorabeautyandwear.com/order-tracking", 14, termsY + 12.5);
 
-  // 8. Official DIU Certified Partner Stamp (Positioned neatly under summary)
-  const stampX = 155;
-  const stampY = Math.max(currentSummaryY + 20, 185);
-
-  doc.setDrawColor(...diuBlue);
-  doc.setLineWidth(0.7);
-  doc.circle(stampX, stampY, 14, "D");
-
-  doc.setDrawColor(34, 197, 94);
-  doc.setLineWidth(0.3);
-  doc.circle(stampX, stampY, 12.5, "D");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(5);
-  doc.setTextColor(...diuBlue);
-  doc.text("DAFFODIL INTL UNIVERSITY", stampX, stampY - 6.5, { align: "center" });
-
-  doc.setFontSize(6.2);
-  doc.setTextColor(...diuGreen);
-  doc.text("CAMPUS PRIVILEGE", stampX, stampY - 1.5, { align: "center" });
-
-  doc.setFontSize(7.5);
-  doc.setTextColor(...primaryColor);
-  doc.text("[ VERIFIED ]", stampX, stampY + 3.2, { align: "center" });
-
-  doc.setFontSize(5);
-  doc.setTextColor(...diuBlue);
-  doc.text("100% AUTHENTIC • DIU15", stampX, stampY + 7.5, { align: "center" });
-
-  // 9. Footer Bar
+  // 8. Footer Bar
   const footerY = 280;
   doc.setDrawColor(...borderLine);
   doc.setLineWidth(0.4);
@@ -465,12 +413,12 @@ export async function downloadInvoicePdf(order) {
   doc.setFontSize(8);
   doc.setTextColor(...textMuted);
   doc.text(
-    "LIORA Beauty & Wear x Daffodil International University | Campus Privilege Partner",
+    "Thank you for choosing LIORA Beauty & Wear! Beauty. Style. You.",
     105,
     footerY + 5,
     { align: "center" }
   );
-  doc.text("https://liorabeautyandwear.com  •  Special privilege for DIU Students & Faculty", 105, footerY + 9, { align: "center" });
+  doc.text("https://liorabeautyandwear.com", 105, footerY + 9, { align: "center" });
 
   // Save / Trigger Download
   const filename = `Invoice-${orderNo}.pdf`;
