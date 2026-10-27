@@ -56,6 +56,7 @@ export function getProductCampusPricing(product, coupon) {
   if (!product || !coupon) return null;
 
   const regularPrice = Number(product.offerPrice || product.originalPrice || 0);
+  const mrp = Number(product.originalPrice || product.offerPrice || regularPrice);
   if (regularPrice <= 0) return null;
 
   // 1. Use product's database campusDiscountPct if present and > 0
@@ -63,11 +64,10 @@ export function getProductCampusPricing(product, coupon) {
 
   // 2. Intelligent fallback if not yet populated or cached (guarantees student discount always activates)
   if (discountPct <= 0) {
-    const orig = Number(product.originalPrice || 0);
-    if (orig > regularPrice && (orig - regularPrice) / orig >= 0.15) {
-      discountPct = 10;
+    if (mrp > regularPrice && (mrp - regularPrice) / mrp >= 0.15) {
+      discountPct = 8;
     } else {
-      discountPct = 7;
+      discountPct = 5;
     }
   }
 
@@ -76,13 +76,18 @@ export function getProductCampusPricing(product, coupon) {
 
   const campusPrice = Math.max(1, Math.round(regularPrice * (1 - discountPct / 100)));
   const savedAmount = Math.max(0, regularPrice - campusPrice);
+  const savedFromMrp = Math.max(savedAmount, mrp - campusPrice);
+  const savedFromMrpPct = mrp > 0 ? Math.round((savedFromMrp / mrp) * 100) : discountPct;
 
   return {
     hasDiscount: true,
     regularPrice,
+    mrp,
     campusPrice,
     discountPct,
     savedAmount,
+    savedFromMrp,
+    savedFromMrpPct,
     badgeText: `🎓 ${coupon.short} -${discountPct}% OFF`,
     shortName: coupon.short
   };

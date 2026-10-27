@@ -161,36 +161,49 @@ export default function CuratedCombos({ onAddToCart }) {
                     </h3>
 
                     {campusPricing?.hasDiscount ? (
-                      <div className="jt-combo-price-box" style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
-                        <strong className="jt-combo-offer-price" style={{ color: "#e11d48", fontWeight: 900 }}>
-                          {campusPricing.campusPrice} Tk
-                        </strong>
-                        <span className="jt-combo-orig-price" style={{ textDecoration: "line-through", color: "#94a3b8" }}>
-                          {item.offerPrice} Tk
-                        </span>
+                      <div>
+                        <div className="jt-combo-price-box" style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+                          <strong className="jt-combo-offer-price" style={{ color: "#e11d48", fontWeight: 900 }}>
+                            {campusPricing.campusPrice} Tk
+                          </strong>
+                          {campusPricing.mrp > campusPricing.campusPrice && (
+                            <span className="jt-combo-orig-price" style={{ textDecoration: "line-through", color: "#94a3b8" }} title="Market Retail Price (MRP)">
+                              MRP {campusPricing.mrp} Tk
+                            </span>
+                          )}
+                        </div>
+                        {item.offerPrice && campusPricing.mrp > item.offerPrice && item.offerPrice > campusPricing.campusPrice && (
+                          <div style={{ fontSize: 11, color: "#64748b", margin: "2px 0" }}>
+                            রেগুলার: <span style={{ textDecoration: "line-through" }}>{item.offerPrice} Tk</span>
+                          </div>
+                        )}
+                        <div className="jt-combo-save-pill" style={{ background: "#dcfce7", color: "#16a34a", fontWeight: 800 }}>
+                          {campusPricing.savedFromMrp > campusPricing.savedAmount ? (
+                            <span>🎓 MRP থেকে মোট সেভ: ৳{campusPricing.savedFromMrp} ({campusPricing.savedFromMrpPct}% লাভ)</span>
+                          ) : (
+                            <span>🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}</span>
+                          )}
+                        </div>
                       </div>
                     ) : (
-                      <div className="jt-combo-price-box">
-                        <strong className="jt-combo-offer-price">
-                          {item.offerPrice} Tk
-                        </strong>
-                        {item.originalPrice > item.offerPrice && (
-                          <span className="jt-combo-orig-price">
-                            {item.originalPrice} Tk
-                          </span>
+                      <div>
+                        <div className="jt-combo-price-box">
+                          <strong className="jt-combo-offer-price">
+                            {item.offerPrice} Tk
+                          </strong>
+                          {item.originalPrice > item.offerPrice && (
+                            <span className="jt-combo-orig-price">
+                              {item.originalPrice} Tk
+                            </span>
+                          )}
+                        </div>
+                        {savedTk > 0 && (
+                          <div className="jt-combo-save-pill">
+                            🎉 মোট ৳{savedTk} সাশ্রয়
+                          </div>
                         )}
                       </div>
                     )}
-
-                    {campusPricing?.hasDiscount ? (
-                      <div className="jt-combo-save-pill" style={{ background: "#dcfce7", color: "#16a34a", fontWeight: 800 }}>
-                        🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}
-                      </div>
-                    ) : savedTk > 0 ? (
-                      <div className="jt-combo-save-pill">
-                        🎉 মোট ৳{savedTk} সাশ্রয়
-                      </div>
-                    ) : null}
                   </div>
                 </Link>
 

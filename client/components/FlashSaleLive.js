@@ -231,13 +231,29 @@ export default function FlashSaleLive({ onAddToCart }) {
                     </h4>
 
                     {campusPricing?.hasDiscount ? (
-                      <div className="jt-flash-price-row" style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
-                        <strong className="jt-flash-offer-price" style={{ color: "#e11d48", fontWeight: 900 }}>
-                          {campusPricing.campusPrice} Tk
-                        </strong>
-                        <span className="jt-flash-orig-price" style={{ textDecoration: "line-through", color: "#94a3b8" }}>
-                          {product.offerPrice} Tk
-                        </span>
+                      <div>
+                        <div className="jt-flash-price-row" style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+                          <strong className="jt-flash-offer-price" style={{ color: "#e11d48", fontWeight: 900 }}>
+                            {campusPricing.campusPrice} Tk
+                          </strong>
+                          {campusPricing.mrp > campusPricing.campusPrice && (
+                            <span className="jt-flash-orig-price" style={{ textDecoration: "line-through", color: "#94a3b8" }} title="Market Retail Price (MRP)">
+                              MRP {campusPricing.mrp} Tk
+                            </span>
+                          )}
+                        </div>
+                        {product.offerPrice && campusPricing.mrp > product.offerPrice && product.offerPrice > campusPricing.campusPrice && (
+                          <div style={{ fontSize: 11, color: "#64748b", margin: "2px 0" }}>
+                            রেগুলার: <span style={{ textDecoration: "line-through" }}>{product.offerPrice} Tk</span>
+                          </div>
+                        )}
+                        <div className="jt-flash-save-text" style={{ color: "#16a34a", fontWeight: 800 }}>
+                          {campusPricing.savedFromMrp > campusPricing.savedAmount ? (
+                            <span>🎓 MRP থেকে মোট সেভ: ৳{campusPricing.savedFromMrp} ({campusPricing.savedFromMrpPct}% লাভ)</span>
+                          ) : (
+                            <span>🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}</span>
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <div className="jt-flash-price-row">
@@ -252,15 +268,11 @@ export default function FlashSaleLive({ onAddToCart }) {
                       </div>
                     )}
 
-                    {campusPricing?.hasDiscount ? (
-                      <div className="jt-flash-save-text" style={{ color: "#16a34a", fontWeight: 800 }}>
-                        🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}
-                      </div>
-                    ) : savedTk > 0 ? (
+                    {!campusPricing?.hasDiscount && savedTk > 0 && (
                       <div className="jt-flash-save-text">
                         ৳{savedTk} সাশ্রয়
                       </div>
-                    ) : null}
+                    )}
                   </div>
                 </Link>
 

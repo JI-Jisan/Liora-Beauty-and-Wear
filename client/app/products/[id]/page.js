@@ -594,12 +594,27 @@ export default function ProductDetailsPage() {
                 <span style={{ fontSize: "clamp(26px, 8vw, 36px)", fontWeight: "900", color: "#e11d48" }}>
                   {campusPricing.campusPrice} Tk
                 </span>
-                <span style={{ fontSize: "16px", color: "#64748b", textDecoration: "line-through" }}>
-                  {product.offerPrice} Tk
-                </span>
-                <span style={{ fontSize: "13px", color: "#16a34a", fontWeight: 800 }}>
-                  (৳{campusPricing.savedAmount} এক্সট্রা সেভিংস)
-                </span>
+                {campusPricing.mrp > campusPricing.campusPrice && (
+                  <span style={{ fontSize: "17px", color: "#94a3b8", textDecoration: "line-through" }} title="Market Retail Price (MRP)">
+                    MRP {campusPricing.mrp} Tk
+                  </span>
+                )}
+                {product.offerPrice && campusPricing.mrp > product.offerPrice && product.offerPrice > campusPricing.campusPrice && (
+                  <span style={{ fontSize: "14px", color: "#64748b" }}>
+                    (রেগুলার: <span style={{ textDecoration: "line-through" }}>{product.offerPrice} Tk</span>)
+                  </span>
+                )}
+              </div>
+              <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                {campusPricing.savedFromMrp > campusPricing.savedAmount ? (
+                  <span style={{ fontSize: "13.5px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "3px 10px", borderRadius: "8px" }}>
+                    🎉 MRP থেকে মোট সেভ: ৳{campusPricing.savedFromMrp} ({campusPricing.savedFromMrpPct}% লাভ)
+                  </span>
+                ) : (
+                  <span style={{ fontSize: "13.5px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "3px 10px", borderRadius: "8px" }}>
+                    🎉 {activeCoupon?.short} স্পেশাল সেভিংস: ৳{campusPricing.savedAmount}
+                  </span>
+                )}
               </div>
             </div>
           )}

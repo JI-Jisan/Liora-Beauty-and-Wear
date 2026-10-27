@@ -446,66 +446,86 @@ function ProductGridContent({
               <div style={{ marginTop: "auto", paddingTop: 4 }}>
                 <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none", display: "block" }}>
                   {campusPricing?.hasDiscount ? (
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
-                      <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 900, color: "#e11d48" }}>
-                        {campusPricing.campusPrice} Tk
-                      </p>
-                      <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through" }}>
-                        {product.offerPrice} Tk
-                      </span>
-                      <span style={{
-                        fontSize: 10,
-                        fontWeight: 800,
-                        background: activeCoupon?.tagColor || "#ff4d6d",
-                        color: "#ffffff",
-                        padding: "1px 6px",
-                        borderRadius: "4px",
-                      }}>
-                        {activeCoupon?.short} -{campusPricing.discountPct}%
-                      </span>
-                      <span style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
-                        marginLeft: "auto"
-                      }}>
-                        {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
-                      </span>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
+                        <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 900, color: "#e11d48" }}>
+                          {campusPricing.campusPrice} Tk
+                        </p>
+                        {campusPricing.mrp > campusPricing.campusPrice && (
+                          <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through" }} title="Market Retail Price (MRP)">
+                            MRP {campusPricing.mrp} Tk
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: 10,
+                          fontWeight: 800,
+                          background: activeCoupon?.tagColor || "#ff4d6d",
+                          color: "#ffffff",
+                          padding: "1px 6px",
+                          borderRadius: "4px",
+                        }}>
+                          {activeCoupon?.short} -{campusPricing.discountPct}%
+                        </span>
+                        <span style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                          marginLeft: "auto"
+                        }}>
+                          {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                        </span>
+                      </div>
+
+                      {product.offerPrice && campusPricing.mrp > product.offerPrice && product.offerPrice > campusPricing.campusPrice && (
+                        <div style={{ fontSize: 11, color: "#64748b", margin: "0 0 3px" }}>
+                          রেগুলার প্রাইস: <span style={{ textDecoration: "line-through" }}>{product.offerPrice} Tk</span>
+                        </div>
+                      )}
+
+                      <div style={{ minHeight: 18, marginBottom: 8, display: "flex", alignItems: "center" }}>
+                        {campusPricing.savedFromMrp > campusPricing.savedAmount ? (
+                          <span style={{ fontSize: 11.5, color: '#16a34a', fontWeight: 800 }}>
+                            🎓 MRP থেকে মোট সেভ: ৳{campusPricing.savedFromMrp} ({campusPricing.savedFromMrpPct}% লাভ)
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 11.5, color: '#16a34a', fontWeight: 800 }}>
+                            🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ) : (
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
-                      <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
-                        {product.offerPrice} Tk
-                      </p>
-                      {product.originalPrice > product.offerPrice && (
-                        <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through" }}>
-                          {product.originalPrice} Tk
+                    <div>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
+                        <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
+                          {product.offerPrice} Tk
+                        </p>
+                        {product.originalPrice > product.offerPrice && (
+                          <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through" }}>
+                            {product.originalPrice} Tk
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                          marginLeft: "auto"
+                        }}>
+                          {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
                         </span>
-                      )}
-                      <span style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
-                        marginLeft: "auto"
-                      }}>
-                        {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
-                      </span>
+                      </div>
+
+                      <div style={{ minHeight: 18, marginBottom: 8, display: "flex", alignItems: "center" }}>
+                        {getSaved(product) > 0 ? (
+                          <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
+                            ৳{getSaved(product)} সাশ্রয়
+                          </span>
+                        ) : (
+                          <span style={{ visibility: "hidden", fontSize: 11 }}>সাশ্রয়</span>
+                        )}
+                      </div>
                     </div>
                   )}
-
-                  <div style={{ minHeight: 18, marginBottom: 8, display: "flex", alignItems: "center" }}>
-                    {campusPricing?.hasDiscount ? (
-                      <span style={{ fontSize: 11.5, color: '#16a34a', fontWeight: 800 }}>
-                        🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}
-                      </span>
-                    ) : getSaved(product) > 0 ? (
-                      <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
-                        ৳{getSaved(product)} সাশ্রয়
-                      </span>
-                    ) : (
-                      <span style={{ visibility: "hidden", fontSize: 11 }}>সাশ্রয়</span>
-                    )}
-                  </div>
                 </Link>
 
                 <button
