@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { QRCodeSVG } from "qrcode.react";
 import { API_BASE_URL } from "@/lib/api";
 import { downloadInvoicePdf } from "@/lib/invoicePdf";
 
@@ -120,26 +121,67 @@ function OrderSuccessContent() {
             </div>
           </div>
 
-          {/* Customer Details Box */}
-          <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "12px", marginBottom: "20px", border: "1px solid #e2e8f0", position: "relative" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
-              <h4 style={{ margin: 0, fontSize: "13px", color: "#334155", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.5px" }}>Bill To / Delivery Details</h4>
-              <span style={{ background: "#eef2ff", border: "1px solid #c7d2fe", color: "#4338ca", fontSize: "10px", fontWeight: "800", padding: "3px 8px", borderRadius: "6px" }}>
-                DIU STUDENT SPECIAL PRIVILEGE
-              </span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "6px", fontSize: "13px", color: "#475569" }}>
-              <p style={{ margin: "2px 0" }}><strong>Customer Name:</strong> {order?.customerName}</p>
-              <p style={{ margin: "2px 0" }}><strong>Payment Method:</strong> Cash on Delivery (COD)</p>
-              <p style={{ margin: "2px 0" }}><strong>Phone:</strong> {order?.phone}</p>
-              <p style={{ margin: "2px 0" }}><strong>District:</strong> {order?.district || "Dhaka"}</p>
-              <p style={{ margin: "2px 0", gridColumn: "1 / -1" }}><strong>Delivery Address:</strong> {order?.address}</p>
-              {order?.note && <p style={{ margin: "2px 0", gridColumn: "1 / -1" }}><strong>Note:</strong> {order.note}</p>}
-            </div>
-          </div>
+          {/* Customer Details Box with QR Code Scanner */}
+          {(() => {
+            const orderNo = order?.orderNumber || "Liora_Order";
+            const siteUrl = typeof window !== "undefined" && window.location?.origin ? window.location.origin : "https://liorabeautyandwear.com";
+            const verifyUrl = order?.accessToken
+              ? `${siteUrl}/order/verify?no=${encodeURIComponent(orderNo)}&k=${encodeURIComponent(order?.accessToken)}`
+              : `${siteUrl}/order-tracking?query=${encodeURIComponent(orderNo)}`;
+
+            return (
+              <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "12px", marginBottom: "20px", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
+                  <h4 style={{ margin: 0, fontSize: "13px", color: "#334155", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    Bill To / Delivery Details:
+                  </h4>
+                  <span style={{ background: "#eef2ff", border: "1px solid #c7d2fe", color: "#4338ca", fontSize: "10px", fontWeight: "800", padding: "3px 8px", borderRadius: "6px" }}>
+                    DIU STUDENT SPECIAL PRIVILEGE
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+                  {/* Left Column: Customer & Delivery Info */}
+                  <div style={{ flex: "1 1 240px", fontSize: "13px", color: "#475569" }}>
+                    <p style={{ margin: "3px 0" }}><strong>Customer Name:</strong> {order?.customerName}</p>
+                    <p style={{ margin: "3px 0" }}><strong>Phone Number:</strong> {order?.phone}</p>
+                    <p style={{ margin: "3px 0" }}><strong>District:</strong> {order?.district || "Dhaka"}</p>
+                    <p style={{ margin: "3px 0" }}><strong>Delivery Address:</strong> {order?.address}</p>
+                    {order?.note && <p style={{ margin: "3px 0" }}><strong>Note:</strong> {order.note}</p>}
+                  </div>
+
+                  {/* Middle Column: Payment Info */}
+                  <div style={{ flex: "0 1 170px", fontSize: "13px", color: "#475569" }}>
+                    <h5 style={{ margin: "0 0 6px", fontSize: "12px", color: "#1e293b", fontWeight: "800", textTransform: "uppercase" }}>PAYMENT METHOD:</h5>
+                    <p style={{ margin: "2px 0", color: "#334155", fontWeight: "600" }}>Cash on Delivery (COD)</p>
+                    <p style={{ margin: "2px 0", color: "#64748b", fontSize: "12px" }}>Currency: BDT (Tk)</p>
+                  </div>
+
+                  {/* Right Column: QR Code Scanner */}
+                  <div style={{
+                    background: "#ffffff",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "10px",
+                    padding: "8px 10px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                    flexShrink: 0
+                  }}>
+                    <QRCodeSVG value={verifyUrl} size={82} level="M" />
+                    <span style={{ fontSize: "9px", fontWeight: "800", color: "#e11d48", marginTop: "5px", letterSpacing: "0.5px" }}>
+                      SCAN TO VERIFY
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Verification Alert if Multiple Pending Orders */}
-          {(order?.isFlagged || (order?.pendingOrdersCount && order.pendingOrdersCount > 0)) && (
+          {Boolean(order?.isFlagged || (order?.pendingOrdersCount && order.pendingOrdersCount > 0)) && (
             <div
               style={{
                 background: "#fffbeb",
@@ -281,6 +323,30 @@ function OrderSuccessContent() {
                       DIU Student Savings: You Saved Tk {totalSaved} ({savePercent}%) on this order!
                     </div>
                   )}
+
+                  {/* Circular DIU Certified Partner Seal */}
+                  <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
+                    <div style={{
+                      width: "92px",
+                      height: "92px",
+                      borderRadius: "50%",
+                      border: "2px solid #004b87",
+                      boxShadow: "inset 0 0 0 2px #22c55e",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transform: "rotate(-5deg)",
+                      background: "rgba(240, 249, 255, 0.6)",
+                      padding: "4px",
+                      textAlign: "center"
+                    }}>
+                      <span style={{ fontSize: "6.5px", fontWeight: "900", color: "#004b87", letterSpacing: "0.4px", lineHeight: "1.1" }}>DAFFODIL INTL UNIV</span>
+                      <span style={{ fontSize: "7px", fontWeight: "800", color: "#16a34a", margin: "2px 0", lineHeight: "1.1" }}>CAMPUS PRIVILEGE</span>
+                      <span style={{ fontSize: "8.5px", fontWeight: "900", color: "#e11d48", letterSpacing: "0.5px", lineHeight: "1.1" }}>[ VERIFIED ]</span>
+                      <span style={{ fontSize: "6px", fontWeight: "800", color: "#004b87", marginTop: "2px", lineHeight: "1.1" }}>100% AUTHENTIC • DIU15</span>
+                    </div>
+                  </div>
                 </div>
               );
             })()}
