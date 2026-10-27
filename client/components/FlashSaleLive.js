@@ -52,7 +52,7 @@ export default function FlashSaleLive({ onAddToCart }) {
   const [addedIds, setAddedIds] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products?paginate=1&limit=8`)
+    fetch(`${API_BASE_URL}/api/products?paginate=1&limit=40`)
       .then((res) => res.json())
       .then((data) => {
         const list = Array.isArray(data?.products)
@@ -60,11 +60,19 @@ export default function FlashSaleLive({ onAddToCart }) {
           : Array.isArray(data)
           ? data
           : [];
-        const offers = list.filter(
-          (p) => p.offerPrice && p.originalPrice && p.offerPrice < p.originalPrice
-        );
-        if (offers.length >= 2) {
-          setFlashProducts(offers.slice(0, 4));
+        const topOffers = list
+          .filter((p) => {
+            const name = (p.name || "").toLowerCase();
+            if (name.includes("skino") || name.includes("lifebuoy") || name.includes("shower gel") || name.includes("bath soap") || name.includes("cleansing brush")) return false;
+            return p.offerPrice && p.originalPrice && p.offerPrice < p.originalPrice;
+          })
+          .sort((a, b) => {
+            const discA = (a.originalPrice - a.offerPrice) / a.originalPrice;
+            const discB = (b.originalPrice - b.offerPrice) / b.originalPrice;
+            return discB - discA;
+          });
+        if (topOffers.length >= 2) {
+          setFlashProducts(topOffers.slice(0, 4));
         } else if (list.length >= 2) {
           setFlashProducts(list.slice(0, 4));
         } else {

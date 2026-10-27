@@ -102,14 +102,15 @@ export default function HomePage() {
       <ShopByConcern />
 
       {/* 7. ⭐ FEATURED COLLECTION (CURATED PICKS) */}
-      <section id="view-offers" style={{ padding: "10px 0" }}>
+      {/* 7. 🌸 KOREAN GLASS SKIN & VIRAL SKINCARE COLLECTION */}
+      <section id="view-offers" style={{ padding: "16px 0" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="featured"
-          title="Featured Collection"
-          subtitle="Hand-picked premium selections curated for you"
-          badge="⭐ Curated Picks"
-          badgeBg="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+          title="🌸 Korean Glass Skin & Viral Skincare"
+          subtitle="100% authentic K-Beauty: COSRX Snail Mucin, Rice Toners, Centella, Beauty of Joseon & Anua"
+          badge="✨ K-Beauty Viral Picks"
+          badgeBg="linear-gradient(135deg, #ec4899 0%, #be185d 100%)"
           limit={8}
           showCategoryBar={false}
           showPagination={false}
@@ -119,33 +120,33 @@ export default function HomePage() {
       {/* 8. 🚚 MIDDLE STRIP CAMPAIGN BANNER (100% AUTHENTIC & FREE DELIVERY) */}
       <MiddleStripBanner />
 
-      {/* 9. 🔥 HOT ITEMS / HOT DEALS */}
-      <section id="hot-items" style={{ padding: "20px 0", background: "linear-gradient(180deg, #fff5f7 0%, #ffffff 100%)", borderRadius: "24px", margin: "10px auto 26px", maxWidth: "1440px" }}>
+      {/* 9. 💄 TRENDING LIPSTICKS & GLAM MAKEUP */}
+      <section id="hot-items" style={{ padding: "24px 0", background: "linear-gradient(180deg, #fff0f3 0%, #ffffff 100%)", borderRadius: "24px", margin: "14px auto 28px", maxWidth: "1440px" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="hot"
-          title="🔥 Hot Items & Deals"
-          subtitle="Trending beauty essentials and biggest discounts selling fast"
-          badge="🔥 Hot Deals"
-          badgeBg="linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)"
+          title="💄 Trending Lipsticks & Glam Makeup"
+          subtitle="Velvet matte lipsticks, Korean lip tints, pigmented blushes & waterproof lipliners"
+          badge="💋 Glam Makeup Hits"
+          badgeBg="linear-gradient(135deg, #e11d48 0%, #9f1239 100%)"
           limit={8}
           showCategoryBar={false}
           showPagination={false}
         />
       </section>
 
-      {/* 8. 🎁 CURATED COMBOS & STUDENT BUDGET BUNDLES */}
+      {/* 10. 🎁 CURATED COMBOS & STUDENT BUDGET BUNDLES */}
       <CuratedCombos onAddToCart={addToCart} />
 
-      {/* 9. ✨ NEW ARRIVALS */}
-      <section id="new-arrivals" style={{ padding: "10px 0" }}>
+      {/* 11. ❄️ WINTER GLOW & DEEP HYDRATION CARE */}
+      <section id="new-arrivals" style={{ padding: "16px 0" }}>
         <ProductGrid
           onAddToCart={addToCart}
           type="new"
-          title="New Arrivals"
-          subtitle="Fresh additions of 100% authentic cosmetics and skincare"
-          badge="✨ Just Arrived"
-          badgeBg="linear-gradient(135deg, #ec4899 0%, #be185d 100%)"
+          title="❄️ Winter Glow & Deep Hydration Care"
+          subtitle="Deep moisture body lotions, barrier repair creams, Vaseline Gluta-Hya & ceramide lip balms"
+          badge="❄️ Winter Essentials"
+          badgeBg="linear-gradient(135deg, #0284c7 0%, #0369a1 100%)"
           limit={8}
           showCategoryBar={false}
           showPagination={false}

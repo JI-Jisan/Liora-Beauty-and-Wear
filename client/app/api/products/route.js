@@ -125,24 +125,23 @@ export async function GET(req) {
     }
     if (type === "featured") {
       query.isFeatured = true;
-      if (!isAdmin) query.inStock = true;
+      if (!isAdmin) {
+        query.inStock = true;
+        query.name = { $not: /skino|lifebuoy|shower gel|bath soap|cleansing brush/i };
+      }
     } else if (type === "trending" || type === "hot") {
       if (!isAdmin) {
         query.inStock = true;
-        // Exclude products already shown in Featured to avoid repetitive duplicate sections
         query.isFeatured = { $ne: true };
+        query.name = { $not: /skino|lifebuoy|shower gel|bath soap|cleansing brush/i };
       }
-      query.$or = [
-        { isTrending: true },
-        { discountBadge: { $in: ["20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "67", "68", "70", "72", "75"] } }
-      ];
+      query.isTrending = true;
     } else if (type === "new") {
       if (!isAdmin) {
         query.inStock = true;
-        // Exclude products already shown in Featured or Hot Deals to keep New Arrivals fresh and unique
         query.isFeatured = { $ne: true };
         query.isTrending = { $ne: true };
-        query.discountBadge = { $nin: ["20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "67", "68", "70", "72", "75"] };
+        query.name = { $not: /skino|lifebuoy|shower gel|bath soap|cleansing brush/i };
       }
       query.isNewArrival = true;
     } else if (type === "slider") {
@@ -322,7 +321,9 @@ export async function GET(req) {
           .populate("category", "name")
           .populate("brand", "name slug")
           .sort(
-            type && type !== "all"
+            type === "featured"
+              ? { offerPrice: -1, createdAt: -1 }
+              : type && type !== "all"
               ? { createdAt: -1 }
               : { inStock: -1, isFeatured: -1, createdAt: -1 }
           )
