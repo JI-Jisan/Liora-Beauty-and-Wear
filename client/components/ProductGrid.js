@@ -9,6 +9,7 @@ import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { cld } from "@/lib/cloudinary";
 import { getDiscount, getSaved } from "@/lib/price";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
 
 function getPaginationItems(current, total) {
   if (total <= 7) {
@@ -107,6 +108,7 @@ function ProductGridContent({
   const gridRef = useRef(null);
   const searchParams = useSearchParams();
   const cartContext = useCart();
+  const { activeCoupon, getProductPrice } = useCampus();
   const [addedId, setAddedId] = useState(null);
 
   const handleAddToCart = (product, e) => {
@@ -119,10 +121,23 @@ function ProductGridContent({
       setAddedId((curr) => (curr === product._id ? null : curr));
     }, 1500);
 
+    const campusPricing = getProductPrice(product);
+    const itemToAdd = campusPricing?.hasDiscount
+      ? {
+          ...product,
+          offerPrice: campusPricing.campusPrice,
+          originalOfferPrice: product.offerPrice,
+          isCampusSpecial: true,
+          campusCode: activeCoupon?.code,
+          campusName: activeCoupon?.short,
+          campusDiscountPct: campusPricing.discountPct
+        }
+      : product;
+
     if (typeof onAddToCart === "function") {
-      onAddToCart(product);
+      onAddToCart(itemToAdd);
     } else if (cartContext && typeof cartContext.addToCart === "function") {
-      cartContext.addToCart(product);
+      cartContext.addToCart(itemToAdd);
     }
   };
   const urlPage = parseInt(searchParams ? searchParams.get("page") : null, 10) || 1;
@@ -334,6 +349,7 @@ function ProductGridContent({
           const fallbackUrl = getSmartFallback(catName, product.name, product._id);
           const imageSrc = getImageUrl(product.image) || fallbackUrl;
           const brandData = getProductBrandInfo(product);
+          const campusPricing = getProductPrice(product);
 
           return (
             <div
@@ -352,7 +368,8 @@ function ProductGridContent({
               <div>
                 <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none", display: "block" }}>
                   <div style={{ position: "relative", width: "100%", paddingBottom: "100%", overflow: "hidden", borderRadius: 10, background: "#ffffff", border: "1px solid #f1f5f9" }}>
-                    {getDiscount(product) > 0 && (
+                    {/* Standard Regular Discount Badge */}
+                    {getDiscount(product) > 0 && !campusPricing?.hasDiscount && (
                       <div style={{
                         position: 'absolute', top: 8, left: 8, zIndex: 2,
                         background: 'linear-gradient(135deg,#ff3b6b,#e11d48)',
@@ -368,6 +385,25 @@ function ProductGridContent({
                         </div>
                       </div>
                     )}
+
+                    {/* Campus Special Student Badge */}
+                    {campusPricing?.hasDiscount && (
+                      <div style={{
+                        position: 'absolute', top: 8, left: 8, zIndex: 3,
+                        background: activeCoupon?.tagColor || '#ff4d6d',
+                        color: '#fff', borderRadius: 8, padding: '3px 8px',
+                        lineHeight: 1.1, textAlign: 'center',
+                        boxShadow: '0 4px 12px rgba(225,29,72,.35)'
+                      }}>
+                        <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          {activeCoupon?.short || "CAMPUS"}
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 900 }}>
+                          -{campusPricing.discountPct}%
+                        </div>
+                      </div>
+                    )}
+
                     <img
                       src={cld(imageSrc, 500, 500)}
                       alt={product.name}
@@ -409,27 +445,60 @@ function ProductGridContent({
 
               <div style={{ marginTop: "auto", paddingTop: 4 }}>
                 <Link href={`/products/${product._id}`} className="jt-product-link" style={{ textDecoration: "none", display: "block" }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
-                    <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
-                      {product.offerPrice} Tk
-                    </p>
-                    {product.originalPrice > product.offerPrice && (
+                  {campusPricing?.hasDiscount ? (
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
+                      <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 900, color: "#e11d48" }}>
+                        {campusPricing.campusPrice} Tk
+                      </p>
                       <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through" }}>
-                        {product.originalPrice} Tk
+                        {product.offerPrice} Tk
                       </span>
-                    )}
-                    <span style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
-                      marginLeft: "auto"
-                    }}>
-                      {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
-                    </span>
-                  </div>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        background: activeCoupon?.tagColor || "#ff4d6d",
+                        color: "#ffffff",
+                        padding: "1px 6px",
+                        borderRadius: "4px",
+                      }}>
+                        {activeCoupon?.short} -{campusPricing.discountPct}%
+                      </span>
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                        marginLeft: "auto"
+                      }}>
+                        {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                      </span>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
+                      <p className="jt-price" style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#ff4d6d" }}>
+                        {product.offerPrice} Tk
+                      </p>
+                      {product.originalPrice > product.offerPrice && (
+                        <span style={{ fontSize: 12, color: "#94a3b8", textDecoration: "line-through" }}>
+                          {product.originalPrice} Tk
+                        </span>
+                      )}
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                        marginLeft: "auto"
+                      }}>
+                        {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                      </span>
+                    </div>
+                  )}
 
                   <div style={{ minHeight: 18, marginBottom: 8, display: "flex", alignItems: "center" }}>
-                    {getSaved(product) > 0 ? (
+                    {campusPricing?.hasDiscount ? (
+                      <span style={{ fontSize: 11.5, color: '#16a34a', fontWeight: 800 }}>
+                        🎓 {activeCoupon?.short} সেভিংস: ৳{campusPricing.savedAmount}
+                      </span>
+                    ) : getSaved(product) > 0 ? (
                       <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
                         ৳{getSaved(product)} সাশ্রয়
                       </span>

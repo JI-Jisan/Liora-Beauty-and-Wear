@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/components/AuthProvider";
+import { useCampus } from "@/context/CampusContext";
 import { cld } from "@/lib/cloudinary";
 import { getDiscount, getSaved } from "@/lib/price";
 import ProductWatermark from "@/components/ProductWatermark";
@@ -200,15 +201,40 @@ export default function ProductDetailsPage() {
       .slice(0, 4);
   }, [allProducts, product]);
 
+  const { activeCoupon, getProductPrice } = useCampus();
+  const campusPricing = getProductPrice(product);
+
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product);
+      const itemToAdd = campusPricing?.hasDiscount
+        ? {
+            ...product,
+            offerPrice: campusPricing.campusPrice,
+            originalOfferPrice: product.offerPrice,
+            isCampusSpecial: true,
+            campusCode: activeCoupon?.code,
+            campusName: activeCoupon?.short,
+            campusDiscountPct: campusPricing.discountPct
+          }
+        : product;
+      addToCart(itemToAdd);
     }
   };
 
   const handleBuyNow = () => {
     if (product) {
-      addToCart(product);
+      const itemToAdd = campusPricing?.hasDiscount
+        ? {
+            ...product,
+            offerPrice: campusPricing.campusPrice,
+            originalOfferPrice: product.offerPrice,
+            isCampusSpecial: true,
+            campusCode: activeCoupon?.code,
+            campusName: activeCoupon?.short,
+            campusDiscountPct: campusPricing.discountPct
+          }
+        : product;
+      addToCart(itemToAdd);
       router.push("/checkout");
     }
   };
@@ -537,31 +563,74 @@ export default function ProductDetailsPage() {
             );
           })()}
 
-          {/* Price */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap", margin: "10px 0" }}>
-            <span style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: "900", color: "#e11d48" }}>
-              {product.offerPrice} Tk
-            </span>
-            {product.originalPrice && (
-              <span style={{ fontSize: "16px", color: "#94a3b8", textDecoration: "line-through" }}>
-                {product.originalPrice} Tk
+          {/* 🎓 Campus Student VIP Offer Box */}
+          {campusPricing?.hasDiscount && (
+            <div style={{
+              background: "linear-gradient(135deg, #fff0f3, #ffe4e8)",
+              border: `1.5px solid ${activeCoupon?.tagColor || "#f43f5e"}`,
+              borderRadius: "14px",
+              padding: "12px 16px",
+              margin: "12px 0",
+              boxShadow: "0 6px 20px rgba(244,63,94,0.14)"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                <span style={{
+                  fontSize: "11px",
+                  fontWeight: 900,
+                  background: activeCoupon?.tagColor || "#ff4d6d",
+                  color: "#fff",
+                  padding: "3px 10px",
+                  borderRadius: "6px",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase"
+                }}>
+                  🎓 {activeCoupon?.short || "CAMPUS"} SPECIAL STUDENT PRIVILEGE
+                </span>
+                <span style={{ fontSize: "12px", color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "2px 8px", borderRadius: "6px" }}>
+                  ✓ Extra {campusPricing.discountPct}% OFF
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginTop: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "clamp(26px, 8vw, 36px)", fontWeight: "900", color: "#e11d48" }}>
+                  {campusPricing.campusPrice} Tk
+                </span>
+                <span style={{ fontSize: "16px", color: "#64748b", textDecoration: "line-through" }}>
+                  {product.offerPrice} Tk
+                </span>
+                <span style={{ fontSize: "13px", color: "#16a34a", fontWeight: 800 }}>
+                  (৳{campusPricing.savedAmount} এক্সট্রা সেভিংস)
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Regular Price (shown if no campus discount or for regular visitors) */}
+          {!campusPricing?.hasDiscount && (
+            <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap", margin: "10px 0" }}>
+              <span style={{ fontSize: "clamp(24px, 7vw, 34px)", fontWeight: "900", color: "#e11d48" }}>
+                {product.offerPrice} Tk
               </span>
-            )}
-            {getDiscount(product) > 0 && (
-              <span style={{
-                background: "linear-gradient(135deg, #e11d48, #f97316)",
-                color: "#fff", fontSize: "12px", fontWeight: "800",
-                padding: "3px 10px", borderRadius: "50px",
-              }}>
-                {getDiscount(product)}% OFF
-              </span>
-            )}
-            {getSaved(product) > 0 && (
-              <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, width: "100%", display: "block", marginTop: 4 }}>
-                ৳{getSaved(product)} সাশ্রয়
-              </span>
-            )}
-          </div>
+              {product.originalPrice && (
+                <span style={{ fontSize: "16px", color: "#94a3b8", textDecoration: "line-through" }}>
+                  {product.originalPrice} Tk
+                </span>
+              )}
+              {getDiscount(product) > 0 && (
+                <span style={{
+                  background: "linear-gradient(135deg, #e11d48, #f97316)",
+                  color: "#fff", fontSize: "12px", fontWeight: "800",
+                  padding: "3px 10px", borderRadius: "50px",
+                }}>
+                  {getDiscount(product)}% OFF
+                </span>
+              )}
+              {getSaved(product) > 0 && (
+                <span style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, width: "100%", display: "block", marginTop: 4 }}>
+                  ৳{getSaved(product)} সাশ্রয়
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Stock */}
           {product.stockQuantity > 0 ? (

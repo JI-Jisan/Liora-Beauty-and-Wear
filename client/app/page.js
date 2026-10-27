@@ -13,6 +13,7 @@ import BrandScroller from "../components/BrandScroller";
 import CustomerLove from "../components/CustomerLove";
 import DualMiniBanners from "../components/DualMiniBanners";
 import MiddleStripBanner from "../components/MiddleStripBanner";
+import CampusCouponBar from "../components/CampusCouponBar";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 
@@ -81,6 +82,9 @@ export default function HomePage() {
 
       {/* 1. CAMPAIGN PROMO SLIDER BANNER */}
       <PromoBanner promoSlides={siteSettings.promoSlides} heroImage={siteSettings.heroImage} />
+
+      {/* 🎓 CAMPUS / STUDENT COUPON UNLOCK BAR */}
+      <CampusCouponBar />
 
       {/* 2. 🛡️ 4-PILLAR TRUST BADGES (100% AUTHENTIC, COD, 24-48H, EASY RETURN) */}
       <TrustBadgesBar />

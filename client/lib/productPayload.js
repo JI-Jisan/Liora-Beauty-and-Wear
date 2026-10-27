@@ -78,6 +78,19 @@ export function buildPayload(body, isUpdate = false, existing = null) {
     stockStatus: deriveStockStatus(stockQuantity),
     inStock: stockQuantity > 0 && deriveStockStatus(stockQuantity) !== "Out of Stock",
     discountBadge: originalPrice > offerPrice ? String(Math.round(((originalPrice - offerPrice) / originalPrice) * 100)) : "",
+    campusDiscountPct: (() => {
+      if (body.campusDiscountPct !== undefined) return Math.min(15, Math.max(0, Number(body.campusDiscountPct) || 0));
+      if (purchasePrice > 0 && offerPrice > purchasePrice) {
+        const minPriceFor20Pct = Math.ceil(purchasePrice / 0.80);
+        if (offerPrice > minPriceFor20Pct) {
+          const maxAllowed = ((offerPrice - minPriceFor20Pct) / offerPrice) * 100;
+          if (maxAllowed >= 15) return 15;
+          if (maxAllowed >= 10) return 10;
+          if (maxAllowed >= 5) return 5;
+        }
+      }
+      return existing?.campusDiscountPct || 0;
+    })(),
     image: String(rawImage || "").trim(),
     images,
     description: String(rawDesc || "").trim().slice(0, 5000),

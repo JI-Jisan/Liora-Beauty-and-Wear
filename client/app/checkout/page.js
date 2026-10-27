@@ -10,11 +10,13 @@ import { getIdToken, useAuth } from "@/components/AuthProvider";
 import { BANGLADESH_DISTRICTS } from "@/lib/delivery";
 import { getThanasForDistrict, isLocationInsideDhaka } from "@/lib/bdLocations";
 import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
+import { useCampus } from "@/context/CampusContext";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cartItems, clearCart } = useCart();
   const { user, profile, role } = useAuth();
+  const { activeCoupon, removeCampusCoupon } = useCampus();
 
   const [district, setDistrict] = useState("Dhaka");
   const [thana, setThana] = useState("");
@@ -126,7 +128,14 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, []);
 
-  const unitPrice = (item) => Number(item.offerPrice ?? item.price ?? 0);
+  const unitPrice = (item) => {
+    const base = Number(item.offerPrice ?? item.price ?? 0);
+    if (item.isCampusSpecial) return base;
+    if (activeCoupon && item.campusDiscountPct > 0) {
+      return Math.max(1, Math.round(base * (1 - item.campusDiscountPct / 100)));
+    }
+    return base;
+  };
 
   const getItemPrice = (item) => {
     if (isAdminUser && customPrices[item._id] !== undefined && customPrices[item._id] !== "") {
@@ -242,6 +251,8 @@ export default function CheckoutPage() {
           commission: commissionVal,
           commissionNote: commissionNote.trim(),
           firebaseUid: user?.uid || null,
+          couponCode: activeCoupon?.code || undefined,
+          campusName: activeCoupon?.campus || undefined,
           items: cartItems.map((item) => ({
             productId: item._id,
             quantity: item.quantity || 1,
@@ -341,6 +352,40 @@ export default function CheckoutPage() {
                         ম্যাসেঞ্জার বা পরিচিত কাস্টমারদের স্পেশাল ছাড়ে পণ্য দিতে সরাসরি দাম এডিট করুন। অন্য কেউ বিক্রি করে দিলে কমিশন বসাতে পারেন (যা ইনভয়েসে প্রিন্ট হবে না)।
                       </span>
                     </div>
+                  </div>
+                )}
+
+                {activeCoupon && (
+                  <div style={{
+                    background: "linear-gradient(135deg, #fff0f3, #ffe4e8)",
+                    border: `1.5px solid ${activeCoupon.tagColor || "#f43f5e"}`,
+                    borderRadius: "12px",
+                    padding: "12px 16px",
+                    marginBottom: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: "10px"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{ fontSize: "22px" }}>🎓</span>
+                      <div>
+                        <strong style={{ fontSize: "14px", color: "#0f172a", display: "block" }}>
+                          {activeCoupon.campus} ({activeCoupon.short}) Privilege Applied!
+                        </strong>
+                        <span style={{ fontSize: "12px", color: "#e11d48", fontWeight: "700" }}>
+                          ✓ Voucher {activeCoupon.code}: Special Campus Student Discount Active
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeCampusCoupon}
+                      style={{ fontSize: "11px", color: "#64748b", background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "6px", padding: "4px 8px", cursor: "pointer", fontWeight: "700" }}
+                    >
+                      ✕ Remove
+                    </button>
                   </div>
                 )}
 

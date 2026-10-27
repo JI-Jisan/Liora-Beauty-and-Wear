@@ -190,6 +190,13 @@ export default function CartDrawer({
 
                     {/* পাশে: unit × qty এবং ওই আইটেমের মোট */}
                     <div style={{ textAlign: "right" }}>
+                      {item.isCampusSpecial && (
+                        <div style={{ marginBottom: "2px" }}>
+                          <span style={{ fontSize: "10px", fontWeight: 800, background: "#ffe4e6", color: "#e11d48", padding: "2px 6px", borderRadius: "4px" }}>
+                            🎓 {item.campusName} Special
+                          </span>
+                        </div>
+                      )}
                       <div style={{ fontSize: "12px", color: "#64748b" }}>
                         {unit(item).toLocaleString("en-US")} × {qty(item)}
                       </div>

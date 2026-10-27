@@ -51,6 +51,7 @@ import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
 import { getCharge } from "@/lib/delivery";
 import { isLocationInsideDhaka } from "@/lib/bdLocations";
 import { allocateFIFO, releaseAllocations, syncProductStock } from "@/lib/inventory";
+import { getCampusCoupon } from "@/lib/campusCoupons";
 
 export async function POST(req) {
   const reserved = [];
@@ -212,6 +213,12 @@ export async function POST(req) {
           const discountPct = isStar ? 10 : 8;
           calculatedPrice = Math.round(defaultRetailPrice * (1 - discountPct / 100));
         }
+      } else if (orderType === "retail" && body.couponCode) {
+        const campusCoupon = getCampusCoupon(body.couponCode);
+        if (campusCoupon && p.campusDiscountPct > 0) {
+          calculatedPrice = Math.round(defaultRetailPrice * (1 - p.campusDiscountPct / 100));
+          totalSavings += Math.max(0, defaultRetailPrice - calculatedPrice) * qty;
+        }
       }
 
       const price = (admin && raw.price !== undefined && raw.price !== null && !isNaN(Number(raw.price)))
@@ -299,6 +306,10 @@ export async function POST(req) {
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const { orderNumber, serial } = await nextOrderIdentity();
+        const campusCoupon = body.couponCode ? getCampusCoupon(body.couponCode) : null;
+        const campusTag = campusCoupon ? ` [🎓 ${campusCoupon.campus} (${campusCoupon.short}) Privilege: ${campusCoupon.code}]` : "";
+        const finalOrderNote = (note + campusTag).trim();
+
         order = await Order.create({
           customerName,
           customerEmail,
@@ -306,7 +317,7 @@ export async function POST(req) {
           district,
           thana,
           address,
-          note,
+          note: finalOrderNote,
           items,
           deliveryZone: finalDeliveryZone,
           deliveryType: isUrgent ? "urgent" : "standard",

@@ -58,6 +58,8 @@ import LayoutChrome from "@/components/LayoutChrome";
 import { AuthProvider } from "@/components/AuthProvider";
 import { Analytics } from "@vercel/analytics/next";
 
+import { CampusProvider } from "@/context/CampusContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -93,11 +95,13 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <AuthProvider>
-          <CartProvider>
-            <div className="jt-root-wrapper">
-              <LayoutChrome>{children}</LayoutChrome>
-            </div>
-          </CartProvider>
+          <CampusProvider>
+            <CartProvider>
+              <div className="jt-root-wrapper">
+                <LayoutChrome>{children}</LayoutChrome>
+              </div>
+            </CartProvider>
+          </CampusProvider>
         </AuthProvider>
         <Analytics />
       </body>
