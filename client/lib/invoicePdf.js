@@ -280,14 +280,12 @@ export async function downloadInvoicePdf(order) {
   let totalMrp = 0;
   items.forEach((item) => {
     const qty = Number(item.quantity) || 1;
-    const pOrig = Number(item.originalPrice) || Number(item.price) || 0;
+    const pOrig = Number(item.originalPrice) || Number(item.mrp) || Number(item.regularPrice) || Number(item.price) || 0;
     totalMrp += pOrig * qty;
   });
-  if (totalMrp < subtotal) totalMrp = subtotal;
+  if (totalMrp <= subtotal && discount > 0) totalMrp = subtotal + discount;
 
-  const productSavings = Math.max(0, totalMrp - subtotal);
-  const orderDiscount = discount > 0 ? discount : 0;
-  const totalSaved = productSavings + orderDiscount;
+  const totalSaved = Math.max(0, totalMrp - (total - deliveryCharge));
   const savedPercent = totalMrp > 0 ? Math.min(100, Math.round((totalSaved / totalMrp) * 100)) : 0;
 
   // 6. Summary Block (Subtotal, Delivery, Discount, Total)
@@ -295,8 +293,8 @@ export async function downloadInvoicePdf(order) {
   const summaryX = 114;
   let currentSummaryY = summaryStartY;
 
-  // If there are product savings, display Regular MRP vs Instant Discount
-  if (productSavings > 0) {
+  // If there are savings from regular MRP, display Regular MRP vs Instant Discount
+  if (totalSaved > 0) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.2);
     doc.setTextColor(...textMuted);
@@ -309,7 +307,7 @@ export async function downloadInvoicePdf(order) {
     doc.setFontSize(8.2);
     doc.setTextColor(...diuGreen);
     doc.text("Instant Offer Discount:", summaryX, currentSummaryY + 4.5);
-    doc.text(`- Tk ${productSavings.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
+    doc.text(`- Tk ${totalSaved.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
     currentSummaryY += 5.2;
   }
 
@@ -327,14 +325,6 @@ export async function downloadInvoicePdf(order) {
   doc.text(`Tk ${deliveryCharge.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
   currentSummaryY += 5.5;
 
-  if (orderDiscount > 0) {
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...diuGreen);
-    doc.text("Special Voucher / Discount:", summaryX, currentSummaryY + 4.5);
-    doc.text(`- Tk ${orderDiscount.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
-    currentSummaryY += 5.5;
-  }
-
   currentSummaryY += 1.5;
   // Total Highlight Box
   doc.setFillColor(255, 241, 242); // Rose-50
@@ -349,7 +339,7 @@ export async function downloadInvoicePdf(order) {
   doc.text("Total Payable:", summaryX, currentSummaryY + 6.5);
   doc.text(`Tk ${total.toLocaleString()}`, 191, currentSummaryY + 6.5, { align: "right" });
 
-  // Customer Happiness Badge: "DIU Student Savings: Tk X (Y%) Saved!"
+  // Customer Happiness Badge: "You Saved Tk X (Y%) on this order!"
   if (totalSaved > 0) {
     currentSummaryY += 11.5;
     doc.setFillColor(240, 253, 244); // Green-50
@@ -362,7 +352,7 @@ export async function downloadInvoicePdf(order) {
     doc.setFontSize(7.5);
     doc.setTextColor(...diuGreen);
     doc.text(
-      `DIU Student Savings: Tk ${totalSaved.toLocaleString()} (${savedPercent}%) Saved!`,
+      `You Saved Tk ${totalSaved.toLocaleString()} (${savedPercent}%) on this order!`,
       summaryX + 37,
       currentSummaryY + 5.5,
       { align: "center" }
@@ -407,7 +397,7 @@ export async function downloadInvoicePdf(order) {
   doc.setFontSize(7.2);
   doc.setTextColor(...textMuted);
   doc.text("• Please check product authenticity & condition in front of delivery rider.", 14, termsY + 4.5);
-  doc.text("• For any return or exchange, please notify us within 24 hours with intact seal.", 14, termsY + 8.5);
+  doc.text("• Check & receive in front of rider. No return/exchange after rider departs.", 14, termsY + 8.5);
   doc.text("• Track your live order progress anytime at liorabeautyandwear.com/order-tracking", 14, termsY + 12.5);
 
   // Special Daffodil Campus Privilege Banner Box

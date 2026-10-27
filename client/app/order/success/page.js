@@ -75,12 +75,11 @@ function OrderSuccessContent() {
         <div style={{ height: "2px", background: "#22c55e", width: "100%" }}></div>
 
         <div style={{ padding: "28px" }}>
-          {/* Header Section: LIORA + DIU Official Partner */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px dashed #cbd5e1", paddingBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
+          {/* Header Section: LIORA (Left) | DIU Partner (Center) | INVOICE Meta (Right) */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid #e2e8f0", paddingBottom: "18px", flexWrap: "wrap", gap: "16px" }}>
+            {/* Left: LIORA Brand */}
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <h2 style={{ margin: 0, fontSize: "24px", color: "#0f172a", fontWeight: "900", letterSpacing: "1.5px" }}>LIORA</h2>
-              </div>
+              <h2 style={{ margin: 0, fontSize: "26px", color: "#0f172a", fontWeight: "900", letterSpacing: "1.5px" }}>LIORA</h2>
               <div style={{ fontSize: "11px", fontWeight: "800", color: "#e11d48", letterSpacing: "1px", marginTop: "2px" }}>BEAUTY & WEAR</div>
               <p style={{ color: "#64748b", margin: "4px 0 0", fontSize: "12px" }}>
                 Authentic Skincare, Cosmetics & Fashion Wear
@@ -90,36 +89,30 @@ function OrderSuccessContent() {
               </p>
             </div>
 
-            {/* DIU Campus Partner Badge */}
-            <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#f0fdf4", border: "1px solid #86efac", padding: "6px 12px", borderRadius: "10px" }}>
-                <img src="/diu-logo-trimmed.png" alt="Daffodil International University" style={{ height: "26px", width: "auto", objectFit: "contain" }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                <div style={{ textAlign: "left" }}>
-                  <span style={{ display: "block", fontSize: "10px", fontWeight: "800", color: "#004b87", letterSpacing: "0.5px" }}>CAMPUS PRIVILEGE</span>
-                  <span style={{ fontSize: "9px", fontWeight: "700", color: "#16a34a" }}>Daffodil Intl University</span>
-                </div>
+            {/* Center: DIU Campus Privilege Partner Logo & Badge */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", alignSelf: "center" }}>
+              <img src="/diu-logo-trimmed.png" alt="Daffodil International University" style={{ height: "30px", width: "auto", objectFit: "contain" }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+              <div style={{ background: "#f0fdf4", border: "1px solid #86efac", padding: "2px 10px", borderRadius: "12px", fontSize: "10px", fontWeight: "800", color: "#16a34a", letterSpacing: "0.5px" }}>
+                CAMPUS PRIVILEGE PARTNER
               </div>
-              <div>
-                <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "700" }}>INVOICE #{order?.orderNumber || "Liora_Order"}</span>
+            </div>
+
+            {/* Right: INVOICE Meta */}
+            <div style={{ textAlign: "right" }}>
+              <h1 style={{ margin: 0, fontSize: "22px", color: "#0f172a", fontWeight: "900", letterSpacing: "1px" }}>INVOICE</h1>
+              <div style={{ fontSize: "13px", fontWeight: "800", color: "#e11d48", margin: "3px 0 2px" }}>
+                #{order?.orderNumber || "LIORA-Order"}
+              </div>
+              <div style={{ fontSize: "12px", color: "#64748b" }}>
+                Date: {order?.createdAt ? new Date(order.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : new Date().toLocaleDateString("en-US")}
+              </div>
+              <div style={{ fontSize: "12px", color: "#64748b" }}>
+                Status: <strong style={{ color: "#b45309" }}>{(order?.status || "PENDING").toUpperCase()}</strong>
               </div>
             </div>
           </div>
 
-          {/* Invoice Meta Bar */}
-          <div style={{ display: "flex", justifyContent: "space-between", margin: "18px 0 14px", flexWrap: "wrap", gap: "10px", fontSize: "12px" }}>
-            <div>
-              <span style={{ color: "#64748b" }}>Date: </span>
-              <strong style={{ color: "#0f172a" }}>
-                {order?.createdAt ? new Date(order.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : new Date().toLocaleDateString("en-US")}
-              </strong>
-            </div>
-            <div>
-              <span style={{ color: "#64748b" }}>Status: </span>
-              <span style={{ background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: "4px", fontWeight: "700", fontSize: "11px" }}>
-                {(order?.status || "PENDING").toUpperCase()}
-              </span>
-            </div>
-          </div>
+          <div style={{ height: "16px" }}></div>
 
           {/* Customer Details Box with QR Code Scanner */}
           {(() => {
@@ -221,8 +214,9 @@ function OrderSuccessContent() {
             <tbody>
               {order?.items?.map((item, idx) => {
                 const qty = item.quantity || 1;
-                const price = item.offerPrice || item.price || 0;
-                const mrp = item.mrp || item.regularPrice || 0;
+                const price = Number(item.offerPrice || item.price || 0);
+                const origPrice = Number(item.originalPrice || item.mrp || item.regularPrice || 0);
+                const hasDiscount = origPrice > price;
                 const totalItemPrice = price * qty;
                 return (
                   <tr key={idx} style={{ borderBottom: "1px solid #e2e8f0", fontSize: "13px", background: idx % 2 === 1 ? "#f8fafc" : "#ffffff" }}>
@@ -230,8 +224,8 @@ function OrderSuccessContent() {
                     <td style={{ padding: "10px 12px", fontWeight: "600", color: "#1e293b" }}>{item.productName || item.name}</td>
                     <td style={{ padding: "10px 12px", textAlign: "center", color: "#475569" }}>{qty}</td>
                     <td style={{ padding: "10px 12px", textAlign: "right" }}>
-                      {mrp > price && (
-                        <div style={{ textDecoration: "line-through", color: "#94a3b8", fontSize: "11px" }}>Tk {mrp}</div>
+                      {hasDiscount && (
+                        <div style={{ textDecoration: "line-through", color: "#e11d48", fontSize: "11px", fontWeight: "600" }}>Tk {origPrice}</div>
                       )}
                       <strong style={{ color: "#0f172a" }}>Tk {price}</strong>
                     </td>
@@ -246,7 +240,7 @@ function OrderSuccessContent() {
 
           {/* Bottom Columns: Guarantee & DIU Privilege on Left, Financials on Right */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px", alignItems: "start" }}>
-            {/* Left Box: Guarantees & DIU Verification */}
+            {/* Left Box: Guarantees & Terms */}
             <div>
               <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderLeft: "4px solid #16a34a", padding: "12px", borderRadius: "8px", marginBottom: "12px" }}>
                 <h5 style={{ margin: "0 0 4px", fontSize: "12px", color: "#166534", fontWeight: "800" }}>100% AUTHENTIC PRODUCT GUARANTEE</h5>
@@ -258,20 +252,20 @@ function OrderSuccessContent() {
                 </span>
               </div>
 
-              <div style={{ background: "#f0f9ff", border: "1px solid #bae6fd", borderLeft: "4px solid #004b87", padding: "12px", borderRadius: "8px" }}>
-                <h5 style={{ margin: "0 0 4px", fontSize: "12px", color: "#0369a1", fontWeight: "800" }}>DAFFODIL (DIU) STUDENT PRIVILEGE</h5>
-                <p style={{ margin: 0, fontSize: "11px", color: "#334151" }}>
-                  Special student campus discount was verified on this order. Priority packaging & authentic quality guaranteed.
-                </p>
-              </div>
-
               <div style={{ marginTop: "12px", fontSize: "11px", color: "#64748b" }}>
-                <strong>TERMS & CONDITIONS:</strong>
-                <ul style={{ margin: "4px 0 0", paddingLeft: "16px", lineHeight: "1.4" }}>
+                <strong style={{ color: "#334155" }}>TERMS & CONDITIONS:</strong>
+                <ul style={{ margin: "4px 0 0", paddingLeft: "16px", lineHeight: "1.5" }}>
                   <li>Please check product authenticity & condition in front of delivery rider.</li>
-                  <li>For any return or exchange, please notify us within 24 hours with intact seal.</li>
+                  <li>ডেলিভারিম্যানের সামনে চেক করে বুঝে নিন, রাইডার চলে যাওয়ার পর কোনো রিটার্ন বা এক্সচেঞ্জ গ্রহণযোগ্য নয়।</li>
                   <li>Track your live order anytime at liorabeautyandwear.com/order-tracking</li>
                 </ul>
+              </div>
+
+              <div style={{ background: "#f0f9ff", border: "1px solid #bae6fd", borderLeft: "4px solid #004b87", padding: "10px 12px", borderRadius: "8px", marginTop: "12px" }}>
+                <h5 style={{ margin: "0 0 2px", fontSize: "11px", color: "#0369a1", fontWeight: "800" }}>DAFFODIL (DIU) STUDENT PRIVILEGE</h5>
+                <p style={{ margin: 0, fontSize: "10.5px", color: "#334155" }}>
+                  Special student campus discount was verified on this order. Priority packaging & authentic quality guaranteed.
+                </p>
               </div>
             </div>
 
@@ -283,49 +277,74 @@ function OrderSuccessContent() {
               let totalMrp = 0;
               (order?.items || []).forEach(item => {
                 const qty = Number(item.quantity) || 1;
-                const m = Number(item.mrp || item.regularPrice || item.price || item.offerPrice || 0);
+                const m = Number(item.originalPrice || item.mrp || item.regularPrice || item.price || item.offerPrice || 0);
                 totalMrp += m * qty;
               });
-              if (totalMrp < subtotal) {
-                totalMrp = subtotal + Math.max(0, subtotal + delivery - total);
+              const rawDiscount = Number(order?.discount) || 0;
+              if (totalMrp <= subtotal && rawDiscount > 0) {
+                totalMrp = subtotal + rawDiscount;
               }
               const totalSaved = Math.max(0, totalMrp - (total - delivery));
               const savePercent = totalMrp > 0 ? Math.min(100, Math.round((totalSaved / totalMrp) * 100)) : 0;
 
               return (
-                <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                  {totalMrp > subtotal && (
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "13px", color: "#64748b" }}>
-                      <span>Regular Market Value (MRP):</span>
-                      <span>Tk {totalMrp}</span>
+                <div>
+                  <div style={{ background: "#ffffff", padding: "14px 16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                    {totalSaved > 0 && (
+                      <>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "7px", fontSize: "13px", color: "#64748b" }}>
+                          <span>Regular Market Value (MRP):</span>
+                          <span style={{ fontWeight: "600", color: "#475569" }}>Tk {totalMrp}</span>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "7px", fontSize: "13px", color: "#16a34a", fontWeight: "700" }}>
+                          <span>Instant Offer Discount:</span>
+                          <span>- Tk {totalSaved}</span>
+                        </div>
+                      </>
+                    )}
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "7px", fontSize: "13px", color: "#475569" }}>
+                      <span>Subtotal:</span>
+                      <strong style={{ color: "#0f172a" }}>Tk {subtotal}</strong>
                     </div>
-                  )}
-                  {totalSaved > 0 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "13px", color: "#16a34a", fontWeight: "700" }}>
-                      <span>DIU Student Instant Discount:</span>
-                      <span>- Tk {totalSaved}</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "7px", fontSize: "13px", color: "#475569" }}>
+                      <span>Delivery Charge:</span>
+                      <span>Tk {delivery}</span>
                     </div>
-                  )}
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "13px", color: "#475569" }}>
-                    <span>Subtotal:</span>
-                    <strong style={{ color: "#0f172a" }}>Tk {subtotal}</strong>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "13px", color: "#475569" }}>
-                    <span>Delivery Charge:</span>
-                    <span>Tk {delivery}</span>
-                  </div>
-                  <div style={{ borderTop: "2px solid #e11d48", paddingTop: "8px", marginTop: "8px", display: "flex", justifyContent: "space-between", fontSize: "18px", fontWeight: "900", color: "#e11d48" }}>
-                    <span>Total Payable:</span>
-                    <span>Tk {total}</span>
-                  </div>
-                  {totalSaved > 0 && (
-                    <div style={{ marginTop: "10px", background: "#f0fdf4", border: "1.5px solid #22c55e", padding: "8px", borderRadius: "8px", fontSize: "12px", color: "#166534", fontWeight: "800", textAlign: "center" }}>
-                      DIU Student Savings: You Saved Tk {totalSaved} ({savePercent}%) on this order!
+
+                    {/* Total Payable Card (Exact Match to Original Invoice) */}
+                    <div style={{
+                      border: "2px solid #e11d48",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      margin: "12px 0 8px",
+                      background: "#fff1f2"
+                    }}>
+                      <span style={{ fontSize: "14px", fontWeight: "800", color: "#e11d48" }}>Total Payable:</span>
+                      <span style={{ fontSize: "18px", fontWeight: "900", color: "#e11d48" }}>Tk {total}</span>
                     </div>
-                  )}
+
+                    {/* You Saved Card (Exact Match to Original Invoice) */}
+                    {totalSaved > 0 && (
+                      <div style={{
+                        border: "1.5px solid #22c55e",
+                        borderRadius: "8px",
+                        padding: "8px 12px",
+                        background: "#f0fdf4",
+                        color: "#16a34a",
+                        fontWeight: "800",
+                        fontSize: "12.5px",
+                        textAlign: "center"
+                      }}>
+                        You Saved Tk {totalSaved} ({savePercent}%) on this order!
+                      </div>
+                    )}
+                  </div>
 
                   {/* Circular DIU Certified Partner Seal */}
-                  <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
+                  <div style={{ marginTop: "14px", display: "flex", justifyContent: "center" }}>
                     <div style={{
                       width: "92px",
                       height: "92px",
