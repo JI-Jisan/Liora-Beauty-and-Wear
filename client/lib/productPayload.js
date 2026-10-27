@@ -57,11 +57,11 @@ export function buildPayload(body, isUpdate = false, existing = null) {
       : (typeof rawBrand === "string" && /^[0-9a-fA-F]{24}$/.test(rawBrand) ? rawBrand : null);
 
   const rawWsPrice = body.wholesalePrice !== undefined && body.wholesalePrice !== "" ? body.wholesalePrice : (existing?.wholesalePrice ?? 0);
-  const rawWsMinQty = body.wholesaleMinQty !== undefined && body.wholesaleMinQty !== "" ? body.wholesaleMinQty : (existing?.wholesaleMinQty ?? 6);
+  const rawWsMinQty = body.wholesaleMinQty !== undefined && body.wholesaleMinQty !== "" ? body.wholesaleMinQty : (existing?.wholesaleMinQty ?? 3);
   const rawResellerPrice = body.resellerPrice !== undefined && body.resellerPrice !== "" ? body.resellerPrice : (existing?.resellerPrice ?? 0);
 
   const wholesalePrice = Number(rawWsPrice);
-  const wholesaleMinQty = Math.max(1, parseInt(rawWsMinQty) || 6);
+  const wholesaleMinQty = Math.max(1, parseInt(rawWsMinQty) || 3);
   const resellerPrice = Number(rawResellerPrice);
 
   return {
@@ -72,7 +72,7 @@ export function buildPayload(body, isUpdate = false, existing = null) {
     originalPrice,
     offerPrice,
     wholesalePrice: Number.isFinite(wholesalePrice) && wholesalePrice > 0 ? wholesalePrice : 0,
-    wholesaleMinQty: Number.isFinite(wholesaleMinQty) ? wholesaleMinQty : 6,
+    wholesaleMinQty: Number.isFinite(wholesaleMinQty) ? wholesaleMinQty : 3,
     resellerPrice: Number.isFinite(resellerPrice) && resellerPrice > 0 ? resellerPrice : 0,
     stockQuantity,
     stockStatus: deriveStockStatus(stockQuantity),

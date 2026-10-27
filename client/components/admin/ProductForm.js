@@ -8,7 +8,7 @@ import { Card, Field, inputStyle, T } from "@/app/admin/ui";
 
 const EMPTY = {
   name: "", category: "", brand: "", purchasePrice: "", originalPrice: "", offerPrice: "",
-  wholesalePrice: "", wholesaleMinQty: 6, resellerPrice: "",
+  wholesalePrice: "", wholesaleMinQty: 3, resellerPrice: "",
   stockQuantity: "", description: "",
   image: "", images: ["", "", ""],
   isFeatured: false, isTrending: false, isNewArrival: false, isSlider: false,
@@ -45,7 +45,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
       originalPrice: editing.originalPrice ?? "",
       offerPrice: editing.offerPrice ?? "",
       wholesalePrice: editing.wholesalePrice ?? "",
-      wholesaleMinQty: editing.wholesaleMinQty ?? 6,
+      wholesaleMinQty: editing.wholesaleMinQty ?? 3,
       resellerPrice: editing.resellerPrice ?? "",
       stockQuantity: editing.stockQuantity || "",
       description: editing.description || "",
@@ -139,7 +139,7 @@ export default function ProductForm({ editing, onSaved, onCancel }) {
             offerPrice: offer,
             purchasePrice: Number(form.purchasePrice) || 0,
             wholesalePrice: Number(form.wholesalePrice) || 0,
-            wholesaleMinQty: Math.max(1, parseInt(form.wholesaleMinQty) || 6),
+            wholesaleMinQty: Math.max(1, parseInt(form.wholesaleMinQty) || 3),
             resellerPrice: Number(form.resellerPrice) || 0,
             stockQuantity: Math.max(0, parseInt(form.stockQuantity) || 0),
             category: form.category || null,

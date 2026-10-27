@@ -39,7 +39,7 @@ const BrandSchema = new mongoose.Schema({
   slug:               { type: String, required: true, unique: true, lowercase: true, index: true },
   logo:               { type: String, default: '' },
   wholesaleMarginPct: { type: Number, default: 7 }, // e.g. 5 for 5%, 20 for 20%
-  minWholesaleQty:    { type: Number, default: 6 },
+  minWholesaleQty:    { type: Number, default: 3 },
   isActive:           { type: Boolean, default: true },
   order:              { type: Number, default: 0 }
 }, { timestamps: true });
@@ -56,7 +56,7 @@ const ProductSchema = new mongoose.Schema(
     originalPrice: { type: Number, required: true, min: 0 },
     offerPrice: { type: Number, required: true, min: 0 },
     wholesalePrice: { type: Number, default: 0, min: 0 },
-    wholesaleMinQty: { type: Number, default: 6, min: 1 },
+    wholesaleMinQty: { type: Number, default: 3, min: 1 },
     resellerPrice: { type: Number, default: 0, min: 0 },
     stockQuantity: { type: Number, required: true, default: 0, min: 0 },
     inStock: { type: Boolean, default: true, index: true },

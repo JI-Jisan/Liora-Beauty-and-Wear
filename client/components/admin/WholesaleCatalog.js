@@ -2666,8 +2666,16 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
                                             <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748b" }}>Pcs</span>
                                           </div>
 
-                                          {/* Quick Increment Presets: +6, +12, +24 */}
+                                          {/* Quick Increment Presets: +3, +6, +12, +24 */}
                                           <div style={{ display: "flex", gap: "3px" }}>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleQuickAddQty(id, 3)}
+                                              style={quickQtyBtnStyle}
+                                              title="৩ পিস (সর্বনিম্ন MOQ) যোগ করুন"
+                                            >
+                                              +3
+                                            </button>
                                             <button
                                               type="button"
                                               onClick={() => handleQuickAddQty(id, 6)}

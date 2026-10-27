@@ -127,8 +127,8 @@ export default function WholesalePage() {
   const totalSavings = Math.max(0, totalMarketValue - subtotalWholesale);
 
   const handleUpdateQty = (p, qty) => {
-    const minMoq = p.wholesaleMinQty || 6;
-    if (qty <= 0) {
+    const minMoq = Math.max(1, p.wholesaleMinQty || 3);
+    if (qty < minMoq) {
       setWholesaleCart((prev) => {
         const copy = { ...prev };
         delete copy[p._id];
@@ -417,7 +417,7 @@ export default function WholesalePage() {
           <div style={{ background: "#fff", padding: "14px 16px", borderRadius: 12, border: "1px solid #fecdd3" }}>
             <span style={{ fontSize: 20 }}>📦</span>
             <h4 style={{ margin: "4px 0 2px", fontSize: 14, fontWeight: 800, color: "#881337" }}>নূন্যতম MOQ</h4>
-            <p style={{ margin: 0, fontSize: 12, color: "#64748b" }}>প্রতি আইটেম মাত্র ৬ পিস বা মোট ৳৩,০০০ থেকে শুরু</p>
+            <p style={{ margin: 0, fontSize: 12, color: "#64748b" }}>প্রতি আইটেম মাত্র ৩ পিস বা মোট ৳৩,০০০ থেকে শুরু</p>
           </div>
           <div style={{ background: "#fff", padding: "14px 16px", borderRadius: 12, border: "1px solid #fecdd3" }}>
             <span style={{ fontSize: 20 }}>🏷️</span>
@@ -572,7 +572,7 @@ export default function WholesalePage() {
             }}
           >
             {filteredProducts.map((p) => {
-              const moq = p.wholesaleMinQty || 6;
+              const moq = p.wholesaleMinQty || 3;
               const retailPrice = Number(p.offerPrice || p.originalPrice || 0);
               const brandMargin = Number(p.brand?.wholesaleMarginPct ?? 7);
               const baseCost = Number(p.purchasePrice || p.costPrice || (retailPrice ? retailPrice * 0.70 : 100));
@@ -728,7 +728,7 @@ export default function WholesalePage() {
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             <button
                               type="button"
-                              onClick={() => handleUpdateQty(p, currentQty - 6)}
+                              onClick={() => handleUpdateQty(p, currentQty - moq)}
                               style={{
                                 width: 34,
                                 height: 34,
@@ -756,7 +756,7 @@ export default function WholesalePage() {
                             </div>
                             <button
                               type="button"
-                              onClick={() => handleUpdateQty(p, currentQty + 6)}
+                              onClick={() => handleUpdateQty(p, currentQty + moq)}
                               style={{
                                 width: 34,
                                 height: 34,

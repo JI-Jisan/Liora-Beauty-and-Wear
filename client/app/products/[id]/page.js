@@ -528,7 +528,7 @@ export default function ProductDetailsPage() {
                   })()}
                 </span>
                 <span style={{ fontSize: "12px", color: "#6d28d9", fontWeight: "800" }}>
-                  🏬 Wholesale VIP Rate (MOQ: {product.wholesaleMinQty || 6} Pcs)
+                  🏬 Wholesale VIP Rate (MOQ: {product.wholesaleMinQty || 3} Pcs)
                 </span>
               </div>
               <Link href="/wholesale" style={{ fontSize: "12px", color: "#7c3aed", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
