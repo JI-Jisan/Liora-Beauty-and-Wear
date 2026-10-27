@@ -230,7 +230,7 @@ export default function FlashSaleLive({ onAddToCart }) {
                           boxShadow: "0 4px 12px rgba(225,29,72,.35)"
                         }}
                       >
-                        🎓 {activeCoupon?.short} -{campusPricing.discountPct}%
+                        -{campusPricing.savedFromMrpPct}% TOTAL OFF
                       </span>
                     ) : discountPct > 0 ? (
                       <span className="jt-flash-discount-badge">

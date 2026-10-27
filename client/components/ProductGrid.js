@@ -402,11 +402,11 @@ function ProductGridContent({
                         lineHeight: 1.1, textAlign: 'center',
                         boxShadow: '0 4px 12px rgba(225,29,72,.35)'
                       }}>
-                        <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          {activeCoupon?.short || "CAMPUS"}
+                        <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '-.3px' }}>
+                          -{campusPricing.savedFromMrpPct}%
                         </div>
-                        <div style={{ fontSize: 13, fontWeight: 900 }}>
-                          -{campusPricing.discountPct}%
+                        <div style={{ fontSize: 7.5, fontWeight: 800, textTransform: 'uppercase', opacity: .95, marginTop: 1, letterSpacing: '0.04em' }}>
+                          TOTAL OFF
                         </div>
                       </div>
                     )}
