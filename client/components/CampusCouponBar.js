@@ -254,7 +254,7 @@ export default function CampusCouponBar() {
                   {activeCoupon.campus} ({activeCoupon.short}) Special Pricing Unlocked!
                 </h3>
                 <p style={{ margin: 0, fontSize: "12px", color: "#475569", fontWeight: 600 }}>
-                  স্টোরের প্রতিটি প্রোডাক্টে আপনার জন্য স্পেশাল স্টুডেন্ট অফার রেট স্বয়ংক্রিয়ভাবে কার্যকর হয়েছে।
+                  স্টোরের প্রতিটি প্রোডাক্টে আপনার জন্য স্পেশাল রেট কার্যকর হয়েছে—সর্বোচ্চ ১৫% ছাড়ের বেস্টসেলার ডিলগুলো সবার উপরে সাজানো হয়েছে! ✨
                 </p>
               </div>
             </div>

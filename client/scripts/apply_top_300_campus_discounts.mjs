@@ -7,6 +7,9 @@ const ProductSchema = new mongoose.Schema({
   purchasePrice: Number,
   wholesalePrice: Number,
   campusDiscountPct: Number,
+  isFeatured: Boolean,
+  isTrending: Boolean,
+  isNewArrival: Boolean,
   inStock: Boolean,
 }, { strict: false });
 
@@ -16,11 +19,12 @@ async function main() {
   await mongoose.connect(process.env.MONGO_URI);
   console.log("Connected to MongoDB.");
 
-  const products = await Product.find({}).lean();
-  console.log(`Total products: ${products.length}`);
+  // Get in-stock products
+  const inStockDocs = await Product.find({ inStock: true }).lean();
+  console.log(`Total in-stock products: ${inStockDocs.length}`);
 
-  // Rank products by profit margin & cash profit
-  const scored = products.map(p => {
+  // Calculate profit margin
+  const scoredInStock = inStockDocs.map(p => {
     const offer = Number(p.offerPrice || p.originalPrice || 0);
     const cost = Number(p.purchasePrice || p.wholesalePrice || Math.round(offer * 0.75));
     const profit = Math.max(0, offer - cost);
@@ -33,27 +37,36 @@ async function main() {
       profit,
       margin
     };
-  });
+  }).filter(p => p.offer >= 80);
 
-  // Sort: highest margin first, then highest profit amount
-  scored.sort((a, b) => {
-    if (b.margin !== a.margin) {
+  // Sort highest margin first, then highest profit amount
+  scoredInStock.sort((a, b) => {
+    if (Math.abs(b.margin - a.margin) > 0.01) {
       return b.margin - a.margin;
     }
     return b.profit - a.profit;
   });
 
-  // Top 300 products with highest profit margin get 15%
-  const top300Ids = new Set(scored.slice(0, 300).map(p => String(p.id)));
+  // Top 300 IN-STOCK items with highest profit margin get 15%
+  const top300InStockIds = new Set(scoredInStock.slice(0, 300).map(p => String(p.id)));
+  console.log(`Cutoff margin for 300th in-stock item: ${scoredInStock[299].margin.toFixed(1)}% (${scoredInStock[299].name})`);
 
+  // Now update all products across database
+  const allProducts = await Product.find({}).lean();
   const bulkOps = [];
   const counts = { 15: 0, 8: 0, 5: 0 };
 
-  for (const p of scored) {
+  for (const p of allProducts) {
+    const isTop300 = top300InStockIds.has(String(p._id));
+    const offer = Number(p.offerPrice || p.originalPrice || 0);
+    const cost = Number(p.purchasePrice || p.wholesalePrice || Math.round(offer * 0.75));
+    const profit = Math.max(0, offer - cost);
+    const margin = offer > 0 ? (profit / offer) * 100 : 0;
+
     let discountPct = 5;
-    if (top300Ids.has(String(p.id))) {
+    if (isTop300) {
       discountPct = 15;
-    } else if (p.margin >= 25) {
+    } else if (margin >= 25) {
       discountPct = 8;
     } else {
       discountPct = 5;
@@ -63,7 +76,7 @@ async function main() {
 
     bulkOps.push({
       updateOne: {
-        filter: { _id: p.id },
+        filter: { _id: p._id },
         update: { $set: { campusDiscountPct: discountPct } }
       }
     });
@@ -81,30 +94,15 @@ async function main() {
   }
 
   console.log("\nApplied campus discounts successfully!");
-  console.log("Discount Distribution:", counts);
+  console.log("Discount Distribution across ALL products:", counts);
 
-  // Check top 300 items sample
-  const sample15 = scored.slice(0, 5);
-  console.log("Top 15% items sample:", sample15.map(p => ({
-    name: p.name.slice(0, 30),
-    offer: p.offer,
-    margin: p.margin.toFixed(1) + "%",
-    discount: "15%"
-  })));
+  const inStock15Count = await Product.countDocuments({ inStock: true, campusDiscountPct: 15 });
+  console.log(`Active IN-STOCK products with 15% OFF: ${inStock15Count}`);
 
-  // Check 300th item
-  console.log("300th item (cutoff):", {
-    name: scored[299].name.slice(0, 30),
-    offer: scored[299].offer,
-    margin: scored[299].margin.toFixed(1) + "%"
-  });
-
-  // Check 301st item
-  console.log("301st item (outside top 300):", {
-    name: scored[300].name.slice(0, 30),
-    offer: scored[300].offer,
-    margin: scored[300].margin.toFixed(1) + "%"
-  });
+  // Sample of in-stock 15% products
+  const sample15 = await Product.find({ inStock: true, campusDiscountPct: 15 }).select('name offerPrice originalPrice campusDiscountPct').limit(10).lean();
+  console.log("\nSample 15% IN-STOCK Products (ready to show on Top):");
+  sample15.forEach(p => console.log(`• [15% OFF] ${p.name.slice(0, 40)} | Offer: ${p.offerPrice} Tk | MRP: ${p.originalPrice} Tk`));
 
   await mongoose.disconnect();
 }

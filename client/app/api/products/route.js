@@ -322,10 +322,10 @@ export async function GET(req) {
           .populate("brand", "name slug")
           .sort(
             type === "featured"
-              ? { offerPrice: -1, createdAt: -1 }
+              ? { campusDiscountPct: -1, offerPrice: -1, createdAt: -1 }
               : type && type !== "all"
-              ? { createdAt: -1 }
-              : { inStock: -1, isFeatured: -1, createdAt: -1 }
+              ? { campusDiscountPct: -1, createdAt: -1 }
+              : { inStock: -1, campusDiscountPct: -1, isFeatured: -1, createdAt: -1 }
           )
           .skip(isPaginated ? skip : 0)
           .limit(limit)

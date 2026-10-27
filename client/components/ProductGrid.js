@@ -223,19 +223,17 @@ function ProductGridContent({
       .then((res) => res.json())
       .then((data) => {
         if (!isMounted) return;
-        if (data && Array.isArray(data.products)) {
-          setProducts(data.products);
-          setTotalPages(data.totalPages || 1);
-          setTotalProducts(data.total || 0);
-        } else if (Array.isArray(data)) {
-          setProducts(data);
-          setTotalPages(1);
-          setTotalProducts(data.length);
-        } else {
-          setProducts([]);
-          setTotalPages(1);
-          setTotalProducts(0);
-        }
+        const rawList = Array.isArray(data?.products)
+          ? data.products
+          : Array.isArray(data)
+          ? data
+          : [];
+        const sortedList = activeCoupon
+          ? [...rawList].sort((a, b) => (Number(b.campusDiscountPct) || 0) - (Number(a.campusDiscountPct) || 0))
+          : rawList;
+        setProducts(sortedList);
+        setTotalPages(data?.totalPages || 1);
+        setTotalProducts(data?.total || rawList.length);
       })
       .catch((err) => {
         if (!isMounted) return;
@@ -261,7 +259,13 @@ function ProductGridContent({
     return () => {
       isMounted = false;
     };
-  }, [activeCategory, activeBrand, type, collection, debouncedSearch, currentPage, PAGE_SIZE]);
+  }, [activeCategory, activeBrand, type, collection, debouncedSearch, currentPage, PAGE_SIZE, activeCoupon]);
+
+  useEffect(() => {
+    if (activeCoupon) {
+      setProducts((prev) => [...prev].sort((a, b) => (Number(b.campusDiscountPct) || 0) - (Number(a.campusDiscountPct) || 0)));
+    }
+  }, [activeCoupon]);
 
   const filteredProducts = products;
 
