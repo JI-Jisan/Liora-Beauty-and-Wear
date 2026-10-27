@@ -322,6 +322,7 @@ export async function POST(req) {
           deliveryType: isUrgent ? "urgent" : "standard",
           deliveryCharge,
           discount,
+          couponCode: (body.couponCode || "").trim(),
           commission,
           commissionNote,
           subtotal,

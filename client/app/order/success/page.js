@@ -41,9 +41,19 @@ function OrderSuccessContent() {
 
   const handleDownloadInvoice = () => {
     if (order) {
-      downloadInvoicePdf(order);
+      downloadInvoicePdf({ ...order, couponCode: order.couponCode || couponCode });
     }
   };
+
+  const noteMatch = (order?.note || "").match(/(?:Privilege|Coupon|Campus):\s*([A-Za-z0-9_-]+)/i);
+  const searchCoupon = searchParams.get("coupon") || "";
+  const couponCode = (
+    order?.couponCode ||
+    searchCoupon ||
+    (noteMatch ? noteMatch[1] : "") ||
+    ((order?.note || "").toLowerCase().includes("diu") ? "DIU15" : "") ||
+    (order?.discount > 0 ? "DIU15" : "")
+  ).toUpperCase();
 
   if (loading) {
     return (
@@ -109,7 +119,15 @@ function OrderSuccessContent() {
               : `${siteUrl}/order-tracking?query=${encodeURIComponent(orderNo)}`;
 
             const cleanNote = (order?.note || "").replace(/\[.*?Privilege:.*?\]/gi, "").trim();
-            const couponCode = order?.couponCode || (order?.discount > 0 ? "DIU15" : "");
+            const noteMatch = (order?.note || "").match(/(?:Privilege|Coupon|Campus):\s*([A-Za-z0-9_-]+)/i);
+            const searchCoupon = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("coupon") : "";
+            const couponCode = (
+              order?.couponCode ||
+              searchCoupon ||
+              (noteMatch ? noteMatch[1] : "") ||
+              ((order?.note || "").toLowerCase().includes("diu") ? "DIU15" : "") ||
+              (order?.discount > 0 ? "DIU15" : "")
+            ).toUpperCase();
 
             return (
               <div style={{ background: "#ffffff", padding: "12px 18px", borderRadius: "10px", margin: "14px 0 18px", border: "1px solid #e2e8f0" }}>
@@ -274,7 +292,7 @@ function OrderSuccessContent() {
                         <span style={{ fontWeight: "600", color: "#475569" }}>Tk {totalMrp}</span>
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "13px", color: "#16a34a", fontWeight: "700" }}>
-                        <span>Instant Offer Discount:</span>
+                        <span>{couponCode ? `Instant & Coupon Discount (${couponCode}):` : "Instant Offer Discount:"}</span>
                         <span>- Tk {totalSaved}</span>
                       </div>
                     </>
@@ -315,7 +333,9 @@ function OrderSuccessContent() {
                       fontSize: "12.5px",
                       textAlign: "center"
                     }}>
-                      You Saved Tk {totalSaved} ({savePercent}%) on this order!
+                      {couponCode
+                        ? `You Saved Tk ${totalSaved} (${savePercent}%) with Coupon ${couponCode}!`
+                        : `You Saved Tk ${totalSaved} (${savePercent}%) on this order!`}
                     </div>
                   )}
                 </div>

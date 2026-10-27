@@ -99,7 +99,14 @@ export async function downloadInvoicePdf(order) {
   doc.text("BILL TO / DELIVERY DETAILS:", 19, 47);
 
   // Corner Pill: Coupon (e.g. DIU15)
-  const couponCode = order.couponCode || (order.discount > 0 ? "DIU15" : "");
+  const noteMatch = (order.note || "").match(/(?:Privilege|Coupon|Campus):\s*([A-Za-z0-9_-]+)/i);
+  const couponCode = (
+    order.couponCode ||
+    (noteMatch ? noteMatch[1] : "") ||
+    ((order.note || "").toLowerCase().includes("diu") ? "DIU15" : "") ||
+    (order.discount > 0 ? "DIU15" : "")
+  ).toUpperCase();
+
   if (couponCode) {
     doc.setFillColor(240, 253, 244);
     doc.roundedRect(128, 43, 30, 4.5, 1.2, 1.2, "F");
@@ -309,10 +316,14 @@ export async function downloadInvoicePdf(order) {
     doc.text(`Tk ${totalMrp.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
     currentSummaryY += 5.2;
 
+    const discountLabel = couponCode
+      ? `Instant & Coupon Discount (${couponCode}):`
+      : "Instant Offer Discount:";
+
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.2);
     doc.setTextColor(...diuGreen);
-    doc.text("Instant Offer Discount:", summaryX, currentSummaryY + 4.5);
+    doc.text(discountLabel, summaryX, currentSummaryY + 4.5);
     doc.text(`- Tk ${totalSaved.toLocaleString()}`, 191, currentSummaryY + 4.5, { align: "right" });
     currentSummaryY += 5.2;
   }
@@ -357,8 +368,11 @@ export async function downloadInvoicePdf(order) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(...diuGreen);
+    const saveMsg = couponCode
+      ? `You Saved Tk ${totalSaved.toLocaleString()} (${savedPercent}%) with ${couponCode}!`
+      : `You Saved Tk ${totalSaved.toLocaleString()} (${savedPercent}%) on this order!`;
     doc.text(
-      `You Saved Tk ${totalSaved.toLocaleString()} (${savedPercent}%) on this order!`,
+      saveMsg,
       summaryX + 37,
       currentSummaryY + 5.5,
       { align: "center" }

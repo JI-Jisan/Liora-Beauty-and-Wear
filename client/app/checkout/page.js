@@ -275,7 +275,8 @@ export default function CheckoutPage() {
       const orderId = data._id || data.orderNumber;
       const orderNo = data.orderNumber || data._id;
       const orderTotal = data.total || total;
-      router.push(`/order/success?id=${orderId}&no=${orderNo}&total=${orderTotal}`);
+      const couponParam = activeCoupon?.code ? `&coupon=${encodeURIComponent(activeCoupon.code)}` : "";
+      router.push(`/order/success?id=${orderId}&no=${orderNo}&total=${orderTotal}${couponParam}`);
     } catch (err) {
       setError(err.message || "অর্ডার সম্পন্ন করতে সমস্যা হয়েছে");
     } finally {

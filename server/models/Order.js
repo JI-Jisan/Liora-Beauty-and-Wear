@@ -37,6 +37,7 @@ const orderSchema = new mongoose.Schema(
     },
     deliveryCharge: { type: Number, default: 0, min: 0 },
     discount: { type: Number, default: 0, min: 0 },
+    couponCode: { type: String, default: "" },
     commission: { type: Number, default: 0, min: 0 },
     commissionNote: { type: String, default: "" },
     subtotal: { type: Number, required: true, min: 0 },
