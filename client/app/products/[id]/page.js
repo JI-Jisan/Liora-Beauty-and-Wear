@@ -516,26 +516,36 @@ export default function ProductDetailsPage() {
           </div>
 
           {/* Wholesale or Reseller Tier Pricing Banner */}
-          {(isWholesale || isAdmin) && (
-            <div style={{ background: "#ede9fe", border: "1.5px solid #c4b5fd", padding: "10px 14px", borderRadius: "12px", margin: "10px 0" }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
-                <span style={{ fontSize: "22px", fontWeight: "900", color: "#6d28d9" }}>
-                  ৳{(() => {
-                    const retail = Number(product.offerPrice || product.originalPrice || 0);
-                    const cost = Number(product.purchasePrice || retail * 0.70);
-                    const isExplicit = Number(product.wholesalePrice) > cost;
-                    return isExplicit ? product.wholesalePrice : Math.round(cost * 1.07);
-                  })()}
-                </span>
-                <span style={{ fontSize: "12px", color: "#6d28d9", fontWeight: "800" }}>
-                  🏬 Wholesale VIP Rate (MOQ: {product.wholesaleMinQty || 3} Pcs)
-                </span>
+          {(isWholesale || isAdmin) && (() => {
+            const regularMrp = Number(product.originalPrice || product.offerPrice || 0);
+            const cost = Number(product.purchasePrice || regularMrp * 0.70);
+            const isExplicit = Number(product.wholesalePrice) > cost;
+            const wsPrice = isExplicit ? product.wholesalePrice : Math.round(cost * 1.07);
+            const profitPerPc = Math.max(0, regularMrp - wsPrice);
+            return (
+              <div style={{ background: "#ede9fe", border: "1.5px solid #c4b5fd", padding: "10px 14px", borderRadius: "12px", margin: "10px 0" }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "8px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "22px", fontWeight: "900", color: "#6d28d9" }}>
+                    ৳{wsPrice}
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#6d28d9", fontWeight: "800" }}>
+                    🏬 Wholesale VIP Rate (MOQ: {product.wholesaleMinQty || 3} Pcs)
+                  </span>
+                  {profitPerPc > 0 && (
+                    <span style={{ fontSize: "11px", fontWeight: "800", color: "#059669", background: "#d1fae5", padding: "2px 6px", borderRadius: "4px" }}>
+                      লাভ ৳{profitPerPc}/pc (MRP: ৳{regularMrp})
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: "11px", color: "#475569", marginTop: "3px" }}>
+                  রেগুলার MRP: <strong>৳{regularMrp}</strong> {product.offerPrice < regularMrp && `(খুচরা অফার: ৳${product.offerPrice})`}
+                </div>
+                <Link href="/wholesale" style={{ fontSize: "12px", color: "#7c3aed", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
+                  Wholesale পোর্টালে বাল্ক কার্টে যোগ করুন &rarr;
+                </Link>
               </div>
-              <Link href="/wholesale" style={{ fontSize: "12px", color: "#7c3aed", fontWeight: "700", textDecoration: "underline", marginTop: "4px", display: "inline-block" }}>
-                Wholesale পোর্টালে বাল্ক কার্টে যোগ করুন &rarr;
-              </Link>
-            </div>
-          )}
+            );
+          })()}
 
           {isReseller && (() => {
             const isStar = Boolean(profile?.isWeeklyStar);

@@ -121,14 +121,14 @@ export default function WholesalePage() {
   const totalItemsCount = cartItems.reduce((acc, it) => acc + it.qty, 0);
   const subtotalWholesale = cartItems.reduce((acc, it) => acc + it.price * it.qty, 0);
   const totalMarketValue = cartItems.reduce(
-    (acc, it) => acc + Number(it.product.offerPrice || it.product.originalPrice || it.price) * it.qty,
+    (acc, it) => acc + Number(it.product.originalPrice || it.product.offerPrice || it.price) * it.qty,
     0
   );
   const totalSavings = Math.max(0, totalMarketValue - subtotalWholesale);
 
   const handleUpdateQty = (p, qty) => {
     const minMoq = Math.max(1, p.wholesaleMinQty || 3);
-    if (qty < minMoq) {
+    if (qty <= 0) {
       setWholesaleCart((prev) => {
         const copy = { ...prev };
         delete copy[p._id];
@@ -137,9 +137,10 @@ export default function WholesalePage() {
       return;
     }
 
-    const retailPrice = Number(p.offerPrice || p.originalPrice || 0);
+    const finalQty = Math.max(minMoq, qty);
+    const regularMrp = Number(p.originalPrice || p.offerPrice || 0);
     const brandMargin = Number(p.brand?.wholesaleMarginPct ?? 7);
-    const baseCost = Number(p.purchasePrice || p.costPrice || (retailPrice ? retailPrice * 0.70 : 100));
+    const baseCost = Number(p.purchasePrice || p.costPrice || (regularMrp ? regularMrp * 0.70 : 100));
     const dynamicRate = Math.round(baseCost * (1 + brandMargin / 100));
     const hasValidMarkup = Number(p.wholesalePrice) > baseCost;
     const wholesaleRate = Number(hasValidMarkup ? p.wholesalePrice : dynamicRate);
@@ -148,7 +149,7 @@ export default function WholesalePage() {
       ...prev,
       [p._id]: {
         product: p,
-        qty: Math.max(minMoq, qty),
+        qty: finalQty,
         price: wholesaleRate,
       },
     }));
@@ -573,13 +574,15 @@ export default function WholesalePage() {
           >
             {filteredProducts.map((p) => {
               const moq = p.wholesaleMinQty || 3;
-              const retailPrice = Number(p.offerPrice || p.originalPrice || 0);
+              const regularMrp = Number(p.originalPrice || p.offerPrice || 0);
+              const retailOffer = Number(p.offerPrice || p.originalPrice || 0);
               const brandMargin = Number(p.brand?.wholesaleMarginPct ?? 7);
-              const baseCost = Number(p.purchasePrice || p.costPrice || (retailPrice ? retailPrice * 0.70 : 100));
+              const baseCost = Number(p.purchasePrice || p.costPrice || (regularMrp ? regularMrp * 0.70 : 100));
               const dynamicRate = Math.round(baseCost * (1 + brandMargin / 100));
               const hasValidMarkup = Number(p.wholesalePrice) > baseCost;
               const wholesaleRate = Number(hasValidMarkup ? p.wholesalePrice : dynamicRate);
-              const savingsPerPiece = Math.max(0, retailPrice - wholesaleRate);
+              const savingsPerPiece = Math.max(0, regularMrp - wholesaleRate);
+              const marginPct = regularMrp > 0 ? Math.round((savingsPerPiece / regularMrp) * 100) : 0;
               const cartItem = wholesaleCart[p._id];
               const currentQty = cartItem?.qty || 0;
 
@@ -667,35 +670,55 @@ export default function WholesalePage() {
                       <div
                         style={{
                           background: "#fff1f2",
-                          padding: "8px 10px",
-                          borderRadius: 8,
+                          padding: "10px 12px",
+                          borderRadius: 10,
                           marginBottom: 12,
+                          border: "1px solid #ffe4e6",
                         }}
                       >
                         {isApproved ? (
                           <>
-                            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                              <span style={{ fontSize: 18, fontWeight: 900, color: "#be123c" }}>
-                                ৳{wholesaleRate}
-                              </span>
-                              <span style={{ fontSize: 11, color: "#94a3b8", textDecoration: "line-through" }}>
-                                ৳{retailPrice}
-                              </span>
-                              <span style={{ fontSize: 11, fontWeight: 800, color: "#059669" }}>
-                                (সেভ ৳{savingsPerPiece}/pc)
+                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 4 }}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                                <span style={{ fontSize: 11, color: "#9f1239", fontWeight: 700 }}>পাইকারি:</span>
+                                <span style={{ fontSize: 20, fontWeight: 900, color: "#be123c" }}>
+                                  ৳{wholesaleRate}
+                                </span>
+                              </div>
+                              <span style={{ fontSize: 11, fontWeight: 800, color: "#059669", background: "#d1fae5", padding: "2px 7px", borderRadius: 4 }}>
+                                লাভ ৳{savingsPerPiece}/pc ({marginPct}%)
                               </span>
                             </div>
-                            <span style={{ fontSize: 10.5, color: "#881337", fontWeight: 700 }}>
-                              পাইকারি রেট (নূন্যতম {moq} পিস)
-                            </span>
+
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5, flexWrap: "wrap", fontSize: 11.5 }}>
+                              <span style={{ color: "#334155", fontWeight: 700 }}>
+                                রেগুলার MRP: <strong style={{ color: "#0f172a" }}>৳{regularMrp}</strong>
+                              </span>
+                              {retailOffer < regularMrp && (
+                                <span style={{ color: "#64748b", fontSize: 10.5 }}>
+                                  (অনলাইন অফার: ৳{retailOffer})
+                                </span>
+                              )}
+                            </div>
+
+                            <div style={{ fontSize: 10.5, color: "#881337", fontWeight: 700, marginTop: 4 }}>
+                              ✓ নূন্যতম {moq} পিস (এরপর ১ পিস করে বাড়ানো যাবে)
+                            </div>
                           </>
                         ) : (
                           <div>
-                            <span style={{ fontSize: 16, fontWeight: 800, color: "#64748b" }}>
-                              ৳{retailPrice}{" "}
-                              <span style={{ fontSize: 11, color: "#94a3b8" }}>(খুচরা দাম)</span>
-                            </span>
-                            <div style={{ fontSize: 11, color: "#e11d48", fontWeight: 700, marginTop: 2 }}>
+                            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                              <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700 }}>রেগুলার MRP:</span>
+                              <span style={{ fontSize: 16, fontWeight: 800, color: "#0f172a" }}>
+                                ৳{regularMrp}
+                              </span>
+                              {retailOffer < regularMrp && (
+                                <span style={{ fontSize: 12, color: "#059669", fontWeight: 700 }}>
+                                  (অফার ৳{retailOffer})
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: 11, color: "#e11d48", fontWeight: 700, marginTop: 4 }}>
                               🔒 পাইকারি রেট আনলক করতে অনুমোদন প্রয়োজন
                             </div>
                           </div>
@@ -720,6 +743,7 @@ export default function WholesalePage() {
                               fontSize: 13,
                               fontWeight: 800,
                               cursor: "pointer",
+                              transition: "all 0.2s ease",
                             }}
                           >
                             + Add MOQ ({moq} pcs) = ৳{wholesaleRate * moq}
@@ -728,46 +752,88 @@ export default function WholesalePage() {
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             <button
                               type="button"
-                              onClick={() => handleUpdateQty(p, currentQty - moq)}
+                              onClick={() => {
+                                if (currentQty <= moq) {
+                                  handleUpdateQty(p, 0);
+                                } else {
+                                  handleUpdateQty(p, currentQty - 1);
+                                }
+                              }}
                               style={{
                                 width: 34,
-                                height: 34,
+                                height: 36,
                                 background: "#f1f5f9",
                                 border: "1px solid #cbd5e1",
                                 borderRadius: 6,
                                 fontWeight: 900,
                                 fontSize: 16,
                                 cursor: "pointer",
+                                color: currentQty <= moq ? "#e11d48" : "#0f172a",
                               }}
+                              title={currentQty <= moq ? "কার্ট থেকে সরান" : "১ পিস কমান"}
                             >
-                              -
+                              {currentQty <= moq ? "✕" : "−"}
                             </button>
+
                             <div
                               style={{
                                 flex: 1,
-                                textAlign: "center",
-                                fontWeight: 800,
-                                fontSize: 13,
-                                color: "#0f172a",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 3,
+                                background: "#f8fafc",
+                                border: "1px solid #e2e8f0",
+                                borderRadius: 6,
+                                padding: "2px 4px",
+                                height: 36,
                               }}
                             >
-                              {currentQty} Pcs
-                              <div style={{ fontSize: 10.5, color: "#059669" }}>৳{currentQty * wholesaleRate}</div>
+                              <input
+                                type="number"
+                                min={moq}
+                                value={currentQty}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value, 10);
+                                  if (isNaN(val)) return;
+                                  if (val <= 0) {
+                                    handleUpdateQty(p, 0);
+                                  } else {
+                                    handleUpdateQty(p, Math.max(moq, val));
+                                  }
+                                }}
+                                style={{
+                                  width: 40,
+                                  border: "none",
+                                  background: "transparent",
+                                  textAlign: "center",
+                                  fontWeight: 900,
+                                  fontSize: 13.5,
+                                  color: "#0f172a",
+                                  outline: "none",
+                                }}
+                              />
+                              <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b" }}>পিস</span>
+                              <span style={{ fontSize: 11, fontWeight: 800, color: "#059669" }}>
+                                • ৳{currentQty * wholesaleRate}
+                              </span>
                             </div>
+
                             <button
                               type="button"
-                              onClick={() => handleUpdateQty(p, currentQty + moq)}
+                              onClick={() => handleUpdateQty(p, currentQty + 1)}
                               style={{
                                 width: 34,
-                                height: 34,
+                                height: 36,
                                 background: "#be123c",
                                 color: "#fff",
                                 border: "none",
                                 borderRadius: 6,
                                 fontWeight: 900,
-                                fontSize: 16,
+                                fontSize: 18,
                                 cursor: "pointer",
                               }}
+                              title="১ পিস বাড়ান (+1)"
                             >
                               +
                             </button>
