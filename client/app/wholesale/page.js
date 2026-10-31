@@ -166,10 +166,22 @@ export default function WholesalePage() {
     try {
       setApplying(true);
       setAppError("");
+      let token = null;
+      try {
+        token = await getIdToken();
+      } catch {}
+
       const res = await fetch("/api/wholesale/apply", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(appForm),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          ...appForm,
+          role: "wholesale",
+          ...(user?.uid ? { firebaseUid: user.uid } : {}),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "আবেদন গ্রহণ করা যায়নি");

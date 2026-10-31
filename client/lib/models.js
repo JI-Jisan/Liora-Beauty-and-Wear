@@ -326,7 +326,16 @@ export const Order =
 // ---------- Customer / User ----------
 const CustomerSchema = new mongoose.Schema(
   {
-    firebaseUid: { type: String, required: false, unique: true, sparse: true, index: true },
+    firebaseUid: {
+      type: String,
+      required: false,
+      sparse: true,
+      index: {
+        unique: true,
+        sparse: true,
+        partialFilterExpression: { firebaseUid: { $type: "string" } },
+      },
+    },
     email: { type: String, lowercase: true, trim: true, index: true },
     name: { type: String, default: "" },
     phone: { type: String, default: "", index: true },
@@ -337,6 +346,10 @@ const CustomerSchema = new mongoose.Schema(
       default: "user",
       index: true,
     },
+    appliedRole: { type: String, default: "" },
+    appliedAt: { type: Date, default: null },
+    fbPageLink: { type: String, default: "" },
+    tradeLicense: { type: String, default: "" },
     teamLeader: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", default: null, index: true },
     teamLeaderEmail: { type: String, default: "", lowercase: true, trim: true },
     teamLeaderName: { type: String, default: "" },

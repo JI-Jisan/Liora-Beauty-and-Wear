@@ -240,6 +240,9 @@ export async function POST(req) {
       minWholesaleOrderAmount = 5000,
       initialWalletBalance = 0,
       status = "active",
+      fbPageLink = "",
+      tradeLicense = "",
+      appliedRole = "",
     } = body;
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
@@ -264,6 +267,9 @@ export async function POST(req) {
       if (name && !customer.name) customer.name = name.trim();
       if (phone && !customer.phone) customer.phone = phone.trim();
       if (address && !customer.address) customer.address = address.trim();
+      if (fbPageLink) customer.fbPageLink = fbPageLink.trim();
+      if (tradeLicense) customer.tradeLicense = tradeLicense.trim();
+      if (appliedRole) customer.appliedRole = appliedRole.trim();
       if (note) customer.note = note.trim();
       customer.status = status;
       customer.wholesaleDiscountPct = Number(wholesaleDiscountPct) || 0;
@@ -300,6 +306,9 @@ export async function POST(req) {
         isWeeklyStar: Boolean(isWeeklyStar),
         weeklyStarMarkedAt: isWeeklyStar ? new Date() : null,
         status,
+        fbPageLink: fbPageLink.trim(),
+        tradeLicense: tradeLicense.trim(),
+        appliedRole: appliedRole.trim(),
         walletBalance: Number(initialWalletBalance) || 0,
         wholesaleDiscountPct: Number(wholesaleDiscountPct) || 0,
         minWholesaleOrderAmount: Number(minWholesaleOrderAmount) || 5000,
@@ -492,6 +501,9 @@ export async function PUT(req) {
     if (name !== undefined) customer.name = String(name).trim();
     if (phone !== undefined) customer.phone = String(phone).trim();
     if (address !== undefined) customer.address = String(address).trim();
+    if (body.fbPageLink !== undefined) customer.fbPageLink = String(body.fbPageLink).trim();
+    if (body.tradeLicense !== undefined) customer.tradeLicense = String(body.tradeLicense).trim();
+    if (body.appliedRole !== undefined) customer.appliedRole = String(body.appliedRole).trim();
     if (note !== undefined) customer.note = String(note).trim();
     if (body.isWeeklyStar !== undefined) {
       customer.isWeeklyStar = Boolean(body.isWeeklyStar);

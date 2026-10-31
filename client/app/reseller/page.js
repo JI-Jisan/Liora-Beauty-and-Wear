@@ -97,6 +97,24 @@ export default function ResellerPage() {
     }
   }, [user, isApproved]);
 
+  useEffect(() => {
+    if (profile) {
+      setApplyForm((prev) => ({
+        ...prev,
+        name: profile.name || prev.name || "",
+        email: profile.email || user?.email || prev.email || "",
+        phone: profile.phone || prev.phone || "",
+        storeName: profile.resellerStoreName || profile.businessName || prev.storeName || "",
+      }));
+    } else if (user) {
+      setApplyForm((prev) => ({
+        ...prev,
+        email: user.email || prev.email || "",
+        name: user.displayName || prev.name || "",
+      }));
+    }
+  }, [profile, user]);
+
   // Reseller dynamic margin rates: Standard 8% vs Weekly Star 10%
   const isWeeklyStar = Boolean(walletData?.isWeeklyStar || profile?.isWeeklyStar);
   const currentMarginDiscountPct = isWeeklyStar ? 10 : 8;
@@ -268,13 +286,22 @@ export default function ResellerPage() {
     try {
       setApplying(true);
       setApplyErr("");
+      let token = null;
+      try {
+        token = await getIdToken();
+      } catch {}
+
       const res = await fetch("/api/wholesale/apply", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           ...applyForm,
           businessName: applyForm.storeName,
           role: "reseller",
+          ...(user?.uid ? { firebaseUid: user.uid } : {}),
         }),
       });
       const data = await res.json();

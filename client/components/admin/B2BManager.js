@@ -33,13 +33,19 @@ export default function B2BManager() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedViewUser, setSelectedViewUser] = useState(null);
 
   // Add / Edit Form State
   const [formData, setFormData] = useState({
     email: "",
     name: "",
     phone: "",
+    address: "",
+    fbPageLink: "",
+    tradeLicense: "",
+    appliedRole: "",
     role: "wholesale",
     businessName: "",
     resellerStoreName: "",
@@ -223,11 +229,52 @@ export default function B2BManager() {
     return list;
   }, [users, roleFilter, search]);
 
+  const handleOpenDetails = (user) => {
+    setSelectedViewUser(user);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleQuickApprove = async (user, targetRole) => {
+    const roleToSet = targetRole || user.appliedRole || user.role || "reseller";
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+      const res = await fetch("/api/admin/b2b-users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAdminToken()}`,
+        },
+        body: JSON.stringify({
+          id: user._id,
+          role: roleToSet,
+          status: "active",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to approve user");
+      setSuccess(`${user.name || user.email} কে ${roleToSet === "reseller" ? "রিসেলার" : "হোলসেলার"} হিসেবে অনুমোদন করা হয়েছে!`);
+      if (selectedViewUser?._id === user._id) {
+        setSelectedViewUser({ ...selectedViewUser, role: roleToSet, status: "active" });
+      }
+      loadData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleOpenAdd = () => {
     setFormData({
       email: "",
       name: "",
       phone: "",
+      address: "",
+      fbPageLink: "",
+      tradeLicense: "",
+      appliedRole: "",
       role: "wholesale",
       businessName: "",
       resellerStoreName: "",
@@ -251,6 +298,10 @@ export default function B2BManager() {
       email: user.email || "",
       name: user.name || "",
       phone: user.phone || "",
+      address: user.address || "",
+      fbPageLink: user.fbPageLink || "",
+      tradeLicense: user.tradeLicense || "",
+      appliedRole: user.appliedRole || "",
       role: user.role || "wholesale",
       businessName: user.businessName || "",
       resellerStoreName: user.resellerStoreName || "",
@@ -668,15 +719,53 @@ export default function B2BManager() {
                     filteredUsers.map((u, idx) => (
                       <tr key={u._id || idx} style={{ borderBottom: "1px solid #f1f5f9", background: idx % 2 === 0 ? "#fff" : "#fafafa" }}>
                         <td style={{ padding: "12px 14px" }}>
-                          <div style={{ fontWeight: 800, color: "#0f172a" }}>{u.name || "Unnamed"}</div>
+                          <div
+                            style={{ fontWeight: 800, color: "#0f172a", cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+                            onClick={() => handleOpenDetails(u)}
+                            title="বিস্তারিত প্রোফাইল ও ফেসবুক লিঙ্ক দেখতে ক্লিক করুন"
+                          >
+                            <span style={{ color: "#be123c", textDecoration: "underline" }}>{u.name || "Unnamed"}</span>
+                            <span style={{ fontSize: 12 }}>👁️</span>
+                          </div>
                           <div style={{ fontSize: 11.5, color: "#64748b" }}>{u.email}</div>
                           {u.phone && <div style={{ fontSize: 11, color: "#0284c7" }}>📞 {u.phone}</div>}
+                          {u.address && <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>📍 {u.address}</div>}
+                          {u.fbPageLink && (
+                            <a
+                              href={u.fbPageLink.startsWith("http") ? u.fbPageLink : `https://${u.fbPageLink}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                                fontSize: 11,
+                                fontWeight: 800,
+                                color: "#1877f2",
+                                textDecoration: "underline",
+                                marginTop: 3,
+                              }}
+                            >
+                              🌐 FB Page ↗
+                            </a>
+                          )}
                         </td>
                         <td style={{ padding: "12px 14px" }}>
                           <div style={{ fontWeight: 700, color: "#1e293b" }}>
                             {u.role === "reseller" ? u.resellerStoreName || "—" : u.businessName || "—"}
                           </div>
-                          {u.note && <div style={{ fontSize: 11, color: "#94a3b8" }}>📝 {u.note}</div>}
+                          {u.tradeLicense && (
+                            <div style={{ fontSize: 11, color: "#4f46e5", fontWeight: 600, marginTop: 2 }}>
+                              📄 Trade/Doc: {u.tradeLicense}
+                            </div>
+                          )}
+                          {u.appliedRole && (
+                            <div style={{ fontSize: 10.5, color: "#b45309", fontWeight: 800, marginTop: 2 }}>
+                              📝 Applied: {u.appliedRole === "reseller" ? "Reseller" : "Wholesale"}
+                            </div>
+                          )}
+                          {u.note && <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>📝 {u.note}</div>}
                         </td>
                         <td style={{ padding: "12px 14px" }}>
                           {u.role === "admin" && (
@@ -781,11 +870,50 @@ export default function B2BManager() {
                               color: u.status === "active" ? "#047857" : u.status === "pending" ? "#b45309" : "#b91c1c",
                             }}
                           >
-                            {u.status || "active"}
+                            {u.status === "pending" ? "⏳ Pending" : u.status || "active"}
                           </span>
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                          <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+                          <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+                            <button
+                              type="button"
+                              title="সম্পূর্ণ প্রোফাইল ও ফেসবুক লিঙ্ক দেখুন"
+                              onClick={() => handleOpenDetails(u)}
+                              style={{
+                                background: "#eff6ff",
+                                border: "1px solid #bfdbfe",
+                                color: "#1d4ed8",
+                                padding: "4px 8px",
+                                borderRadius: 6,
+                                fontSize: 11,
+                                fontWeight: 800,
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                              }}
+                            >
+                              👁️ Details
+                            </button>
+                            {u.status === "pending" && (
+                              <button
+                                type="button"
+                                title="১-ক্লিকে অনুমোদন করুন"
+                                onClick={() => handleQuickApprove(u, u.appliedRole || u.role || "reseller")}
+                                style={{
+                                  background: "#ecfdf5",
+                                  border: "1px solid #6ee7b7",
+                                  color: "#047857",
+                                  padding: "4px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  fontWeight: 800,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                ✓ Approve
+                              </button>
+                            )}
                             <button
                               type="button"
                               title="Edit Member"
@@ -1568,6 +1696,46 @@ export default function B2BManager() {
                 </>
               )}
 
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                  দোকান / গোডাউনের ঠিকানা (Address)
+                </label>
+                <input
+                  type="text"
+                  placeholder="মার্কেট, রাস্তা, জেলা..."
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                    ফেসবুক পেজ লিঙ্ক (Facebook Link)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://facebook.com/page"
+                    value={formData.fbPageLink}
+                    onChange={(e) => setFormData({ ...formData, fbPageLink: e.target.value })}
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                    ট্রেড লাইসেন্স নম্বর (যদি থাকে)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="TR-XXXXXX"
+                    value={formData.tradeLicense}
+                    onChange={(e) => setFormData({ ...formData, tradeLicense: e.target.value })}
+                    style={{ width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
+                  />
+                </div>
+              </div>
+
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
                   অ্যাডমিন নোট / মন্তব্য
@@ -1710,14 +1878,65 @@ export default function B2BManager() {
                 />
               </div>
 
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>Full Name</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>Phone</label>
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
+                  />
+                </div>
+              </div>
+
               <div style={{ marginBottom: 12 }}>
-                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>Phone</label>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                  দোকান / গোডাউনের ঠিকানা (Address)
+                </label>
                 <input
                   type="text"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="মার্কেট, রাস্তা, জেলা..."
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
                 />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                    ফেসবুক পেজ লিঙ্ক (Facebook Link)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://facebook.com/page"
+                    value={formData.fbPageLink}
+                    onChange={(e) => setFormData({ ...formData, fbPageLink: e.target.value })}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#334155", marginBottom: 4 }}>
+                    ট্রেড লাইসেন্স বা ডকুমেন্ট
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="TR-XXXXXX"
+                    value={formData.tradeLicense}
+                    onChange={(e) => setFormData({ ...formData, tradeLicense: e.target.value })}
+                    style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13, boxSizing: "border-box" }}
+                  />
+                </div>
               </div>
 
               <div style={{ marginBottom: 16 }}>
@@ -1747,6 +1966,422 @@ export default function B2BManager() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: View Full Member / Applicant Profile & Facebook Link */}
+      {isDetailsModalOpen && selectedViewUser && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(4px)",
+            zIndex: 99999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+            overflowY: "auto",
+          }}
+          onClick={() => setIsDetailsModalOpen(false)}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              width: "100%",
+              maxWidth: 680,
+              maxHeight: "92vh",
+              overflowY: "auto",
+              borderRadius: 20,
+              padding: "24px",
+              boxShadow: "0 25px 60px rgba(0,0,0,0.3)",
+              border: "1px solid #fecdd3",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px solid #f1f5f9", paddingBottom: 16, marginBottom: 18 }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                  <span style={{ fontSize: 24 }}>👤</span>
+                  <h3 style={{ margin: 0, fontSize: 19, fontWeight: 900, color: "#881337" }}>
+                    {selectedViewUser.name || "Unnamed Applicant"}
+                  </h3>
+                  <span
+                    style={{
+                      padding: "3px 10px",
+                      borderRadius: 12,
+                      fontSize: 11,
+                      fontWeight: 800,
+                      background: selectedViewUser.status === "active" ? "#ecfdf5" : selectedViewUser.status === "pending" ? "#fef3c7" : "#fee2e2",
+                      color: selectedViewUser.status === "active" ? "#047857" : selectedViewUser.status === "pending" ? "#b45309" : "#b91c1c",
+                    }}
+                  >
+                    {selectedViewUser.status === "pending" ? "⏳ Pending Approval" : selectedViewUser.status === "active" ? "✓ Active Member" : "❌ Suspended"}
+                  </span>
+                  <span
+                    style={{
+                      padding: "3px 10px",
+                      borderRadius: 12,
+                      fontSize: 11,
+                      fontWeight: 800,
+                      background: selectedViewUser.role === "reseller" ? "#ffe4e6" : selectedViewUser.role === "wholesale" ? "#ede9fe" : "#f1f5f9",
+                      color: selectedViewUser.role === "reseller" ? "#be123c" : selectedViewUser.role === "wholesale" ? "#6d28d9" : "#475569",
+                    }}
+                  >
+                    Role: {selectedViewUser.role}
+                  </span>
+                </div>
+                <p style={{ margin: "4px 0 0", fontSize: 12.5, color: "#64748b" }}>
+                  আবেদনকারীর বিস্তারিত প্রোফাইল, ফেসবুক পেজ লিঙ্ক, যোগাযোগের নম্বর ও ভেরিফিকেশন বিবরণ
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsDetailsModalOpen(false)}
+                style={{
+                  background: "#f1f5f9",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: 32,
+                  height: 32,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 16,
+                  color: "#64748b",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Profile Content */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Card 1: Shop & Facebook Verification */}
+              <div style={{ background: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)", border: "1.5px solid #a7f3d0", borderRadius: 14, padding: "16px 18px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+                  <span style={{ fontSize: 18 }}>🏬</span>
+                  <h4 style={{ margin: 0, fontSize: 15, fontWeight: 900, color: "#065f46" }}>
+                    দোকান ও সোশ্যাল মিডিয়া ভেরিফিকেশন
+                  </h4>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+                  <div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "#047857", textTransform: "uppercase" }}>দোকান / ব্যবসার নাম:</span>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: "#0f172a", marginTop: 2 }}>
+                      {selectedViewUser.businessName || selectedViewUser.resellerStoreName || "দেওয়া হয়নি"}
+                    </div>
+                  </div>
+
+                  {selectedViewUser.appliedRole && (
+                    <div>
+                      <span style={{ fontSize: 11.5, fontWeight: 700, color: "#047857", textTransform: "uppercase" }}>আবেদনের ধরণ:</span>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "#b45309", marginTop: 2 }}>
+                        {selectedViewUser.appliedRole === "reseller" ? "🚀 Reseller (রিসেলার)" : "🏬 Wholesale (পাইকারি)"}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "#047857", textTransform: "uppercase" }}>ফেসবুক পেজ / প্রোফাইল লিঙ্ক:</span>
+                    <div style={{ marginTop: 4 }}>
+                      {selectedViewUser.fbPageLink ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                          <a
+                            href={selectedViewUser.fbPageLink.startsWith("http") ? selectedViewUser.fbPageLink : `https://${selectedViewUser.fbPageLink}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 6,
+                              background: "#1877f2",
+                              color: "#ffffff",
+                              padding: "8px 16px",
+                              borderRadius: 8,
+                              fontSize: 13,
+                              fontWeight: 800,
+                              textDecoration: "none",
+                              boxShadow: "0 2px 8px rgba(24, 119, 242, 0.25)",
+                            }}
+                          >
+                            🌐 ফেসবুক পেজ সরাসরি ওপেন করুন ↗
+                          </a>
+                          <span style={{ fontSize: 12, color: "#475569", wordBreak: "break-all" }}>
+                            {selectedViewUser.fbPageLink}
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: 13, color: "#94a3b8", fontStyle: "italic" }}>
+                          কোনো ফেসবুক লিঙ্ক জমা দেওয়া হয়নি
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "#047857", textTransform: "uppercase" }}>ট্রেড লাইসেন্স নম্বর / লিঙ্ক:</span>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginTop: 2 }}>
+                      {selectedViewUser.tradeLicense ? (
+                        selectedViewUser.tradeLicense.startsWith("http") ? (
+                          <a href={selectedViewUser.tradeLicense} target="_blank" rel="noreferrer" style={{ color: "#2563eb", textDecoration: "underline" }}>
+                            📄 {selectedViewUser.tradeLicense} ↗
+                          </a>
+                        ) : (
+                          `📄 ${selectedViewUser.tradeLicense}`
+                        )
+                      ) : (
+                        "—"
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "#047857", textTransform: "uppercase" }}>দোকান / গোডাউনের ঠিকানা:</span>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginTop: 2 }}>
+                      📍 {selectedViewUser.address || "ঠিকানা দেওয়া হয়নি"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Contact & Authentication Info */}
+              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "16px 18px", boxShadow: "0 2px 6px rgba(0,0,0,0.02)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+                  <span style={{ fontSize: 18 }}>📞</span>
+                  <h4 style={{ margin: 0, fontSize: 15, fontWeight: 900, color: "#1e293b" }}>
+                    যোগাযোগ ও অ্যাকাউন্ট তথ্য
+                  </h4>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+                  <div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>মোবাইল নম্বর:</span>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: "#0f172a", marginTop: 2, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span>{selectedViewUser.phone || "—"}</span>
+                      {selectedViewUser.phone && (
+                        <>
+                          <a
+                            href={`tel:${selectedViewUser.phone}`}
+                            style={{
+                              background: "#f1f5f9",
+                              color: "#0369a1",
+                              border: "1px solid #bae6fd",
+                              padding: "2px 8px",
+                              borderRadius: 6,
+                              fontSize: 11,
+                              fontWeight: 800,
+                              textDecoration: "none",
+                            }}
+                          >
+                            📞 Call
+                          </a>
+                          {(() => {
+                            const raw = (selectedViewUser.phone || "").replace(/\D/g, "");
+                            const clean = raw.startsWith("88") ? raw : raw.startsWith("0") ? "88" + raw : "880" + raw;
+                            return (
+                              <a
+                                href={`https://wa.me/${clean}?text=${encodeURIComponent(`আসসালামু আলাইকুম ${selectedViewUser.name || ""}। LIORA Beauty & Wear থেকে যোগাযোগ করছি। আপনার রিসেলার/হোলসেল আবেদন সংক্রান্ত তথ্য:`)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                  background: "#25d366",
+                                  color: "#ffffff",
+                                  padding: "2px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  fontWeight: 800,
+                                  textDecoration: "none",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                }}
+                              >
+                                💬 WhatsApp
+                              </a>
+                            );
+                          })()}
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>ইমেইল অ্যাড্রেস:</span>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: "#0f172a", marginTop: 2 }}>
+                      {selectedViewUser.email}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>আবেদনের তারিখ ও সময়:</span>
+                    <div style={{ fontSize: 13, color: "#334155", marginTop: 2 }}>
+                      {selectedViewUser.appliedAt
+                        ? new Date(selectedViewUser.appliedAt).toLocaleString()
+                        : selectedViewUser.createdAt
+                        ? new Date(selectedViewUser.createdAt).toLocaleString()
+                        : "—"}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Firebase UID:</span>
+                    <div style={{ fontSize: 11.5, color: "#64748b", fontFamily: "monospace", marginTop: 2, wordBreak: "break-all" }}>
+                      {selectedViewUser.firebaseUid || "Guest Applicant (Not linked yet)"}
+                    </div>
+                  </div>
+                </div>
+
+                {selectedViewUser.note && (
+                  <div style={{ marginTop: 12, background: "#f8fafc", padding: "10px 12px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>আবেদন নোট / মন্তব্য:</span>
+                    <div style={{ fontSize: 12.5, color: "#334155", marginTop: 3, whiteSpace: "pre-wrap" }}>
+                      {selectedViewUser.note}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Card 3: Performance, Wallet & Squad Status */}
+              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 14, padding: "16px 18px", boxShadow: "0 2px 6px rgba(0,0,0,0.02)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+                  <span style={{ fontSize: 18 }}>💰</span>
+                  <h4 style={{ margin: 0, fontSize: 15, fontWeight: 900, color: "#1e293b" }}>
+                    ওয়ালেট ও সেলস পারফরম্যান্স
+                  </h4>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+                  <div style={{ background: "#f8fafc", padding: "10px 14px", borderRadius: 10 }}>
+                    <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>বর্তমান ব্যালেন্স</span>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: "#059669", marginTop: 2 }}>
+                      ৳{Number(selectedViewUser.walletBalance || 0).toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div style={{ background: "#f8fafc", padding: "10px 14px", borderRadius: 10 }}>
+                    <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>মোট ড্রপশিপ / বাল্ক অর্ডার</span>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: "#0f172a", marginTop: 2 }}>
+                      {selectedViewUser.orderCount || 0} Orders
+                    </div>
+                  </div>
+
+                  <div style={{ background: "#f8fafc", padding: "10px 14px", borderRadius: 10 }}>
+                    <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>লাইফটাইম কেনাকাটা</span>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: "#6366f1", marginTop: 2 }}>
+                      ৳{Number(selectedViewUser.totalSpend || 0).toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div style={{ background: "#f8fafc", padding: "10px 14px", borderRadius: 10 }}>
+                    <span style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase" }}>টিম লিডার / স্কোয়াড</span>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: "#475569", marginTop: 2 }}>
+                      {selectedViewUser.teamLeaderName || selectedViewUser.teamLeaderEmail || "Unassigned"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions Footer */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 10,
+                marginTop: 22,
+                paddingTop: 16,
+                borderTop: "1px solid #f1f5f9",
+              }}
+            >
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {selectedViewUser.status === "pending" && (
+                  <>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => handleQuickApprove(selectedViewUser, "reseller")}
+                      style={{
+                        background: "linear-gradient(135deg, #16a34a, #15803d)",
+                        color: "#fff",
+                        border: "none",
+                        padding: "9px 18px",
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 900,
+                        cursor: saving ? "not-allowed" : "pointer",
+                        boxShadow: "0 2px 8px rgba(22, 163, 74, 0.25)",
+                      }}
+                    >
+                      ✓ Approve as Reseller
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => handleQuickApprove(selectedViewUser, "wholesale")}
+                      style={{
+                        background: "linear-gradient(135deg, #7c3aed, #6d28d9)",
+                        color: "#fff",
+                        border: "none",
+                        padding: "9px 18px",
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 900,
+                        cursor: saving ? "not-allowed" : "pointer",
+                        boxShadow: "0 2px 8px rgba(124, 58, 237, 0.25)",
+                      }}
+                    >
+                      🏬 Approve as Wholesaler
+                    </button>
+                  </>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleOpenEdit(selectedViewUser);
+                    setIsDetailsModalOpen(false);
+                  }}
+                  style={{
+                    background: "#0f172a",
+                    color: "#fff",
+                    border: "none",
+                    padding: "9px 18px",
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    cursor: "pointer",
+                  }}
+                >
+                  ✏️ Edit Profile Info
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsDetailsModalOpen(false)}
+                style={{
+                  background: "#f1f5f9",
+                  border: "1px solid #cbd5e1",
+                  padding: "9px 20px",
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: "#475569",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
