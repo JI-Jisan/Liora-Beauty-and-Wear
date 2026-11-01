@@ -452,6 +452,32 @@ function OrderSuccessContent() {
                     </strong>
                   </div>
 
+                  {/* Reseller Profit & Wallet Notice */}
+                  {isReseller && order?.resellerDetails && (
+                    <div
+                      style={{
+                        background: "#f0fdf4",
+                        border: "1.5px solid #86efac",
+                        borderRadius: "10px",
+                        padding: "10px 14px",
+                        textAlign: "left",
+                        marginTop: "10px"
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "12px", color: "#166534", fontWeight: "700" }}>
+                          🎉 আপনার আনুমানিক নিট লাভ:
+                        </span>
+                        <strong style={{ fontSize: "15px", color: "#15803d" }}>
+                          +৳{order.resellerDetails.resellerProfit || 0}
+                        </strong>
+                      </div>
+                      <p style={{ margin: 0, fontSize: "11px", color: "#475569", lineHeight: "1.4" }}>
+                        কুরিয়ার কাস্টমার থেকে <strong>৳{order.resellerDetails.customerCodAmount || total}</strong> কালেক্ট করবে। পার্সেল ডেলিভারি (Delivered) সম্পন্ন হলে ৳{order.resellerDetails.resellerProfit || 0} স্বয়ংক্রিয়ভাবে আপনার ওয়ালেটে জমা হবে।
+                      </p>
+                    </div>
+                  )}
+
                   {/* Customer Happiness / Savings Badge */}
                   {!isReseller && totalSaved > 0 && (
                     <div

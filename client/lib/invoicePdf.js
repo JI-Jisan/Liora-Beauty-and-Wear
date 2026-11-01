@@ -536,14 +536,18 @@ async function renderResellerInvoice(doc, order, orderNo) {
   const phone = order.phone || "";
   const district = order.district || "Dhaka";
   const address = order.address || "";
-  const subtotal = Number(order.subtotal) || 0;
   const deliveryCharge = Number(order.deliveryCharge) || 0;
-  const total =
-    order.total !== undefined && order.total !== null && !isNaN(order.total)
-      ? Number(order.total)
-      : subtotal + deliveryCharge;
+  // For Reseller dropship invoice, total COD amount is what the customer pays to courier
+  const finalCodAmount = Number(order.resellerDetails?.customerCodAmount) || Number(order.total) || 0;
+  const total = finalCodAmount > 0 ? finalCodAmount : (Number(order.total) || 0);
+  const subtotal = Math.max(0, total - deliveryCharge);
   const status = order.status || "Pending";
   const items = Array.isArray(order.items) ? order.items : [];
+
+  const originalItemsSubtotal = items.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
+  const priceScale = (order.resellerDetails?.customerCodAmount && originalItemsSubtotal > 0 && subtotal > 0)
+    ? (subtotal / originalItemsSubtotal)
+    : 1;
 
   const storeName = order.resellerDetails?.storeName || "";
   const storePhone = order.resellerDetails?.storePhone || "";
@@ -705,7 +709,8 @@ async function renderResellerInvoice(doc, order, orderNo) {
     const name = item.productName || item.name || "Product Item";
     const itemLines = doc.splitTextToSize(name, 90);
     const lineCount = Array.isArray(itemLines) ? itemLines.length : 1;
-    const price = Number(item.price) || 0;
+    const basePrice = Number(item.price) || 0;
+    const price = (order.resellerDetails?.customerCodAmount && priceScale > 0) ? Math.round(basePrice * priceScale) : basePrice;
     const qty = Number(item.quantity) || 1;
     const rowTotal = price * qty;
     const rowHeight = lineCount > 1 ? Math.max(8.5, 4.5 + lineCount * 3.8) : 8;

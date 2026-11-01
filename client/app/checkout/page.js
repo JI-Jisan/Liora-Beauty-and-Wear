@@ -71,6 +71,35 @@ export default function CheckoutPage() {
     fetchCosts();
   }, [isAdminUser, cartItems.length]);
 
+  const isReseller = useMemo(() => {
+    return (
+      role === "reseller" ||
+      profile?.role === "reseller" ||
+      cartItems.some((i) => i.orderType === "reseller")
+    );
+  }, [role, profile, cartItems]);
+
+  const [resellerStoreName, setResellerStoreName] = useState("");
+  const [resellerStorePhone, setResellerStorePhone] = useState("");
+  const [customerCodAmount, setCustomerCodAmount] = useState("");
+  const [isManualCodAmount, setIsManualCodAmount] = useState(false);
+
+  useEffect(() => {
+    if (profile?.resellerStoreName && !resellerStoreName) {
+      setResellerStoreName(profile.resellerStoreName);
+    }
+    if ((profile?.resellerStorePhone || profile?.phone) && !resellerStorePhone) {
+      setResellerStorePhone(profile.resellerStorePhone || profile.phone || "");
+    }
+  }, [profile]);
+
+  const suggestedRetailTotal = useMemo(() => {
+    return cartItems.reduce((sum, item) => {
+      const retailPrice = Number(item.offerPrice ?? item.originalPrice ?? item.price ?? 0);
+      return sum + retailPrice * (item.quantity || 1);
+    }, 0);
+  }, [cartItems]);
+
   const [formData, setFormData] = useState({
     customerName: "",
     customerEmail: "",
@@ -80,7 +109,7 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    if ((profile || user) && !isAdminUser) {
+    if ((profile || user) && !isAdminUser && !isReseller) {
       setFormData((prev) => ({
         ...prev,
         customerName: prev.customerName || profile?.name || user?.displayName || "",
@@ -89,7 +118,17 @@ export default function CheckoutPage() {
         address: prev.address || profile?.address || "",
       }));
     }
-  }, [profile, user, isAdminUser]);
+  }, [profile, user, isAdminUser, isReseller]);
+
+  const fillResellerPersonalDetails = () => {
+    setFormData((prev) => ({
+      ...prev,
+      customerName: profile?.name || user?.displayName || "",
+      customerEmail: profile?.email || user?.email || "",
+      phone: profile?.phone || "",
+      address: profile?.address || "",
+    }));
+  };
 
   const clearCustomerForm = () => {
     setFormData({
@@ -187,6 +226,17 @@ export default function CheckoutPage() {
 
   const total = Math.max(0, subtotal + deliveryCharge - discountVal);
 
+  const codAmountNum = Number(customerCodAmount) || 0;
+  const lioraBaseTotal = subtotal + deliveryCharge;
+  const resellerNetProfit = Math.max(0, codAmountNum - lioraBaseTotal);
+
+  useEffect(() => {
+    if (isReseller && !isManualCodAmount && cartItems.length > 0) {
+      const defaultCod = suggestedRetailTotal > 0 ? (suggestedRetailTotal + deliveryCharge) : (subtotal + deliveryCharge);
+      setCustomerCodAmount(String(defaultCod));
+    }
+  }, [isReseller, isManualCodAmount, suggestedRetailTotal, deliveryCharge, subtotal, cartItems.length]);
+
   const totalCost = useMemo(() => {
     return cartItems.reduce((sum, item) => {
       const cost = Number(
@@ -229,6 +279,14 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (isReseller) {
+      const codNum = Number(customerCodAmount) || 0;
+      if (!codNum || codNum < subtotal + deliveryCharge) {
+        setError(`কাস্টমার কালেকশন (COD) অ্যামাউন্ট অবশ্যই সর্বনিম্ন ৳${subtotal + deliveryCharge} (প্রডাক্ট রেট ৳${subtotal} + কুরিয়ার ৳${deliveryCharge}) হতে হবে।`);
+        return;
+      }
+    }
+
     setSubmitting(true);
     setError("");
     setSuccess("");
@@ -249,7 +307,7 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           customerName: formData.customerName,
-          customerEmail: formData.customerEmail || profile?.email || user?.email || "",
+          customerEmail: isReseller ? (formData.customerEmail || "") : (formData.customerEmail || profile?.email || user?.email || ""),
           phone: cleanPhone,
           district: district || "Dhaka",
           thana: thana || "",
@@ -267,10 +325,17 @@ export default function CheckoutPage() {
           campusName: activeCoupon?.campus || undefined,
           orderType: (role === "wholesale" || cartItems.some((i) => i.orderType === "wholesale"))
             ? "wholesale"
-            : (role === "reseller" || cartItems.some((i) => i.orderType === "reseller"))
+            : isReseller
             ? "reseller"
             : "retail",
           isWholesale: role === "wholesale" || cartItems.some((i) => i.orderType === "wholesale"),
+          isReseller,
+          customerCodAmount: isReseller ? Number(customerCodAmount) : undefined,
+          storeName: isReseller ? (resellerStoreName.trim() || profile?.resellerStoreName || "Official Reseller") : undefined,
+          storePhone: isReseller ? (resellerStorePhone.trim() || profile?.resellerStorePhone || profile?.phone || "") : undefined,
+          resellerUid: isReseller ? (user?.uid || profile?.firebaseUid || "") : undefined,
+          resellerEmail: isReseller ? (user?.email || profile?.email || "") : undefined,
+          resellerName: isReseller ? (profile?.name || user?.displayName || "Reseller") : undefined,
           items: cartItems.map((item) => ({
             productId: item._id,
             quantity: item.quantity || 1,
@@ -279,7 +344,7 @@ export default function CheckoutPage() {
                 ? Number(customPrices[item._id])
                 : (item.orderType === "wholesale" || role === "wholesale")
                 ? Number(item.price ?? item.wholesalePrice ?? getItemPrice(item))
-                : (item.orderType === "reseller" || role === "reseller")
+                : (item.orderType === "reseller" || role === "reseller" || isReseller)
                 ? Number(item.price ?? item.resellerPrice ?? getItemPrice(item))
                 : undefined,
           })),
@@ -329,7 +394,7 @@ export default function CheckoutPage() {
               <div className="jt-checkout-left">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                   <h3 style={{ margin: 0 }}>Your Order ({cartItems.length} items)</h3>
-                  {isAdminUser && (
+                  {isAdminUser ? (
                     <span style={{
                       background: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)",
                       color: "#fff",
@@ -344,12 +409,29 @@ export default function CheckoutPage() {
                     }}>
                       👑 ADMIN CHECKOUT
                     </span>
-                  )}
+                  ) : isReseller ? (
+                    <span style={{
+                      background: "linear-gradient(135deg, #be185d 0%, #9f1239 100%)",
+                      color: "#fff",
+                      fontSize: "11px",
+                      fontWeight: "800",
+                      padding: "3px 9px",
+                      borderRadius: "6px",
+                      boxShadow: "0 2px 6px rgba(159, 18, 57, 0.3)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px"
+                    }}>
+                      💼 RESELLER DROPSHIP
+                    </span>
+                  ) : null}
                 </div>
 
                 <p style={{ textAlign: "left", marginTop: 0, marginBottom: "16px", fontSize: "14px", color: "#64748b" }}>
                   {isAdminUser
                     ? "অ্যাডমিন প্যানেল থেকে অর্ডার কাটছেন। নিচে পণ্যের দাম, ডিসকাউন্ট ও কমিশন পরিবর্তন করতে পারেন।"
+                    : isReseller
+                    ? "রিসেলার ড্রপশিপ অর্ডার: আপনি পণ্যের পাইকারি রেট পাচ্ছেন। নিচে কাস্টমারের কাছে কত টাকায় বিক্রি করেছেন তা বসান।"
                     : "Review your selected products before placing the order."}
                 </p>
 
@@ -671,9 +753,273 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
+                {/* Reseller Dropship Pricing & Profit Controls */}
+                {isReseller && (
+                  <div
+                    style={{
+                      marginTop: "16px",
+                      marginBottom: "16px",
+                      background: "linear-gradient(135deg, #fdf2f8 0%, #fff1f2 100%)",
+                      border: "2px solid #f43f5e",
+                      borderRadius: "14px",
+                      padding: "16px 18px",
+                      boxShadow: "0 4px 14px rgba(244, 63, 94, 0.12)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", borderBottom: "1.5px dashed #fecdd3", paddingBottom: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "20px" }}>💼</span>
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: "14px", color: "#9f1239", fontWeight: "800" }}>
+                            রিসেলার ড্রপশিপ সেটিংস ও লাভ
+                          </h4>
+                          <span style={{ fontSize: "11px", color: "#be123c" }}>
+                            কাস্টমার থেকে কুরিয়ার কত টাকা তুলবে (COD) তা লিখুন
+                          </span>
+                        </div>
+                      </div>
+                      <span style={{
+                        background: "#9f1239",
+                        color: "#fff",
+                        fontSize: "10px",
+                        fontWeight: "800",
+                        padding: "3px 8px",
+                        borderRadius: "6px",
+                        letterSpacing: "0.5px"
+                      }}>
+                        RESELLER DROPSHIP
+                      </span>
+                    </div>
+
+                    {/* Customer COD Collection Amount Input */}
+                    <div style={{ marginBottom: "14px" }}>
+                      <label style={{ display: "block", fontSize: "12.5px", fontWeight: "700", color: "#881337", marginBottom: "6px" }}>
+                        💰 কাস্টমার থেকে কালেকশন মূল্য (Customer COD Collection) (৳) *
+                      </label>
+                      <div style={{ position: "relative" }}>
+                        <span style={{
+                          position: "absolute",
+                          left: "12px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          fontSize: "15px",
+                          fontWeight: "800",
+                          color: "#9f1239"
+                        }}>
+                          ৳
+                        </span>
+                        <input
+                          type="number"
+                          min={subtotal + deliveryCharge}
+                          placeholder={String(suggestedRetailTotal > 0 ? suggestedRetailTotal + deliveryCharge : subtotal + deliveryCharge)}
+                          value={customerCodAmount}
+                          onChange={(e) => {
+                            setIsManualCodAmount(true);
+                            setCustomerCodAmount(e.target.value);
+                          }}
+                          style={{
+                            width: "100%",
+                            padding: "10px 14px 10px 32px",
+                            borderRadius: "8px",
+                            border: "2px solid #f43f5e",
+                            fontSize: "16px",
+                            fontWeight: "800",
+                            color: "#881337",
+                            background: "#ffffff",
+                            outline: "none"
+                          }}
+                          required
+                        />
+                      </div>
+
+                      {/* Quick chips to preset prices */}
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "8px", alignItems: "center" }}>
+                        <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>দ্রুত সেট করুন:</span>
+                        {suggestedRetailTotal > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsManualCodAmount(true);
+                              setCustomerCodAmount(String(suggestedRetailTotal + deliveryCharge));
+                            }}
+                            style={{
+                              fontSize: "11px",
+                              padding: "3px 8px",
+                              borderRadius: "5px",
+                              background: "#ffffff",
+                              border: "1px solid #fda4af",
+                              color: "#9f1239",
+                              cursor: "pointer",
+                              fontWeight: "700"
+                            }}
+                          >
+                            খুচরা রেট + কুরিয়ার (৳{suggestedRetailTotal + deliveryCharge})
+                          </button>
+                        )}
+                        {suggestedRetailTotal > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsManualCodAmount(true);
+                              setCustomerCodAmount(String(suggestedRetailTotal));
+                            }}
+                            style={{
+                              fontSize: "11px",
+                              padding: "3px 8px",
+                              borderRadius: "5px",
+                              background: "#ffffff",
+                              border: "1px solid #fda4af",
+                              color: "#9f1239",
+                              cursor: "pointer",
+                              fontWeight: "700"
+                            }}
+                          >
+                            ফ্রি ডেলিভারি অফার (৳{suggestedRetailTotal})
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsManualCodAmount(true);
+                            setCustomerCodAmount(String(subtotal + deliveryCharge));
+                          }}
+                          style={{
+                            fontSize: "11px",
+                            padding: "3px 8px",
+                            borderRadius: "5px",
+                            background: "#ffffff",
+                            border: "1px solid #cbd5e1",
+                            color: "#475569",
+                            cursor: "pointer",
+                            fontWeight: "600"
+                          }}
+                        >
+                          কেনা রেটে (৳{subtotal + deliveryCharge})
+                        </button>
+                      </div>
+
+                      {Number(customerCodAmount) > 0 && Number(customerCodAmount) < subtotal + deliveryCharge && (
+                        <div style={{
+                          marginTop: "8px",
+                          background: "#fef2f2",
+                          border: "1px solid #fecaca",
+                          borderRadius: "6px",
+                          padding: "6px 10px",
+                          fontSize: "11.5px",
+                          color: "#b91c1c",
+                          fontWeight: "700"
+                        }}>
+                          ⚠️ কালেকশন অ্যামাউন্ট সর্বনিম্ন ৳{subtotal + deliveryCharge} (প্রডাক্ট রেট ৳{subtotal} + কুরিয়ার ৳{deliveryCharge}) হতে হবে। নতুবা আপনার লোকসান হবে।
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Reseller Store Branding Info */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px", marginBottom: "14px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#475569", marginBottom: "4px" }}>
+                          🏪 আপনার পেইজ/দোকানের নাম (Store Name):
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="যেমন: Glamour Hub"
+                          value={resellerStoreName}
+                          onChange={(e) => setResellerStoreName(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "8px 10px",
+                            borderRadius: "6px",
+                            border: "1px solid #cbd5e1",
+                            fontSize: "12px",
+                            background: "#ffffff"
+                          }}
+                        />
+                        <span style={{ fontSize: "10px", color: "#64748b", marginTop: "2px", display: "block" }}>
+                          পার্সেল ইনভয়েসে প্রেরক হিসেবে প্রিন্ট হবে
+                        </span>
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#475569", marginBottom: "4px" }}>
+                          📞 পেইজের হেল্পলাইন মোবাইল:
+                        </label>
+                        <input
+                          type="tel"
+                          placeholder="01XXXXXXXXX"
+                          value={resellerStorePhone}
+                          onChange={(e) => setResellerStorePhone(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "8px 10px",
+                            borderRadius: "6px",
+                            border: "1px solid #cbd5e1",
+                            fontSize: "12px",
+                            background: "#ffffff"
+                          }}
+                        />
+                        <span style={{ fontSize: "10px", color: "#64748b", marginTop: "2px", display: "block" }}>
+                          কাস্টমার ইনভয়েসে আপনার ফোন নম্বর দেখবে
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Live Profit Breakdown Card */}
+                    <div style={{
+                      background: "#ffffff",
+                      border: "1.5px solid #bbf7d0",
+                      borderRadius: "10px",
+                      padding: "12px 14px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "6px"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#475569" }}>
+                        <span>কাস্টমার থেকে কুরিয়ার কালেকশন (COD):</span>
+                        <strong style={{ color: "#0f172a" }}>৳{codAmountNum}</strong>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#475569" }}>
+                        <span>বাদ: প্রডাক্ট রিসেলার কেনা রেট:</span>
+                        <span style={{ color: "#dc2626" }}>-৳{subtotal}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#475569" }}>
+                        <span>বাদ: কুরিয়ার ডেলিভারি চার্জ:</span>
+                        <span style={{ color: "#dc2626" }}>-৳{deliveryCharge}</span>
+                      </div>
+
+                      <div style={{
+                        marginTop: "4px",
+                        paddingTop: "8px",
+                        borderTop: "1.5px dashed #cbd5e1",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                      }}>
+                        <div>
+                          <strong style={{ fontSize: "13px", color: "#166534", display: "block" }}>
+                            🎉 আপনার নিট প্রফিট (Net Profit):
+                          </strong>
+                          <span style={{ fontSize: "10.5px", color: "#059669" }}>
+                            পার্সেল Delivered হওয়ার সাথে সাথে ওয়ালেটে যুক্ত হবে
+                          </span>
+                        </div>
+                        <div style={{
+                          background: resellerNetProfit > 0 ? "#dcfce7" : "#f1f5f9",
+                          border: resellerNetProfit > 0 ? "1.5px solid #86efac" : "1px solid #cbd5e1",
+                          padding: "4px 10px",
+                          borderRadius: "8px",
+                          fontSize: "16px",
+                          fontWeight: "900",
+                          color: resellerNetProfit > 0 ? "#15803d" : "#64748b"
+                        }}>
+                          +৳{resellerNetProfit}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Summary Box */}
-                <div className="jt-summary-box">
-                  <p>Subtotal: <strong>{subtotal} Tk</strong></p>
+                <div className="jt-summary-box" style={isReseller ? { border: "1.5px solid #fecdd3", background: "#fff5f7" } : {}}>
+                  <p>Subtotal {isReseller ? "(রিসেলার রেট)" : ""}: <strong>{subtotal} Tk</strong></p>
                   <p>
                     Delivery:{" "}
                     <strong>{deliveryCharge === 0 ? "Free 🎉 (0 Tk)" : `${deliveryCharge} Tk`}</strong>
@@ -688,8 +1034,26 @@ export default function CheckoutPage() {
                       কমিশন খরচ (গোপন): <strong>-৳{commissionVal} Tk</strong>
                     </p>
                   )}
-                  <p className="jt-summary-total">Total: <strong>{total} Tk</strong></p>
-                  {rates.freeDeliveryThreshold > 0 && !freeApplied && !isUrgent && !isAdminUser && (
+                  <p className="jt-summary-total">
+                    {isReseller ? "মোট লিয়রা কস্ট:" : "Total:"} <strong>{total} Tk</strong>
+                  </p>
+
+                  {isReseller && (
+                    <>
+                      <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px dashed #f43f5e", display: "flex", justifyContent: "space-between", fontSize: "13.5px" }}>
+                        <span style={{ color: "#881337", fontWeight: "700" }}>কাস্টমার থেকে কুরিয়ার তুলবে:</span>
+                        <strong style={{ color: "#be185d", fontSize: "15px" }}>৳{codAmountNum} Tk</strong>
+                      </div>
+                      <div style={{ marginTop: "6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ color: "#166534", fontWeight: "700", fontSize: "13px" }}>🎉 ডেলিভারি শেষে ওয়ালেটে ঢুকবে:</span>
+                        <strong style={{ color: "#15803d", fontSize: "16px", background: "#dcfce7", padding: "2px 8px", borderRadius: "6px" }}>
+                          +৳{resellerNetProfit} Tk
+                        </strong>
+                      </div>
+                    </>
+                  )}
+
+                  {rates.freeDeliveryThreshold > 0 && !freeApplied && !isUrgent && !isAdminUser && !isReseller && (
                     <p style={{ fontSize: "13px", color: "#059669" }}>
                       আর {rates.freeDeliveryThreshold - subtotal} Tk কিনলেই ডেলিভারি ফ্রি!
                     </p>
@@ -724,38 +1088,68 @@ export default function CheckoutPage() {
               </div>
 
               <div className="jt-checkout-right">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                  <h3 style={{ margin: 0 }}>Customer & Delivery Details</h3>
-                  {isAdminUser && (
-                    <button
-                      type="button"
-                      onClick={clearCustomerForm}
-                      style={{
-                        background: "#f1f5f9",
-                        border: "1px solid #cbd5e1",
-                        borderRadius: "6px",
-                        padding: "4px 8px",
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        color: "#475569",
-                        cursor: "pointer"
-                      }}
-                    >
-                      🔄 ফর্ম ক্লিয়ার করুন
-                    </button>
-                  )}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
+                  <div>
+                    <h3 style={{ margin: 0 }}>
+                      {isReseller ? "📦 ক্রেতার ডেলিভারি ঠিকানা (End-Customer Details)" : "Customer & Delivery Details"}
+                    </h3>
+                    {isReseller && (
+                      <span style={{ fontSize: "11.5px", color: "#64748b", display: "block", marginTop: "2px" }}>
+                        যে কাস্টমারের কাছে পার্সেলটি পাঠানো হবে তার নাম, ফোন ও ঠিকানা দিন।
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    {isReseller && (
+                      <button
+                        type="button"
+                        onClick={fillResellerPersonalDetails}
+                        title="যদি পার্সেলটি আপনি নিজের জন্য নিতে চান"
+                        style={{
+                          background: "#fdf2f8",
+                          border: "1px solid #fbcfe8",
+                          borderRadius: "6px",
+                          padding: "4px 8px",
+                          fontSize: "11px",
+                          fontWeight: "700",
+                          color: "#be185d",
+                          cursor: "pointer"
+                        }}
+                      >
+                        👤 আমার তথ্য দিন
+                      </button>
+                    )}
+                    {(isAdminUser || isReseller) && (
+                      <button
+                        type="button"
+                        onClick={clearCustomerForm}
+                        style={{
+                          background: "#f1f5f9",
+                          border: "1px solid #cbd5e1",
+                          borderRadius: "6px",
+                          padding: "4px 8px",
+                          fontSize: "11px",
+                          fontWeight: "700",
+                          color: "#475569",
+                          cursor: "pointer"
+                        }}
+                      >
+                        🔄 ক্লিয়ার
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <form className="jt-checkout-form" onSubmit={placeOrder}>
                   {/* Name */}
                   <div style={{ marginBottom: "12px" }}>
                     <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "6px" }}>
-                      👤 আপনার নাম (Full Name) *
+                      👤 {isReseller ? "ক্রেতার সম্পূর্ণ নাম (Customer Name) *" : "আপনার নাম (Full Name) *"}
                     </label>
                     <input
                       type="text"
                       name="customerName"
                       autoComplete="name"
-                      placeholder="আপনার সম্পূর্ণ নাম লিখুন"
+                      placeholder={isReseller ? "কাস্টমারের নাম লিখুন" : "আপনার সম্পূর্ণ নাম লিখুন"}
                       value={formData.customerName}
                       onChange={handleChange}
                       minLength={2}
@@ -767,7 +1161,7 @@ export default function CheckoutPage() {
                   {/* Phone */}
                   <div style={{ marginBottom: "12px" }}>
                     <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "6px" }}>
-                      📱 মোবাইল নম্বর (Mobile Number) *
+                      📱 {isReseller ? "ক্রেতার মোবাইল নম্বর (Customer Phone) *" : "মোবাইল নম্বর (Mobile Number) *"}
                     </label>
                     <input
                       type="tel"
@@ -775,7 +1169,7 @@ export default function CheckoutPage() {
                       autoComplete="tel"
                       inputMode="numeric"
                       maxLength={11}
-                      placeholder="১১ ডিজিটের মোবাইল নম্বর (যেমন 017XXXXXXXX)"
+                      placeholder={isReseller ? "কাস্টমারের ১১ ডিজিটের মোবাইল নম্বর" : "১১ ডিজিটের মোবাইল নম্বর (যেমন 017XXXXXXXX)"}
                       value={formData.phone}
                       onChange={handleChange}
                       style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1.5px solid #cbd5e1", fontSize: "14px" }}
@@ -1062,6 +1456,8 @@ export default function CheckoutPage() {
                   <button type="submit" className="jt-place-order-btn" disabled={submitting || (formData.phone && !isPhoneValid)}>
                     {submitting
                       ? "অর্ডার হচ্ছে, অপেক্ষা করুন..."
+                      : isReseller
+                      ? `কাস্টমারের ড্রপশিপ অর্ডার প্লেস করুন (কুরিয়ার কালেকশন ৳${codAmountNum || total} | লাভ +৳${resellerNetProfit})`
                       : `Place Cash on Delivery Order (${total} Tk)`}
                   </button>
                 </form>

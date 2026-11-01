@@ -306,9 +306,22 @@ export async function POST(req) {
     }
 
     const firebaseUid = user?.uid || body.firebaseUid || null;
-    const customerEmail = (user?.email || body.customerEmail || "").toLowerCase().trim();
+    const customerEmail = (orderType === "reseller" ? (body.customerEmail || "") : (user?.email || body.customerEmail || "")).toLowerCase().trim();
 
-    // Reseller profit and customer COD collection setup
+    // Reseller details lookup and profit setup
+    const resellerUid = body.resellerUid || user?.uid || (orderType === "reseller" ? firebaseUid : "") || "";
+    const resellerEmail = (body.resellerEmail || (orderType === "reseller" ? user?.email : "") || "").toLowerCase().trim();
+
+    let resellerCustomerDoc = null;
+    if (orderType === "reseller") {
+      if (resellerUid) {
+        resellerCustomerDoc = await Customer.findOne({ firebaseUid: resellerUid }).lean();
+      }
+      if (!resellerCustomerDoc && resellerEmail) {
+        resellerCustomerDoc = await Customer.findOne({ email: resellerEmail }).lean();
+      }
+    }
+
     const customerCodAmount = orderType === "reseller"
       ? Math.max(subtotal + deliveryCharge, Number(body.customerCodAmount || body.codAmount || total))
       : total;
@@ -354,11 +367,11 @@ export async function POST(req) {
           pendingOrdersCount: recentOrdersCount,
           orderType,
           resellerDetails: orderType === "reseller" ? {
-            resellerUid: user?.uid || customerDoc?.firebaseUid || "",
-            resellerEmail: customerEmail || customerDoc?.email || "",
-            resellerName: customerDoc?.name || user?.name || "Reseller",
-            storeName: body.storeName || customerDoc?.resellerStoreName || "",
-            storePhone: body.storePhone || customerDoc?.resellerStorePhone || "",
+            resellerUid: resellerUid || resellerCustomerDoc?.firebaseUid || "",
+            resellerEmail: resellerEmail || resellerCustomerDoc?.email || "",
+            resellerName: body.resellerName || resellerCustomerDoc?.name || user?.displayName || user?.name || "Reseller",
+            storeName: body.storeName || resellerCustomerDoc?.resellerStoreName || "",
+            storePhone: body.storePhone || resellerCustomerDoc?.resellerStorePhone || "",
             customerCodAmount,
             baseCost: subtotal,
             deliveryFee: deliveryCharge,
@@ -366,14 +379,14 @@ export async function POST(req) {
             settledToWallet: false,
           } : undefined,
           wholesaleDetails: orderType === "wholesale" ? {
-            businessName: body.businessName || customerDoc?.businessName || "",
+            businessName: body.businessName || "",
             tradeLicense: body.tradeLicense || "",
             totalItemsQty: items.reduce((s, it) => s + it.quantity, 0),
             wholesaleSavings: totalSavings,
           } : undefined,
         });
 
-        if (firebaseUid) {
+        if (firebaseUid && orderType !== "reseller") {
           Customer.findOneAndUpdate(
             { firebaseUid },
             {
@@ -388,6 +401,16 @@ export async function POST(req) {
             },
             { upsert: true }
           ).catch((e) => console.error("Customer sync error:", e?.message));
+        } else if (firebaseUid && orderType === "reseller") {
+          const storeUpdates = {};
+          if (body.storeName) storeUpdates.resellerStoreName = String(body.storeName).trim();
+          if (body.storePhone) storeUpdates.resellerStorePhone = String(body.storePhone).trim();
+          if (Object.keys(storeUpdates).length > 0) {
+            Customer.findOneAndUpdate(
+              { firebaseUid },
+              { $set: storeUpdates }
+            ).catch((e) => console.error("Reseller store sync error:", e?.message));
+          }
         }
 
         // Asynchronously send order confirmation email if customer email exists

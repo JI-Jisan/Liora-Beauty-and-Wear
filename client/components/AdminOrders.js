@@ -1045,6 +1045,50 @@ export default function AdminOrders({ onOrderUpdated }) {
                       <div className="jt-grand-total">
                         Total Amount: <strong>{order.total} Tk (COD)</strong>
                       </div>
+
+                      {/* Reseller Dropship Order Overview in Admin */}
+                      {order.orderType === "reseller" && (
+                        <div style={{
+                          marginTop: "10px",
+                          padding: "10px 12px",
+                          background: "#fff1f2",
+                          border: "1.5px solid #fecdd3",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          textAlign: "left"
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                            <strong style={{ color: "#9f1239", display: "flex", alignItems: "center", gap: "4px" }}>
+                              💼 রিসেলার ড্রপশিপ অর্ডার
+                            </strong>
+                            <span style={{
+                              background: order.resellerDetails?.settledToWallet ? "#dcfce7" : "#ffedd5",
+                              color: order.resellerDetails?.settledToWallet ? "#15803d" : "#c2410c",
+                              padding: "2px 7px",
+                              borderRadius: "4px",
+                              fontWeight: "800",
+                              fontSize: "10px"
+                            }}>
+                              {order.resellerDetails?.settledToWallet ? "✅ প্রফিট ওয়ালেটে ক্রেডিট হয়েছে" : "⏳ Delivered হলে ওয়ালেটে ঢুকবে"}
+                            </span>
+                          </div>
+
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", color: "#334155", fontSize: "12px" }}>
+                            <span>কুরিয়ার কালেকশন (COD): <strong style={{ color: "#0f172a" }}>৳{order.resellerDetails?.customerCodAmount || order.total}</strong></span>
+                            <span>রিসেলার কেনা রেট: <strong>৳{order.resellerDetails?.baseCost || order.subtotal}</strong></span>
+                            <span>ডেলিভারি ফি: <strong>৳{order.resellerDetails?.deliveryFee || order.deliveryCharge}</strong></span>
+                            <span>রিসেলার লাভ: <strong style={{ color: "#16a34a" }}>৳{order.resellerDetails?.resellerProfit || 0}</strong></span>
+                          </div>
+
+                          {(order.resellerDetails?.storeName || order.resellerDetails?.storePhone || order.resellerDetails?.resellerName) && (
+                            <div style={{ marginTop: "6px", paddingTop: "6px", borderTop: "1px dashed #fecdd3", fontSize: "11px", color: "#64748b" }}>
+                              {order.resellerDetails?.storeName && <span>🏪 শপ/পেইজ: <strong style={{ color: "#0f172a" }}>{order.resellerDetails.storeName}</strong> </span>}
+                              {order.resellerDetails?.storePhone && <span> | হেল্পলাইন: <strong>{order.resellerDetails.storePhone}</strong> </span>}
+                              {order.resellerDetails?.resellerName && <span> | রিসেলার: <strong>{order.resellerDetails.resellerName}</strong></span>}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
