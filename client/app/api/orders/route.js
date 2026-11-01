@@ -242,6 +242,12 @@ export async function POST(req) {
         categoryName = cat?.name || "";
       }
 
+      let brandName = "";
+      if (p.brand) {
+        const br = await Brand.findById(p.brand).select("name").lean();
+        brandName = br?.name || "";
+      }
+
       items.push({
         productId: p._id,
         productName: p.name,
@@ -252,6 +258,7 @@ export async function POST(req) {
         allocations: res.allocations,
         originalPrice: Number(p.originalPrice ?? 0),
         categoryName,
+        brandName,
         image: p.image || "",
       });
 

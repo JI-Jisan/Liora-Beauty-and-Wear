@@ -244,6 +244,7 @@ const OrderItemSchema = new mongoose.Schema(
     ],
     originalPrice: { type: Number, default: 0, min: 0 },
     categoryName: { type: String, default: "" },
+    brandName: { type: String, default: "" },
     image: { type: String, default: "" },
   },
   { _id: false }
