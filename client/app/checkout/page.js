@@ -94,30 +94,7 @@ export default function CheckoutPage() {
     }
   }, [profile]);
 
-  const getItemCustomerPrice = (item) => {
-    if (resellerItemPrices[item._id] !== undefined && resellerItemPrices[item._id] !== "") {
-      return Math.max(0, Number(resellerItemPrices[item._id]) || 0);
-    }
-    const regular = Number(item.offerPrice ?? item.originalPrice ?? item.price ?? 0);
-    const buyPrice = unitPrice(item);
-    return regular > 0 ? regular : buyPrice;
-  };
 
-  const handleResellerItemPriceChange = (id, val) => {
-    setIsManualCodAmount(false);
-    setResellerItemPrices((prev) => ({
-      ...prev,
-      [id]: val === "" ? "" : Math.max(0, Number(val) || 0),
-    }));
-  };
-
-  const customerItemsSubtotal = useMemo(() => {
-    if (!isReseller) return 0;
-    return cartItems.reduce((sum, item) => {
-      const custPrice = getItemCustomerPrice(item);
-      return sum + custPrice * (item.quantity || 1);
-    }, 0);
-  }, [cartItems, resellerItemPrices, isReseller]);
 
   const suggestedRetailTotal = useMemo(() => {
     return cartItems.reduce((sum, item) => {
@@ -232,6 +209,31 @@ export default function CheckoutPage() {
     () => cartItems.reduce((sum, item) => sum + getItemPrice(item) * (item.quantity || 1), 0),
     [cartItems, customPrices, isAdminUser]
   );
+
+  const getItemCustomerPrice = (item) => {
+    if (resellerItemPrices[item._id] !== undefined && resellerItemPrices[item._id] !== "") {
+      return Math.max(0, Number(resellerItemPrices[item._id]) || 0);
+    }
+    const regular = Number(item.offerPrice ?? item.originalPrice ?? item.price ?? 0);
+    const buyPrice = unitPrice(item);
+    return regular > 0 ? regular : buyPrice;
+  };
+
+  const handleResellerItemPriceChange = (id, val) => {
+    setIsManualCodAmount(false);
+    setResellerItemPrices((prev) => ({
+      ...prev,
+      [id]: val === "" ? "" : Math.max(0, Number(val) || 0),
+    }));
+  };
+
+  const customerItemsSubtotal = useMemo(() => {
+    if (!isReseller) return 0;
+    return cartItems.reduce((sum, item) => {
+      const custPrice = getItemCustomerPrice(item);
+      return sum + custPrice * (item.quantity || 1);
+    }, 0);
+  }, [cartItems, resellerItemPrices, isReseller]);
 
   const isUrgent = isInsideDhaka && deliveryType === "urgent";
   const baseCharge = isUrgent ? 250 : isInsideDhaka ? 70 : 130;
