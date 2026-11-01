@@ -68,11 +68,15 @@ export function getProductCampusPricing(product, coupon) {
   const mrp = Number(product.originalPrice || product.offerPrice || regularPrice);
   if (regularPrice <= 0) return null;
 
-  // 1. Use product's database campusDiscountPct if present and > 0
-  let discountPct = Number(product.campusDiscountPct || 0);
+  const ogerioPrice = Number(product.ogerioPrice || 0);
 
-  // 2. Intelligent fallback if not yet populated or cached (guarantees student discount always activates)
-  if (discountPct <= 0) {
+  // 1. Use product's database campusDiscountPct if defined
+  let discountPct = product.campusDiscountPct !== undefined && product.campusDiscountPct !== null
+    ? Number(product.campusDiscountPct)
+    : -1;
+
+  // 2. Intelligent fallback if not yet populated or cached
+  if (discountPct < 0) {
     if (mrp > regularPrice && (mrp - regularPrice) / mrp >= 0.15) {
       discountPct = 8;
     } else {
@@ -80,16 +84,24 @@ export function getProductCampusPricing(product, coupon) {
     }
   }
 
-  // Cap at coupon max (15%) and floor at 5%
-  discountPct = Math.min(coupon.maxDiscount || 15, Math.max(5, discountPct));
+  // Cap at coupon max (15%)
+  discountPct = Math.min(coupon.maxDiscount || 15, Math.max(0, discountPct));
 
-  const campusPrice = Math.max(1, Math.round(regularPrice * (1 - discountPct / 100)));
+  let campusPrice = Math.max(1, Math.round(regularPrice * (1 - discountPct / 100)));
+
+  // Safety rule: DIU price must NEVER drop below Ogerio's price.
+  // If discounted price goes below Ogerio price, set it equal to Ogerio price!
+  if (ogerioPrice > 0 && campusPrice < ogerioPrice) {
+    campusPrice = Math.min(regularPrice, ogerioPrice);
+    discountPct = regularPrice > campusPrice ? Math.round(((regularPrice - campusPrice) / regularPrice) * 100) : 0;
+  }
+
   const savedAmount = Math.max(0, regularPrice - campusPrice);
   const savedFromMrp = Math.max(savedAmount, mrp - campusPrice);
   const savedFromMrpPct = mrp > 0 ? Math.round((savedFromMrp / mrp) * 100) : discountPct;
 
   return {
-    hasDiscount: true,
+    hasDiscount: discountPct > 0 || savedAmount > 0,
     regularPrice,
     mrp,
     campusPrice,
@@ -97,7 +109,7 @@ export function getProductCampusPricing(product, coupon) {
     savedAmount,
     savedFromMrp,
     savedFromMrpPct,
-    badgeText: `🎓 ${coupon.short} -${discountPct}% OFF`,
+    badgeText: discountPct > 0 ? `🎓 ${coupon.short} -${discountPct}% OFF` : `🎓 ${coupon.short} Privilege`,
     shortName: coupon.short
   };
 }

@@ -221,6 +221,10 @@ export async function POST(req) {
         if (campusCoupon) {
           const discountPct = Number(p.campusDiscountPct || 0) > 0 ? Number(p.campusDiscountPct) : 7;
           calculatedPrice = Math.round(defaultRetailPrice * (1 - discountPct / 100));
+          const ogerioP = Number(p.ogerioPrice || 0);
+          if (ogerioP > 0 && calculatedPrice < ogerioP) {
+            calculatedPrice = Math.min(defaultRetailPrice, ogerioP);
+          }
           totalSavings += Math.max(0, defaultRetailPrice - calculatedPrice) * qty;
         }
       }

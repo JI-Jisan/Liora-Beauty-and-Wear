@@ -62,6 +62,7 @@ const ProductSchema = new mongoose.Schema(
     inStock: { type: Boolean, default: true, index: true },
     discountBadge: { type: String, default: "" },
     campusDiscountPct: { type: Number, default: 0, min: 0, max: 15 },
+    ogerioPrice: { type: Number, default: 0, min: 0 },
     stockStatus: {
       type: String,
       enum: ["In Stock", "Limited Stock", "Out of Stock"],

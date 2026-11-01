@@ -91,6 +91,7 @@ export function buildPayload(body, isUpdate = false, existing = null) {
       }
       return existing?.campusDiscountPct || 0;
     })(),
+    ogerioPrice: Number.isFinite(Number(body.ogerioPrice)) ? Math.max(0, Number(body.ogerioPrice)) : (existing?.ogerioPrice || 0),
     image: String(rawImage || "").trim(),
     images,
     description: String(rawDesc || "").trim().slice(0, 5000),

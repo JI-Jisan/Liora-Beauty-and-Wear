@@ -139,7 +139,12 @@ export default function CheckoutPage() {
     if (item.isCampusSpecial) return base;
     if (activeCoupon) {
       const pct = Number(item.campusDiscountPct || 0) > 0 ? Number(item.campusDiscountPct) : 7;
-      return Math.max(1, Math.round(base * (1 - pct / 100)));
+      let discounted = Math.max(1, Math.round(base * (1 - pct / 100)));
+      const ogerioP = Number(item.ogerioPrice || 0);
+      if (ogerioP > 0 && discounted < ogerioP) {
+        discounted = Math.min(base, ogerioP);
+      }
+      return discounted;
     }
     return base;
   };
