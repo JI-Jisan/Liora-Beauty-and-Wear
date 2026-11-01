@@ -226,8 +226,8 @@ export const VALID_CAMPUS_COUPONS = {
     short: "DIU",
     maxDiscount: 15,
     tagColor: "#ff4d6d",
-    welcomeTitle: "🎓 DIU Student Privilege Active!",
-    welcomeSubtitle: "ড্যাফোডিল ইন্টারন্যাশনাল ইউনিভার্সিটির শিক্ষার্থীদের জন্য সর্বোচ্চ ১৫% স্পেশাল ছাড় সক্রিয় হয়েছে! ✨"
+    welcomeTitle: "❄️ DIU Winter Glow-Up Fest Active!",
+    welcomeSubtitle: "ড্যাফোডিলিয়ানদের জন্য শীতের স্কিনকেয়ারে সর্বোচ্চ ১৫% স্পেশাল ছাড় কার্যকর হয়েছে! ✨"
   },
   "AUST15": {
     code: "AUST15",
