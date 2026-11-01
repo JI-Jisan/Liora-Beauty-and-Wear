@@ -45,14 +45,14 @@ function OrderSuccessContent() {
     order?.couponCode ||
     searchCoupon ||
     (noteMatch ? noteMatch[1] : "") ||
-    ((order?.note || "").toLowerCase().includes("diu") ? "DIU15" : "") ||
-    (order?.discount > 0 ? "DIU15" : "")
+    (order?.discount > 0 ? "CAMPUS15" : "")
   ).toUpperCase();
 
   const orderType = String(order?.orderType || "").toLowerCase();
   const isReseller = orderType === "reseller";
   const isWholesale = orderType === "wholesale";
-  const isDIU15 = !isReseller && !isWholesale && (couponCode === "DIU15" || !!couponCode);
+  const isCampusOrder = !isReseller && !isWholesale && !!couponCode;
+  const isDIU15 = isCampusOrder;
 
   const handleDownloadInvoice = () => {
     if (order) {
@@ -527,8 +527,8 @@ function OrderSuccessContent() {
             ? "📥 Download Commercial Invoice (PDF)"
             : isWholesale
             ? "📥 Download Wholesale B2B Invoice (PDF)"
-            : isDIU15
-            ? "📥 Download DIU Privilege Invoice (PDF)"
+            : couponCode
+            ? `📥 Download ${couponCode} Privilege Invoice (PDF)`
             : "📥 Download Official Invoice (PDF)"}
         </button>
 

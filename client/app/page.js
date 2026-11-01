@@ -18,12 +18,14 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { API_BASE_URL } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { useCampus } from "@/context/CampusContext";
 
 export default function HomePage() {
   const router = useRouter();
   const { user, isWholesale, isReseller, loading: authLoading } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const { addToCart } = useCart();
+  const { activeCoupon } = useCampus();
 
   useEffect(() => {
     if (isWholesale) {
@@ -126,10 +128,22 @@ export default function HomePage() {
         <ProductGrid
           onAddToCart={addToCart}
           type="campus15"
-          title="🔥 সর্বোচ্চ ১৫% স্পেশাল ছাড়ের ডিল (15% Max Campus Deals)"
-          subtitle="DIU স্টুডেন্টদের জন্য সর্বোচ্চ ১৫% স্পেশাল ফ্ল্যাট ছাড় — ট্রেন্ডিং মেকআপ, লিপস্টিক, সিরাম ও ভাইরাল স্কিনকেয়ার"
-          badge="🎓 সর্বোচ্চ ১৫% ছাড়"
-          badgeBg="linear-gradient(135deg, #e11d48 0%, #be123c 100%)"
+          title={
+            activeCoupon
+              ? `🔥 ${activeCoupon.campus} স্পেশাল ছাড়ের ডিল (${activeCoupon.short} Deals)`
+              : "🔥 সকল বিশ্ববিদ্যালয়ের জন্য সর্বোচ্চ ১৫% স্পেশাল ছাড়ের ডিল (All Campus Deals)"
+          }
+          subtitle={
+            activeCoupon
+              ? `${activeCoupon.campus} (${activeCoupon.short}) শিক্ষার্থীদের জন্য সর্বোচ্চ ১৫% স্পেশাল ফ্ল্যাট ছাড় — ট্রেন্ডিং মেকআপ, লিপস্টিক, সিরাম ও ভাইরাল স্কিনকেয়ার`
+              : "সকল বিশ্ববিদ্যালয়ের শিক্ষার্থীদের জন্য ক্যাম্পাস প্রিভিলেজ সর্বোচ্চ ১৫% স্পেশাল ফ্ল্যাট ছাড় — ট্রেন্ডিং মেকআপ, লিপস্টিক, সিরাম ও ভাইরাল স্কিনকেয়ার"
+          }
+          badge={
+            activeCoupon
+              ? `🎓 ${activeCoupon.short} স্পেশাল ১৫% ছাড়`
+              : "🎓 সর্বোচ্চ ১৫% ক্যাম্পাস ছাড়"
+          }
+          badgeBg={activeCoupon?.tagColor || "linear-gradient(135deg, #e11d48 0%, #be123c 100%)"}
           limit={8}
           showCategoryBar={false}
           showPagination={false}

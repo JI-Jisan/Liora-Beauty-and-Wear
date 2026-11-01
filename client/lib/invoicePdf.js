@@ -111,16 +111,16 @@ export async function downloadInvoicePdf(order) {
   const isReseller = orderType === "reseller";
   const isWholesale = orderType === "wholesale";
 
-  // Coupon Detection (e.g. DIU15)
+  // Coupon Detection (e.g. DU15, BRAC15, NSU15, CAMPUS15)
   const noteMatch = (order.note || "").match(/(?:Privilege|Coupon|Campus):\s*([A-Za-z0-9_-]+)/i);
   const rawCoupon = (
     order.couponCode ||
     (noteMatch ? noteMatch[1] : "") ||
-    ((order.note || "").toLowerCase().includes("diu") ? "DIU15" : "") ||
-    (order.discount > 0 && !isReseller && !isWholesale ? "DIU15" : "")
+    (order.discount > 0 && !isReseller && !isWholesale ? "CAMPUS15" : "")
   ).toUpperCase();
   const couponCode = rawCoupon.trim();
-  const isDIU15 = couponCode === "DIU15" || (couponCode && !isReseller && !isWholesale);
+  const isCampusOrder = Boolean(couponCode && !isReseller && !isWholesale);
+  const isDIU15 = isCampusOrder;
 
   const orderNo = order.orderNumber || `LIORA-${order._id ? String(order._id).slice(-8) : Date.now()}`;
 
