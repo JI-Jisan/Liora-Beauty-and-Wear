@@ -2,23 +2,16 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { getImageUrl } from "@/lib/api";
 
 export default function CartQuickBar() {
-  const router = useRouter();
   const pathname = usePathname() || "";
-  const { cartItems, cartCount, openCart, recentlyAdded } = useCart();
+  const { openCart, recentlyAdded } = useCart();
   const [toastItem, setToastItem] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const hideTimerRef = useRef(null);
-
-  // Calculate cart subtotal
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + Number(item.price !== undefined ? item.price : (item.offerPrice ?? 0)) * (Number(item.quantity) || 1),
-    0
-  );
 
   // Trigger toast whenever a new item is added
   useEffect(() => {
@@ -216,73 +209,6 @@ export default function CartQuickBar() {
                 চেকআউট ➔
               </Link>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2. PERSISTENT FLOATING CART QUICK BUTTON (WHEN CART HAS ITEMS) */}
-      {cartCount > 0 && !showToast && (
-        <div
-          className="jt-floating-cart-pill-wrap"
-          style={{
-            position: "fixed",
-            bottom: "24px",
-            left: "20px",
-            zIndex: 9980,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
-              color: "#ffffff",
-              borderRadius: "999px",
-              boxShadow: "0 8px 24px rgba(225, 29, 72, 0.45)",
-              padding: "4px 6px 4px 14px",
-              gap: "10px",
-              cursor: "pointer",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-          >
-            {/* Click bag to open cart */}
-            <div
-              onClick={openCart}
-              title="View Cart"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                fontSize: "13px",
-                fontWeight: 800,
-              }}
-            >
-              <span style={{ fontSize: "16px" }}>🛍️</span>
-              <span>{cartCount}টি</span>
-              <span style={{ opacity: 0.7 }}>•</span>
-              <span style={{ fontSize: "14px", fontWeight: 900 }}>৳{subtotal}</span>
-            </div>
-
-            {/* Direct Checkout button */}
-            <Link
-              href="/checkout"
-              style={{
-                background: "#ffffff",
-                color: "#e11d48",
-                textDecoration: "none",
-                borderRadius: "999px",
-                padding: "6px 14px",
-                fontSize: "12px",
-                fontWeight: 900,
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                letterSpacing: "0.02em",
-              }}
-            >
-              চেকআউট ➔
-            </Link>
           </div>
         </div>
       )}

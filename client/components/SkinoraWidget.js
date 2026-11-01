@@ -171,31 +171,10 @@ export default function SkinoraWidget() {
             type="button"
             onClick={() => setIsOpen(true)}
             aria-label="Open Skinora AI Skincare Assistant"
-            style={{
-              background: "linear-gradient(135deg, #e11d48 0%, #be123c 50%, #881337 100%)",
-              color: "#ffffff",
-              border: "2px solid rgba(255, 255, 255, 0.4)",
-              borderRadius: "50px",
-              padding: "10px 18px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              boxShadow: "0 8px 24px rgba(225, 29, 72, 0.35), 0 2px 8px rgba(0, 0, 0, 0.12)",
-              cursor: "pointer",
-              transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-              transform: "scale(1)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.05) translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 12px 30px rgba(225, 29, 72, 0.45)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 8px 24px rgba(225, 29, 72, 0.35)";
-            }}
+            className="jt-skinora-trigger-btn"
           >
-            <span style={{ fontSize: "18px", animation: "skinoraSpin 3s infinite linear" }}>✨</span>
-            <div style={{ textAlign: "left" }}>
+            <span className="jt-skinora-sparkle">✨</span>
+            <div className="jt-skinora-label">
               <div style={{ fontSize: "13px", fontWeight: "900", letterSpacing: "0.02em", lineHeight: 1.1 }}>
                 Skinora AI
               </div>
@@ -203,15 +182,7 @@ export default function SkinoraWidget() {
                 ফ্রি স্কিন কনসালট্যান্ট
               </div>
             </div>
-            <span
-              style={{
-                background: "#10b981",
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                boxShadow: "0 0 6px #10b981",
-              }}
-            />
+            <span className="jt-skinora-online-dot" />
           </button>
         )}
       </div>
@@ -696,6 +667,42 @@ export default function SkinoraWidget() {
           right: 20px;
           z-index: 9991;
         }
+        .jt-skinora-trigger-btn {
+          background: linear-gradient(135deg, #e11d48 0%, #be123c 50%, #881337 100%);
+          color: #ffffff;
+          border: 2px solid rgba(255, 255, 255, 0.4);
+          border-radius: 50px;
+          padding: 10px 18px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 8px 24px rgba(225, 29, 72, 0.35), 0 2px 8px rgba(0, 0, 0, 0.12);
+          cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          transform: scale(1);
+          position: relative;
+        }
+        .jt-skinora-trigger-btn:hover {
+          transform: scale(1.05) translateY(-2px);
+          box-shadow: 0 12px 30px rgba(225, 29, 72, 0.45);
+        }
+        .jt-skinora-sparkle {
+          font-size: 18px;
+          line-height: 1;
+          display: inline-block;
+          animation: skinoraSpin 3s infinite linear;
+        }
+        .jt-skinora-label {
+          text-align: left;
+        }
+        .jt-skinora-online-dot {
+          background: #10b981;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          box-shadow: 0 0 6px #10b981;
+          display: block;
+        }
         .jt-skinora-modal {
           position: fixed;
           bottom: 20px;
@@ -714,13 +721,35 @@ export default function SkinoraWidget() {
         }
         @media (max-width: 768px) {
           .jt-skinora-float {
-            bottom: calc(70px + env(safe-area-inset-bottom, 8px));
-            right: 14px;
+            bottom: calc(72px + env(safe-area-inset-bottom, 8px));
+            right: 16px;
             left: auto;
           }
-          .jt-skinora-float button {
-            padding: 8px 13px !important;
-            gap: 6px !important;
+          .jt-skinora-trigger-btn {
+            width: 48px !important;
+            height: 48px !important;
+            min-width: 48px !important;
+            border-radius: 50% !important;
+            padding: 0 !important;
+            justify-content: center !important;
+            align-items: center !important;
+            border: 2px solid rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 6px 18px rgba(225, 29, 72, 0.45), 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+          }
+          .jt-skinora-sparkle {
+            font-size: 22px !important;
+          }
+          .jt-skinora-label {
+            display: none !important;
+          }
+          .jt-skinora-online-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 9px;
+            height: 9px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 0 6px #10b981;
           }
           .jt-skinora-modal {
             bottom: calc(68px + env(safe-area-inset-bottom, 8px));
