@@ -119,7 +119,7 @@ export default function OrderSuccessPage() {
                   <div className="jt-info-row">
                     <span>Estimated Delivery:</span>
                     <strong>
-                      {order.deliveryCharge === 65
+                      {order.deliveryCharge === 70 || order.deliveryCharge === 65 || order.deliveryZone === "inside_dhaka"
                         ? "24-48 Hours (Inside Dhaka)"
                         : "48-72 Hours (Outside Dhaka)"}
                     </strong>

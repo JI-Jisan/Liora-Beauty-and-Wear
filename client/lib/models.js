@@ -406,8 +406,8 @@ const SiteSettingsSchema = new mongoose.Schema(
     flashButtonLink: String,
     flashDurationHours: Number,
     // ডেলিভারি সংক্রান্ত একমাত্র সত্য উৎস
-    deliveryInside: { type: Number, default: 65 },
-    deliveryOutside: { type: Number, default: 110 },
+    deliveryInside: { type: Number, default: 70 },
+    deliveryOutside: { type: Number, default: 130 },
     freeDeliveryThreshold: { type: Number, default: 0 }, // 0 = ফ্রি ডেলিভারি বন্ধ
 
     // Facebook Auto-Pilot Settings

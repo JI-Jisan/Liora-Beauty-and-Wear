@@ -135,8 +135,8 @@ export default function ProductDetailsPage() {
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
     brandSubtitle: "Beauty. Style. You.",
-    deliveryInside: 65,
-    deliveryOutside: 110,
+    deliveryInside: 70,
+    deliveryOutside: 130,
   });
 
   useEffect(() => {
@@ -146,8 +146,8 @@ export default function ProductDetailsPage() {
         setSiteSettings({
           brandName: data.brandName || "LIORA Beauty & Wear",
           brandSubtitle: data.brandSubtitle || "Beauty. Style. You.",
-          deliveryInside: data.deliveryInside ?? 65,
-          deliveryOutside: data.deliveryOutside ?? 110,
+          deliveryInside: data.deliveryInside ?? 70,
+          deliveryOutside: data.deliveryOutside ?? 130,
         })
       )
       .catch((err) => console.error(err));
