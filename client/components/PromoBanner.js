@@ -208,6 +208,7 @@ export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
         {total > 1 && (
           <button
             type="button"
+            className="jt-slider-prev-btn"
             onClick={(e) => {
               e.preventDefault();
               prevSlide();
@@ -252,6 +253,7 @@ export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
         {total > 1 && (
           <button
             type="button"
+            className="jt-slider-next-btn"
             onClick={(e) => {
               e.preventDefault();
               nextSlide();

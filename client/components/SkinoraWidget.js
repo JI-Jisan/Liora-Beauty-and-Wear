@@ -714,8 +714,13 @@ export default function SkinoraWidget() {
         }
         @media (max-width: 768px) {
           .jt-skinora-float {
-            bottom: calc(125px + env(safe-area-inset-bottom, 8px));
+            bottom: calc(70px + env(safe-area-inset-bottom, 8px));
             right: 14px;
+            left: auto;
+          }
+          .jt-skinora-float button {
+            padding: 8px 13px !important;
+            gap: 6px !important;
           }
           .jt-skinora-modal {
             bottom: calc(68px + env(safe-area-inset-bottom, 8px));

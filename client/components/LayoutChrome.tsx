@@ -8,6 +8,7 @@ import SkinoraWidget from "@/components/SkinoraWidget";
 export default function LayoutChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() || '';
   const isAdmin = pathname.startsWith('/admin');
+  const isCheckout = pathname === '/checkout';
 
   if (isAdmin) {
     return <>{children}</>;
@@ -17,8 +18,8 @@ export default function LayoutChrome({ children }: { children: React.ReactNode }
     <>
       <div className="jt-content-area">{children}</div>
       <Footer />
-      <WhatsAppButton />
-      <SkinoraWidget />
+      {!isCheckout && <WhatsAppButton />}
+      {!isCheckout && <SkinoraWidget />}
       <MobileBottomNav />
     </>
   );

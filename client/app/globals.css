@@ -3036,13 +3036,28 @@ button {
 
 @media (max-width: 768px) {
   .jt-whatsapp-float {
-    bottom: calc(68px + env(safe-area-inset-bottom, 8px));
-    right: 14px;
+    bottom: calc(70px + env(safe-area-inset-bottom, 8px));
+    left: 14px;
+    right: auto;
     z-index: 9990;
-    padding: 10px 15px;
-    font-size: 13px;
+    padding: 8px 13px;
+    font-size: 12.5px;
     gap: 6px;
-    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 16px rgba(37, 211, 102, 0.45);
+  }
+
+  .jt-slider-prev-btn,
+  .jt-slider-next-btn {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 11px !important;
+    opacity: 0.65 !important;
+    left: 8px !important;
+  }
+  .jt-slider-next-btn {
+    left: auto !important;
+    right: 8px !important;
   }
 }
 
@@ -5605,6 +5620,14 @@ button {
   font-weight: 800;
 }
 
+@media (max-width: 640px) {
+  .jt-tab-pill {
+    padding: 6px 12px;
+    font-size: 12.5px;
+    gap: 5px;
+  }
+}
+
 /* --- HERO SECTION (IMAGE FRAME & SIDE-BY-SIDE CONTENT) --- */
 .jt-hero-wrapper {
   max-width: 1200px;
@@ -6305,7 +6328,7 @@ button {
   }
 
   .jt-content-area {
-    padding-bottom: 60px;
+    padding-bottom: calc(75px + env(safe-area-inset-bottom, 8px));
   }
 }
 
@@ -6681,6 +6704,45 @@ html, body {
   }
   .jt-trust-new-text span {
     font-size: 10.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .jt-trust-badges-new-inner {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .jt-trust-new-item {
+    padding: 8px 10px;
+    gap: 8px;
+    min-width: 0;
+  }
+  .jt-trust-new-icon-wrap {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 8px;
+  }
+  .jt-trust-new-icon {
+    font-size: 15px;
+  }
+  .jt-trust-new-text {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .jt-trust-new-text strong {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  .jt-trust-new-text span {
+    font-size: 9.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
   }
 }
 

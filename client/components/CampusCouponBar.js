@@ -137,8 +137,9 @@ export default function CampusCouponBar() {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                flex: "1 1 320px",
+                flex: "1 1 260px",
                 maxWidth: "460px",
+                width: "100%",
               }}
             >
               <input
@@ -148,11 +149,12 @@ export default function CampusCouponBar() {
                   setInputCode(e.target.value.toUpperCase());
                   if (feedback) setFeedback(null);
                 }}
-                placeholder="কুপন কোড লিখুন (যেমন: DU15, NSU15...)"
+                placeholder="কুপন কোড (যেমন: DU15)"
                 style={{
                   flex: 1,
-                  padding: "10px 14px",
-                  fontSize: "13.5px",
+                  minWidth: 0,
+                  padding: "10px 12px",
+                  fontSize: "13px",
                   fontWeight: 700,
                   letterSpacing: "0.05em",
                   borderRadius: "12px",
@@ -167,8 +169,8 @@ export default function CampusCouponBar() {
                 type="submit"
                 disabled={isSubmitting}
                 style={{
-                  padding: "10px 18px",
-                  fontSize: "13px",
+                  padding: "10px 14px",
+                  fontSize: "12.5px",
                   fontWeight: 800,
                   borderRadius: "12px",
                   background: "linear-gradient(135deg, #ff4d6d 0%, #e11d48 100%)",

@@ -11,6 +11,33 @@ import { BANGLADESH_DISTRICTS } from "@/lib/delivery";
 import { getThanasForDistrict, isLocationInsideDhaka } from "@/lib/bdLocations";
 import { normalizeBdPhone, isValidBdPhone } from "@/lib/validate";
 import { useCampus } from "@/context/CampusContext";
+import SearchableLocationPicker from "@/components/SearchableLocationPicker";
+
+const POPULAR_DISTRICTS = [
+  "Dhaka",
+  "Chattogram",
+  "Gazipur",
+  "Narayanganj",
+  "Cumilla",
+  "Sylhet",
+  "Rajshahi",
+  "Khulna",
+  "Bogura",
+  "Barishal",
+];
+
+const POPULAR_DHAKA_THANAS = [
+  "Mirpur",
+  "Uttara",
+  "Dhanmondi",
+  "Gulshan",
+  "Mohammadpur",
+  "Badda",
+  "Banani",
+  "Jatrabari",
+  "Savar",
+  "Keraniganj",
+];
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -1366,81 +1393,56 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  {/* District & Thana Row (Ogerio Style Location Selection) */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
+                  {/* District & Thana Row (Searchable Location Selection) */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px", marginBottom: "12px" }}>
                     <div>
-                      <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "6px" }}>
-                        📍 জেলা (District) *
-                      </label>
-                      <select
+                      <SearchableLocationPicker
+                        label="📍 জেলা (District) *"
                         value={district}
-                        onChange={(e) => handleDistrictChange(e.target.value)}
-                        style={{
-                          width: "100%",
-                          padding: "12px 10px",
-                          borderRadius: "8px",
-                          border: "1.5px solid #cbd5e1",
-                          fontSize: "14px",
-                          fontWeight: "600",
-                          color: "#0f172a",
-                          backgroundColor: "#ffffff",
-                          outline: "none",
-                          cursor: "pointer",
-                        }}
+                        onChange={handleDistrictChange}
+                        options={BANGLADESH_DISTRICTS}
+                        placeholder="জেলা নির্বাচন করুন"
+                        searchPlaceholder="জেলার নাম লিখে খুঁজুন (যেমন: ঢাকা বা Dhaka)..."
+                        popularItems={POPULAR_DISTRICTS}
+                        icon="📍"
                         required
-                      >
-                        {BANGLADESH_DISTRICTS.map((d) => (
-                          <option key={d.id} value={d.nameEn}>
-                            {d.nameBn} ({d.nameEn})
-                          </option>
-                        ))}
-                      </select>
+                      />
                     </div>
 
                     <div>
-                      <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "6px" }}>
-                        🏘️ থানা / এলাকা (Thana / Area) *
-                      </label>
                       {availableThanas.length > 0 ? (
-                        <select
+                        <SearchableLocationPicker
+                          label="🏘️ থানা / এলাকা (Thana / Area) *"
                           value={thana}
-                          onChange={(e) => setThana(e.target.value)}
-                          style={{
-                            width: "100%",
-                            padding: "12px 10px",
-                            borderRadius: "8px",
-                            border: "1.5px solid #cbd5e1",
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color: "#0f172a",
-                            backgroundColor: "#ffffff",
-                            outline: "none",
-                            cursor: "pointer",
-                          }}
-                          required
-                        >
-                          <option value="">-- থানা নির্বাচন করুন --</option>
-                          {availableThanas.map((t) => (
-                            <option key={t} value={t}>
-                              {t}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          type="text"
-                          placeholder="আপনার থানা বা এলাকা লিখুন"
-                          value={thana}
-                          onChange={(e) => setThana(e.target.value)}
-                          style={{
-                            width: "100%",
-                            padding: "12px 10px",
-                            borderRadius: "8px",
-                            border: "1.5px solid #cbd5e1",
-                            fontSize: "14px",
-                          }}
+                          onChange={(val) => setThana(val)}
+                          options={availableThanas}
+                          placeholder="-- থানা নির্বাচন করুন --"
+                          searchPlaceholder="থানার নাম লিখে খুঁজুন (যেমন: মিরপুর বা Mirpur)..."
+                          popularItems={district === "Dhaka" ? POPULAR_DHAKA_THANAS : []}
+                          icon="🏘️"
                           required
                         />
+                      ) : (
+                        <div>
+                          <label style={{ display: "block", fontSize: "13px", fontWeight: "700", color: "#334155", marginBottom: "6px" }}>
+                            🏘️ থানা / এলাকা (Thana / Area) *
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="আপনার থানা বা এলাকা লিখুন"
+                            value={thana}
+                            onChange={(e) => setThana(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "11px 12px",
+                              borderRadius: "10px",
+                              border: "1.5px solid #cbd5e1",
+                              fontSize: "14px",
+                              boxSizing: "border-box"
+                            }}
+                            required
+                          />
+                        </div>
                       )}
                     </div>
                   </div>
