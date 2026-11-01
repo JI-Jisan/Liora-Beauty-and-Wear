@@ -233,6 +233,14 @@ export async function POST(req) {
         ? Math.max(0, Number(raw.price))
         : calculatedPrice;
 
+      const rawCustomerPrice = raw.customerPrice !== undefined && raw.customerPrice !== null && !isNaN(Number(raw.customerPrice))
+        ? Math.max(0, Number(raw.customerPrice))
+        : 0;
+
+      const customerPrice = rawCustomerPrice > 0
+        ? rawCustomerPrice
+        : (orderType === "reseller" ? Number(p.offerPrice ?? p.originalPrice ?? p.price ?? price) : 0);
+
       subtotal += price * qty;
       totalCost += (res.totalCost || res.avgCost * qty);
 
@@ -253,6 +261,7 @@ export async function POST(req) {
         productName: p.name,
         quantity: qty,
         price,
+        customerPrice,
         purchasePrice: res.avgCost,
         costAtSale: res.avgCost,
         allocations: res.allocations,

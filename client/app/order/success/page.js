@@ -312,7 +312,10 @@ function OrderSuccessContent() {
               <tbody>
                 {order?.items?.map((item, idx) => {
                   const qty = item.quantity || 1;
-                  const price = Number(item.offerPrice || item.price || 0);
+                  const itemCustomerPrice = Number(item.customerPrice) || 0;
+                  const price = isReseller
+                    ? (itemCustomerPrice > 0 ? itemCustomerPrice : Number(item.price || 0))
+                    : Number(item.offerPrice || item.price || 0);
                   const origPrice = Number(item.originalPrice || item.mrp || item.regularPrice || 0);
                   const hasDiscount = !isReseller && origPrice > price;
                   const totalItemPrice = price * qty;
@@ -392,9 +395,19 @@ function OrderSuccessContent() {
 
             {/* Right Box: Financial Totals */}
             {(() => {
-              const subtotal = Number(order?.subtotal) || 0;
               const delivery = Number(order?.deliveryCharge) || 0;
-              const total = Number(order?.total) || 0;
+              const hasItemCustomerPrices = (order?.items || []).some((it) => Number(it.customerPrice) > 0);
+              const customerSubtotal = (order?.items || []).reduce((s, it) => {
+                const cp = Number(it.customerPrice) > 0 ? Number(it.customerPrice) : Number(it.price || 0);
+                return s + cp * (Number(it.quantity) || 1);
+              }, 0);
+              const subtotal = isReseller && hasItemCustomerPrices
+                ? customerSubtotal
+                : (Number(order?.subtotal) || 0);
+              const finalCod = Number(order?.resellerDetails?.customerCodAmount);
+              const total = isReseller
+                ? (finalCod > 0 ? finalCod : subtotal + delivery)
+                : (Number(order?.total) || 0);
               let totalMrp = 0;
               (order?.items || []).forEach((item) => {
                 const qty = Number(item.quantity) || 1;
@@ -527,13 +540,37 @@ function OrderSuccessContent() {
         </div>
       </div>
 
+      {/* Reseller White-Label Guidance Notice */}
+      {isReseller && (
+        <div style={{
+          background: "#f0fdf4",
+          border: "1.5px solid #86efac",
+          borderRadius: "12px",
+          padding: "14px 18px",
+          marginTop: "20px",
+          textAlign: "left"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+            <strong style={{ fontSize: "14px", color: "#166534", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>📄</span> নন-ব্র্যান্ডিং কাস্টমার ইনভয়েস রেডি (White-Label PDF)
+            </strong>
+            <span style={{ fontSize: "11px", background: "#dcfce7", color: "#15803d", fontWeight: "800", padding: "2px 8px", borderRadius: "6px", border: "1px solid #86efac" }}>
+              🔒 NO LIORA BRANDING
+            </span>
+          </div>
+          <p style={{ margin: 0, fontSize: "12px", color: "#334155", lineHeight: "1.5" }}>
+            নিচের সবুজ বাটন দিয়ে নন-ব্র্যান্ডিং কাস্টমার ইনভয়েস PDF ডাউনলোড করে সরাসরি কাস্টমারকে দিন। এতে লিয়রার কোনো নাম বা লোগো থাকবে না; শুধুমাত্র আপনার পেইজের নাম ও মোবাইল এবং প্রতিটি প্রডাক্টে আপনার বসানো কাস্টমার বিক্রয়মূল্য প্রিন্ট থাকবে।
+          </p>
+        </div>
+      )}
+
       {/* Action Buttons (Hidden on Print) */}
-      <div className="no-print" style={{ display: "flex", gap: "14px", marginTop: "24px", justifyContent: "center" }}>
+      <div className="no-print" style={{ display: "flex", gap: "14px", marginTop: "20px", justifyContent: "center", flexWrap: "wrap" }}>
         <button
           onClick={handleDownloadInvoice}
           style={{
             background: isReseller
-              ? "linear-gradient(135deg, #334155 0%, #1e293b 100%)"
+              ? "linear-gradient(135deg, #059669 0%, #047857 100%)"
               : isWholesale
               ? "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)"
               : "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
@@ -546,11 +583,13 @@ function OrderSuccessContent() {
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            boxShadow: "0 4px 14px rgba(15, 23, 42, 0.2)",
+            boxShadow: isReseller
+              ? "0 4px 14px rgba(5, 150, 105, 0.3)"
+              : "0 4px 14px rgba(15, 23, 42, 0.2)",
           }}
         >
           {isReseller
-            ? "📥 Download Commercial Invoice (PDF)"
+            ? "📄 ডাউনলোড কাস্টমার ইনভয়েস (White-Label PDF)"
             : isWholesale
             ? "📥 Download Wholesale B2B Invoice (PDF)"
             : couponCode

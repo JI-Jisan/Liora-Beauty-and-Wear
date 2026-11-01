@@ -126,7 +126,9 @@ export async function downloadInvoicePdf(order) {
 
   if (isReseller) {
     await renderResellerInvoice(doc, order, orderNo);
-    doc.save(`Commercial-Invoice-${orderNo}.pdf`);
+    const storePrefix = (order.resellerDetails?.storeName || "").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
+    const dlFileName = storePrefix ? `${storePrefix}-Invoice-${orderNo}.pdf` : `Customer-Invoice-${orderNo}.pdf`;
+    doc.save(dlFileName);
   } else if (isWholesale) {
     await renderWholesaleInvoice(doc, order, orderNo);
     doc.save(`Wholesale-Invoice-${orderNo}.pdf`);
@@ -537,15 +539,27 @@ async function renderResellerInvoice(doc, order, orderNo) {
   const district = order.district || "Dhaka";
   const address = order.address || "";
   const deliveryCharge = Number(order.deliveryCharge) || 0;
-  // For Reseller dropship invoice, total COD amount is what the customer pays to courier
-  const finalCodAmount = Number(order.resellerDetails?.customerCodAmount) || Number(order.total) || 0;
-  const total = finalCodAmount > 0 ? finalCodAmount : (Number(order.total) || 0);
-  const subtotal = Math.max(0, total - deliveryCharge);
-  const status = order.status || "Pending";
   const items = Array.isArray(order.items) ? order.items : [];
+  const status = order.status || "Pending";
 
+  const hasItemCustomerPrices = items.some((it) => Number(it.customerPrice) > 0);
   const originalItemsSubtotal = items.reduce((s, it) => s + (Number(it.price) || 0) * (Number(it.quantity) || 1), 0);
-  const priceScale = (order.resellerDetails?.customerCodAmount && originalItemsSubtotal > 0 && subtotal > 0)
+
+  // Calculate customer subtotal: prioritize item.customerPrice if set by reseller
+  const customerItemsSubtotal = items.reduce((s, it) => {
+    const cp = Number(it.customerPrice) > 0 ? Number(it.customerPrice) : (Number(it.price) || 0);
+    return s + cp * (Number(it.quantity) || 1);
+  }, 0);
+
+  const finalCodAmount = Number(order.resellerDetails?.customerCodAmount) || Number(order.total) || 0;
+
+  const subtotal = hasItemCustomerPrices
+    ? customerItemsSubtotal
+    : Math.max(0, (finalCodAmount > 0 ? finalCodAmount : (Number(order.total) || 0)) - deliveryCharge);
+
+  const total = finalCodAmount > 0 ? finalCodAmount : (subtotal + deliveryCharge);
+
+  const priceScale = (!hasItemCustomerPrices && order.resellerDetails?.customerCodAmount && originalItemsSubtotal > 0 && subtotal > 0)
     ? (subtotal / originalItemsSubtotal)
     : 1;
 
@@ -710,7 +724,10 @@ async function renderResellerInvoice(doc, order, orderNo) {
     const itemLines = doc.splitTextToSize(name, 90);
     const lineCount = Array.isArray(itemLines) ? itemLines.length : 1;
     const basePrice = Number(item.price) || 0;
-    const price = (order.resellerDetails?.customerCodAmount && priceScale > 0) ? Math.round(basePrice * priceScale) : basePrice;
+    const itemCustomerP = Number(item.customerPrice) || 0;
+    const price = itemCustomerP > 0
+      ? itemCustomerP
+      : ((order.resellerDetails?.customerCodAmount && priceScale > 0) ? Math.round(basePrice * priceScale) : basePrice);
     const qty = Number(item.quantity) || 1;
     const rowTotal = price * qty;
     const rowHeight = lineCount > 1 ? Math.max(8.5, 4.5 + lineCount * 3.8) : 8;

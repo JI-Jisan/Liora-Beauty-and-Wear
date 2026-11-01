@@ -83,6 +83,7 @@ export default function CheckoutPage() {
   const [resellerStorePhone, setResellerStorePhone] = useState("");
   const [customerCodAmount, setCustomerCodAmount] = useState("");
   const [isManualCodAmount, setIsManualCodAmount] = useState(false);
+  const [resellerItemPrices, setResellerItemPrices] = useState({});
 
   useEffect(() => {
     if (profile?.resellerStoreName && !resellerStoreName) {
@@ -92,6 +93,31 @@ export default function CheckoutPage() {
       setResellerStorePhone(profile.resellerStorePhone || profile.phone || "");
     }
   }, [profile]);
+
+  const getItemCustomerPrice = (item) => {
+    if (resellerItemPrices[item._id] !== undefined && resellerItemPrices[item._id] !== "") {
+      return Math.max(0, Number(resellerItemPrices[item._id]) || 0);
+    }
+    const regular = Number(item.offerPrice ?? item.originalPrice ?? item.price ?? 0);
+    const buyPrice = unitPrice(item);
+    return regular > 0 ? regular : buyPrice;
+  };
+
+  const handleResellerItemPriceChange = (id, val) => {
+    setIsManualCodAmount(false);
+    setResellerItemPrices((prev) => ({
+      ...prev,
+      [id]: val === "" ? "" : Math.max(0, Number(val) || 0),
+    }));
+  };
+
+  const customerItemsSubtotal = useMemo(() => {
+    if (!isReseller) return 0;
+    return cartItems.reduce((sum, item) => {
+      const custPrice = getItemCustomerPrice(item);
+      return sum + custPrice * (item.quantity || 1);
+    }, 0);
+  }, [cartItems, resellerItemPrices, isReseller]);
 
   const suggestedRetailTotal = useMemo(() => {
     return cartItems.reduce((sum, item) => {
@@ -232,10 +258,12 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (isReseller && !isManualCodAmount && cartItems.length > 0) {
-      const defaultCod = suggestedRetailTotal > 0 ? (suggestedRetailTotal + deliveryCharge) : (subtotal + deliveryCharge);
+      const defaultCod = customerItemsSubtotal > 0
+        ? (customerItemsSubtotal + deliveryCharge)
+        : (suggestedRetailTotal > 0 ? (suggestedRetailTotal + deliveryCharge) : (subtotal + deliveryCharge));
       setCustomerCodAmount(String(defaultCod));
     }
-  }, [isReseller, isManualCodAmount, suggestedRetailTotal, deliveryCharge, subtotal, cartItems.length]);
+  }, [isReseller, isManualCodAmount, customerItemsSubtotal, suggestedRetailTotal, deliveryCharge, subtotal, cartItems.length]);
 
   const totalCost = useMemo(() => {
     return cartItems.reduce((sum, item) => {
@@ -339,6 +367,7 @@ export default function CheckoutPage() {
           items: cartItems.map((item) => ({
             productId: item._id,
             quantity: item.quantity || 1,
+            customerPrice: isReseller ? getItemCustomerPrice(item) : undefined,
             price:
               isAdminUser && customPrices[item._id] !== undefined && customPrices[item._id] !== ""
                 ? Number(customPrices[item._id])
@@ -517,7 +546,7 @@ export default function CheckoutPage() {
                           gap: "8px",
                           padding: "12px 14px",
                           borderRadius: "10px",
-                          border: "1px solid #e2e8f0",
+                          border: isReseller ? "1.5px solid #fecdd3" : "1px solid #e2e8f0",
                           marginBottom: "10px",
                           background: "#ffffff"
                         }}
@@ -532,12 +561,107 @@ export default function CheckoutPage() {
                                   ({itemRegularPrice} Tk)
                                 </span>
                               )}
+                              {isReseller && (
+                                <span style={{ marginLeft: "8px", color: "#be185d", fontWeight: "700" }}>
+                                  (রিসেলার কেনা রেট)
+                                </span>
+                              )}
                             </p>
                           </div>
                           <strong style={{ fontSize: "14px", color: "#0f172a", whiteSpace: "nowrap" }}>
                             {rowTotal.toLocaleString()} Tk
                           </strong>
                         </div>
+
+                        {/* Reseller Per-Product Selling Price Editor */}
+                        {isReseller && (
+                          <div
+                            style={{
+                              background: "#fff1f2",
+                              border: "1.5px dashed #fda4af",
+                              borderRadius: "8px",
+                              padding: "10px 12px",
+                              marginTop: "4px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px"
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px" }}>
+                              <label style={{ fontSize: "12px", fontWeight: "800", color: "#9f1239", display: "flex", alignItems: "center", gap: "5px" }}>
+                                <span>🏷️</span> এই প্রডাক্ট কাস্টমারের কাছে কত টাকায় সেল করলেন?
+                              </label>
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px" }}>
+                                <span style={{ background: "#ffffff", color: "#475569", fontWeight: "700", padding: "2px 8px", borderRadius: "5px", border: "1px solid #cbd5e1" }}>
+                                  কেনা রেট: ৳{itemRegularPrice}
+                                </span>
+                                {Number(item.offerPrice ?? item.originalPrice ?? 0) > 0 && (
+                                  <span style={{ background: "#eff6ff", color: "#1d4ed8", fontWeight: "700", padding: "2px 8px", borderRadius: "5px", border: "1px solid #bfdbfe" }}>
+                                    খুচরা রেট: ৳{Number(item.offerPrice ?? item.originalPrice)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <span style={{ fontSize: "12.5px", fontWeight: "700", color: "#64748b" }}>কাস্টমার বিক্রয় মূল্য:</span>
+                                <div style={{ position: "relative" }}>
+                                  <span style={{ position: "absolute", left: "9px", top: "50%", transform: "translateY(-50%)", fontSize: "13px", fontWeight: "800", color: "#9f1239" }}>
+                                    ৳
+                                  </span>
+                                  <input
+                                    type="number"
+                                    min={itemRegularPrice}
+                                    value={resellerItemPrices[item._id] !== undefined ? resellerItemPrices[item._id] : getItemCustomerPrice(item)}
+                                    onChange={(e) => handleResellerItemPriceChange(item._id, e.target.value)}
+                                    placeholder={String(getItemCustomerPrice(item))}
+                                    style={{
+                                      width: "115px",
+                                      padding: "6px 8px 6px 24px",
+                                      borderRadius: "6px",
+                                      border: (getItemCustomerPrice(item) < itemRegularPrice) ? "2px solid #ef4444" : "2px solid #f43f5e",
+                                      fontWeight: "800",
+                                      fontSize: "14px",
+                                      color: "#881337",
+                                      background: "#ffffff",
+                                      outline: "none"
+                                    }}
+                                  />
+                                </div>
+                                <span style={{ fontSize: "11.5px", color: "#64748b" }}>/ পিস</span>
+                              </div>
+
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                {(() => {
+                                  const custP = getItemCustomerPrice(item);
+                                  const unitProfit = custP - itemRegularPrice;
+                                  const totalItemProfit = unitProfit * (item.quantity || 1);
+                                  return (
+                                    <span
+                                      style={{
+                                        background: totalItemProfit >= 0 ? "#dcfce7" : "#fee2e2",
+                                        color: totalItemProfit >= 0 ? "#15803d" : "#b91c1c",
+                                        fontWeight: "800",
+                                        fontSize: "12px",
+                                        padding: "4px 9px",
+                                        borderRadius: "6px",
+                                        border: totalItemProfit >= 0 ? "1.5px solid #86efac" : "1.5px solid #fca5a5"
+                                      }}
+                                    >
+                                      {totalItemProfit >= 0
+                                        ? `🎉 এই পণ্যে আপনার লাভ: +৳${totalItemProfit}`
+                                        : `⚠️ লস: -৳${Math.abs(totalItemProfit)} (কেনা রেটের চেয়ে কম)`}
+                                    </span>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#9f1239", opacity: 0.9 }}>
+                              ✓ কাস্টমার ইনভয়েস PDF-এ এই বিক্রয় মূল্যটিই (৳{getItemCustomerPrice(item)}) প্রিন্ট হবে।
+                            </div>
+                          </div>
+                        )}
 
                         {/* Admin Inline Price Editor */}
                         {isAdminUser && (
@@ -835,12 +959,12 @@ export default function CheckoutPage() {
                       {/* Quick chips to preset prices */}
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "8px", alignItems: "center" }}>
                         <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>দ্রুত সেট করুন:</span>
-                        {suggestedRetailTotal > 0 && (
+                        {customerItemsSubtotal > 0 && (
                           <button
                             type="button"
                             onClick={() => {
                               setIsManualCodAmount(true);
-                              setCustomerCodAmount(String(suggestedRetailTotal + deliveryCharge));
+                              setCustomerCodAmount(String(customerItemsSubtotal + deliveryCharge));
                             }}
                             style={{
                               fontSize: "11px",
@@ -853,15 +977,15 @@ export default function CheckoutPage() {
                               fontWeight: "700"
                             }}
                           >
-                            খুচরা রেট + কুরিয়ার (৳{suggestedRetailTotal + deliveryCharge})
+                            প্রডাক্ট সেল রেট + কুরিয়ার (৳{customerItemsSubtotal + deliveryCharge})
                           </button>
                         )}
-                        {suggestedRetailTotal > 0 && (
+                        {customerItemsSubtotal > 0 && (
                           <button
                             type="button"
                             onClick={() => {
                               setIsManualCodAmount(true);
-                              setCustomerCodAmount(String(suggestedRetailTotal));
+                              setCustomerCodAmount(String(customerItemsSubtotal));
                             }}
                             style={{
                               fontSize: "11px",
@@ -874,7 +998,7 @@ export default function CheckoutPage() {
                               fontWeight: "700"
                             }}
                           >
-                            ফ্রি ডেলিভারি অফার (৳{suggestedRetailTotal})
+                            ফ্রি ডেলিভারি অফার (৳{customerItemsSubtotal})
                           </button>
                         )}
                         <button
@@ -1013,6 +1137,23 @@ export default function CheckoutPage() {
                           +৳{resellerNetProfit}
                         </div>
                       </div>
+                    </div>
+
+                    {/* Non-branding White-Label Guarantee */}
+                    <div style={{
+                      marginTop: "10px",
+                      background: "#f0fdf4",
+                      border: "1px solid #86efac",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px"
+                    }}>
+                      <span style={{ fontSize: "16px" }}>🔒</span>
+                      <p style={{ margin: 0, fontSize: "11px", color: "#166534", lineHeight: "1.4" }}>
+                        <strong>নন-ব্র্যান্ডিং ইনভয়েস গ্যারান্টি:</strong> অর্ডার শেষে যে কাস্টমার ইনভয়েস PDF তৈরি হবে তাতে কোনো LIORA ব্র্যান্ডিং থাকবে না। এতে প্রতিটি পণ্যের আপনার সেট করা বিক্রয়মূল্য এবং প্রেরক হিসেবে আপনার পেইজের নাম ও হেল্পলাইন থাকবে, যা সরাসরি কাস্টমারকে দিতে পারবেন।
+                      </p>
                     </div>
                   </div>
                 )}

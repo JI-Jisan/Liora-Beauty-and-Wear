@@ -232,6 +232,7 @@ const OrderItemSchema = new mongoose.Schema(
     productName: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true, min: 0 },          // বিক্রয়মূল্য snapshot
+    customerPrice: { type: Number, default: 0 },              // রিসেলার ড্রপশিপ অর্ডারে কাস্টমারের জন্য বিক্রয়মূল্য
     purchasePrice: { type: Number, default: 0, min: 0 },      // ক্রয়মূল্য snapshot
     costAtSale: { type: Number, default: 0 },                 // প্রতি পিস কেনা দাম, বিক্রির মুহূর্তে
     allocations: [
