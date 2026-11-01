@@ -524,7 +524,9 @@ function ProductGridContent({
                     );
                   })() : isReseller ? (() => {
                     const resellerRate = product.resellerPrice > 0 ? product.resellerPrice : Math.round(product.offerPrice * 0.92);
-                    const resellerProfit = Math.max(0, product.offerPrice - resellerRate);
+                    const mrp = Number(product.originalPrice || product.offerPrice || 0);
+                    const retailOffer = Number(product.offerPrice || mrp || 0);
+                    const resellerProfit = Math.max(0, retailOffer - resellerRate);
                     return (
                       <div>
                         <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", margin: "0 0 2px" }}>
@@ -551,13 +553,14 @@ function ProductGridContent({
                           </span>
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 18, marginBottom: 8, fontSize: 11.5 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 4, minHeight: 18, marginBottom: 8, fontSize: 11 }}>
                           <span style={{ color: "#64748b" }}>
-                            খুচরা: {product.offerPrice} Tk
+                            {mrp > retailOffer && <span style={{ textDecoration: "line-through", marginRight: 4, color: "#94a3b8" }}>MRP ৳{mrp}</span>}
+                            <span>খুচরা: ৳{retailOffer}</span>
                           </span>
                           {resellerProfit > 0 && (
-                            <span style={{ color: "#16a34a", fontWeight: 800 }}>
-                              প্রফিট ৳{resellerProfit}
+                            <span style={{ color: "#16a34a", fontWeight: 800, background: "#dcfce7", padding: "1px 6px", borderRadius: 4 }}>
+                              লাভ ৳{resellerProfit}
                             </span>
                           )}
                         </div>

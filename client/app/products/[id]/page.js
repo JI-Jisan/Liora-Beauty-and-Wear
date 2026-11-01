@@ -765,13 +765,23 @@ export default function ProductDetailsPage() {
                   </span>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "baseline", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
-                  <span style={{ fontSize: "clamp(28px, 8vw, 38px)", fontWeight: "900", color: isStar ? "#b45309" : "#be123c" }}>
-                    ৳{resellerBuyRate} Tk
-                  </span>
-                  <span style={{ fontSize: "13px", color: "#64748b" }}>
-                    (কাস্টমার বিক্রয় রেট: ৳{product.offerPrice} Tk)
-                  </span>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "14px", marginTop: "12px", flexWrap: "wrap" }}>
+                  <div>
+                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", display: "block" }}>রিসেলার কেনা দাম:</span>
+                    <span style={{ fontSize: "clamp(28px, 8vw, 36px)", fontWeight: "900", color: isStar ? "#b45309" : "#be123c" }}>
+                      ৳{resellerBuyRate} Tk
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                    <span style={{ fontSize: "13.5px", fontWeight: "800", color: "#0f172a" }}>
+                      আমাদের খুচরা রেট: ৳{product.offerPrice} Tk
+                    </span>
+                    {product.originalPrice && product.originalPrice > product.offerPrice && (
+                      <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+                        মার্কেট MRP: <span style={{ textDecoration: "line-through" }}>৳{product.originalPrice} Tk</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 

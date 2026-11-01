@@ -627,8 +627,14 @@ export default function ResellerPage() {
                           <div style={{ fontSize: 11.5, fontWeight: 700, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                             {p.name}
                           </div>
-                          <div style={{ fontSize: 11, color: "#be123c", fontWeight: 800 }}>
-                            Buy Rate: ৳{resCost} <span style={{ fontSize: 9.5, color: "#64748b" }}>({currentMarginDiscountPct}%)</span>
+                          <div style={{ fontSize: 10, color: "#64748b", margin: "2px 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            MRP: <span style={{ textDecoration: "line-through" }}>৳{p.originalPrice || p.offerPrice}</span> | খুচরা: ৳{p.offerPrice || p.originalPrice}
+                          </div>
+                          <div style={{ fontSize: 11, color: "#be123c", fontWeight: 800, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span>Buy: ৳{resCost}</span>
+                            <span style={{ fontSize: 9.5, color: "#16a34a", background: "#dcfce7", padding: "1px 5px", borderRadius: 4, fontWeight: 700 }}>
+                              +৳{Math.max(0, (p.offerPrice || p.originalPrice || 0) - resCost)}
+                            </span>
                           </div>
                         </div>
                       );
@@ -647,26 +653,30 @@ export default function ResellerPage() {
                       marginBottom: 16,
                     }}
                   >
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, textAlign: "center" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 8, textAlign: "center" }}>
                       <div>
-                        <span style={{ fontSize: 11, color: "#64748b" }}>
-                          Liora Buy Rate ({currentMarginDiscountPct}% Off)
-                        </span>
-                        <div style={{ fontSize: 16, fontWeight: 900, color: "#be123c" }}>৳{unitResellerCost}</div>
-                      </div>
-                      <div>
-                        <span style={{ fontSize: 11, color: "#64748b" }}>Recommended Retail</span>
-                        <div style={{ fontSize: 16, fontWeight: 800, color: "#64748b" }}>
-                          ৳{selectedProduct.offerPrice || selectedProduct.originalPrice}
+                        <span style={{ fontSize: 11, color: "#64748b" }}>মার্কেট MRP</span>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: "#94a3b8", textDecoration: "line-through" }}>
+                          ৳{selectedProduct.originalPrice || selectedProduct.offerPrice}
                         </div>
                       </div>
                       <div>
-                        <span style={{ fontSize: 11, color: "#64748b" }}>Courier Fee ({dropshipForm.district})</span>
+                        <span style={{ fontSize: 11, color: "#64748b" }}>আমাদের খুচরা রেট</span>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: "#0f172a" }}>
+                          ৳{selectedProduct.offerPrice || selectedProduct.originalPrice}
+                        </div>
+                      </div>
+                      <div style={{ background: "#ffe4e6", padding: "6px 8px", borderRadius: 8 }}>
+                        <span style={{ fontSize: 11, color: "#be123c", fontWeight: 700 }}>রিসেলার কেনা দাম</span>
+                        <div style={{ fontSize: 17, fontWeight: 900, color: "#be123c" }}>৳{unitResellerCost}</div>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: 11, color: "#64748b" }}>কুরিয়ার ফি ({dropshipForm.district})</span>
                         <div style={{ fontSize: 16, fontWeight: 800, color: "#ea580c" }}>৳{deliveryCharge}</div>
                       </div>
                       <div style={{ background: "#dcfce7", padding: "6px 10px", borderRadius: 8 }}>
-                        <span style={{ fontSize: 11, color: "#166534", fontWeight: 700 }}>Your Net Profit</span>
-                        <div style={{ fontSize: 20, fontWeight: 900, color: "#15803d" }}>৳{netProfit}</div>
+                        <span style={{ fontSize: 11, color: "#166534", fontWeight: 800 }}>আপনার নিট প্রফিট</span>
+                        <div style={{ fontSize: 19, fontWeight: 900, color: "#15803d" }}>৳{netProfit}</div>
                       </div>
                     </div>
                   </div>
