@@ -30,10 +30,8 @@ export default function HomePage() {
   useEffect(() => {
     if (isWholesale) {
       router.replace("/wholesale");
-    } else if (isReseller) {
-      router.replace("/reseller");
     }
-  }, [isWholesale, isReseller, router]);
+  }, [isWholesale, router]);
 
   const [siteSettings, setSiteSettings] = useState({
     brandName: "LIORA Beauty & Wear",
@@ -85,13 +83,13 @@ export default function HomePage() {
       });
   }, []);
 
-  if (isWholesale || isReseller) {
+  if (isWholesale) {
     return (
       <main className="jt-page" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fcfaf8" }}>
         <div style={{ textAlign: "center", padding: "40px 20px" }}>
-          <div style={{ fontSize: "42px", marginBottom: "16px" }}>{isWholesale ? "🏬" : "🚀"}</div>
+          <div style={{ fontSize: "42px", marginBottom: "16px" }}>🏬</div>
           <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#0f172a", marginBottom: "8px" }}>
-            {isWholesale ? "Wholesale B2B পোর্টালে নিয়ে যাওয়া হচ্ছে..." : "Reseller Hub-এ নিয়ে যাওয়া হচ্ছে..."}
+            Wholesale B2B পোর্টালে নিয়ে যাওয়া হচ্ছে...
           </h2>
           <p style={{ color: "#64748b", fontSize: "14px" }}>অনুগ্রহ করে এক মুহূর্ত অপেক্ষা করুন...</p>
         </div>

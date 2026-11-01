@@ -13,7 +13,7 @@ function ProductsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isWholesale, isReseller } = useAuth();
-  const homeHref = isWholesale ? "/wholesale" : isReseller ? "/reseller" : "/";
+  const homeHref = isWholesale ? "/wholesale" : "/";
   const urlSearch = searchParams ? searchParams.get("search") || "" : "";
   const filterParam = searchParams ? searchParams.get("filter") || "" : "";
   const [searchTerm, setSearchTerm] = useState(urlSearch);

@@ -14,10 +14,10 @@ export default function MobileBottomNav() {
   const { user, isAdmin, isWholesale, isReseller } = useAuth();
   const { cartCount, openCart } = useCart();
 
-  const homeHref = isWholesale ? "/wholesale" : isReseller ? "/reseller" : "/";
-  const homeLabel = isWholesale ? "Wholesale" : isReseller ? "Reseller" : "Home";
-  const homeIcon = isWholesale ? "🏬" : isReseller ? "🚀" : "🏠";
-  const isHomeActive = pathname === "/" || (isWholesale && pathname === "/wholesale") || (isReseller && pathname === "/reseller");
+  const homeHref = isWholesale ? "/wholesale" : "/";
+  const homeLabel = isWholesale ? "Wholesale" : "Home";
+  const homeIcon = isWholesale ? "🏬" : "🏠";
+  const isHomeActive = pathname === "/" || (isWholesale && pathname === "/wholesale");
 
   const accountHref = user ? (isAdmin ? "/admin" : "/account") : "/login";
   const isAccountActive = pathname?.startsWith("/admin") || pathname?.startsWith("/account") || pathname === "/login";

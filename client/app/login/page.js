@@ -43,7 +43,8 @@ function LoginFormContent() {
       } else if (role === "wholesale") {
         router.push("/wholesale");
       } else if (role === "reseller" || role === "team_leader") {
-        router.push("/reseller");
+        const dest = redirectUrl && !redirectUrl.startsWith("/admin") ? redirectUrl : "/";
+        router.push(dest);
       } else {
         const dest = redirectUrl.startsWith("/admin") ? "/account" : redirectUrl;
         router.push(dest);
@@ -123,7 +124,8 @@ function LoginFormContent() {
         if (data.role === "wholesale") {
           router.push("/wholesale");
         } else if (data.role === "reseller" || data.role === "team_leader") {
-          router.push("/reseller");
+          const dest = redirectUrl && !redirectUrl.startsWith("/admin") ? redirectUrl : "/";
+          router.push(dest);
         } else {
           const dest = redirectUrl.startsWith("/admin") ? "/account" : redirectUrl;
           router.push(dest);

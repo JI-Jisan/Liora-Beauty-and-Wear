@@ -43,7 +43,7 @@ export default function Header({
 
   const cartContext = useCart();
   const { user, role, isWholesale, isReseller, isAdmin, profile } = useAuth();
-  const homeHref = isWholesale ? "/wholesale" : isReseller ? "/reseller" : "/";
+  const homeHref = isWholesale ? "/wholesale" : "/";
 
   const [localSearch, setLocalSearch] = useState("");
   const [liveSearchResults, setLiveSearchResults] = useState([]);
@@ -397,6 +397,9 @@ export default function Header({
             </>
           ) : isReseller ? (
             <>
+              <Link href="/" className={`jt-tab-pill ${isHome ? "active" : ""}`}>
+                <span className="jt-tab-icon">🏠</span> Home
+              </Link>
               <Link href="/reseller" className={`jt-tab-pill ${pathname === "/reseller" ? "active" : ""}`} style={{ background: "#be123c", color: "#fff", fontWeight: 800 }}>
                 <span className="jt-tab-icon">🚀</span> Reseller Hub
               </Link>
