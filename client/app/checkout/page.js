@@ -186,6 +186,10 @@ export default function CheckoutPage() {
       if (ogerioP > 0 && discounted < ogerioP) {
         discounted = Math.min(base, ogerioP);
       }
+      const itemCost = Number(item.purchasePrice || item.costAtSale || 0);
+      if (itemCost > 0 && discounted < itemCost) {
+        discounted = Math.min(base, itemCost);
+      }
       return discounted;
     }
     return base;

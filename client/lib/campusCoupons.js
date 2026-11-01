@@ -515,10 +515,16 @@ export function getProductCampusPricing(product, coupon) {
 
   let campusPrice = Math.max(1, Math.round(regularPrice * (1 - discountPct / 100)));
 
-  // Safety rule: Campus price must NEVER drop below Ogerio's price.
-  // If discounted price goes below Ogerio price, set it equal to Ogerio price!
+  // Safety rule 1: Campus price must NEVER drop below Ogerio's price.
   if (ogerioPrice > 0 && campusPrice < ogerioPrice) {
     campusPrice = Math.min(regularPrice, ogerioPrice);
+    discountPct = regularPrice > campusPrice ? Math.round(((regularPrice - campusPrice) / regularPrice) * 100) : 0;
+  }
+
+  // Safety rule 2: Campus price must NEVER drop below purchase cost (কেনা দাম). Zero loss guarantee!
+  const baseCost = Number(product.purchasePrice || product.costAtSale || 0);
+  if (baseCost > 0 && campusPrice < baseCost) {
+    campusPrice = Math.min(regularPrice, baseCost);
     discountPct = regularPrice > campusPrice ? Math.round(((regularPrice - campusPrice) / regularPrice) * 100) : 0;
   }
 

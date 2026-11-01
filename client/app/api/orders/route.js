@@ -225,6 +225,10 @@ export async function POST(req) {
           if (ogerioP > 0 && calculatedPrice < ogerioP) {
             calculatedPrice = Math.min(defaultRetailPrice, ogerioP);
           }
+          const baseCost = Number(p.purchasePrice || p.costAtSale || 0);
+          if (baseCost > 0 && calculatedPrice < baseCost) {
+            calculatedPrice = Math.min(defaultRetailPrice, baseCost);
+          }
           totalSavings += Math.max(0, defaultRetailPrice - calculatedPrice) * qty;
         }
       }
