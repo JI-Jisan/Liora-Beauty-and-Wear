@@ -12,82 +12,89 @@ require('../models/Brand');
 const Product = require('../models/Product');
 const Brand = require('../models/Brand');
 
-// 5 Luxury Spotlight Themes (11.11 Mega Sale Studio Photoshoot Templates)
+// 5 Commercial 3D Studio Themes (11.11 Mega Sale Color-Matched Templates)
 const THEMES = {
-  teal: {
-    name: 'K-Beauty Dewy 11.11',
-    bgDark: '#041f27',
-    bgMid: '#063f4e',
-    spotlight: '#00b4d8',
-    glowOpacity: 0.85,
-    accent: '#38bdf8',
-    ribbon: '#ff1493',
-    cardBg: 'rgba(3, 31, 39, 0.82)',
-    cardBorder: 'rgba(56, 189, 248, 0.45)',
-    template: 'template_1111_kbeauty.jpg',
-    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654682/liora_store/fb_templates/template_1111_kbeauty.jpg',
-    floorY: 870,
-    centerX: 680,
+  blue: {
+    key: 'blue',
+    name: 'Blue Hydration 11.11',
+    priceColor: '#002b80',
+    accent: '#0047b3',
+    template: 'template_3d_blue.png',
+    podiumCx: 330,
+    podiumTopY: 840,
   },
-  rose: {
-    name: '11.11 Burgundy Velvet',
-    bgDark: '#260412',
-    bgMid: '#4c0824',
-    spotlight: '#f43f5e',
-    glowOpacity: 0.8,
-    accent: '#fb7185',
-    ribbon: '#e11d48',
-    cardBg: 'rgba(20, 6, 12, 0.85)',
-    cardBorder: 'rgba(244, 63, 94, 0.45)',
-    template: 'template_1111_burgundy.jpg',
-    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654673/liora_store/fb_templates/template_1111_burgundy.jpg',
-    floorY: 880,
-    centerX: 680,
-  },
-  emerald: {
-    name: 'Organic Botanical 11.11',
-    bgDark: '#021e14',
-    bgMid: '#064e3b',
-    spotlight: '#10b981',
-    glowOpacity: 0.85,
-    accent: '#34d399',
-    ribbon: '#f43f5e',
-    cardBg: 'rgba(4, 24, 18, 0.85)',
-    cardBorder: 'rgba(52, 211, 153, 0.45)',
-    template: 'template_1111_kbeauty.jpg',
-    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654682/liora_store/fb_templates/template_1111_kbeauty.jpg',
-    floorY: 870,
-    centerX: 680,
-  },
-  navy: {
-    name: 'Midnight Obsidian 11.11',
-    bgDark: '#080d1a',
-    bgMid: '#14203d',
-    spotlight: '#3b82f6',
-    glowOpacity: 0.85,
-    accent: '#60a5fa',
-    ribbon: '#ec4899',
-    cardBg: 'rgba(10, 10, 16, 0.85)',
-    cardBorder: 'rgba(234, 179, 8, 0.45)',
-    template: 'template_1111_midnight.jpg',
-    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654679/liora_store/fb_templates/template_1111_midnight.jpg',
-    floorY: 870,
-    centerX: 680,
+  pink: {
+    key: 'pink',
+    name: 'Blush Rose Glam 11.11',
+    priceColor: '#831843',
+    accent: '#be185d',
+    template: 'template_3d_pink.png',
+    podiumCx: 330,
+    podiumTopY: 840,
   },
   gold: {
-    name: 'Golden Gala 11.11',
-    bgDark: '#211502',
-    bgMid: '#452b04',
-    spotlight: '#f59e0b',
-    glowOpacity: 0.82,
-    accent: '#fbbf24',
-    ribbon: '#e11d48',
-    cardBg: 'rgba(25, 14, 4, 0.85)',
-    cardBorder: 'rgba(251, 191, 36, 0.45)',
-    template: 'template_1111_burgundy.jpg',
-    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654673/liora_store/fb_templates/template_1111_burgundy.jpg',
-    floorY: 880,
-    centerX: 680,
+    key: 'gold',
+    name: 'Golden Radiance 11.11',
+    priceColor: '#78350f',
+    accent: '#b45309',
+    template: 'template_3d_gold.png',
+    podiumCx: 330,
+    podiumTopY: 840,
+  },
+  green: {
+    key: 'green',
+    name: 'Botanical Mint 11.11',
+    priceColor: '#064e3b',
+    accent: '#047857',
+    template: 'template_3d_green.png',
+    podiumCx: 330,
+    podiumTopY: 840,
+  },
+  grey: {
+    key: 'grey',
+    name: 'Minimalist Obsidian 11.11',
+    priceColor: '#0f172a',
+    accent: '#1e293b',
+    template: 'template_3d_grey.png',
+    podiumCx: 330,
+    podiumTopY: 840,
+  },
+  // Backward compatibility aliases
+  teal: {
+    key: 'blue',
+    name: 'Blue Hydration 11.11',
+    priceColor: '#002b80',
+    accent: '#0047b3',
+    template: 'template_3d_blue.png',
+    podiumCx: 330,
+    podiumTopY: 840,
+  },
+  rose: {
+    key: 'pink',
+    name: 'Blush Rose Glam 11.11',
+    priceColor: '#831843',
+    accent: '#be185d',
+    template: 'template_3d_pink.png',
+    podiumCx: 330,
+    podiumTopY: 840,
+  },
+  emerald: {
+    key: 'green',
+    name: 'Botanical Mint 11.11',
+    priceColor: '#064e3b',
+    accent: '#047857',
+    template: 'template_3d_green.png',
+    podiumCx: 330,
+    podiumTopY: 840,
+  },
+  navy: {
+    key: 'grey',
+    name: 'Minimalist Obsidian 11.11',
+    priceColor: '#0f172a',
+    accent: '#1e293b',
+    template: 'template_3d_grey.png',
+    podiumCx: 330,
+    podiumTopY: 840,
   },
 };
 
@@ -174,28 +181,101 @@ async function getProductBuffer(imageUrl) {
   }
 }
 
-async function cleanTransparentCutout(buffer) {
-  const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] < 110) {
-      data[i + 3] = 0;
+function removeStudioBackground(data, width, height) {
+  const visited = new Uint8Array(width * height);
+  const queue = new Int32Array(width * height);
+  let head = 0;
+  let tail = 0;
+
+  function isBorderBg(idx) {
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const brightness = (r + g + b) / 3;
+    const diff = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
+    return brightness >= 248 && diff <= 12;
+  }
+
+  for (let x = 0; x < width; x++) {
+    const topIdx = (0 * width + x) * 4;
+    const botIdx = ((height - 1) * width + x) * 4;
+    if (!visited[x] && isBorderBg(topIdx)) {
+      visited[x] = 1;
+      queue[tail++] = x;
+    }
+    const botP = (height - 1) * width + x;
+    if (!visited[botP] && isBorderBg(botIdx)) {
+      visited[botP] = 1;
+      queue[tail++] = botP;
     }
   }
-  return await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
-    .trim()
-    .png()
-    .toBuffer();
+
+  for (let y = 0; y < height; y++) {
+    const leftP = y * width;
+    const rightP = y * width + (width - 1);
+    if (!visited[leftP] && isBorderBg(leftP * 4)) {
+      visited[leftP] = 1;
+      queue[tail++] = leftP;
+    }
+    if (!visited[rightP] && isBorderBg(rightP * 4)) {
+      visited[rightP] = 1;
+      queue[tail++] = rightP;
+    }
+  }
+
+  while (head < tail) {
+    const p = queue[head++];
+    const px = p % width;
+    const py = Math.floor(p / width);
+    const neighbors = [
+      px > 0 ? p - 1 : -1,
+      px < width - 1 ? p + 1 : -1,
+      py > 0 ? p - width : -1,
+      py < height - 1 ? p + width : -1,
+    ];
+    for (const n of neighbors) {
+      if (n !== -1 && !visited[n] && isBorderBg(n * 4)) {
+        visited[n] = 1;
+        queue[tail++] = n;
+      }
+    }
+  }
+
+  for (let p = 0; p < width * height; p++) {
+    if (visited[p]) {
+      data[p * 4 + 3] = 0;
+    }
+  }
+}
+
+async function cleanTransparentCutout(buffer) {
+  try {
+    const { data, info } = await sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    let alphaCount = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 120) alphaCount++;
+    }
+    if (alphaCount < data.length * 0.05) {
+      removeStudioBackground(data, info.width, info.height);
+    }
+    return await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+      .trim({ threshold: 10 })
+      .png()
+      .toBuffer();
+  } catch (err) {
+    return buffer;
+  }
 }
 
 // Smart theme detection based on product name / category
 function pickSmartTheme(productName = '', categoryName = '') {
   const text = `${productName} ${categoryName}`.toLowerCase();
-  if (/hair|shampoo|keratin|conditioner|scalp|oil/i.test(text)) return 'emerald';
-  if (/rose|glow|bright|milk|berry|pink|whitening|face wash|lipstick|lip|blush/i.test(text)) return 'rose';
-  if (/shower|bath|gel|aqua|water|fresh|cool|body wash|hyaluron/i.test(text)) return 'teal';
-  if (/gold|serum|vitamin c|honey|retinol|anti.?aging|sun/i.test(text)) return 'gold';
-  if (/men|charcoal|night|deep|black/i.test(text)) return 'navy';
-  return 'teal';
+  if (/hair|shampoo|keratin|conditioner|scalp|oil|gold|honey|sun/i.test(text)) return 'gold';
+  if (/rose|glow|bright|milk|berry|pink|whitening|face wash|lipstick|lip|blush|palette/i.test(text)) return 'pink';
+  if (/shower|bath|gel|aqua|water|fresh|cool|body wash|hyaluron|cerave|cleanser/i.test(text)) return 'blue';
+  if (/aloe|tea tree|cica|centella|botanical|green|herb|organic|dark spot/i.test(text)) return 'green';
+  if (/men|charcoal|night|deep|black|ordinary|niacinamide|grey|obsidian/i.test(text)) return 'grey';
+  return 'blue';
 }
 
 // Generate FB High-Converting Sales Caption for 11.11 Mega Sale
@@ -263,11 +343,10 @@ async function generateProductBanner(product, customThemeKey = null) {
   const width = 1080;
   const height = 1080;
 
-  const brandName = product.brand?.name || 'LIORA';
   const categoryName = product.category?.name || 'AUTHENTIC BEAUTY';
 
-  let originalPrice = Number(product.originalPrice) || 0;
-  let offerPrice = Number(product.offerPrice) || originalPrice;
+  let originalPrice = Number(product.originalPrice) || Number(product.price) || 0;
+  let offerPrice = Number(product.offerPrice) || Number(product.salePrice) || originalPrice;
   if (originalPrice <= offerPrice) {
     originalPrice = Math.round(offerPrice * 1.3);
   }
@@ -275,159 +354,65 @@ async function generateProductBanner(product, customThemeKey = null) {
   const discountPct = originalPrice > 0 ? Math.round((saveAmount / originalPrice) * 100) : 0;
 
   const themeKey = customThemeKey || pickSmartTheme(product.name, categoryName);
-  const theme = THEMES[themeKey] || THEMES.teal;
+  const theme = THEMES[themeKey] || THEMES.blue;
 
   const imageUrl = product.image || (product.images && product.images[0]) || '';
   if (!imageUrl) {
     throw new Error(`Product "${product.name}" does not have an image.`);
   }
 
-  // 1. Fetch & AI Background Removal & auto-grounding
+  // 1. Fetch Product Buffer
   const rawProduct = await getProductBuffer(imageUrl);
   const trimmed = await cleanTransparentCutout(rawProduct);
 
-  const floorY = theme.floorY || 875;
-  const centerX = theme.centerX || 680;
+  const podiumCx = theme.podiumCx || 330;
+  const podiumTopY = theme.podiumTopY || 840;
 
   const { data: resizedBuffer, info: resizedInfo } = await sharp(trimmed)
     .trim({ threshold: 10 })
     .resize({
-      width: 440,
-      height: 620,
+      width: 380,
+      height: 630,
       fit: 'inside',
       background: { r: 0, g: 0, b: 0, alpha: 0 }
     })
     .toBuffer({ resolveWithObject: true });
 
-  const productTop = floorY - resizedInfo.height;
-  const productLeft = Math.round(centerX - resizedInfo.width / 2);
-
-  const titleLines = formatBannerTitle(product.name);
-  const safeBrand = escapeXml(brandName);
-  const safeCat = escapeXml(categoryName);
-  const leftMargin = 65;
-
-  const titleBlockHeight = titleLines.length * 30;
-  const priceCardY = 270 + titleBlockHeight + 10;
+  const productTop = podiumTopY - resizedInfo.height + 15;
+  const productLeft = Math.round(podiumCx - resizedInfo.width / 2);
 
   const templateBuffer = await loadTemplateBackground(theme);
 
+  // Exact Commercial Typography & Contact Shadow Overlay
   const overlaySvg = `
   <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="${theme.bgDark}" />
-        <stop offset="50%" stop-color="${theme.bgMid}" />
-        <stop offset="100%" stop-color="${theme.bgDark}" />
-      </linearGradient>
-
-      <radialGradient id="spotlightGlow" cx="65%" cy="50%" r="56%">
-        <stop offset="0%" stop-color="${theme.spotlight}" stop-opacity="${theme.glowOpacity}" />
-        <stop offset="42%" stop-color="${theme.spotlight}" stop-opacity="0.36" />
-        <stop offset="75%" stop-color="${theme.bgMid}" stop-opacity="0.12" />
-        <stop offset="100%" stop-color="${theme.bgDark}" stop-opacity="0" />
+      <radialGradient id="productContactShadow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#0f172a" stop-opacity="0.45" />
+        <stop offset="60%" stop-color="#0f172a" stop-opacity="0.15" />
+        <stop offset="100%" stop-color="#0f172a" stop-opacity="0" />
       </radialGradient>
-
-      <radialGradient id="floorShadow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#000000" stop-opacity="0.85" />
-        <stop offset="50%" stop-color="#000000" stop-opacity="0.35" />
-        <stop offset="100%" stop-color="#000000" stop-opacity="0" />
-      </radialGradient>
-
-      <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#fef08a" />
-        <stop offset="50%" stop-color="#eab308" />
-        <stop offset="100%" stop-color="#ca8a04" />
-      </linearGradient>
-
-      <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#e11d48" />
-        <stop offset="100%" stop-color="#9f1239" />
-      </linearGradient>
-
-      <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000000" flood-opacity="0.65" />
-      </filter>
     </defs>
 
-    ${!templateBuffer ? `
-      <rect width="${width}" height="${height}" fill="url(#bgGrad)" />
-      <rect width="${width}" height="${height}" fill="url(#spotlightGlow)" />
-    ` : ''}
+    <!-- Product Contact Shadow on Podium Surface -->
+    <ellipse cx="${podiumCx}" cy="${podiumTopY + 3}" rx="${Math.round(resizedInfo.width * 0.44)}" ry="16" fill="url(#productContactShadow)" />
 
-    <!-- Floor Shadow Under Cutout Product -->
-    <ellipse cx="${centerX}" cy="${floorY + 12}" rx="${Math.round(resizedInfo.width * 0.46)}" ry="24" fill="url(#floorShadow)" />
-
-    <!-- TOP HEADER: LIORA OFFICIAL BRANDING -->
-    <g transform="translate(65, 55)">
-      <text x="0" y="22" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="28" fill="#FFFFFF" letter-spacing="5">LIORA</text>
-      <text x="145" y="22" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#fecdd3" letter-spacing="3.5">BEAUTY &amp; WEAR</text>
-      <line x1="0" y1="36" x2="310" y2="36" stroke="#f43f5e" stroke-opacity="0.6" stroke-width="1.8" />
-    </g>
-
-    <!-- TOP RIGHT: 11.11 MEGA SALE GOLDEN BADGE -->
-    <g transform="translate(850, 50)" filter="url(#shadowFilter)">
-      <rect x="0" y="0" width="165" height="56" rx="28" fill="url(#goldGrad)" stroke="#ffffff" stroke-width="2" />
-      <text x="82" y="26" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="15" fill="#881337" letter-spacing="1">11.11 MEGA SALE</text>
-      <text x="82" y="44" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="11" fill="#713f12" letter-spacing="0.5">LIMITED TIME OFFER</text>
-    </g>
-
-    <!-- LEFT PRODUCT INFO -->
-    <!-- Brand Name -->
-    <g transform="translate(${leftMargin}, 170)">
-      <text x="0" y="22" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="22" fill="#fef08a" letter-spacing="4">${safeBrand}</text>
-      <line x1="0" y1="32" x2="60" y2="32" stroke="#eab308" stroke-width="3" stroke-linecap="round" />
-    </g>
-
-    <!-- Category Pill -->
-    <g transform="translate(${leftMargin}, 216)">
-      <rect x="0" y="0" width="${categoryName.length * 8 + 24}" height="26" rx="13" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.25)" stroke-width="1" />
-      <text x="12" y="17" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="11" fill="#ffffff" letter-spacing="1.5">${safeCat}</text>
-    </g>
-
-    <!-- Product Title -->
-    <g transform="translate(${leftMargin}, 275)" filter="url(#shadowFilter)">
-      <text x="0" y="0" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="24" fill="#FFFFFF">${escapeXml(titleLines[0] || '')}</text>
-      ${titleLines[1] ? `<text x="0" y="30" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="20" fill="rgba(255,255,255,0.9)">${escapeXml(titleLines[1])}</text>` : ''}
-      ${titleLines[2] ? `<text x="0" y="58" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="16" fill="rgba(255,255,255,0.75)">${escapeXml(titleLines[2])}</text>` : ''}
-    </g>
-
-    <!-- 100% ACCURATE 11.11 PRICE CARD (GLASSMORPHISM CARD) -->
-    <g transform="translate(${leftMargin}, ${priceCardY})" filter="url(#shadowFilter)">
-      <rect width="280" height="205" rx="20" fill="${theme.cardBg || 'rgba(20, 6, 12, 0.85)'}" stroke="${theme.cardBorder || 'rgba(244, 63, 94, 0.45)'}" stroke-width="2" />
-      
-      <!-- Strikethrough Regular MRP -->
-      <g transform="translate(140, 40)">
-        <text x="0" y="0" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="16" fill="rgba(255,255,255,0.65)">MRP: ৳${originalPrice} TK</text>
-        <line x1="-65" y1="-5" x2="65" y2="-5" stroke="#ef4444" stroke-width="2.5" />
+    <!-- 1. REGULAR PRICE SECTION -->
+    <g transform="translate(810, 420)" text-anchor="middle">
+      <text x="0" y="0" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="25" fill="#334155">Regular Price</text>
+      <g transform="translate(0, 46)">
+        <text x="0" y="0" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="46" fill="#1e293b">৳ ${originalPrice.toLocaleString('en-IN')}</text>
+        <line x1="-80" y1="4" x2="80" y2="-22" stroke="#ef4444" stroke-width="4.5" stroke-linecap="round" />
       </g>
-
-      <!-- 11.11 Offer Price -->
-      <text x="140" y="106" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="56" fill="#FFFFFF" letter-spacing="-1">৳ ${offerPrice}</text>
-      <text x="140" y="132" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="12" fill="#fef08a" letter-spacing="1.5">11.11 SPECIAL OFFER</text>
-
-      <!-- Save & Discount Ribbon -->
-      <path d="M 0 156 Q 0 152 0 152 L 280 152 L 280 188 Q 280 205 260 205 L 20 205 Q 0 205 0 188 Z" fill="url(#badgeGrad)" />
-      <text x="140" y="184" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="14" fill="#FFFFFF" letter-spacing="1">SAVE ৳ ${saveAmount} TAKA (-${discountPct}%)</text>
     </g>
 
-    <!-- TRUST STRIPS -->
-    <g transform="translate(${leftMargin}, ${priceCardY + 225})" filter="url(#shadowFilter)">
-      <rect x="0" y="0" width="280" height="40" rx="10" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
-      <text x="140" y="25" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="12.5" fill="#ffffff">🚚 সারা দেশে হোম ডেলিভারি</text>
-    </g>
-
-    <g transform="translate(${leftMargin}, ${priceCardY + 275})" filter="url(#shadowFilter)">
-      <rect x="0" y="0" width="280" height="40" rx="10" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
-      <text x="140" y="25" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="12.5" fill="#ffffff">🛡️ ১০০% ইন-স্টক আসল প্রোডাক্ট</text>
-    </g>
-
-    <!-- BOTTOM CTA BANNER -->
-    <g transform="translate(65, 995)">
-      <rect x="0" y="0" width="950" height="48" rx="12" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
-      <text x="475" y="30" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" fill="#fef08a" letter-spacing="1">
-        🛒 অর্ডার করতে পেইজে ইনবক্স করুন অথবা ভিজিট করুন: liorabd.com 📱 01837223147
-      </text>
+    <!-- 2. OFFER PRICE INSIDE THE WHITE CARD -->
+    <g transform="translate(810, 642)" text-anchor="middle">
+      <text x="0" y="0" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="82" fill="${theme.priceColor}" letter-spacing="-2">৳ ${offerPrice.toLocaleString('en-IN')}</text>
+      <g transform="translate(0, 36)">
+        <rect x="-115" y="-15" width="230" height="30" rx="15" fill="#ef4444" />
+        <text x="0" y="5" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="13" fill="#ffffff" letter-spacing="1">SAVE ৳${saveAmount.toLocaleString('en-IN')} (-${discountPct}%)</text>
+      </g>
     </g>
   </svg>
   `;
@@ -436,8 +421,8 @@ async function generateProductBanner(product, customThemeKey = null) {
     return await sharp(templateBuffer)
       .resize(width, height)
       .composite([
-        { input: resizedBuffer, top: productTop, left: productLeft },
-        { input: Buffer.from(overlaySvg), top: 0, left: 0 }
+        { input: Buffer.from(overlaySvg), top: 0, left: 0 },
+        { input: resizedBuffer, top: productTop, left: productLeft }
       ])
       .png({ quality: 95 })
       .toBuffer();
