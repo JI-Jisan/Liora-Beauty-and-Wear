@@ -8,17 +8,30 @@ const DEFAULT_SETTINGS = {
   heroTitle: "Beauty That Inspires Confidence & Style That Speaks Elegance",
   heroText:
     "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
-  heroImage: "https://res.cloudinary.com/dlgubaefs/image/upload/v1792467814/liora_store/banners/tbiqgyrlq3veuklfizh6.jpg",
+  heroImage: "",
   offerText:
     "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1999 Tk   ✨ 100% Authentic Products",
   promoSlides: [
     {
-      badge: "Exclusive",
-      title: "Royal Oud Collection",
-      subtitle: "Experience luxury oriental fragrances with long-lasting scent.",
-      buttonText: "Shop Perfumes",
-      buttonLink: "/products?search=Perfume",
-      image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1200&auto=format&fit=crop&q=80",
+      id: "banner-1111-swiss-cosmetics",
+      title: "11.11 Mega Sale - Swiss Beauty & Cosmetics Up to 70% OFF",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647403/liora_store/banners/jaibi6bgdo6xodnr4tro.webp",
+      buttonLink: "/brand/swiss-beauty",
+      buttonText: "Shop 11.11 Deals",
+    },
+    {
+      id: "banner-1111-beauty-saga",
+      title: "11.11 Beauty Saga - Tresemme & Hair Care Up to 45% OFF",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647404/liora_store/banners/rhyy1m9sbuhbmhdywstn.webp",
+      buttonLink: "/products?category=Hair+Care",
+      buttonText: "Shop Beauty Saga",
+    },
+    {
+      id: "banner-1111-k-beauty-fest",
+      title: "11.11 K-Beauty Festival - Korean Glass Skin Up to 50% OFF",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647405/liora_store/banners/embskiwgane2zn7wjwaz.webp",
+      buttonLink: "/products?category=K-Beauty",
+      buttonText: "Grab K-Beauty Deals",
     },
   ],
   flashTitle: "Limited Time Special Offer",
