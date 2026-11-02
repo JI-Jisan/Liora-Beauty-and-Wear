@@ -60,8 +60,8 @@ export default function BannerManager({ siteSettings, onUpdateSettings }) {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setMessage({ type: "error", text: "❌ ছবির সাইজ ১০MB-র কম হতে হবে।" });
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: "error", text: "❌ ছবির সাইজ ৫MB-র কম হতে হবে।" });
       return;
     }
 
@@ -486,17 +486,7 @@ export default function BannerManager({ siteSettings, onUpdateSettings }) {
           {slides.map((slide, index) => (
             <div
               key={slide.id || index}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "180px 1fr auto",
-                gap: "16px",
-                alignItems: "center",
-                padding: "16px",
-                borderRadius: "14px",
-                border: "1px solid #e2e8f0",
-                background: "#fcfaf8",
-                boxShadow: "0 2px 8px rgba(15, 23, 42, 0.03)",
-              }}
+              className="jt-banner-manager-item"
             >
               {/* Thumbnail Image */}
               <div
