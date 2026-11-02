@@ -279,6 +279,8 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
         purchasePrice: buyPrice,
         quantity: qty,
         wholesalePrice: finalWholesale,
+        price: finalWholesale,
+        unitPrice: finalWholesale,
         calculatedDefaultPrice: defaultWholesale,
         customPrice: entry.customPrice ?? null,
         discountPct,
@@ -611,6 +613,9 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
           originalPrice: it.origPrice,
           purchasePrice: it.purchasePrice || 0,
           wholesalePrice: it.wholesalePrice,
+          price: it.wholesalePrice,
+          unitPrice: it.wholesalePrice,
+          customPrice: it.customPrice ?? null,
           quantity: it.quantity,
           lineTotal: it.lineTotal,
           discountPct: it.discountPct,
@@ -777,15 +782,11 @@ export default function WholesaleCatalog({ products = [], categories = [] }) {
     const map = {};
     (q.items || []).forEach((it) => {
       const id = String(it.productId || it._id || it.name);
-      // Keep price as null if it matches the formula so changing profit% dynamically recalculates it!
-      const buyPrice = Number(it.purchasePrice) || 0;
-      const calculatedExpected = Math.round(buyPrice * (1 + savedProfit / 100));
-      const rawWs = Number(it.wholesalePrice);
-      const safeWs = !isNaN(rawWs) && rawWs >= 0 && rawWs <= 100000 ? Math.round(rawWs) : calculatedExpected;
-      const wasCustom = buyPrice > 0 && safeWs !== calculatedExpected;
+      const rawWs = Number(it.wholesalePrice ?? it.price ?? it.unitPrice);
+      const safeWs = !isNaN(rawWs) && rawWs >= 0 && rawWs <= 100000 ? Math.round(rawWs) : null;
 
       map[id] = {
-        customPrice: wasCustom ? safeWs : null,
+        customPrice: safeWs,
         qty: Math.min(10000, Math.max(1, parseInt(it.quantity) || 1)),
         snapshot: it,
       };

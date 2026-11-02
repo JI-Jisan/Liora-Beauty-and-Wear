@@ -209,17 +209,30 @@ export async function generateWholesalePdf({
     const origPrice =
       Number(p.originalPrice) ||
       Number(p.offerPrice) ||
+      Number(p.origPrice) ||
       (buyPrice > 0 ? Math.round(buyPrice * 1.5) : 0);
-    const explicitPrice = Number(p.price || p.unitPrice || 0);
 
-    let calculatedWholesale = explicitPrice > 0 ? explicitPrice : getWholesalePrice(p);
-    // If admin explicitly set profitPercent and purchasePrice is available, honor markup:
-    if (explicitPrice <= 0 && buyPrice > 0 && Number(profitPercent) > 0) {
+    // Priority 1: Respect the exact wholesale rate already specified on the item!
+    // Items from WholesaleCatalog or saved Quotation have `wholesalePrice`, `customPrice`, `price`, or `unitPrice`
+    const explicitPrice = Number(
+      p.wholesalePrice ?? p.customPrice ?? p.price ?? p.unitPrice ?? 0
+    );
+
+    let calculatedWholesale = 0;
+    if (explicitPrice > 0) {
+      // The user or quotation explicitly designated this exact rate: DO NOT OVERWRITE!
+      calculatedWholesale = explicitPrice;
+    } else if (buyPrice > 0 && Number(profitPercent) > 0) {
+      // Only fallback to markup calculation if no explicit wholesale price is provided
       calculatedWholesale = Math.round(buyPrice * (1 + Number(profitPercent) / 100));
+    } else {
+      // Fallback: default wholesale discount logic
+      calculatedWholesale = getWholesalePrice(p);
     }
+
     // Safety check: wholesale rate must never exceed retail price if retail price is known
-    if (origPrice > 0 && calculatedWholesale >= origPrice) {
-      calculatedWholesale = Math.round(origPrice * 0.88);
+    if (origPrice > 0 && calculatedWholesale > origPrice) {
+      calculatedWholesale = origPrice;
     }
 
     const finalWholesale = Math.max(1, calculatedWholesale);
