@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
+import BannerManager from "@/components/admin/BannerManager";
 
 export default function BrandingPage() {
   const router = useRouter();
@@ -108,8 +109,14 @@ export default function BrandingPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div style={{ padding: "30px" }}>
-      <h2>Branding Settings</h2>
+    <div style={{ padding: "30px", maxWidth: "1200px", margin: "0 auto" }}>
+      {/* Banner & Slider Upload Studio */}
+      <BannerManager
+        siteSettings={settings}
+        onUpdateSettings={(updated) => setSettings((prev) => ({ ...prev, ...updated }))}
+      />
+
+      <h2>Other Branding Settings</h2>
 
       <input
         name="brandName"

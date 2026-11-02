@@ -333,7 +333,7 @@ export default function Header({
                 <span className="jt-announcement-divider">•</span>
                 <span>🛡️ ১০০% অথেনটিক কোরিয়ান ও গ্লোবাল স্কিনকেয়ার</span>
                 <span className="jt-announcement-divider">•</span>
-                <span>🌸 Use Code <strong>DIU15</strong> for 15% Student Discount</span>
+                <span>🎓 স্টুডেন্ট ও ক্যাম্পাস স্পেশাল ডিসকাউন্ট — আপনার বিশ্ববিদ্যালয় কোড দিয়ে ১৫% পর্যন্ত ছাড় পান</span>
               </>
             )}
           </div>

@@ -38,26 +38,6 @@ export default function CampusCouponBar() {
     }, 250);
   };
 
-  const handleDirectApply = (code) => {
-    setIsSubmitting(true);
-    setFeedback(null);
-    setTimeout(() => {
-      const res = applyCampusCoupon(code);
-      if (res.success) {
-        setFeedback({ type: "success", message: res.message });
-        setInputCode("");
-        setTimeout(() => {
-          const el = document.getElementById("view-offers") || document.getElementById("hot-items");
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        }, 300);
-      } else {
-        setFeedback({ type: "error", message: res.message });
-      }
-      setIsSubmitting(false);
-    }, 200);
-  };
 
   return (
     <section
@@ -86,27 +66,27 @@ export default function CampusCouponBar() {
         }}
       >
         {!activeCoupon ? (
-          /* BEFORE COUPON APPLIED - COMPACT DIU VIP PASS (ONE-CLICK + MANUAL) */
+          /* BEFORE COUPON APPLIED - REQUIRE VALID CAMPUS CODE ENTRY */
           <div
             style={{
               display: "flex",
               flexWrap: "wrap",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: "10px",
+              gap: "12px",
             }}
           >
-            <div style={{ flex: "1 1 300px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ flex: "1 1 300px", display: "flex", alignItems: "center", gap: "12px" }}>
               <div
                 style={{
-                  width: "42px",
-                  height: "42px",
+                  width: "44px",
+                  height: "44px",
                   borderRadius: "12px",
                   background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "20px",
+                  fontSize: "22px",
                   color: "#ffffff",
                   boxShadow: "0 4px 12px rgba(225, 29, 72, 0.28)",
                   flexShrink: 0,
@@ -130,8 +110,8 @@ export default function CampusCouponBar() {
                   >
                     Campus VIP Privilege
                   </span>
-                  <span style={{ fontSize: "11px", color: "#16a34a", fontWeight: 800 }}>
-                    ★ DIU Winter Glow-Up Fest
+                  <span style={{ fontSize: "11px", color: "#e11d48", fontWeight: 800 }}>
+                    ★ স্টুডেন্ট প্রিভিলেজ অফার
                   </span>
                 </div>
                 <h3
@@ -143,40 +123,19 @@ export default function CampusCouponBar() {
                     lineHeight: 1.25,
                   }}
                 >
-                  ড্যাফোডিল শিক্ষার্থীদের জন্য ফ্ল্যাট ১৫% ছাড়!
+                  বিশ্ববিদ্যালয় শিক্ষার্থীদের জন্য বিশেষ ছাড়!
                 </h3>
+                <p style={{ margin: "2px 0 0", fontSize: "11px", color: "#64748b", fontWeight: 500 }}>
+                  আপনার ক্যাম্পাস প্রিভিলেজ কোড জানা থাকলে নিচে এন্টার করে ১৫% ছাড় আনলক করুন
+                </p>
               </div>
             </div>
 
-            {/* Quick 1-Click DIU15 Activate + Other Campus code input */}
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", flex: "1 1 280px", maxWidth: "460px", width: "100%" }}>
-              <button
-                type="button"
-                onClick={() => handleDirectApply("DIU15")}
-                disabled={isSubmitting}
-                style={{
-                  background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
-                  color: "#ffffff",
-                  border: "none",
-                  borderRadius: "10px",
-                  padding: "8px 13px",
-                  fontSize: "12px",
-                  fontWeight: 900,
-                  cursor: isSubmitting ? "wait" : "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  boxShadow: "0 4px 12px rgba(225, 29, 72, 0.28)",
-                  transition: "all 0.2s ease",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <span>⚡ DIU15 সক্রিয় করুন</span>
-              </button>
-
+            {/* Secret Campus Code Entry Form */}
+            <div style={{ flex: "1 1 280px", maxWidth: "420px", width: "100%" }}>
               <form
                 onSubmit={handleSubmit}
-                style={{ display: "flex", alignItems: "center", gap: "6px", flex: 1, minWidth: "140px" }}
+                style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%" }}
               >
                 <input
                   type="text"
@@ -185,13 +144,13 @@ export default function CampusCouponBar() {
                     setInputCode(e.target.value.toUpperCase());
                     if (feedback) setFeedback(null);
                   }}
-                  placeholder="অন্যান্য কোড (যেমন: DIU15)"
+                  placeholder="আপনার ক্যাম্পাস কোড লিখুন..."
                   style={{
-                    width: "100%",
-                    padding: "8px 10px",
-                    fontSize: "12px",
+                    flex: 1,
+                    padding: "9px 12px",
+                    fontSize: "13px",
                     fontWeight: 700,
-                    letterSpacing: "0.04em",
+                    letterSpacing: "0.05em",
                     borderRadius: "10px",
                     border: feedback?.type === "error" ? "1.5px solid #f43f5e" : "1px solid #cbd5e1",
                     background: "#ffffff",
@@ -204,20 +163,34 @@ export default function CampusCouponBar() {
                   type="submit"
                   disabled={isSubmitting}
                   style={{
-                    padding: "8px 10px",
-                    fontSize: "11px",
+                    padding: "9px 16px",
+                    fontSize: "12px",
                     fontWeight: 800,
                     borderRadius: "10px",
-                    background: "#ffffff",
-                    color: "#881337",
-                    border: "1px solid #fecdd3",
+                    background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
+                    color: "#ffffff",
+                    border: "none",
                     cursor: isSubmitting ? "wait" : "pointer",
                     whiteSpace: "nowrap",
+                    boxShadow: "0 3px 10px rgba(225, 29, 72, 0.25)",
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  প্রয়োগ
+                  {isSubmitting ? "যাচাই হচ্ছে..." : "⚡ আনলক করুন"}
                 </button>
               </form>
+              {feedback && (
+                <div
+                  style={{
+                    marginTop: "6px",
+                    fontSize: "11.5px",
+                    fontWeight: 700,
+                    color: feedback.type === "success" ? "#16a34a" : "#e11d48",
+                  }}
+                >
+                  {feedback.message}
+                </div>
+              )}
             </div>
           </div>
         ) : (

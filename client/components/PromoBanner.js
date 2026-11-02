@@ -32,48 +32,39 @@ export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
   const touchEndX = useRef(0);
 
   // Compile active banners:
-  // If user has custom heroImage or custom promoSlides, include them in the carousel
+  // If user has custom promoSlides uploaded from Admin Panel, use ONLY them!
   const banners = useMemo(() => {
-    const list = [];
-
-    // 1. If admin has a main hero image, put it first (excluding deleted default banner)
-    if (heroImage && heroImage.trim() && !heroImage.includes("hero-banner-main")) {
-      list.push({
-        id: "banner-hero-main-dynamic",
-        title: "LIORA Beauty & Wear",
-        image: getImageUrl(heroImage),
-        link: "/products",
-      });
-    }
-
-    // 2. Custom slides uploaded in admin panel
+    // 1. Custom slides uploaded in admin panel
     if (Array.isArray(promoSlides) && promoSlides.length > 0) {
-      promoSlides
-        .filter((s) => s && s.image)
-        .forEach((s, idx) => {
-          list.push({
-            id: s._id || `admin-banner-${idx}`,
-            title: s.title || "Special Offer",
-            image: getImageUrl(s.image),
-            link: s.buttonLink || "/products",
-          });
-        });
-    }
+      const validSlides = promoSlides
+        .filter((s) => s && s.image && typeof s.image === "string" && s.image.trim())
+        .map((s, idx) => ({
+          id: s._id || s.id || `admin-banner-${idx}`,
+          title: s.title || "LIORA Beauty & Wear",
+          image: getImageUrl(s.image),
+          link: s.buttonLink || s.link || "/products",
+        }));
 
-    // 3. If the list has fewer than 2 banners, fill with our luxury campaign banners
-    if (list.length === 0) {
-      return DEFAULT_CAMPAIGN_BANNERS;
-    }
-
-    // Append our high-end campaign banners so there is always an outstanding multi-slide carousel
-    DEFAULT_CAMPAIGN_BANNERS.forEach((defBanner) => {
-      const alreadyExists = list.some((item) => item.image === defBanner.image);
-      if (!alreadyExists && list.length < 5) {
-        list.push(defBanner);
+      if (validSlides.length > 0) {
+        return validSlides;
       }
-    });
+    }
 
-    return list;
+    // 2. If admin has a custom hero image uploaded, use it as slide 1 + defaults
+    if (heroImage && heroImage.trim() && !heroImage.includes("hero-banner-main")) {
+      return [
+        {
+          id: "banner-hero-main-dynamic",
+          title: "LIORA Beauty & Wear",
+          image: getImageUrl(heroImage),
+          link: "/products",
+        },
+        ...DEFAULT_CAMPAIGN_BANNERS,
+      ];
+    }
+
+    // 3. Fallback to default campaign banners
+    return DEFAULT_CAMPAIGN_BANNERS;
   }, [promoSlides, heroImage]);
 
   const total = banners.length;

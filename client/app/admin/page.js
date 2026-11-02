@@ -15,6 +15,7 @@ import WholesaleCatalog from "@/components/admin/WholesaleCatalog";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
 import { useAuth } from "@/components/AuthProvider";
+import BannerManager from "@/components/admin/BannerManager";
 
 // Helper to get selected category ID and all its descendant category IDs
 function getCategoryAndDescendantIds(selectedCatId, allCategories = []) {
@@ -985,6 +986,24 @@ export default function AdminPage() {
             📦 Orders
           </li>
           <li
+            className={activeTab === "banners" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("banners");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            style={{
+              background: activeTab === "banners" ? undefined : "linear-gradient(135deg, #fff1f2, #ffe4e6)",
+              color: activeTab === "banners" ? "#ffffff" : "#be123c",
+              fontWeight: "800",
+              borderRadius: "8px",
+              boxShadow: "0 2px 6px rgba(190, 18, 60, 0.15)",
+              margin: "4px 0",
+            }}
+          >
+            🖼️ Banners & Sliders (ব্যানার আপলোড)
+          </li>
+          <li
             className={activeTab === "branding" ? "active-tab" : ""}
             onClick={() => {
               setActiveTab("branding");
@@ -1718,10 +1737,24 @@ export default function AdminPage() {
           </div>
           )}
 
+          {/* Banners & Sliders Tab */}
+          {activeTab === "banners" && (
+            <BannerManager
+              siteSettings={settings}
+              onUpdateSettings={(updated) => setSettings((prev) => ({ ...prev, ...updated }))}
+            />
+          )}
+
           {/* Branding Tab */}
           {activeTab === "branding" && (
             <div id="branding-section" className="jt-admin-panel jt-admin-panel-wide">
-            <h3>Homepage Hero Banner & Settings</h3>
+              {/* Top Banner Manager inside Branding */}
+              <BannerManager
+                siteSettings={settings}
+                onUpdateSettings={(updated) => setSettings((prev) => ({ ...prev, ...updated }))}
+              />
+
+              <h3>Homepage Hero Banner & Settings</h3>
 
             {/* HERO BANNER IMAGE UPLOAD CONTROL */}
             <div style={{ background: "#fff0f5", padding: "18px", borderRadius: "16px", border: "1.5px solid #fecdd3", marginBottom: "24px" }}>

@@ -28,6 +28,9 @@ const DEFAULT_SETTINGS = {
   flashDurationHours: 6,
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     await connectToDatabase();
@@ -37,13 +40,13 @@ export async function GET() {
     }
     return NextResponse.json(settings, {
       headers: {
-        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=3600",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
       },
     });
   } catch {
     return NextResponse.json(DEFAULT_SETTINGS, {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
       },
     });
   }
