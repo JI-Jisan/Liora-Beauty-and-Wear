@@ -16,14 +16,14 @@ const DEFAULT_SETTINGS = {
       id: "banner-1111-swiss-beauty-pro",
       title: "Swiss Beauty 11.11 Mega Sale - Up to 70% OFF",
       image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650036/liora_store/banners/qii0c7gsgixdcqx5gj7g.webp",
-      buttonLink: "/brand/swiss-beauty",
+      buttonLink: "/brands/swiss-beauty",
       buttonText: "Shop Swiss Beauty",
     },
     {
       id: "banner-1111-beauty-glazed-pro",
       title: "Beauty Glazed 11.11 Color Mania - Up to 65% OFF",
       image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650037/liora_store/banners/p1fonohzgobksm55r101.webp",
-      buttonLink: "/brand/beauty-glazed",
+      buttonLink: "/brands/beauty-glazed",
       buttonText: "Shop Beauty Glazed",
     },
     {

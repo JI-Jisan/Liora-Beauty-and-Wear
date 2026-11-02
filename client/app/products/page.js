@@ -16,6 +16,8 @@ function ProductsPageContent() {
   const homeHref = isWholesale ? "/wholesale" : "/";
   const urlSearch = searchParams ? searchParams.get("search") || "" : "";
   const filterParam = searchParams ? searchParams.get("filter") || "" : "";
+  const categoryParam = searchParams ? searchParams.get("category") || "" : "";
+  const brandParam = searchParams ? searchParams.get("brand") || "" : "";
   const [searchTerm, setSearchTerm] = useState(urlSearch);
   const { addToCart } = useCart();
 
@@ -192,9 +194,19 @@ function ProductsPageContent() {
               <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#64748b", marginBottom: "8px" }}>
                 <Link href={homeHref} style={{ color: "#64748b", textDecoration: "none" }}>Home</Link>
                 <span>/</span>
-                <span style={{ color: "#ff4d6d", fontWeight: 700 }}>
-                  {filterParam === "offers" ? "Special Offers" : "All Products"}
-                </span>
+                {categoryParam || brandParam ? (
+                  <>
+                    <Link href="/products" style={{ color: "#64748b", textDecoration: "none" }}>Products</Link>
+                    <span>/</span>
+                    <span style={{ color: "#ff4d6d", fontWeight: 700 }}>
+                      {categoryParam || brandParam}
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ color: "#ff4d6d", fontWeight: 700 }}>
+                    {filterParam === "offers" ? "Special Offers" : "All Products"}
+                  </span>
+                )}
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
@@ -214,7 +226,13 @@ function ProductsPageContent() {
                     boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
                   }}
                 >
-                  {filterParam === "offers" ? "🏷️ Exclusive Discounts" : "✨ Official Beauty Catalog"}
+                  {categoryParam
+                    ? `🌸 11.11 ${categoryParam} Collection`
+                    : brandParam
+                    ? `🌟 ${brandParam} Official`
+                    : filterParam === "offers"
+                    ? "🏷️ Exclusive Discounts"
+                    : "✨ Official Beauty Catalog"}
                 </span>
               </div>
 
@@ -228,13 +246,56 @@ function ProductsPageContent() {
                   letterSpacing: "-0.5px",
                 }}
               >
-                {filterParam === "offers" ? "Special Deals & Offers" : "All Products & Collections"}
+                {categoryParam
+                  ? `${categoryParam} Collection`
+                  : brandParam
+                  ? `${brandParam} Products`
+                  : filterParam === "offers"
+                  ? "Special Deals & Offers"
+                  : "All Products & Collections"}
               </h1>
 
               <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
-                Browse 100% authentic skincare, makeup & personal care items with guaranteed nationwide delivery.
+                {categoryParam
+                  ? `Showing authentic ${categoryParam} products available in stock with 11.11 mega deals.`
+                  : brandParam
+                  ? `Showing official authentic ${brandParam} products with fast nationwide delivery.`
+                  : "Browse 100% authentic skincare, makeup & personal care items with guaranteed nationwide delivery."}
               </p>
             </div>
+
+            {(categoryParam || brandParam) && (
+              <button
+                type="button"
+                onClick={() => router.push("/products")}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "9px 18px",
+                  borderRadius: "999px",
+                  background: "#ffffff",
+                  border: "1px solid #fecdd3",
+                  color: "#e11d48",
+                  fontSize: "13.5px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 8px rgba(225, 29, 72, 0.08)",
+                  zIndex: 1,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#fff1f2";
+                  e.currentTarget.style.borderColor = "#fda4af";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#ffffff";
+                  e.currentTarget.style.borderColor = "#fecdd3";
+                }}
+              >
+                ✕ View All Products
+              </button>
+            )}
           </div>
         )}
       </section>

@@ -50,15 +50,15 @@ async function run() {
     {
       id: 'banner-1111-swiss-beauty-official',
       title: 'Swiss Beauty 11.11 Mega Sale - Up to 70% OFF',
-      image: swissUrl,
-      buttonLink: '/brand/swiss-beauty',
+      image: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793650036/liora_store/banners/qii0c7gsgixdcqx5gj7g.webp',
+      buttonLink: '/brands/swiss-beauty',
       buttonText: 'Shop Swiss Beauty',
     },
     {
       id: 'banner-1111-beauty-glazed-color',
       title: 'Beauty Glazed 11.11 Mega Sale - Up to 65% OFF',
-      image: bgUrl,
-      buttonLink: '/brand/beauty-glazed',
+      image: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793650037/liora_store/banners/p1fonohzgobksm55r101.webp',
+      buttonLink: '/brands/beauty-glazed',
       buttonText: 'Shop Beauty Glazed',
     },
     {
