@@ -6,8 +6,11 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const PRESET_LINKS = [
   { label: "🛍️ সকল পণ্য", url: "/products" },
-  { label: "🌸 স্কিনকেয়ার", url: "/products?category=Serum" },
-  { label: "💄 লিপস্টিক ও মেকআপ", url: "/products?category=Lipsticks" },
+  { label: "💄 Swiss Beauty (সুইস বিউটি)", url: "/brand/swiss-beauty" },
+  { label: "🌸 K-Beauty (কোরিয়ান গ্লাস স্কিন)", url: "/products?category=K-Beauty" },
+  { label: "💇‍♀️ Hair Care (হেয়ার কেয়ার)", url: "/products?category=Hair+Care" },
+  { label: "✨ Beauty Glazed মেকআপ", url: "/brand/beauty-glazed" },
+  { label: "💧 স্কিনকেয়ার ও সিরাম", url: "/products?category=Serum" },
   { label: "⚡ ফ্ল্যাশ সেল", url: "/flash-sales" },
   { label: "🎁 অফার / ক্লিয়ারেন্স", url: "/clearance" },
   { label: "✨ কোরিয়ান কম্বো", url: "/combo" },

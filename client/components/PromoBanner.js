@@ -6,22 +6,22 @@ import { getImageUrl } from "@/lib/api";
 
 const DEFAULT_CAMPAIGN_BANNERS = [
   {
-    id: "banner-korean-skincare",
-    title: "Glowing Korean Skincare - Up to 30% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_1440,q_auto,f_auto/v1792467810/liora_store/banners/clghtv3wrtpnzf33a6gb.jpg",
-    link: "/products?category=Serum",
+    id: "banner-swiss-beauty-fest",
+    title: "Swiss Beauty Official - Up to 60% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793646612/liora_store/banners/mfvaoj8bxgklkvvsqylg.webp",
+    link: "/brand/swiss-beauty",
   },
   {
-    id: "banner-sunscreen-glow",
-    title: "Sun Defense & Glow - SPF 50+ Hydration",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_1440,q_auto,f_auto/v1792467811/liora_store/banners/b5qyqf9olpne8oyfdtoq.jpg",
-    link: "/products?category=Sunscreen",
+    id: "banner-korean-skincare-glow",
+    title: "Korean Glass Skin Routine - Up to 50% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793646613/liora_store/banners/zghmttpcmkpyaqhqmfxm.webp",
+    link: "/products?category=K-Beauty",
   },
   {
-    id: "banner-makeup-glam",
-    title: "Authentic Makeup & Glam - Flat 25% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_1440,q_auto,f_auto/v1792467812/liora_store/banners/yvq8otfhiai5jllzrvw4.jpg",
-    link: "/products?category=Lipsticks",
+    id: "banner-haircare-nourishment",
+    title: "Hair Care & Nourishment Essentials - Up to 40% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793646614/liora_store/banners/tcls1btwrheaz08b1vyf.webp",
+    link: "/products?category=Hair+Care",
   },
 ];
 
@@ -127,6 +127,23 @@ export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
       }}
       aria-label="Promotional Banners"
     >
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @media (max-width: 768px) {
+              .jt-shajgoj-slider-container {
+                aspect-ratio: 16 / 8.5 !important;
+                border-radius: 14px !important;
+              }
+              .jt-slider-prev-btn, .jt-slider-next-btn {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 12px !important;
+              }
+            }
+          `,
+        }}
+      />
       <div
         className="jt-shajgoj-slider-container"
         style={{
