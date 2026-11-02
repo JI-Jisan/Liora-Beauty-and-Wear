@@ -6,16 +6,16 @@ import { getImageUrl } from "@/lib/api";
 
 const DEFAULT_CAMPAIGN_BANNERS = [
   {
-    id: "banner-1111-swiss-real-hamper",
-    title: "11.11 Mega Sale - Swiss Beauty Authentic Hamper Up to 70% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793649280/liora_store/banners/sfquuospgd7kydkjm5te.webp",
+    id: "banner-1111-swiss-beauty-pro",
+    title: "Swiss Beauty 11.11 Mega Sale - Up to 70% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650036/liora_store/banners/qii0c7gsgixdcqx5gj7g.webp",
     link: "/brand/swiss-beauty",
   },
   {
-    id: "banner-1111-beauty-saga",
-    title: "11.11 Beauty Saga - Tresemme & Hair Care Up to 45% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647404/liora_store/banners/rhyy1m9sbuhbmhdywstn.webp",
-    link: "/products?category=Hair+Care",
+    id: "banner-1111-beauty-glazed-pro",
+    title: "Beauty Glazed 11.11 Color Mania - Up to 65% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650037/liora_store/banners/p1fonohzgobksm55r101.webp",
+    link: "/brand/beauty-glazed",
   },
   {
     id: "banner-1111-k-beauty-fest",
@@ -24,10 +24,10 @@ const DEFAULT_CAMPAIGN_BANNERS = [
     link: "/products?category=K-Beauty",
   },
   {
-    id: "banner-1111-beauty-glazed-fest",
-    title: "Beauty Glazed Color Mania - Palettes & Glam Up to 65% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793649367/liora_store/banners/mbbdnrafv4wnii5t0exl.webp",
-    link: "/brand/beauty-glazed",
+    id: "banner-1111-beauty-saga",
+    title: "11.11 Beauty Saga - Tresemme & Hair Care Up to 45% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647404/liora_store/banners/rhyy1m9sbuhbmhdywstn.webp",
+    link: "/products?category=Hair+Care",
   },
 ];
 
@@ -54,7 +54,7 @@ export default function PromoBanner({ promoSlides = [] }) {
       }
     }
 
-    // Default to 11.11 real-product campaign banners
+    // Default to 11.11 real-product studio campaign banners
     return DEFAULT_CAMPAIGN_BANNERS;
   }, [promoSlides]);
 
@@ -74,7 +74,7 @@ export default function PromoBanner({ promoSlides = [] }) {
 
     const timer = setInterval(() => {
       nextSlide();
-    }, 3800);
+    }, 4000);
 
     return () => clearInterval(timer);
   }, [total, nextSlide]);
@@ -113,7 +113,7 @@ export default function PromoBanner({ promoSlides = [] }) {
       className="jt-shajgoj-slider-section"
       style={{
         maxWidth: "1440px",
-        margin: "6px auto 18px",
+        margin: "8px auto 20px",
         padding: "0 16px",
       }}
       aria-label="Promotional Banners"
@@ -121,15 +121,25 @@ export default function PromoBanner({ promoSlides = [] }) {
       <style
         dangerouslySetInnerHTML={{
           __html: `
+            .jt-slider-prev-btn, .jt-slider-next-btn {
+              opacity: 0.35;
+              transition: opacity 0.25s ease, transform 0.2s ease, background 0.2s ease !important;
+            }
+            .jt-shajgoj-slider-container:hover .jt-slider-prev-btn,
+            .jt-shajgoj-slider-container:hover .jt-slider-next-btn {
+              opacity: 0.95;
+            }
             @media (max-width: 768px) {
+              .jt-shajgoj-slider-section {
+                padding: 0 10px !important;
+                margin: 6px auto 14px !important;
+              }
               .jt-shajgoj-slider-container {
-                aspect-ratio: 16 / 8.5 !important;
-                border-radius: 14px !important;
+                aspect-ratio: 16 / 9 !important;
+                border-radius: 12px !important;
               }
               .jt-slider-prev-btn, .jt-slider-next-btn {
-                width: 30px !important;
-                height: 30px !important;
-                font-size: 12px !important;
+                display: none !important;
               }
             }
           `,
@@ -140,11 +150,11 @@ export default function PromoBanner({ promoSlides = [] }) {
         style={{
           position: "relative",
           width: "100%",
-          borderRadius: "20px",
+          borderRadius: "18px",
           overflow: "hidden",
-          boxShadow: "0 12px 36px rgba(15, 23, 42, 0.08)",
-          backgroundColor: "#fdf2f4",
-          aspectRatio: "16 / 6.6",
+          boxShadow: "0 12px 36px rgba(15, 23, 42, 0.09)",
+          backgroundColor: "#18060d",
+          aspectRatio: "16 / 9",
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -188,8 +198,8 @@ export default function PromoBanner({ promoSlides = [] }) {
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "cover",
-                    objectPosition: "center",
+                    objectFit: "contain",
+                    backgroundColor: "#110307",
                     display: "block",
                     userSelect: "none",
                   }}
@@ -213,24 +223,24 @@ export default function PromoBanner({ promoSlides = [] }) {
             aria-label="Previous Banner"
             style={{
               position: "absolute",
-              left: "14px",
+              left: "16px",
               top: "50%",
               transform: "translateY(-50%)",
-              width: "42px",
-              height: "42px",
+              width: "40px",
+              height: "40px",
               borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.9)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255, 255, 255, 0.8)",
+              background: "rgba(255, 255, 255, 0.85)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              border: "1px solid rgba(255, 255, 255, 0.9)",
               color: "#0f172a",
               cursor: "pointer",
-              fontSize: "16px",
+              fontSize: "15px",
               fontWeight: "900",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 6px 18px rgba(0, 0, 0, 0.16)",
-              transition: "all 0.2s ease",
+              boxShadow: "0 6px 18px rgba(0, 0, 0, 0.2)",
               zIndex: 10,
             }}
             onMouseEnter={(e) => {
@@ -238,7 +248,7 @@ export default function PromoBanner({ promoSlides = [] }) {
               e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.85)";
               e.currentTarget.style.transform = "translateY(-50%) scale(1)";
             }}
           >
@@ -258,24 +268,24 @@ export default function PromoBanner({ promoSlides = [] }) {
             aria-label="Next Banner"
             style={{
               position: "absolute",
-              right: "14px",
+              right: "16px",
               top: "50%",
               transform: "translateY(-50%)",
-              width: "42px",
-              height: "42px",
+              width: "40px",
+              height: "40px",
               borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.9)",
-              backdropFilter: "blur(8px)",
-              border: "1px solid rgba(255, 255, 255, 0.8)",
+              background: "rgba(255, 255, 255, 0.85)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              border: "1px solid rgba(255, 255, 255, 0.9)",
               color: "#0f172a",
               cursor: "pointer",
-              fontSize: "16px",
+              fontSize: "15px",
               fontWeight: "900",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 6px 18px rgba(0, 0, 0, 0.16)",
-              transition: "all 0.2s ease",
+              boxShadow: "0 6px 18px rgba(0, 0, 0, 0.2)",
               zIndex: 10,
             }}
             onMouseEnter={(e) => {
@@ -283,7 +293,7 @@ export default function PromoBanner({ promoSlides = [] }) {
               e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.85)";
               e.currentTarget.style.transform = "translateY(-50%) scale(1)";
             }}
           >
@@ -302,8 +312,9 @@ export default function PromoBanner({ promoSlides = [] }) {
               display: "flex",
               gap: "8px",
               alignItems: "center",
-              background: "rgba(15, 23, 42, 0.35)",
+              background: "rgba(15, 23, 42, 0.4)",
               backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
               padding: "5px 12px",
               borderRadius: "50px",
               zIndex: 10,
