@@ -6,41 +6,39 @@ import { getImageUrl } from "@/lib/api";
 
 const DEFAULT_CAMPAIGN_BANNERS = [
   {
-    id: "banner-swiss-beauty-fest",
-    title: "Swiss Beauty Official - Up to 60% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793646612/liora_store/banners/mfvaoj8bxgklkvvsqylg.webp",
+    id: "banner-1111-swiss-cosmetics",
+    title: "11.11 Mega Sale - Swiss Beauty & Cosmetics Up to 70% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647403/liora_store/banners/jaibi6bgdo6xodnr4tro.webp",
     link: "/brand/swiss-beauty",
   },
   {
-    id: "banner-korean-skincare-glow",
-    title: "Korean Glass Skin Routine - Up to 50% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793646613/liora_store/banners/zghmttpcmkpyaqhqmfxm.webp",
-    link: "/products?category=K-Beauty",
+    id: "banner-1111-beauty-saga",
+    title: "11.11 Beauty Saga - Tresemme & Hair Care Up to 45% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647404/liora_store/banners/rhyy1m9sbuhbmhdywstn.webp",
+    link: "/products?category=Hair+Care",
   },
   {
-    id: "banner-haircare-nourishment",
-    title: "Hair Care & Nourishment Essentials - Up to 40% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793646614/liora_store/banners/tcls1btwrheaz08b1vyf.webp",
-    link: "/products?category=Hair+Care",
+    id: "banner-1111-k-beauty-fest",
+    title: "11.11 K-Beauty Festival - Korean Glass Skin Up to 50% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647405/liora_store/banners/embskiwgane2zn7wjwaz.webp",
+    link: "/products?category=K-Beauty",
   },
 ];
 
-export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
+export default function PromoBanner({ promoSlides = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
   // Compile active banners:
-  // If user has custom promoSlides uploaded from Admin Panel, use ONLY them!
+  // Strictly use active campaign banners (custom admin slides or default 11.11 campaign slides)
   const banners = useMemo(() => {
-    // 1. Custom slides uploaded in admin panel
     if (Array.isArray(promoSlides) && promoSlides.length > 0) {
       const validSlides = promoSlides
         .filter((s) => s && s.image && typeof s.image === "string" && s.image.trim())
         .map((s, idx) => ({
           id: s._id || s.id || `admin-banner-${idx}`,
-          title: s.title || "LIORA Beauty & Wear",
+          title: s.title || "LIORA 11.11 Mega Campaign",
           image: getImageUrl(s.image),
           link: s.buttonLink || s.link || "/products",
         }));
@@ -50,22 +48,9 @@ export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
       }
     }
 
-    // 2. If admin has a custom hero image uploaded, use it as slide 1 + defaults
-    if (heroImage && heroImage.trim() && !heroImage.includes("hero-banner-main")) {
-      return [
-        {
-          id: "banner-hero-main-dynamic",
-          title: "LIORA Beauty & Wear",
-          image: getImageUrl(heroImage),
-          link: "/products",
-        },
-        ...DEFAULT_CAMPAIGN_BANNERS,
-      ];
-    }
-
-    // 3. Fallback to default campaign banners
+    // Default to 11.11 real-product campaign banners
     return DEFAULT_CAMPAIGN_BANNERS;
-  }, [promoSlides, heroImage]);
+  }, [promoSlides]);
 
   const total = banners.length;
 
@@ -77,16 +62,16 @@ export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
     setCurrentSlide((prev) => (prev === 0 ? total - 1 : prev - 1));
   }, [total]);
 
-  // Auto-slide every 4 seconds with smooth horizontal glide
+  // Smooth continuous auto-sliding every 3.8s (never gets stuck)
   useEffect(() => {
-    if (total <= 1 || isPaused) return;
+    if (total <= 1) return;
 
     const timer = setInterval(() => {
       nextSlide();
-    }, 4000);
+    }, 3800);
 
     return () => clearInterval(timer);
-  }, [total, isPaused, nextSlide]);
+  }, [total, nextSlide]);
 
   // Safeguard index
   useEffect(() => {
@@ -155,8 +140,6 @@ export default function PromoBanner({ promoSlides = [], heroImage = "" }) {
           backgroundColor: "#fdf2f4",
           aspectRatio: "16 / 6.6",
         }}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

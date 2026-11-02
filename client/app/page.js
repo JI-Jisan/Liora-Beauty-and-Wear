@@ -107,7 +107,7 @@ export default function HomePage() {
       />
 
       {/* 1. CAMPAIGN PROMO SLIDER BANNER */}
-      <PromoBanner promoSlides={siteSettings.promoSlides} heroImage={siteSettings.heroImage} />
+      <PromoBanner promoSlides={siteSettings.promoSlides} />
 
       {/* 🎓 CAMPUS / STUDENT COUPON UNLOCK BAR */}
       <CampusCouponBar />
