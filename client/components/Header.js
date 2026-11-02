@@ -289,12 +289,13 @@ export default function Header({
               </div>
             </>
           ) : isSearchingLive ? (
-            <div className="jt-live-search-empty" style={{ color: "#e11d48", fontWeight: "600" }}>
-              ⚡ চোখের পলকে খোঁজা হচ্ছে...
+            <div className="jt-live-search-empty" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", color: "#881337", fontWeight: "600", fontSize: "13px", padding: "18px 16px" }}>
+              <span className="jt-search-inline-spinner" />
+              <span>প্রোডাক্ট খোঁজা হচ্ছে...</span>
             </div>
           ) : (
-            <div className="jt-live-search-empty">
-              No products found for &quot;{currentSearchValue}&quot;
+            <div className="jt-live-search-empty" style={{ fontSize: "13px", color: "#64748b", padding: "18px 16px" }}>
+              &quot;{currentSearchValue}&quot; দিয়ে কোনো প্রোডাক্ট পাওয়া যায়নি
             </div>
           )}
         </div>

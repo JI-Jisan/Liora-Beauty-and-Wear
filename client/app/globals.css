@@ -4328,11 +4328,29 @@ button {
 }
 
 .jt-live-search-empty {
-  padding: 24px;
+  padding: 18px 24px;
   text-align: center;
   color: #64748b;
   font-size: 14px;
   font-weight: 600;
+  background: #ffffff;
+}
+
+.jt-search-inline-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fecdd3;
+  border-top-color: #e11d48;
+  border-radius: 50%;
+  animation: jtSearchSpin 0.75s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@keyframes jtSearchSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Admin Slide-out Drawer & Layout Override */
