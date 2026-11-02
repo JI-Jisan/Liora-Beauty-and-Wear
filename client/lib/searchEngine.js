@@ -335,10 +335,25 @@ export async function warmOrGetSearchCatalog(Product) {
     return searchCatalogCache;
   }
 
+  // Resolve Product model if not explicitly passed
+  let ActiveProduct = Product;
+  if (!ActiveProduct) {
+    try {
+      const models = await import("./models.js");
+      ActiveProduct = models.Product;
+    } catch (e) {
+      console.error("Failed to load Product model in searchEngine:", e);
+    }
+  }
+
+  if (!ActiveProduct) {
+    return searchCatalogCache || [];
+  }
+
   // Stale-while-revalidate: if stale cache exists, return it immediately and refresh in background!
   if (searchCatalogCache && !isRefreshingCatalog) {
     isRefreshingCatalog = true;
-    Product.find({})
+    ActiveProduct.find({})
       .select('name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice description isSlider')
       .populate('category', 'name ancestors slug')
       .populate('brand', 'name slug')
@@ -356,7 +371,7 @@ export async function warmOrGetSearchCatalog(Product) {
   }
 
   // Cold start: synchronous initial load
-  const docs = await Product.find({})
+  const docs = await ActiveProduct.find({})
     .select('name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice description isSlider')
     .populate('category', 'name ancestors slug')
     .populate('brand', 'name slug')
@@ -371,9 +386,24 @@ export async function warmOrGetSearchCatalog(Product) {
  * Ultra-fast in-memory product search with typo tolerance and relevance ranking
  */
 export async function searchProductsFast(
-  Product,
-  rawSearch,
-  {
+  productOrSearch,
+  rawSearchOrOptions,
+  maybeOptions = {}
+) {
+  let ActiveProduct = null;
+  let rawSearch = "";
+  let options = {};
+
+  if (typeof productOrSearch === "string") {
+    rawSearch = productOrSearch;
+    options = (typeof rawSearchOrOptions === "object" && rawSearchOrOptions !== null) ? rawSearchOrOptions : {};
+  } else {
+    ActiveProduct = productOrSearch;
+    rawSearch = typeof rawSearchOrOptions === "string" ? rawSearchOrOptions : "";
+    options = (typeof maybeOptions === "object" && maybeOptions !== null) ? maybeOptions : {};
+  }
+
+  const {
     isAdmin = false,
     page = 1,
     limit = 24,
@@ -383,8 +413,8 @@ export async function searchProductsFast(
     type = null,
     collection = null,
     excludeId = null,
-  } = {}
-) {
+  } = options;
+
   const parsed = cleanSearchTerm(rawSearch);
   const cleanPhrase = parsed.cleanPhrase;
   const searchTokens = parsed.tokens;
@@ -400,7 +430,7 @@ export async function searchProductsFast(
   let rankedCandidates = queryResultCache.get(filterKey);
 
   if (!rankedCandidates) {
-    const catalog = await warmOrGetSearchCatalog(Product);
+    const catalog = await warmOrGetSearchCatalog(ActiveProduct);
 
     // Expand search tokens with known typo aliases
     const allVariants = new Set();
