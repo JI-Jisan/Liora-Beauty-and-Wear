@@ -43,6 +43,8 @@ next-env.d.ts
 # Large static assets offloaded to Cloudinary
 /public/banners/*
 !/public/banners/.gitkeep
+!/public/banners/fb_templates/
+!/public/banners/fb_templates/*
 /public/combos/*
 !/public/combos/.gitkeep
 /public/id_cards/*

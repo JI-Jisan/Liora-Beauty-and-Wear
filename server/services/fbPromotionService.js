@@ -12,59 +12,123 @@ require('../models/Brand');
 const Product = require('../models/Product');
 const Brand = require('../models/Brand');
 
-// 5 Luxury Spotlight Themes (Shajgoj-inspired Luxury Aesthetics)
+// 5 Luxury Spotlight Themes (11.11 Mega Sale Studio Photoshoot Templates)
 const THEMES = {
   teal: {
+    name: 'K-Beauty Dewy 11.11',
     bgDark: '#041f27',
     bgMid: '#063f4e',
     spotlight: '#00b4d8',
     glowOpacity: 0.85,
     accent: '#38bdf8',
-    ribbon: '#ff1493', // hot pink
-    cardBg: 'rgba(3, 31, 39, 0.78)',
-    cardBorder: 'rgba(56, 189, 248, 0.4)',
+    ribbon: '#ff1493',
+    cardBg: 'rgba(3, 31, 39, 0.82)',
+    cardBorder: 'rgba(56, 189, 248, 0.45)',
+    template: 'template_1111_kbeauty.jpg',
+    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654682/liora_store/fb_templates/template_1111_kbeauty.jpg',
+    floorY: 870,
+    centerX: 680,
   },
   rose: {
+    name: '11.11 Burgundy Velvet',
     bgDark: '#260412',
     bgMid: '#4c0824',
     spotlight: '#f43f5e',
     glowOpacity: 0.8,
     accent: '#fb7185',
-    ribbon: '#f59e0b', // warm gold
-    cardBg: 'rgba(38, 4, 18, 0.78)',
-    cardBorder: 'rgba(251, 113, 133, 0.4)',
+    ribbon: '#e11d48',
+    cardBg: 'rgba(20, 6, 12, 0.85)',
+    cardBorder: 'rgba(244, 63, 94, 0.45)',
+    template: 'template_1111_burgundy.jpg',
+    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654673/liora_store/fb_templates/template_1111_burgundy.jpg',
+    floorY: 880,
+    centerX: 680,
   },
   emerald: {
+    name: 'Organic Botanical 11.11',
     bgDark: '#021e14',
     bgMid: '#064e3b',
     spotlight: '#10b981',
     glowOpacity: 0.85,
     accent: '#34d399',
-    ribbon: '#f43f5e', // coral pink
-    cardBg: 'rgba(2, 30, 20, 0.78)',
-    cardBorder: 'rgba(52, 211, 153, 0.4)',
+    ribbon: '#f43f5e',
+    cardBg: 'rgba(4, 24, 18, 0.85)',
+    cardBorder: 'rgba(52, 211, 153, 0.45)',
+    template: 'template_1111_kbeauty.jpg',
+    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654682/liora_store/fb_templates/template_1111_kbeauty.jpg',
+    floorY: 870,
+    centerX: 680,
   },
   navy: {
+    name: 'Midnight Obsidian 11.11',
     bgDark: '#080d1a',
     bgMid: '#14203d',
     spotlight: '#3b82f6',
     glowOpacity: 0.85,
     accent: '#60a5fa',
-    ribbon: '#ec4899', // pink
-    cardBg: 'rgba(8, 13, 26, 0.78)',
-    cardBorder: 'rgba(96, 165, 250, 0.4)',
+    ribbon: '#ec4899',
+    cardBg: 'rgba(10, 10, 16, 0.85)',
+    cardBorder: 'rgba(234, 179, 8, 0.45)',
+    template: 'template_1111_midnight.jpg',
+    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654679/liora_store/fb_templates/template_1111_midnight.jpg',
+    floorY: 870,
+    centerX: 680,
   },
   gold: {
+    name: 'Golden Gala 11.11',
     bgDark: '#211502',
     bgMid: '#452b04',
     spotlight: '#f59e0b',
     glowOpacity: 0.82,
     accent: '#fbbf24',
-    ribbon: '#e11d48', // rose
-    cardBg: 'rgba(33, 21, 2, 0.78)',
-    cardBorder: 'rgba(251, 191, 36, 0.4)',
-  }
+    ribbon: '#e11d48',
+    cardBg: 'rgba(25, 14, 4, 0.85)',
+    cardBorder: 'rgba(251, 191, 36, 0.45)',
+    template: 'template_1111_burgundy.jpg',
+    templateUrl: 'https://res.cloudinary.com/dlgubaefs/image/upload/v1793654673/liora_store/fb_templates/template_1111_burgundy.jpg',
+    floorY: 880,
+    centerX: 680,
+  },
 };
+
+const templateBufferCache = new Map();
+
+async function loadTemplateBackground(theme) {
+  if (!theme || !theme.template) return null;
+  if (templateBufferCache.has(theme.template)) {
+    return templateBufferCache.get(theme.template);
+  }
+
+  const localCandidates = [
+    path.join(process.cwd(), 'public', 'banners', 'fb_templates', theme.template),
+    path.join(process.cwd(), 'client', 'public', 'banners', 'fb_templates', theme.template),
+    path.join(process.cwd(), '..', 'client', 'public', 'banners', 'fb_templates', theme.template),
+    path.join(process.cwd(), 'server', 'public', 'banners', 'fb_templates', theme.template),
+    path.join(process.cwd(), '..', 'server', 'public', 'banners', 'fb_templates', theme.template),
+  ];
+
+  for (const cand of localCandidates) {
+    if (fs.existsSync(cand)) {
+      try {
+        const buf = fs.readFileSync(cand);
+        templateBufferCache.set(theme.template, buf);
+        return buf;
+      } catch (e) {}
+    }
+  }
+
+  if (theme.templateUrl) {
+    try {
+      const buf = await fetchBuffer(theme.templateUrl);
+      templateBufferCache.set(theme.template, buf);
+      return buf;
+    } catch (e) {
+      console.warn('Failed to fetch template from Cloudinary:', theme.templateUrl, e.message);
+    }
+  }
+
+  return null;
+}
 
 function fetchBuffer(url) {
   return new Promise((resolve, reject) => {
@@ -134,46 +198,58 @@ function pickSmartTheme(productName = '', categoryName = '') {
   return 'teal';
 }
 
-// Generate FB High-Converting Sales Caption
+// Generate FB High-Converting Sales Caption for 11.11 Mega Sale
 function generateFBCaption(product, brandName = 'LIORA') {
   const name = product.name;
-  const original = product.originalPrice || 0;
-  const offer = product.offerPrice || original;
+  let original = Number(product.originalPrice) || 0;
+  let offer = Number(product.offerPrice) || original;
+  if (original <= offer) {
+    original = Math.round(offer * 1.3);
+  }
   const savings = Math.max(0, original - offer);
-  const slug = product.slug || product._id;
+  const discountPct = original > 0 ? Math.round((savings / original) * 100) : 0;
   const siteUrl = 'https://www.liorabeautyandwear.com';
-  const productUrl = `${siteUrl}/products?search=${encodeURIComponent(name)}`;
+  const productUrl = product.slug
+    ? `${siteUrl}/products/${product.slug}`
+    : `${siteUrl}/products?search=${encodeURIComponent(name)}`;
 
-  return `✨ ${name} ✨
+  return `🔥 LIORA 11.11 MEGA SALE — BIGGEST BEAUTY DISCOUNTS! 🔥
 
-সৌন্দর্য ও নির্ভরযোগ্য স্কিনকেয়ারের খাঁটি অভিজ্ঞতা নিয়ে এসেছে ${brandName}! ১০০% অথেনটিক এবং অরিজিনাল কসমেটিক্স এখন বিশেষ অফার মূল্যে।
+✨ ${name} ✨
 
-🔥 রেগুলার প্রাইস: ৳${original}
-💥 অফার প্রাইস: মাত্র ৳${offer}! ${savings > 0 ? `(৳${savings} সাশ্রয়)` : ''}
-💯 ১০০% অরিজিনাল গ্যারান্টিড
+আন্তর্জাতিক মান ও ১০০% অথেনটিক বিউটি কেয়ারের সেরা কালেকশন এখন বছরের সবচেয়ে বড় ধামাকা ছাড়ে! স্টক সীমিত, এখনই বুক করুন আপনার পছন্দের অরিজিনাল প্রোডাক্ট।
 
-🛍️ ঘরে বসে সরাসরি ওয়েবসাইট থেকে অর্ডার করুন:
+💰 রেগুলার MRP: ৳${original}
+💥 11.11 অফার প্রাইস: মাত্র ৳${offer}! ${savings > 0 ? `(সরাসরি ৳${savings} সাশ্রয় | ${discountPct}% OFF)` : ''}
+🛡️ ১০০% ইন-স্টক ও আসল প্রোডাক্ট গ্যারান্টি
+
+🛍️ অর্ডার করতে সরাসরি প্রোডাক্ট লিংকে যান:
 👉 ${productUrl}
 
-📞 কল অথবা হোয়াটসঅ্যাপে দ্রুত অর্ডার করতে যোগাযোগ করুন:
-📱 01837223147
+📱 পেইজে মেসেজ দিন অথবা সরাসরি কল/হোয়াটসঅ্যাপ করুন:
+📞 01837223147
 
-🚚 সারা বাংলাদেশে ক্যাশ অন হোম ডেলিভারি সুবিধা!
+🚚 সারা বাংলাদেশে ক্যাশ অন হোম ডেলিভারি সুবিধা (প্যাকেট দেখে চেক করে রিসিভ করার সুযোগ)!
 
-#LioraBeautyAndWear #Liora #AuthenticCosmetics #SkincareBD #CosmeticsBD #DiscountOffer #BeautyDealsBD`;
+#LioraBeautyAndWear #1111MegaSale #AuthenticCosmetics #1111Offer #SkincareBD #CosmeticsBD #LioraDeals #MakeupBD #KoreanSkincareBD`;
 }
 
-// Split title into 2 clean lines for banner
+// Split title into clean lines of max 22 characters for banner
 function formatBannerTitle(rawName) {
   const words = String(rawName || '').replace(/[()]/g, ' ').split(/\s+/).filter(Boolean);
-  if (words.length <= 3) {
-    return [words.join(' ').toUpperCase()];
+  const lines = [];
+  let current = '';
+  for (const w of words) {
+    if ((current + ' ' + w).trim().length <= 22) {
+      current = (current + ' ' + w).trim();
+    } else {
+      if (current) lines.push(current.toUpperCase());
+      current = w;
+      if (lines.length >= 2) break;
+    }
   }
-  const mid = Math.ceil(words.length / 2);
-  return [
-    words.slice(0, mid).join(' ').toUpperCase(),
-    words.slice(mid, mid + 3).join(' ').toUpperCase()
-  ];
+  if (current && lines.length < 3) lines.push(current.toUpperCase());
+  return lines;
 }
 
 // Extract volume (e.g. 220 ml, 100g, 50ml)
@@ -182,17 +258,22 @@ function extractVolume(name = '') {
   return match ? match[1].toLowerCase() : '';
 }
 
-// Generate HD Shajgoj Luxury Banner
+// Generate HD 11.11 Studio Photoshoot Banner
 async function generateProductBanner(product, customThemeKey = null) {
   const width = 1080;
   const height = 1080;
 
   const brandName = product.brand?.name || 'LIORA';
   const categoryName = product.category?.name || 'AUTHENTIC BEAUTY';
-  const originalPrice = product.originalPrice || 0;
-  const offerPrice = product.offerPrice || originalPrice;
+
+  let originalPrice = Number(product.originalPrice) || 0;
+  let offerPrice = Number(product.offerPrice) || originalPrice;
+  if (originalPrice <= offerPrice) {
+    originalPrice = Math.round(offerPrice * 1.3);
+  }
   const saveAmount = Math.max(0, originalPrice - offerPrice);
-  const volume = extractVolume(product.name);
+  const discountPct = originalPrice > 0 ? Math.round((saveAmount / originalPrice) * 100) : 0;
+
   const themeKey = customThemeKey || pickSmartTheme(product.name, categoryName);
   const theme = THEMES[themeKey] || THEMES.teal;
 
@@ -205,15 +286,14 @@ async function generateProductBanner(product, customThemeKey = null) {
   const rawProduct = await getProductBuffer(imageUrl);
   const trimmed = await cleanTransparentCutout(rawProduct);
 
-  const maxHeroWidth = 470;
-  const maxHeroHeight = 670;
-  const floorY = 830;
-  const centerX = 615;
+  const floorY = theme.floorY || 875;
+  const centerX = theme.centerX || 680;
 
   const { data: resizedBuffer, info: resizedInfo } = await sharp(trimmed)
+    .trim({ threshold: 10 })
     .resize({
-      width: maxHeroWidth,
-      height: maxHeroHeight,
+      width: 440,
+      height: 620,
       fit: 'inside',
       background: { r: 0, g: 0, b: 0, alpha: 0 }
     })
@@ -221,91 +301,152 @@ async function generateProductBanner(product, customThemeKey = null) {
 
   const productTop = floorY - resizedInfo.height;
   const productLeft = Math.round(centerX - resizedInfo.width / 2);
-  const shadowRadiusX = Math.round(resizedInfo.width * 0.48);
-  const shadowRadiusY = 25;
 
   const titleLines = formatBannerTitle(product.name);
   const safeBrand = escapeXml(brandName);
   const safeCat = escapeXml(categoryName);
-  const safeSub = escapeXml(product.name.slice(0, 32));
-  const safeVolume = escapeXml(volume);
-  const leftMargin = 75;
+  const leftMargin = 65;
 
-  const backgroundSvg = `
-  <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+  const titleBlockHeight = titleLines.length * 30;
+  const priceCardY = 270 + titleBlockHeight + 10;
+
+  const templateBuffer = await loadTemplateBackground(theme);
+
+  const overlaySvg = `
+  <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="baseBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="${theme.bgDark}" />
-        <stop offset="60%" stop-color="${theme.bgMid}" />
+        <stop offset="50%" stop-color="${theme.bgMid}" />
         <stop offset="100%" stop-color="${theme.bgDark}" />
       </linearGradient>
 
-      <radialGradient id="spotlightGlow" cx="60%" cy="50%" r="58%">
+      <radialGradient id="spotlightGlow" cx="65%" cy="50%" r="56%">
         <stop offset="0%" stop-color="${theme.spotlight}" stop-opacity="${theme.glowOpacity}" />
-        <stop offset="45%" stop-color="${theme.spotlight}" stop-opacity="0.38" />
+        <stop offset="42%" stop-color="${theme.spotlight}" stop-opacity="0.36" />
         <stop offset="75%" stop-color="${theme.bgMid}" stop-opacity="0.12" />
         <stop offset="100%" stop-color="${theme.bgDark}" stop-opacity="0" />
       </radialGradient>
 
-      <radialGradient id="pedestalShadow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#000000" stop-opacity="0.65" />
-        <stop offset="35%" stop-color="#000000" stop-opacity="0.3" />
+      <radialGradient id="floorShadow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#000000" stop-opacity="0.85" />
+        <stop offset="50%" stop-color="#000000" stop-opacity="0.35" />
         <stop offset="100%" stop-color="#000000" stop-opacity="0" />
       </radialGradient>
 
-      <filter id="boxShadow" x="-10%" y="-10%" width="120%" height="130%">
-        <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000000" flood-opacity="0.5" />
+      <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fef08a" />
+        <stop offset="50%" stop-color="#eab308" />
+        <stop offset="100%" stop-color="#ca8a04" />
+      </linearGradient>
+
+      <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#e11d48" />
+        <stop offset="100%" stop-color="#9f1239" />
+      </linearGradient>
+
+      <filter id="shadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000000" flood-opacity="0.65" />
       </filter>
     </defs>
 
-    <rect width="${width}" height="${height}" fill="url(#baseBg)" />
-    <rect width="${width}" height="${height}" fill="url(#spotlightGlow)" />
-    <ellipse cx="${centerX}" cy="${floorY + 8}" rx="${shadowRadiusX}" ry="${shadowRadiusY}" fill="url(#pedestalShadow)" />
-
-    <text x="${leftMargin}" y="190" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="30" fill="#FFFFFF" letter-spacing="4">${safeBrand}</text>
-    <line x1="${leftMargin}" y1="206" x2="${leftMargin + 45}" y2="206" stroke="${theme.accent}" stroke-width="3" stroke-linecap="round" />
-
-    <text x="${leftMargin}" y="248" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="13.5" fill="${theme.accent}" letter-spacing="2.5">${safeCat}</text>
-
-    <text x="${leftMargin}" y="292" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="0.5">${titleLines[0] || ''}</text>
-    ${titleLines[1] ? `
-    <text x="${leftMargin}" y="334" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="0.5">${titleLines[1]}</text>
+    ${!templateBuffer ? `
+      <rect width="${width}" height="${height}" fill="url(#bgGrad)" />
+      <rect width="${width}" height="${height}" fill="url(#spotlightGlow)" />
     ` : ''}
 
-    <g transform="translate(${leftMargin}, ${titleLines[1] ? 390 : 350})" filter="url(#boxShadow)">
-      <rect width="250" height="190" rx="16" fill="${theme.cardBg}" stroke="${theme.cardBorder}" stroke-width="1.8" />
-      <line x1="55" y1="36" x2="195" y2="36" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" />
-      <text x="125" y="41" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="20" fill="rgba(255,255,255,0.7)" text-decoration="line-through">${originalPrice} TK</text>
-      <text x="125" y="116" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="60" fill="#FFFFFF" letter-spacing="-1">${offerPrice}</text>
-      <path d="M 0 140 Q 0 136 0 136 L 250 136 L 250 174 Q 250 190 234 190 L 16 190 Q 0 190 0 174 Z" fill="${theme.ribbon}" />
-      <text x="125" y="169" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="15" fill="#FFFFFF" letter-spacing="1.5">SAVE ${saveAmount} TAKA</text>
+    <!-- Floor Shadow Under Cutout Product -->
+    <ellipse cx="${centerX}" cy="${floorY + 12}" rx="${Math.round(resizedInfo.width * 0.46)}" ry="24" fill="url(#floorShadow)" />
+
+    <!-- TOP HEADER: LIORA OFFICIAL BRANDING -->
+    <g transform="translate(65, 55)">
+      <text x="0" y="22" font-family="'Playfair Display', Georgia, serif" font-weight="900" font-size="28" fill="#FFFFFF" letter-spacing="5">LIORA</text>
+      <text x="145" y="22" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="13" fill="#fecdd3" letter-spacing="3.5">BEAUTY &amp; WEAR</text>
+      <line x1="0" y1="36" x2="310" y2="36" stroke="#f43f5e" stroke-opacity="0.6" stroke-width="1.8" />
     </g>
 
-    <g transform="translate(${leftMargin}, ${titleLines[1] ? 615 : 575})">
-      <text x="125" y="0" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="700" font-size="14.5" fill="rgba(255,255,255,0.9)">${safeSub}</text>
-      ${volume ? `
-      <rect x="85" y="16" width="80" height="26" rx="13" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.25)" stroke-width="1" />
-      <text x="125" y="34" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="12" fill="#FFFFFF">${safeVolume}</text>
-      ` : ''}
+    <!-- TOP RIGHT: 11.11 MEGA SALE GOLDEN BADGE -->
+    <g transform="translate(850, 50)" filter="url(#shadowFilter)">
+      <rect x="0" y="0" width="165" height="56" rx="28" fill="url(#goldGrad)" stroke="#ffffff" stroke-width="2" />
+      <text x="82" y="26" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="15" fill="#881337" letter-spacing="1">11.11 MEGA SALE</text>
+      <text x="82" y="44" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="11" fill="#713f12" letter-spacing="0.5">LIMITED TIME OFFER</text>
     </g>
 
-    <g transform="translate(930, 480)" filter="url(#boxShadow)">
-      <circle cx="0" cy="0" r="42" fill="${theme.ribbon}" />
-      <text x="0" y="-6" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="13" fill="#FFFFFF">100%</text>
-      <text x="0" y="12" text-anchor="middle" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="800" font-size="10.5" fill="#FFFFFF" letter-spacing="1">ORIGINAL</text>
+    <!-- LEFT PRODUCT INFO -->
+    <!-- Brand Name -->
+    <g transform="translate(${leftMargin}, 170)">
+      <text x="0" y="22" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="22" fill="#fef08a" letter-spacing="4">${safeBrand}</text>
+      <line x1="0" y1="32" x2="60" y2="32" stroke="#eab308" stroke-width="3" stroke-linecap="round" />
+    </g>
+
+    <!-- Category Pill -->
+    <g transform="translate(${leftMargin}, 216)">
+      <rect x="0" y="0" width="${categoryName.length * 8 + 24}" height="26" rx="13" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.25)" stroke-width="1" />
+      <text x="12" y="17" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="11" fill="#ffffff" letter-spacing="1.5">${safeCat}</text>
+    </g>
+
+    <!-- Product Title -->
+    <g transform="translate(${leftMargin}, 275)" filter="url(#shadowFilter)">
+      <text x="0" y="0" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="24" fill="#FFFFFF">${escapeXml(titleLines[0] || '')}</text>
+      ${titleLines[1] ? `<text x="0" y="30" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="20" fill="rgba(255,255,255,0.9)">${escapeXml(titleLines[1])}</text>` : ''}
+      ${titleLines[2] ? `<text x="0" y="58" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="16" fill="rgba(255,255,255,0.75)">${escapeXml(titleLines[2])}</text>` : ''}
+    </g>
+
+    <!-- 100% ACCURATE 11.11 PRICE CARD (GLASSMORPHISM CARD) -->
+    <g transform="translate(${leftMargin}, ${priceCardY})" filter="url(#shadowFilter)">
+      <rect width="280" height="205" rx="20" fill="${theme.cardBg || 'rgba(20, 6, 12, 0.85)'}" stroke="${theme.cardBorder || 'rgba(244, 63, 94, 0.45)'}" stroke-width="2" />
+      
+      <!-- Strikethrough Regular MRP -->
+      <g transform="translate(140, 40)">
+        <text x="0" y="0" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="16" fill="rgba(255,255,255,0.65)">MRP: ৳${originalPrice} TK</text>
+        <line x1="-65" y1="-5" x2="65" y2="-5" stroke="#ef4444" stroke-width="2.5" />
+      </g>
+
+      <!-- 11.11 Offer Price -->
+      <text x="140" y="106" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="56" fill="#FFFFFF" letter-spacing="-1">৳ ${offerPrice}</text>
+      <text x="140" y="132" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="12" fill="#fef08a" letter-spacing="1.5">11.11 SPECIAL OFFER</text>
+
+      <!-- Save & Discount Ribbon -->
+      <path d="M 0 156 Q 0 152 0 152 L 280 152 L 280 188 Q 280 205 260 205 L 20 205 Q 0 205 0 188 Z" fill="url(#badgeGrad)" />
+      <text x="140" y="184" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="14" fill="#FFFFFF" letter-spacing="1">SAVE ৳ ${saveAmount} TAKA (-${discountPct}%)</text>
+    </g>
+
+    <!-- TRUST STRIPS -->
+    <g transform="translate(${leftMargin}, ${priceCardY + 225})" filter="url(#shadowFilter)">
+      <rect x="0" y="0" width="280" height="40" rx="10" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+      <text x="140" y="25" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="12.5" fill="#ffffff">🚚 সারা দেশে হোম ডেলিভারি</text>
+    </g>
+
+    <g transform="translate(${leftMargin}, ${priceCardY + 275})" filter="url(#shadowFilter)">
+      <rect x="0" y="0" width="280" height="40" rx="10" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+      <text x="140" y="25" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="12.5" fill="#ffffff">🛡️ ১০০% ইন-স্টক আসল প্রোডাক্ট</text>
+    </g>
+
+    <!-- BOTTOM CTA BANNER -->
+    <g transform="translate(65, 995)">
+      <rect x="0" y="0" width="950" height="48" rx="12" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+      <text x="475" y="30" text-anchor="middle" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="15" fill="#fef08a" letter-spacing="1">
+        🛒 অর্ডার করতে পেইজে ইনবক্স করুন অথবা ভিজিট করুন: liorabd.com 📱 01837223147
+      </text>
     </g>
   </svg>
   `;
 
-  const bgBuffer = Buffer.from(backgroundSvg);
+  if (templateBuffer) {
+    return await sharp(templateBuffer)
+      .resize(width, height)
+      .composite([
+        { input: resizedBuffer, top: productTop, left: productLeft },
+        { input: Buffer.from(overlaySvg), top: 0, left: 0 }
+      ])
+      .png({ quality: 95 })
+      .toBuffer();
+  }
 
+  const bgBuffer = Buffer.from(overlaySvg);
   return await sharp(bgBuffer)
     .composite([
-      {
-        input: resizedBuffer,
-        top: productTop,
-        left: productLeft
-      }
+      { input: resizedBuffer, top: productTop, left: productLeft }
     ])
     .png()
     .toBuffer();
