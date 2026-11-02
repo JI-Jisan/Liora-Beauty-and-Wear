@@ -90,7 +90,10 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ProductSchema.index({ inStock: -1, campusDiscountPct: -1, isFeatured: -1, createdAt: -1 });
 ProductSchema.index({ inStock: -1, isFeatured: -1, createdAt: -1 });
+ProductSchema.index({ name: 1 });
+ProductSchema.index({ name: "text" }, { weights: { name: 10 }, name: "product_name_text" });
 ProductSchema.index({ category: 1 });
 ProductSchema.index({ isSlider: 1 });
 ProductSchema.index({ isFeatured: 1, isTrending: 1, isNewArrival: 1 });

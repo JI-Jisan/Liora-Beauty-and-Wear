@@ -47,11 +47,15 @@ export default function Header({
 
   const [localSearch, setLocalSearch] = useState("");
   const [liveSearchResults, setLiveSearchResults] = useState([]);
+  const [isSearchingLive, setIsSearchingLive] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isVisualSearchOpen, setIsVisualSearchOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
+
+  const clientSearchCache = useRef(new Map());
+  const abortControllerRef = useRef(null);
 
   const cartCount =
     cartContext?.cartCount !== undefined ? cartContext.cartCount : propsCartCount || 0;
@@ -79,23 +83,53 @@ export default function Header({
     propsSearchTerm !== undefined ? propsSearchTerm : localSearch;
 
   useEffect(() => {
-    const q = currentSearchValue.trim();
+    const q = currentSearchValue.trim().toLowerCase();
     if (!q) {
-      const emptyTimer = setTimeout(() => {
-        setLiveSearchResults([]);
-      }, 0);
-      return () => clearTimeout(emptyTimer);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      setLiveSearchResults([]);
+      setIsSearchingLive(false);
+      return;
     }
 
+    // 1. INSTANT CLIENT CACHE HIT (0ms — appears in the blink of an eye!)
+    if (clientSearchCache.current.has(q)) {
+      setLiveSearchResults(clientSearchCache.current.get(q));
+      setIsSearchingLive(false);
+      return;
+    }
+
+    // 2. Ultra-responsive 120ms debounce with request cancellation
+    setIsSearchingLive(true);
     const timer = setTimeout(() => {
-      fetch(`${API_BASE_URL}/api/products?search=${encodeURIComponent(q)}&limit=8`)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      fetch(`${API_BASE_URL}/api/products?search=${encodeURIComponent(q)}&limit=8`, {
+        signal: controller.signal,
+      })
         .then((res) => res.json())
         .then((data) => {
-          const items = Array.isArray(data?.products) ? data.products : (Array.isArray(data) ? data : []);
+          const items = Array.isArray(data?.products)
+            ? data.products
+            : Array.isArray(data)
+            ? data
+            : [];
+          clientSearchCache.current.set(q, items);
           setLiveSearchResults(items);
+          setIsSearchingLive(false);
         })
-        .catch(() => setLiveSearchResults([]));
-    }, 200);
+        .catch((err) => {
+          if (err.name !== "AbortError") {
+            setLiveSearchResults([]);
+            setIsSearchingLive(false);
+          }
+        });
+    }, 120);
 
     return () => clearTimeout(timer);
   }, [currentSearchValue]);
@@ -254,6 +288,10 @@ export default function Header({
                 View all results for &quot;{currentSearchValue}&quot; &rarr;
               </div>
             </>
+          ) : isSearchingLive ? (
+            <div className="jt-live-search-empty" style={{ color: "#e11d48", fontWeight: "600" }}>
+              ⚡ চোখের পলকে খোঁজা হচ্ছে...
+            </div>
           ) : (
             <div className="jt-live-search-empty">
               No products found for &quot;{currentSearchValue}&quot;

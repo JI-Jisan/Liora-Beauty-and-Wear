@@ -4,6 +4,7 @@ import { Product } from "@/lib/models";
 import { getAdminFromRequest } from "@/lib/adminGuard";
 import { buildPayload } from "@/lib/productPayload";
 import { ensureProductBatchStock } from "@/lib/inventory";
+import { invalidateSearchCatalog } from "@/lib/searchEngine";
 export async function GET(req, { params }) {
   try {
     await connectToDatabase();
@@ -62,6 +63,7 @@ export async function PUT(req, { params }) {
     if (payload.stockQuantity !== undefined) {
       await ensureProductBatchStock(updated._id, payload.stockQuantity, updated.purchasePrice, updated.name);
     }
+    invalidateSearchCatalog();
     return NextResponse.json(updated.toJSON());
   } catch (error) {
     console.error("Product PUT error:", error);
@@ -89,6 +91,7 @@ export async function DELETE(req, { params }) {
     if (!deleted) {
       return NextResponse.json({ message: "Product not found" }, { status: 404 });
     }
+    invalidateSearchCatalog();
     return NextResponse.json({ message: "Product deleted successfully" });
   } catch (error) {
     return NextResponse.json({ message: "Server error" }, { status: 500 });

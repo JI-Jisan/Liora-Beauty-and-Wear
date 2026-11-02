@@ -16,6 +16,8 @@ import {
   scoreProductRelevance,
   escapeRegex,
   SEARCH_STOP_WORDS,
+  searchProductsFast,
+  invalidateSearchCatalog,
 } from "@/lib/searchEngine";
 
 export async function GET(req) {
@@ -175,151 +177,19 @@ export async function GET(req) {
 
     if (rawSearch && rawSearch.trim()) {
       isSearchActive = true;
-      const parsed = cleanSearchTerm(rawSearch);
-      cleanSearchPhrase = parsed.cleanPhrase;
-      searchTokens = parsed.tokens;
-      const meaningfulTokens = searchTokens.filter((t) => !SEARCH_STOP_WORDS.has(t) && t.length >= 2);
-
-      const candidateMap = new Map();
-      const addCandidates = (docs) => {
-        for (const doc of docs) {
-          const id = String(doc._id);
-          if (!candidateMap.has(id)) {
-            candidateMap.set(id, doc);
-          }
-        }
-      };
-
-      // Match categories and brands for key variants
-      const allSearchVariants = new Set();
-      if (cleanSearchPhrase) allSearchVariants.add(cleanSearchPhrase);
-      for (const t of searchTokens) {
-        if (!SEARCH_STOP_WORDS.has(t)) {
-          allSearchVariants.add(t);
-          const { words } = getFuzzyVariantsForToken(t);
-          words.forEach((w) => allSearchVariants.add(w));
-        }
-      }
-
-      const catBrandConditions = Array.from(allSearchVariants)
-        .filter((w) => w.length >= 2)
-        .slice(0, 15)
-        .map((w) => ({ name: { $regex: escapeRegex(w), $options: "i" } }));
-
-      const [matchingCats, matchingBrands] = await Promise.all([
-        catBrandConditions.length > 0 ? Category.find({ $or: catBrandConditions }).select("_id").lean() : [],
-        catBrandConditions.length > 0 ? Brand.find({ $or: catBrandConditions }).select("_id name").lean() : []
-      ]);
-      const matchingCatIds = matchingCats.map(c => c._id);
-      const matchingBrandIds = matchingBrands.map(b => b._id);
-
-      // Base query criteria (category, brand, exclude, inStock, featured)
-      const baseSearchQuery = { ...query };
-
-      // Tier 1: Exact or substring phrase match in name or description
-      if (cleanSearchPhrase) {
-        const phraseMatches = await Product.find({
-          ...baseSearchQuery,
-          $or: [
-            { name: { $regex: escapeRegex(cleanSearchPhrase), $options: "i" } },
-            { description: { $regex: escapeRegex(cleanSearchPhrase), $options: "i" } }
-          ]
-        })
-          .select(isAdmin ? "" : "-purchasePrice")
-          .populate("category", "name")
-          .populate("brand", "name slug")
-          .limit(100)
-          .lean();
-        addCandidates(phraseMatches);
-      }
-
-      // Tier 2: All meaningful tokens matching in name together ($and)
-      if (meaningfulTokens.length > 1) {
-        const combinedRegex = meaningfulTokens.map(t => `(?=.*${escapeRegex(t)})`).join("");
-        const andMatches = await Product.find({
-          ...baseSearchQuery,
-          name: { $regex: new RegExp(combinedRegex, "i") }
-        })
-          .select(isAdmin ? "" : "-purchasePrice")
-          .populate("category", "name")
-          .populate("brand", "name slug")
-          .limit(100)
-          .lean();
-        addCandidates(andMatches);
-      }
-
-      // Tier 3: Matching Brand or Category
-      if (matchingBrandIds.length > 0) {
-        const brandMatches = await Product.find({
-          ...baseSearchQuery,
-          brand: { $in: matchingBrandIds }
-        })
-          .select(isAdmin ? "" : "-purchasePrice")
-          .populate("category", "name")
-          .populate("brand", "name slug")
-          .limit(100)
-          .lean();
-        addCandidates(brandMatches);
-      }
-
-      // Tier 4: Broad match for meaningful tokens & typo variants
-      if (candidateMap.size < 100 && meaningfulTokens.length > 0) {
-        const tokenOr = [];
-        for (const t of meaningfulTokens.slice(0, 6)) {
-          tokenOr.push({ name: { $regex: escapeRegex(t), $options: "i" } });
-          const { words, patterns } = getFuzzyVariantsForToken(t);
-          for (const w of words) tokenOr.push({ name: { $regex: escapeRegex(w), $options: "i" } });
-          for (const p of patterns) tokenOr.push({ name: { $regex: p, $options: "i" } });
-        }
-        if (matchingCatIds.length > 0) {
-          tokenOr.push({ category: { $in: matchingCatIds } });
-        }
-        if (tokenOr.length > 0) {
-          const broadMatches = await Product.find({
-            ...baseSearchQuery,
-            $or: tokenOr
-          })
-            .select(isAdmin ? "" : "-purchasePrice")
-            .populate("category", "name")
-            .populate("brand", "name slug")
-            .limit(150)
-            .lean();
-          addCandidates(broadMatches);
-        }
-      }
-
-      // Tier 5: Fallback typo search if 0 products found
-      if (candidateMap.size === 0 && searchTokens.length > 0) {
-        const fallbackOr = [];
-        for (const t of searchTokens) {
-          if (t.length >= 3 && !SEARCH_STOP_WORDS.has(t)) {
-            fallbackOr.push({ name: { $regex: escapeRegex(t.slice(0, 3)), $options: "i" } });
-          }
-        }
-        if (fallbackOr.length > 0) {
-          const fallbackMatches = await Product.find({
-            ...baseSearchQuery,
-            $or: fallbackOr
-          })
-            .select(isAdmin ? "" : "-purchasePrice")
-            .populate("category", "name")
-            .populate("brand", "name slug")
-            .limit(50)
-            .lean();
-          addCandidates(fallbackMatches);
-        }
-      }
-
-      products = Array.from(candidateMap.values());
-      products.forEach((p) => {
-        p._score = scoreProductRelevance(p, cleanSearchPhrase, searchTokens);
+      const searchRes = await searchProductsFast(Product, rawSearch, {
+        isAdmin,
+        page,
+        limit,
+        isPaginated,
+        brand,
+        category,
+        type,
+        collection,
+        excludeId: exclude,
       });
-      products.sort((a, b) => (b._score || 0) - (a._score || 0));
-      total = products.length;
-
-      if (isPaginated) {
-        products = products.slice(skip, skip + limit);
-      }
+      products = searchRes.products;
+      total = searchRes.total;
     } else {
       [products, total] = await Promise.all([
         Product.find(query)
@@ -344,7 +214,9 @@ export async function GET(req) {
 
     const cacheHeader = isAdmin
       ? "no-store, no-cache, must-revalidate, max-age=0"
-      : "public, s-maxage=5, stale-while-revalidate=15";
+      : isSearchActive
+      ? "public, s-maxage=60, stale-while-revalidate=300"
+      : "public, s-maxage=15, stale-while-revalidate=60";
 
     if (isPaginated) {
       return NextResponse.json(
@@ -390,6 +262,7 @@ export async function POST(req) {
     if (payload.stockQuantity > 0) {
       await ensureProductBatchStock(product._id, payload.stockQuantity, payload.purchasePrice, product.name);
     }
+    invalidateSearchCatalog();
     return NextResponse.json(product.toJSON(), { status: 201 });
   } catch (error) {
     console.error("Products POST:", error);

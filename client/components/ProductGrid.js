@@ -242,7 +242,7 @@ function ProductGridContent({
     qs.set('page', String(currentPage));
     qs.set('limit', String(PAGE_SIZE));
 
-    fetch(`${API_BASE_URL}/api/products?${qs.toString()}`, { cache: "no-store" })
+    fetch(`${API_BASE_URL}/api/products?${qs.toString()}`)
       .then((res) => res.json())
       .then((data) => {
         if (!isMounted) return;
