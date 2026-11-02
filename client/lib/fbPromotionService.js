@@ -315,10 +315,68 @@ export async function loadTemplateBackground(theme) {
   return null;
 }
 
+export const WINTER_1111_BESTSELLER_IDS = [
+  // DAY 1 (5 Skincare + 5 Cosmetics)
+  "6a9ab97fc63dd531aa8db100", // Simple Replenishing Rich Moisturiser 125ml
+  "6a9ab70979e75ff1fa1f8a47", // Bob Long Lasting Waterproof Kajal
+  "6a9ab990c63dd531aa8db156", // Ponds Super Light Gel Moisturiser 50ml
+  "6a9ab996c63dd531aa8db166", // Swiss Beauty Eye Define Auto Kajal Black
+  "6a9ab9e1c63dd531aa8db298", // Boots Vitamin C Brightening Cream 50ml
+  "6a9ab97ec63dd531aa8db0f9", // w7 Dip Liquid Eyeliner POT
+  "6a9ab9efc63dd531aa8db2cc", // Laikou Snail Essence Cream 25g
+  "6a9ab992c63dd531aa8db15d", // Beauty Glazed Dark Brown Kajal Gel Liner
+  "6a9ab986c63dd531aa8db126", // skinO Hydration Boost Gel Moisturizer
+  "6a9ab9a3c63dd531aa8db1ab", // Wet N Wild Color Icon Kohl Liner Pencil
+  // DAY 2 (5 Skincare + 5 Cosmetics)
+  "6a9ab9a1c63dd531aa8db1a6", // Laikou Hyaluronic Acid Cream 25g
+  "6a9ab997c63dd531aa8db173", // CAPLINO Liquid Matte Lipstick Red Velvet 08
+  "6a9ab9ecc63dd531aa8db2c6", // Rajkonna Light Moisturizer 50gm
+  "6a9ab998c63dd531aa8db175", // CAPLINO Liquid Matte Lipstick GORGEOUS ME 03
+  "6a9ab992c63dd531aa8db15e", // Dot & Key Vitamin C + E Super Bright Moisturizer
+  "6a9ab980c63dd531aa8db10c", // CAPLINO Liquid Matte Lipstick Nude Glow 10
+  "6a8e6eafe9601eacddbf7dbb", // Skin O Vitamin E Milk Brightening Face Wash
+  "6a9ab997c63dd531aa8db171", // Swiss Beauty Pure Matte Lipstick Bare 213
+  "6a9ab97dc63dd531aa8db0f6", // Dot & Key Barrier Repair Gentle Face Wash
+  "6a9ab988c63dd531aa8db138", // Beauty Glazed Matte Liquid Lipstick Mini
+  // DAY 3 (5 Skincare + 5 Cosmetics)
+  "6aa2ffd70d2b8add7c6efbd0", // Cosrx Salicylic Acid Daily Gentle Cleanser 150ml
+  "6a9ab984c63dd531aa8db11e", // Beauty Glazed Lip Crayon Espresso B106
+  "6a9ab99dc63dd531aa8db18a", // Cosrx Low Ph Good Morning Gel Cleanser 50ml
+  "6a9ab98ec63dd531aa8db150", // Beauty Glazed Lip Crayon Dusty B110
+  "6a9ab988c63dd531aa8db133", // Fenyi Vitamin C Cleanser 50gm
+  "6a9ab98fc63dd531aa8db153", // Beauty Glazed Lip Crayon Dark Brown B102
+  "6a9ab74b661657cb254c1bd5", // I’M From Rice Toner 30ml
+  "6a9ab987c63dd531aa8db130", // Fafamoon Peptide Lip Tint Espresso 04
+  "6a9ab9aec63dd531aa8db1d9", // Anua Pdrn Hyaluronic ACID Capsule Serum 10ml
+  "6a9ab980c63dd531aa8db10d", // Beauty Glazed Volume Plumping Lip Gloss 102 TOAST
+  // DAY 4 (5 Skincare + 5 Cosmetics)
+  "6a9ab9c8c63dd531aa8db243", // Bioaqua Hyaluronic Acid Serum 30ml
+  "6a9ab989c63dd531aa8db13b", // Beauty Glazed Volume Plumping Lip Gloss 104 RIBBON
+  "6a9ab77134ccee884a4b5cab", // The Ordinary Niacinamide Serum 10%+Zinc1% 30ml
+  "6a9ab996c63dd531aa8db16d", // Beauty Glazed Glow Lip Oil Meet 101
+  "6a9ab98ac63dd531aa8db143", // Purito Seoul Azelaic Acid 10 Kojic Tea Tree Serum 30ml
+  "6a9ab9a8c63dd531aa8db1c4", // Swiss Beauty Moist Heist Tinted Lip Gloss Berry Mission 03
+  "6a9ab98ec63dd531aa8db14d", // I’m From Mugwort Essence 30ml
+  "6a9ab98ac63dd531aa8db148", // Swiss Beauty Cover Play 6 in 1 Concealer Palette
+  "6a9ab97bc63dd531aa8db0f4", // Caplino 1% Retinol Serum 30ml
+  "6a9ab97fc63dd531aa8db107", // Technic Mega Glow Highlighter
+  // DAY 5 (5 Skincare + 5 Cosmetics)
+  "6a9ab982c63dd531aa8db118", // Missha Aqua Sunscreen SPF50+ PA++++ 50ml
+  "6a9ab9a1c63dd531aa8db1a2", // Wet n Wild Color Icon Blush Mellow Wine
+  "6a9ab9d8c63dd531aa8db279", // Innsaei Hyaluronic Sunscreen SPF 50+
+  "6a9ab9a4c63dd531aa8db1b3", // Technic Mega Matte Blush 4 Color
+  "6a9ab998c63dd531aa8db178", // Organikaon Lip Balm Orange & Shea Butter 10gm
+  "6a9ab9a3c63dd531aa8db1b0", // Beauty Glazed 4 In 1 Color Board Palette 60 Color
+  "6a9ab9c2c63dd531aa8db228", // Laikou Rice Skin Care Set 5pcs Glowing Set
+  "6a9ab97ec63dd531aa8db0fd", // Caplino Makeup Sponge Magenta
+  "6a9ab9fec63dd531aa8db2fe", // Bioaqua Olive Dandruff & Hair Fall Moisturizing Shampoo 400ml
+  "6a9ab97fc63dd531aa8db104", // Caplino Makeup Sponge Deep Magenta
+];
+
 export function generateFBCaption(product, brandName = "LIORA") {
   const name = product.name;
-  let original = Number(product.originalPrice) || 0;
-  let offer = Number(product.offerPrice) || original;
+  let original = Number(product.originalPrice) || Number(product.price) || 0;
+  let offer = Number(product.offerPrice) || Number(product.salePrice) || original;
   if (original <= offer) {
     original = Math.round(offer * 1.3);
   }
@@ -329,14 +387,14 @@ export function generateFBCaption(product, brandName = "LIORA") {
     ? `${siteUrl}/products/${product.slug}`
     : `${siteUrl}/products?search=${encodeURIComponent(name)}`;
 
-  return `🔥 LIORA 11.11 MEGA SALE — BIGGEST BEAUTY DISCOUNTS! 🔥
+  return `🔥 LIORA 11.11 MEGA SALE — WINTER SPECIAL OFFER! 🔥
 
 ✨ ${name} ✨
 
-আন্তর্জাতিক মান ও ১০০% অথেনটিক বিউটি কেয়ারের সেরা কালেকশন এখন বছরের সবচেয়ে বড় ধামাকা ছাড়ে! স্টক সীমিত, এখনই বুক করুন আপনার পছন্দের অরিজিনাল প্রোডাক্ট।
+শীতের ত্বকের যত্ন ও আসন্ন বিয়ের সিজনে পারফেক্ট গ্লোয়িং লুকের জন্য ১০০% আসল অথেনটিক প্রোডাক্ট এখন সেরা ডিসকাউন্টে!
 
-💰 রেগুলার MRP: ৳${original}
-💥 11.11 অফার প্রাইস: মাত্র ৳${offer}! ${savings > 0 ? `(সরাসরি ৳${savings} সাশ্রয় | ${discountPct}% OFF)` : ""}
+💰 রেগুলার MRP: ৳${original.toLocaleString("en-IN")}
+💥 11.11 অফার প্রাইস: মাত্র ৳${offer.toLocaleString("en-IN")}! ${savings > 0 ? `(সরাসরি ৳${savings.toLocaleString("en-IN")} সাশ্রয় | ${discountPct}% OFF)` : ""}
 🛡️ ১০০% ইন-স্টক ও আসল প্রোডাক্ট গ্যারান্টি
 
 🛍️ অর্ডার করতে সরাসরি প্রোডাক্ট লিংকে যান:
@@ -345,9 +403,9 @@ export function generateFBCaption(product, brandName = "LIORA") {
 📱 পেইজে মেসেজ দিন অথবা সরাসরি কল/হোয়াটসঅ্যাপ করুন:
 📞 01837223147
 
-🚚 সারা বাংলাদেশে ক্যাশ অন হোম ডেলিভারি সুবিধা (প্যাকেট দেখে চেক করে রিসিভ করার সুযোগ)!
+🚚 সারা বাংলাদেশে ক্যাশ অন হোম ডেলিভারি সুবিধা (প্যাকেট চেক করে রিসিভ করার সুযোগ)!
 
-#LioraBeautyAndWear #1111MegaSale #AuthenticCosmetics #1111Offer #SkincareBD #CosmeticsBD #LioraDeals #MakeupBD #KoreanSkincareBD`;
+#LioraBeautyAndWear #1111MegaSale #WinterSkincareBD #WeddingMakeupBD #AuthenticCosmetics #1111Offer #SkincareBD #CosmeticsBD #LioraDeals`;
 }
 
 export function formatBannerTitle(rawName) {
@@ -783,7 +841,15 @@ export async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit =
   let brandDoc = null;
   let products = [];
 
-  if (brandQuery === "instock_ready") {
+  if (brandQuery === "winter_1111_bestsellers") {
+    const raw = await Product.find({ _id: { $in: WINTER_1111_BESTSELLER_IDS } })
+      .populate("brand", "name")
+      .populate("category", "name")
+      .lean();
+    const map = new Map(raw.map((p) => [p._id.toString(), p]));
+    products = WINTER_1111_BESTSELLER_IDS.map((id) => map.get(id)).filter(Boolean);
+    brandDoc = { name: "❄️ 11.11 Winter Best-Sellers (Skincare + Cosmetics)" };
+  } else if (brandQuery === "instock_ready") {
     const target300Ids = [
       "6a9ab981c63dd531aa8db110", "6a9ab987c63dd531aa8db12a", "6a9ab77134ccee884a4b5cab", "6a9ab74b661657cb254c1bd5", "6a9aad6ae4955f357f776448",
       "6a8ae1ccdbc554e2928be214", "6a8e6c9d6d43fcfea47cad88", "6a8e6d7682271de00ebfa736", "6a8e6e13297e3906134a82f6", "6a8e6eafe9601eacddbf7dbb",
@@ -913,7 +979,8 @@ export async function startAutoPilot({ brandQuery, intervalMinutes = 15, limit =
     job.currentProduct = product.name;
 
     try {
-      const bannerBuffer = await generateProductBanner(product);
+      const isOriginalImageOnly = brandQuery === "winter_1111_bestsellers" || !product.useBanner;
+      const bannerBuffer = isOriginalImageOnly ? null : await generateProductBanner(product).catch(() => null);
       const caption = generateFBCaption(product, brandDoc?.name || "LIORA");
       const prodImg = product.image || (product.images && product.images[0]) || "";
       const fbResult = await publishPhotoToFacebook({

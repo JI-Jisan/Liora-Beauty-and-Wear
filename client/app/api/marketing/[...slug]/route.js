@@ -14,6 +14,7 @@ import {
   startAutoPilot,
   stopAutoPilot,
   getAutoPilotStatus,
+  WINTER_1111_BESTSELLER_IDS,
 } from "@/lib/fbPromotionService";
 
 export const runtime = "nodejs";
@@ -393,6 +394,12 @@ export async function GET(req, { params }) {
 
       const enriched = [
         {
+          _id: "winter_1111_bestsellers",
+          name: "❄️ 11.11 Winter Mega Sale (১০টি/দিন: স্কিনকেয়ার + কসমেটিক্স ৫০টি অরিজিনাল আইটেম)",
+          slug: "winter_1111_bestsellers",
+          productCount: WINTER_1111_BESTSELLER_IDS.length,
+        },
+        {
           _id: "instock_ready",
           name: `🔥 প্রস্তুতকৃত ${READY_IN_STOCK_IDS.length}টি ইন-স্টক ব্যানার (Ready ${READY_IN_STOCK_IDS.length} Banners)`,
           slug: "instock_ready",
@@ -497,6 +504,18 @@ export async function GET(req, { params }) {
           .populate("brand", "name")
           .limit(200)
           .lean();
+      } else if (brandId === "winter_1111_bestsellers") {
+        const raw = await Product.find({ _id: { $in: WINTER_1111_BESTSELLER_IDS } })
+          .populate("category", "name")
+          .populate("brand", "name")
+          .lean();
+        const map = new Map(raw.map((p) => [p._id.toString(), p]));
+        products = WINTER_1111_BESTSELLER_IDS.map((id) => map.get(id)).filter(Boolean);
+
+        if (search) {
+          const s = search.toLowerCase();
+          products = products.filter((p) => p.name.toLowerCase().includes(s));
+        }
       } else if (brandId === "instock_ready") {
         const raw = await Product.find({ _id: { $in: READY_IN_STOCK_IDS } })
           .populate("category", "name")

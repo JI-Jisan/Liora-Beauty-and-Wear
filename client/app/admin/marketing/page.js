@@ -58,8 +58,9 @@ export default function AdminMarketingPage() {
         if (brandsJson.success && brandsJson.brands) {
           setBrands(brandsJson.brands);
           if (brandsJson.brands.length > 0) {
+            const hasWinter = brandsJson.brands.find((b) => b._id === "winter_1111_bestsellers");
             const hasReady = brandsJson.brands.find((b) => b._id === "instock_ready");
-            setSelectedBrand(hasReady ? "instock_ready" : brandsJson.brands[0]._id);
+            setSelectedBrand(hasWinter ? "winter_1111_bestsellers" : (hasReady ? "instock_ready" : brandsJson.brands[0]._id));
           }
         }
 
