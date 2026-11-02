@@ -8,7 +8,7 @@ import { getImageUrl } from "@/lib/api";
 
 export default function CartQuickBar() {
   const pathname = usePathname() || "";
-  const { openCart, recentlyAdded } = useCart();
+  const { openCart, recentlyAdded, cartCount = 0, subtotal = 0 } = useCart();
   const [toastItem, setToastItem] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const hideTimerRef = useRef(null);

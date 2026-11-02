@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import CartDrawer from "@/components/CartDrawer";
 import CartQuickBar from "@/components/CartQuickBar";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { useAuth } from "@/components/AuthProvider";
 import { getWholesalePrice } from "@/lib/price";
 
@@ -228,7 +229,9 @@ export function CartProvider({ children }) {
         onDecrease={decreaseQty}
         onRemove={removeItem}
       />
-      <CartQuickBar />
+      <ErrorBoundary>
+        <CartQuickBar />
+      </ErrorBoundary>
     </CartContext.Provider>
   );
 }
