@@ -5,21 +5,43 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 
 const BEAUTY_CATEGORY_PRESETS = [
+  // 1. Lipsticks
   { match: /lipstick|lip\s*stick|lip\s*color/i, icon: "💄", image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&auto=format&fit=crop&q=80" },
+  // 2. Serum
   { match: /serum/i, icon: "💧", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&auto=format&fit=crop&q=80" },
-  { match: /sunscreen|sun\s*cream|sun\s*block/i, icon: "☀️", image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=300&auto=format&fit=crop&q=80" },
-  { match: /cream|moisturiz/i, icon: "🧴", image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&auto=format&fit=crop&q=80" },
-  { match: /wash|cleanser|facewash/i, icon: "🫧", image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&auto=format&fit=crop&q=80" },
-  { match: /foundation|bb\s*cream|concealer/i, icon: "✨", image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&auto=format&fit=crop&q=80" },
-  { match: /mask/i, icon: "🧖‍♀️", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&auto=format&fit=crop&q=80" },
-  { match: /shampoo|hair/i, icon: "✨", image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=300&auto=format&fit=crop&q=80" },
+  // 3. Face Wash (gentle foaming lather cleanser)
+  { match: /face\s*wash|facewash/i, icon: "🫧", image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793603176/liora_store/categories/agu6uitgchcvf572hjnx.jpg" },
+  // 4. Cleanser (micellar water & splash)
+  { match: /cleanser|cleansing/i, icon: "💧", image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793603173/liora_store/categories/pr62qi4bxlawvuel4lsi.jpg" },
+  // 5. Face Cream (luxury cosmetic cream jar open with cream)
+  { match: /face\s*cream|day\s*cream|night\s*cream/i, icon: "🌸", image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793603174/liora_store/categories/ktykn7ijrjxnrdushpna.jpg" },
+  // 6. Moisturizers (dewy hydrating aqua gel jar)
+  { match: /moisturiz/i, icon: "🧴", image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793603179/liora_store/categories/z7iwhbxdv78djndcmaja.jpg" },
+  // 7. General Cream
+  { match: /cream/i, icon: "🌸", image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793603174/liora_store/categories/ktykn7ijrjxnrdushpna.jpg" },
+  // 8. Sunscreen (sun protection bottles)
+  { match: /sunscreen|sun\s*cream|sun\s*block|spf/i, icon: "☀️", image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=300&auto=format&fit=crop&q=80" },
+  // 9. Face Mask (Korean sheet mask pouch with pure cotton mask)
+  { match: /mask/i, icon: "🧖‍♀️", image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793603175/liora_store/categories/v89u94gv8jhk6fpk4eyx.jpg" },
+  // 10. Foundation (liquid foundation bottle with pump & shade swatches)
+  { match: /foundation|bb\s*cream|concealer/i, icon: "✨", image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793603177/liora_store/categories/qqy4bewymxzgn2q2j0ky.jpg" },
+  // 11. Shampoo & Hair
+  { match: /shampoo|conditioner|hair/i, icon: "🌿", image: "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=300&auto=format&fit=crop&q=80" },
+  // 12. Eyeshadow & Eye makeup
   { match: /eye\s*shadow|eyeliner|kajal|mascara/i, icon: "👁️", image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&auto=format&fit=crop&q=80" },
-  { match: /perfume|fragrance|mist/i, icon: "🌸", image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&auto=format&fit=crop&q=80" },
+  // 13. Perfume & Fragrances
+  { match: /perfume|fragrance|mist|attar/i, icon: "🌺", image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&auto=format&fit=crop&q=80" },
+  // 14. Face Toner
   { match: /toner/i, icon: "💧", image: "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=300&auto=format&fit=crop&q=80" },
+  // 15. Blush
   { match: /blush|bronzer/i, icon: "🌸", image: "https://images.unsplash.com/photo-1515688594390-b649af70d282?w=300&auto=format&fit=crop&q=80" },
+  // 16. Body Lotion (nourishing body lotion pump dispenser)
+  { match: /lotion|body\s*lotion/i, icon: "🧴", image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793603178/liora_store/categories/oaaunpmnejsgdjq9akf0.jpg" },
+  // 17. Bath & Body
+  { match: /bath|body\s*wash|shower/i, icon: "🛁", image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=300&auto=format&fit=crop&q=80" },
+  // 18. Face Powder
   { match: /powder/i, icon: "✨", image: "https://images.unsplash.com/photo-1503236823255-94609f598e71?w=300&auto=format&fit=crop&q=80" },
-  { match: /bath|body/i, icon: "🛁", image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=300&auto=format&fit=crop&q=80" },
-  { match: /lotion/i, icon: "🧴", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300&auto=format&fit=crop&q=80" },
+  // 19. Nails
   { match: /nail/i, icon: "💅", image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=300&auto=format&fit=crop&q=80" },
 ];
 
