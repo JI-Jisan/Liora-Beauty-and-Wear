@@ -6,9 +6,9 @@ import { getImageUrl } from "@/lib/api";
 
 const DEFAULT_CAMPAIGN_BANNERS = [
   {
-    id: "banner-1111-swiss-cosmetics",
-    title: "11.11 Mega Sale - Swiss Beauty & Cosmetics Up to 70% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647403/liora_store/banners/jaibi6bgdo6xodnr4tro.webp",
+    id: "banner-1111-swiss-real-hamper",
+    title: "11.11 Mega Sale - Swiss Beauty Authentic Hamper Up to 70% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793649280/liora_store/banners/sfquuospgd7kydkjm5te.webp",
     link: "/brand/swiss-beauty",
   },
   {
@@ -22,6 +22,12 @@ const DEFAULT_CAMPAIGN_BANNERS = [
     title: "11.11 K-Beauty Festival - Korean Glass Skin Up to 50% OFF",
     image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647405/liora_store/banners/embskiwgane2zn7wjwaz.webp",
     link: "/products?category=K-Beauty",
+  },
+  {
+    id: "banner-1111-beauty-glazed-fest",
+    title: "Beauty Glazed Color Mania - Palettes & Glam Up to 65% OFF",
+    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793649367/liora_store/banners/mbbdnrafv4wnii5t0exl.webp",
+    link: "/brand/beauty-glazed",
   },
 ];
 

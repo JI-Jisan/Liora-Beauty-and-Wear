@@ -13,11 +13,11 @@ const DEFAULT_SETTINGS = {
     "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1999 Tk   ✨ 100% Authentic Products",
   promoSlides: [
     {
-      id: "banner-1111-swiss-cosmetics",
-      title: "11.11 Mega Sale - Swiss Beauty & Cosmetics Up to 70% OFF",
-      image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647403/liora_store/banners/jaibi6bgdo6xodnr4tro.webp",
+      id: "banner-1111-swiss-real-hamper",
+      title: "11.11 Mega Sale - Swiss Beauty Authentic Hamper Up to 70% OFF",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793649280/liora_store/banners/sfquuospgd7kydkjm5te.webp",
       buttonLink: "/brand/swiss-beauty",
-      buttonText: "Shop 11.11 Deals",
+      buttonText: "Shop Swiss Beauty",
     },
     {
       id: "banner-1111-beauty-saga",
@@ -32,6 +32,13 @@ const DEFAULT_SETTINGS = {
       image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647405/liora_store/banners/embskiwgane2zn7wjwaz.webp",
       buttonLink: "/products?category=K-Beauty",
       buttonText: "Grab K-Beauty Deals",
+    },
+    {
+      id: "banner-1111-beauty-glazed-fest",
+      title: "Beauty Glazed Color Mania - Palettes & Glam Up to 65% OFF",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793649367/liora_store/banners/mbbdnrafv4wnii5t0exl.webp",
+      buttonLink: "/brand/beauty-glazed",
+      buttonText: "Shop Beauty Glazed",
     },
   ],
   flashTitle: "Limited Time Special Offer",
