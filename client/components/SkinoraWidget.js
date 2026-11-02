@@ -19,17 +19,20 @@ const QUICK_PROMPTS = [
   { icon: "💋", label: "ঠোঁট ফাটা ও কালো হওয়া", query: "ঠোঁট ফেটে রক্ত বের হয় আর কালচে হয়ে গেছে, সেরা লিপ কেয়ার সাজেস্ট কর।" },
 ];
 
+import { useAuth } from "@/components/AuthProvider";
+
 export default function SkinoraWidget() {
   const pathname = usePathname() || "";
   const { addToCart } = useCart();
   const { activeCoupon, getProductPrice } = useCampus();
+  const { isAdmin, role, loading: authLoading } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: "welcome",
       sender: "bot",
-      text: "আসসালামু আলাইকুম! 🌸 আমি **Skinora**, LIORA Beauty & Wear-এর AI স্কিনকেয়ার কনসালট্যান্ট।\n\nআপনার স্কিন টাইপ কেমন বা কী ধরণের সমস্যা হচ্ছে আমাকে জানান (যেমন: ব্রণ, সানট্যান, অতিরিক্ত তেল বা শুষ্কতা)। আমি ডার্মাটোলজি অনুযায়ী সমাধান বুঝিয়ে বলব এবং আমাদের স্টোরের ১০০% আসল প্রোডাক্ট সাজেস্ট করব!",
+      text: "আসসালামু আলাইকুম! 🌸 আমি **Skinora**, LIORA Beauty & Wear-এর AI স্কিনকেয়ার কনসালট্যান্ট [Admin Testing Mode]।\n\nআপনার স্কিন টাইপ কেমন বা কী ধরণের সমস্যা হচ্ছে আমাকে জানান (যেমন: ব্রণ, সানট্যান, অতিরিক্ত তেল বা শুষ্কতা)। আমি ডার্মাটোলজি অনুযায়ী সমাধান বুঝিয়ে বলব এবং আমাদের স্টোরের ১০০% আসল প্রোডাক্ট সাজেস্ট করব!",
       products: [],
     },
   ]);
@@ -61,8 +64,21 @@ export default function SkinoraWidget() {
     return () => window.removeEventListener("openSkinora", handleOpen);
   }, []);
 
-  // Don't show in admin or invoice routes
-  if (pathname.startsWith("/admin") || pathname.startsWith("/invoice")) {
+  // ── TEMPORARY ADMIN-ONLY ACCESS RESTRICTION ──
+  // Skinora is currently visible ONLY to Admins for testing. Customers cannot see or open it.
+  const isUserAdmin =
+    isAdmin ||
+    role === "admin" ||
+    (typeof window !== "undefined" &&
+      (localStorage.getItem("jt_user_role") === "admin" ||
+        localStorage.getItem("jt_admin_logged_in") === "true"));
+
+  if (!isUserAdmin) {
+    return null;
+  }
+
+  // Don't show in invoice routes
+  if (pathname.startsWith("/invoice")) {
     return null;
   }
 

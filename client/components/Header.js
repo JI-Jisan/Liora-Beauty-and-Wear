@@ -405,8 +405,8 @@ export default function Header({
         <div className="jt-header-search-container">
           {renderSearchForm()}
 
-          {/* ✨ SKINORA AI CONCIERGE STRIP (ChatGPT Option B) */}
-          {!isWholesale && !isReseller && (
+          {/* ✨ SKINORA AI CONCIERGE STRIP (Admin Testing Mode Only) */}
+          {isAdmin && !isWholesale && !isReseller && (
             <div
               className="jt-header-concierge-strip"
               onClick={() => {
@@ -416,14 +416,14 @@ export default function Header({
               }}
               role="button"
               tabIndex={0}
-              title="Open Skinora AI Skincare Assistant"
+              title="Open Skinora AI Skincare Assistant (Admin Testing)"
             >
               <div className="jt-concierge-strip-left">
                 <span className="jt-concierge-sparkle">✨</span>
-                <span className="jt-concierge-title">Skinora AI:</span>
-                <span className="jt-concierge-subtitle">আপনার ত্বকের সমস্যা বা রুটিন জানতে পরামর্শ নিন</span>
+                <span className="jt-concierge-title">Skinora AI [Admin Test]:</span>
+                <span className="jt-concierge-subtitle">টেস্টিং কনসোল — প্রোডাক্ট ও পরামর্শ যাচাই করুন</span>
               </div>
-              <span className="jt-concierge-action">পরামর্শ নিন ➔</span>
+              <span className="jt-concierge-action">টেস্ট করুন ➔</span>
             </div>
           )}
         </div>

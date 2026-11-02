@@ -11,7 +11,12 @@ export default function LayoutChrome({ children }: { children: React.ReactNode }
   const isCheckout = pathname === '/checkout';
 
   if (isAdmin) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <SkinoraWidget />
+      </>
+    );
   }
 
   return (
