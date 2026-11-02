@@ -4,6 +4,17 @@
 
 :root {
   --bottom-nav-h: 60px;
+  --font-serif: var(--font-playfair), 'Playfair Display', Georgia, serif;
+  --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* International Luxury Palette Tokens */
+  --liora-blush-50: #fff5f6;
+  --liora-blush-100: #ffe4e6;
+  --liora-blush-200: #fecdd3;
+  --liora-rose: #e11d48;
+  --liora-burgundy: #881337;
+  --liora-dark: #0f172a;
+  --liora-muted: #64748b;
 }
 
 @media (max-width: 768px) {
@@ -16,11 +27,17 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: var(--font-geist-sans), "Outfit", "Segoe UI", sans-serif;
-  background: #faf7f5;
-  color: #1e293b;
+  font-family: var(--font-sans);
+  background: #fdfbfb;
+  color: #0f172a;
   max-width: 100%;
   overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+.jt-luxury-serif {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -319,34 +336,25 @@ button {
   text-decoration: line-through;
 }
 
-/* Ogerio-style Brand Pill on Product Cards */
+/* International Luxury Brand Label on Product Cards */
 .jt-card-brand-pill {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-  padding: 1.5px 7px;
-  background: #faf5ff;
-  border: 1px solid #d8b4fe;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #6b21a8;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  text-decoration: none;
   line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.2s ease;
 }
 
 .jt-card-brand-pill:hover {
-  background: #f3e8ff;
-  border-color: #a855f7;
-  color: #581c87;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.18);
+  color: #e11d48;
 }
 
 .jt-stock {
@@ -5323,15 +5331,15 @@ button {
 
 /* --- TOP ANNOUNCEMENT BAR --- */
 .jt-top-announcement-bar {
-  background: #fff0f3;
-  border-bottom: 1px solid #fecdd3;
-  padding: 8px 16px;
+  background: linear-gradient(90deg, #fff1f2 0%, #ffe4e6 50%, #fff1f2 100%);
+  border-bottom: 1px solid rgba(254, 205, 211, 0.7);
+  padding: 6px 16px;
   text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #334155;
-  transition: padding 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.25s ease;
+  font-size: 12px;
+  font-weight: 700;
+  color: #881337;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .jt-announcement-content {
@@ -5339,11 +5347,126 @@ button {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .jt-announcement-divider {
-  color: #fda4af;
+  color: #fb7185;
+  font-weight: 900;
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .jt-top-announcement-bar {
+    padding: 6px 8px;
+    font-size: 11px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .jt-top-announcement-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .jt-announcement-content {
+    justify-content: flex-start;
+    display: inline-flex;
+    min-width: max-content;
+    gap: 14px;
+    animation: jtTickerMarquee 26s linear infinite;
+  }
+  .jt-announcement-content:hover {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes jtTickerMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* --- SKINORA AI CONCIERGE STRIP (Under Search) --- */
+.jt-header-concierge-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #fff5f6 0%, #ffe4e6 50%, #fff1f2 100%);
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.jt-header-concierge-strip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.12);
+  border-color: #fda4af;
+}
+
+.jt-concierge-strip-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.jt-concierge-sparkle {
+  font-size: 14px;
+  animation: skinoraSpin 3s infinite linear;
+  flex-shrink: 0;
+}
+
+.jt-concierge-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: #881337;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.jt-concierge-subtitle {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jt-concierge-action {
+  font-size: 11px;
+  font-weight: 800;
+  color: #e11d48;
+  background: #ffffff;
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid #fecdd3;
+  flex-shrink: 0;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.jt-header-concierge-strip:hover .jt-concierge-action {
+  background: #e11d48;
+  color: #ffffff;
+  border-color: #e11d48;
+}
+
+@media (max-width: 480px) {
+  .jt-header-concierge-strip {
+    padding: 5px 10px;
+    margin-top: 5px;
+  }
+  .jt-concierge-subtitle {
+    font-size: 10px;
+  }
+  .jt-concierge-action {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
 }
 
 .jt-header-new {
@@ -5415,6 +5538,16 @@ button {
   max-width: 1200px;
   margin: 6px auto 10px;
   padding: 0 16px;
+}
+
+@media (max-width: 768px) {
+  .jt-header-logo-row {
+    padding: 6px 12px 2px;
+  }
+  .jt-header-search-container {
+    margin: 4px auto 6px;
+    padding: 0 12px;
+  }
 }
 
 /* --- FLOATING STICKY COMPACT BAR (Always pinned at top on scroll) --- */
@@ -6331,14 +6464,16 @@ button {
     bottom: 0;
     left: 0;
     width: 100%;
-    background: #ffffff;
-    border-top: 1px solid #f1f5f9;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(241, 245, 249, 0.85);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 8px 0;
+    padding: 6px 0 calc(6px + env(safe-area-inset-bottom, 0px));
     z-index: 99990;
-    box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05);
   }
 
   .jt-content-area {
@@ -6350,24 +6485,42 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   color: #64748b;
   text-decoration: none;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 4px 8px;
+  padding: 4px 10px;
+  position: relative;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.jt-bottom-nav-item:active {
+  transform: scale(0.94);
 }
 
 .jt-bottom-nav-item.active {
-  color: #f43f5e;
+  color: #e11d48;
   font-weight: 800;
 }
 
 .jt-bottom-nav-icon {
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  width: 22px;
+}
+
+.jt-bottom-nav-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #e11d48;
+  margin-top: 1px;
 }
 @keyframes sk { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
 

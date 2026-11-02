@@ -329,9 +329,11 @@ export default function Header({
               </>
             ) : (
               <>
-                <span>🚚 Free Delivery on orders above ৳1999</span>
-                <span className="jt-announcement-divider">|</span>
-                <span>🛡️ 100% Authentic Products</span>
+                <span>🚚 ৳১৯৯৯ অর্ডারে ফ্রি ডেলিভারি (Free Delivery)</span>
+                <span className="jt-announcement-divider">•</span>
+                <span>🛡️ ১০০% অথেনটিক কোরিয়ান ও গ্লোবাল স্কিনকেয়ার</span>
+                <span className="jt-announcement-divider">•</span>
+                <span>🌸 Use Code <strong>DIU15</strong> for 15% Student Discount</span>
               </>
             )}
           </div>
@@ -363,6 +365,28 @@ export default function Header({
         {/* SEARCH BAR ROW (Clean in main header - NO double buttons!) */}
         <div className="jt-header-search-container">
           {renderSearchForm()}
+
+          {/* ✨ SKINORA AI CONCIERGE STRIP (ChatGPT Option B) */}
+          {!isWholesale && !isReseller && (
+            <div
+              className="jt-header-concierge-strip"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("openSkinora"));
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              title="Open Skinora AI Skincare Assistant"
+            >
+              <div className="jt-concierge-strip-left">
+                <span className="jt-concierge-sparkle">✨</span>
+                <span className="jt-concierge-title">Skinora AI:</span>
+                <span className="jt-concierge-subtitle">আপনার ত্বকের সমস্যা বা রুটিন জানতে পরামর্শ নিন</span>
+              </div>
+              <span className="jt-concierge-action">পরামর্শ নিন ➔</span>
+            </div>
+          )}
         </div>
 
         {/* HORIZONTAL PILL NAV TABS STRIP */}

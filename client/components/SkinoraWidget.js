@@ -50,6 +50,13 @@ export default function SkinoraWidget() {
     }
   }, [isOpen]);
 
+  // Listen for external open trigger (e.g. from Header Skinora Concierge strip)
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener("openSkinora", handleOpen);
+    return () => window.removeEventListener("openSkinora", handleOpen);
+  }, []);
+
   // Don't show in admin or invoice routes
   if (pathname.startsWith("/admin") || pathname.startsWith("/invoice")) {
     return null;

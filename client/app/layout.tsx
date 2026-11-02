@@ -1,8 +1,21 @@
 import type { Metadata } from "next";
+import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { CartProvider } from "@/context/CartContext";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
 
 const siteUrl = "https://www.liorabeautyandwear.com";
 
@@ -93,7 +106,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
         />
       </head>
-      <body className="antialiased">
+      <body className={`${plusJakarta.variable} ${playfair.variable} antialiased`}>
         <AuthProvider>
           <CampusProvider>
             <CartProvider>

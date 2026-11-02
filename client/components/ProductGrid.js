@@ -402,17 +402,13 @@ function ProductGridContent({
                     {getDiscount(product) > 0 && !campusPricing?.hasDiscount && (
                       <div style={{
                         position: 'absolute', top: 8, left: 8, zIndex: 2,
-                        background: 'linear-gradient(135deg,#ff3b6b,#e11d48)',
-                        color: '#fff', borderRadius: 8, padding: '4px 7px',
-                        lineHeight: 1, textAlign: 'center',
-                        boxShadow: '0 4px 10px rgba(225,29,72,.3)'
+                        background: '#e11d48',
+                        color: '#fff', borderRadius: '6px', padding: '3px 7px',
+                        fontSize: '11px', fontWeight: 900, letterSpacing: '-0.2px',
+                        lineHeight: 1,
+                        boxShadow: '0 2px 6px rgba(225,29,72,.25)'
                       }}>
-                        <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: '-.3px' }}>
-                          {getDiscount(product)}%
-                        </div>
-                        <div style={{ fontSize: 8, fontWeight: 700, opacity: .95, marginTop: 2 }}>
-                          OFF
-                        </div>
+                        -{getDiscount(product)}%
                       </div>
                     )}
 
@@ -420,17 +416,13 @@ function ProductGridContent({
                     {campusPricing?.hasDiscount && (
                       <div style={{
                         position: 'absolute', top: 8, left: 8, zIndex: 3,
-                        background: activeCoupon?.tagColor || '#ff4d6d',
-                        color: '#fff', borderRadius: 8, padding: '3px 8px',
-                        lineHeight: 1.1, textAlign: 'center',
-                        boxShadow: '0 4px 12px rgba(225,29,72,.35)'
+                        background: activeCoupon?.tagColor || '#e11d48',
+                        color: '#fff', borderRadius: '6px', padding: '3px 7px',
+                        fontSize: '11px', fontWeight: 900, letterSpacing: '-0.2px',
+                        lineHeight: 1,
+                        boxShadow: '0 2px 6px rgba(225,29,72,.25)'
                       }}>
-                        <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '-.3px' }}>
-                          -{campusPricing.savedFromMrpPct}%
-                        </div>
-                        <div style={{ fontSize: 7.5, fontWeight: 800, textTransform: 'uppercase', opacity: .95, marginTop: 1, letterSpacing: '0.04em' }}>
-                          TOTAL OFF
-                        </div>
+                        {activeCoupon?.short || 'DIU'} -{campusPricing.savedFromMrpPct}%
                       </div>
                     )}
 
