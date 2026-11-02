@@ -9268,30 +9268,48 @@ html, body {
   }
 }
 
-/* 🖼️ Admin Banner Manager Responsive Styling */
-.jt-banner-manager-item {
-  display: grid;
-  grid-template-columns: 220px 1fr auto;
-  gap: 16px;
-  align-items: center;
-  padding: 16px;
-  border-radius: 14px;
-  border: 1px solid #e2e8f0;
-  background: #fcfaf8;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-  transition: border-color 0.2s ease;
+/* 🖼️ Admin Banner Manager Clean & Modern Styling */
+.jt-banner-wrapper {
+  width: 100%;
+  max-width: 100%;
 }
 
-.jt-banner-manager-item:hover {
+.jt-banner-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1.5px solid #fecdd3;
+  padding: 18px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
+  margin-bottom: 18px;
+}
+
+.jt-banner-card:hover {
   border-color: #f43f5e;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.08);
 }
 
-@media (max-width: 768px) {
-  .jt-banner-manager-item {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
-    padding: 14px;
+.jt-banner-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #ffe4e6;
+}
+
+.jt-banner-card-body {
+  display: grid;
+  grid-template-columns: minmax(280px, 400px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .jt-banner-card-body {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }

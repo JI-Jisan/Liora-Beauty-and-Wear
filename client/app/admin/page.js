@@ -1739,10 +1739,12 @@ export default function AdminPage() {
 
           {/* Banners & Sliders Tab */}
           {activeTab === "banners" && (
-            <BannerManager
-              siteSettings={settings}
-              onUpdateSettings={(updated) => setSettings((prev) => ({ ...prev, ...updated }))}
-            />
+            <div style={{ gridColumn: "1 / -1", width: "100%" }}>
+              <BannerManager
+                siteSettings={settings}
+                onUpdateSettings={(updated) => setSettings((prev) => ({ ...prev, ...updated }))}
+              />
+            </div>
           )}
 
           {/* Branding Tab */}
