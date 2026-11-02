@@ -155,12 +155,17 @@ export default function FlashSaleLive({ onAddToCart }) {
         {/* Header Bar */}
         <div className="jt-flash-header">
           <div className="jt-flash-header-left">
-            <span className="jt-flash-flame-icon">⚡</span>
+            <span className="jt-flash-flame-icon" style={{ fontSize: "28px" }}>🔥</span>
             <div>
-              <div className="jt-flash-badge-row">
-                <span className="jt-flash-tag">LIMITED TIME FLASH SALE</span>
+              <div className="jt-flash-badge-row" style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                <span className="jt-flash-tag" style={{ background: "linear-gradient(135deg, #e11d48, #be123c)", color: "#fff", fontWeight: 800 }}>
+                  11.11 MEGA FLASH DEALS
+                </span>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "#be123c", background: "#ffe4e6", padding: "2px 8px", borderRadius: "12px" }}>
+                  সরাসরি মেগা ছাড়
+                </span>
               </div>
-              <h3 className="jt-flash-title">Grab Special Deals Before Time Runs Out!</h3>
+              <h3 className="jt-flash-title">11.11 মেগা ফ্ল্যাশ ডিল — সময় শেষ হওয়ার আগেই লুফে নিন!</h3>
             </div>
           </div>
 
@@ -233,8 +238,9 @@ export default function FlashSaleLive({ onAddToCart }) {
                         -{campusPricing.savedFromMrpPct}% TOTAL OFF
                       </span>
                     ) : discountPct > 0 ? (
-                      <span className="jt-flash-discount-badge">
-                        -{discountPct}% OFF
+                      <span className="jt-flash-discount-badge" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                        <span style={{ background: "#fff", color: "#e11d48", padding: "1px 4px", borderRadius: "3px", fontSize: "10px", fontWeight: 900 }}>11.11</span>
+                        <span>-{discountPct}% OFF</span>
                       </span>
                     ) : null}
                   </div>

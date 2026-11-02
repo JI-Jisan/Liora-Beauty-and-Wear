@@ -368,11 +368,13 @@ export default function Header({
               </>
             ) : (
               <>
-                <span>🚚 ৳১৯৯৯ অর্ডারে ফ্রি ডেলিভারি (Free Delivery)</span>
+                <span style={{ fontWeight: 800, color: "#fef08a" }}>🔥 11.11 MEGA SHOPPING FESTIVAL LIVE</span>
                 <span className="jt-announcement-divider">•</span>
-                <span>🛡️ ১০০% অথেনটিক কোরিয়ান ও গ্লোবাল স্কিনকেয়ার</span>
+                <span>✨ সুইস বিউটি, বিউটি গ্লেজড ও কোরিয়ান স্কিনকেয়ারে সর্বোচ্চ ৭০% সরাসরি ছাড়</span>
                 <span className="jt-announcement-divider">•</span>
-                <span>🎓 স্টুডেন্ট ও ক্যাম্পাস স্পেশাল ডিসকাউন্ট — আপনার বিশ্ববিদ্যালয় কোড দিয়ে ১৫% পর্যন্ত ছাড় পান</span>
+                <span>🚚 সারা বাংলাদেশে ক্যাশ অন ডেলিভারি (Cash on Delivery)</span>
+                <span className="jt-announcement-divider">•</span>
+                <span>🛡️ ১০০% ইন-স্টক অথেনটিক প্রোডাক্ট গ্যারান্টি</span>
               </>
             )}
           </div>

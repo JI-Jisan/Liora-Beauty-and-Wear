@@ -403,12 +403,14 @@ function ProductGridContent({
                       <div style={{
                         position: 'absolute', top: 8, left: 8, zIndex: 2,
                         background: '#e11d48',
-                        color: '#fff', borderRadius: '6px', padding: '3px 7px',
+                        color: '#fff', borderRadius: '6px', padding: '3px 6px',
                         fontSize: '11px', fontWeight: 900, letterSpacing: '-0.2px',
                         lineHeight: 1,
-                        boxShadow: '0 2px 6px rgba(225,29,72,.25)'
+                        boxShadow: '0 2px 6px rgba(225,29,72,.25)',
+                        display: 'flex', alignItems: 'center', gap: '3px'
                       }}>
-                        -{getDiscount(product)}%
+                        <span style={{ fontSize: '9px', fontWeight: 900, background: '#fff', color: '#be123c', padding: '1px 3px', borderRadius: '3px' }}>11.11</span>
+                        <span>-{getDiscount(product)}%</span>
                       </div>
                     )}
 

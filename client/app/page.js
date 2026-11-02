@@ -129,17 +129,17 @@ export default function HomePage() {
           title={
             activeCoupon
               ? `🔥 ${activeCoupon.campus} স্পেশাল ছাড়ের ডিল (${activeCoupon.short} Deals)`
-              : "🔥 সর্বোচ্চ ১৫% স্পেশাল ডিল (Special Deals)"
+              : "🔥 11.11 মেগা বিউটি অফার (11.11 Mega Deals)"
           }
           subtitle={
             activeCoupon
               ? `${activeCoupon.campus} (${activeCoupon.short}) শিক্ষার্থীদের জন্য সর্বোচ্চ ১৫% স্পেশাল ফ্ল্যাট ছাড় — ট্রেন্ডিং মেকআপ, লিপস্টিক, সিরাম ও ভাইরাল স্কিনকেয়ার`
-              : "আপনার ক্যাম্পাস প্রিভিলেজ কুপন কোড টাইপ করে সর্বোচ্চ ১৫% স্পেশাল ফ্ল্যাট ছাড় আনলক করুন — ট্রেন্ডিং মেকআপ, লিপস্টিক, সিরাম ও ভাইরাল স্কিনকেয়ার"
+              : "সরাসরি বিশেষ ছাড় — কোনো কুপন কোডের ঝামেলা ছাড়াই সেরা ট্রেন্ডিং মেকআপ, লিপস্টিক, সিরাম ও ভাইরাল স্কিনকেয়ার কিনুন"
           }
           badge={
             activeCoupon
               ? `🎓 ${activeCoupon.short} স্পেশাল ১৫% ছাড়`
-              : "🎓 স্পেশাল প্রিভিলেজ ডিল"
+              : "🔥 11.11 MEGA OFFER"
           }
           badgeBg={activeCoupon?.tagColor || "linear-gradient(135deg, #e11d48 0%, #be123c 100%)"}
           limit={8}

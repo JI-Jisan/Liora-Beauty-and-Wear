@@ -5,16 +5,16 @@ import Link from "next/link";
 export default function DualMiniBanners() {
   const miniBanners = [
     {
-      id: "mini-k-beauty",
-      title: "K-Beauty Essentials - Flat 20% OFF",
-      image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_720,q_auto,f_auto/v1792467812/liora_store/banners/oe6wzvqfjnindzk6za0m.jpg",
-      link: "/products?category=Serum",
+      id: "mini-1111-mega-glam",
+      title: "11.11 Mega Glam - Lip & Eye Essentials Up to 65% OFF",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650523/liora_store/banners/xeccuyphskavxkotm1rv.webp",
+      link: "/products?category=Lipsticks",
     },
     {
-      id: "mini-makeup-glam",
-      title: "Authentic Makeup & Lipsticks - Flat 25% OFF",
-      image: "https://res.cloudinary.com/dlgubaefs/image/upload/c_fill,w_720,q_auto,f_auto/v1792467813/liora_store/banners/x73lqyhktwkthczt1rtz.jpg",
-      link: "/products?category=Lipsticks",
+      id: "mini-1111-glass-skin",
+      title: "11.11 Glass Skin Fest - Authentic K-Beauty Skincare Up to 50% OFF",
+      image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650523/liora_store/banners/ymyco2upsy8vns0kwpp5.webp",
+      link: "/products?category=K-Beauty",
     },
   ];
 
