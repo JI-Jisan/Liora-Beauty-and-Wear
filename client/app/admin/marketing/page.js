@@ -251,7 +251,8 @@ export default function AdminMarketingPage() {
         body: JSON.stringify({
           productId: activeProduct,
           customCaption: previewData.caption,
-          theme: selectedTheme
+          theme: selectedTheme,
+          useOriginal: selectedBrand === "winter_1111_bestsellers",
         })
       });
       const json = await res.json();
@@ -282,6 +283,7 @@ export default function AdminMarketingPage() {
           customCaption: previewData.caption,
           theme: selectedTheme,
           scheduledMinutes: Number(bsScheduleMinutes) || 20,
+          useOriginal: selectedBrand === "winter_1111_bestsellers",
         }),
       });
       const json = await res.json();
@@ -952,10 +954,19 @@ export default function AdminMarketingPage() {
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
-                  {/* Banner Image Preview Box */}
+                  {/* Banner / Product Image Preview Box */}
                   <div>
-                    <div style={{ borderRadius: "12px", overflow: "hidden", border: "1px solid #334155", background: "#0b1120", position: "relative" }}>
-                      <img src={previewData.bannerBase64} alt="HD Promotional Banner" style={{ width: "100%", height: "auto", display: "block" }} />
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span style={{ fontSize: "12px", fontWeight: "700", color: "#38bdf8", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <span>✨</span> {selectedBrand === "winter_1111_bestsellers" ? "১০০% আসল প্রোডাক্টের ছবি (কোনো এডিট ছাড়া)" : "প্রমোশনাল ব্যানার"}
+                      </span>
+                    </div>
+                    <div style={{ borderRadius: "12px", overflow: "hidden", border: "1px solid #334155", background: "#0b1120", position: "relative", minHeight: "360px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <img
+                        src={previewData.bannerBase64 || previewData.imageUrl || previewData.product?.image}
+                        alt={previewData.product?.name || "Product"}
+                        style={{ width: "100%", maxHeight: "540px", objectFit: "contain", display: "block" }}
+                      />
                     </div>
 
                     {/* Quick Post to Feed Action Card */}

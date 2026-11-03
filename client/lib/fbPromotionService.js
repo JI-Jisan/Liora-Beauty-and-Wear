@@ -2,6 +2,7 @@ import https from "https";
 import http from "http";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import { Product, Brand, Category, SiteSettings } from "./models.js";
 import { connectToDatabase } from "./db.js";
@@ -281,7 +282,16 @@ export async function loadTemplateBackground(theme) {
   }
 
   // 1. Try local filesystem paths
+  let currentDir = "";
+  try {
+    currentDir = path.dirname(fileURLToPath(import.meta.url));
+  } catch (e) {}
+
   const localCandidates = [
+    ...(currentDir ? [
+      path.join(currentDir, "..", "public", "banners", "fb_templates", theme.template),
+      path.join(currentDir, "..", "..", "client", "public", "banners", "fb_templates", theme.template),
+    ] : []),
     path.join(process.cwd(), "public", "banners", "fb_templates", theme.template),
     path.join(process.cwd(), "client", "public", "banners", "fb_templates", theme.template),
     path.join(process.cwd(), "..", "client", "public", "banners", "fb_templates", theme.template),
@@ -529,16 +539,11 @@ export async function generateProductBanner(product, customThemeKey = null) {
     console.warn("Sharp banner generation error:", err.message);
   }
 
-  // Fallback: Embed base64 product
-  let imgMime = "image/jpeg";
-  if (imageUrl.toLowerCase().includes(".png") || (rawProduct[0] === 0x89 && rawProduct[1] === 0x50)) {
-    imgMime = "image/png";
-  } else if (imageUrl.toLowerCase().includes(".webp") || (rawProduct[0] === 0x52 && rawProduct[1] === 0x49)) {
-    imgMime = "image/webp";
+  // Safe Fallback: Return raw authentic product image buffer directly
+  if (rawProduct && rawProduct.length > 0) {
+    return rawProduct;
   }
-  const embeddedDataUri = `data:${imgMime};base64,${rawProduct.toString("base64")}`;
-
-  return Buffer.from(buildOverlaySvg(440, true, embeddedDataUri, 620));
+  throw new Error(`Unable to generate banner or load image for product "${product.name}".`);
 }
 
 export async function batchGenerateBrandPromotions({ brandQuery, limit = 100 }) {

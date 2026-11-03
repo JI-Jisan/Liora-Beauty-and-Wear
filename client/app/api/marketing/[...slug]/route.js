@@ -578,11 +578,17 @@ export async function GET(req, { params }) {
 
       const caption = generateFBCaption(product, product.brand?.name || "LIORA");
 
+      const prodImg = product.image || (product.images && product.images[0]) || "";
       let bannerBuffer = getStoredBannerBuffer(productId);
       let isSvg = false;
       if (!bannerBuffer) {
-        bannerBuffer = await generateProductBanner(product, theme);
-        isSvg = bannerBuffer.toString("utf8", 0, 100).includes("<svg");
+        try {
+          bannerBuffer = await generateProductBanner(product, theme);
+          isSvg = bannerBuffer && bannerBuffer.toString("utf8", 0, 100).includes("<svg");
+        } catch (err) {
+          console.warn("Banner preview error, falling back to original image:", err.message);
+          bannerBuffer = null;
+        }
       }
       const mime = isSvg ? "image/svg+xml" : "image/png";
 
@@ -593,12 +599,15 @@ export async function GET(req, { params }) {
           name: product.name,
           originalPrice: product.originalPrice,
           offerPrice: product.offerPrice,
+          image: prodImg,
           brand: product.brand?.name || "LIORA",
         },
         theme: theme || pickSmartTheme(product.name, product.category?.name),
         caption,
         isSvg,
-        bannerBase64: `data:${mime};base64,${bannerBuffer.toString("base64")}`,
+        bannerBase64: bannerBuffer ? `data:${mime};base64,${bannerBuffer.toString("base64")}` : (prodImg || null),
+        imageUrl: prodImg,
+        originalImage: prodImg,
       });
     }
 
@@ -837,13 +846,21 @@ export async function POST(req, { params }) {
         return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
       }
 
-      let bannerBuffer = getStoredBannerBuffer(productId);
-      if (!bannerBuffer) {
-        bannerBuffer = await generateProductBanner(product, theme);
+      const prodImg = product.image || (product.images && product.images[0]) || "";
+      let bannerBuffer = null;
+      if (!body.useOriginal) {
+        bannerBuffer = getStoredBannerBuffer(productId);
+        if (!bannerBuffer) {
+          try {
+            bannerBuffer = await generateProductBanner(product, theme);
+          } catch (e) {
+            console.warn("Banner gen skipped, posting original image:", e.message);
+            bannerBuffer = null;
+          }
+        }
       }
       const caption = customCaption || generateFBCaption(product, product.brand?.name || "LIORA");
 
-      const prodImg = product.image || (product.images && product.images[0]) || "";
       const fbResult = await publishPhotoToFacebook({
         imageBuffer: bannerBuffer,
         imageUrl: prodImg,
@@ -885,13 +902,21 @@ export async function POST(req, { params }) {
         return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
       }
 
-      let bannerBuffer = getStoredBannerBuffer(productId);
-      if (!bannerBuffer) {
-        bannerBuffer = await generateProductBanner(product, theme);
+      const prodImg = product.image || (product.images && product.images[0]) || "";
+      let bannerBuffer = null;
+      if (!body.useOriginal) {
+        bannerBuffer = getStoredBannerBuffer(productId);
+        if (!bannerBuffer) {
+          try {
+            bannerBuffer = await generateProductBanner(product, theme);
+          } catch (e) {
+            console.warn("Banner gen skipped in schedule, using original image:", e.message);
+            bannerBuffer = null;
+          }
+        }
       }
       const caption = customCaption || generateFBCaption(product, product.brand?.name || "LIORA");
 
-      const prodImg = product.image || (product.images && product.images[0]) || "";
       const fbResult = await schedulePostToFacebook({
         imageBuffer: bannerBuffer,
         imageUrl: prodImg,
