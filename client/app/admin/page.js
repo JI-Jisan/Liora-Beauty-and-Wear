@@ -941,6 +941,22 @@ export default function AdminPage() {
           </li>
           <li
             onClick={() => {
+              router.push("/admin/profit-matrix");
+            }}
+            style={{
+              background: "linear-gradient(135deg, #10b981, #059669)",
+              color: "#ffffff",
+              fontWeight: "900",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(16, 185, 129, 0.3)",
+              margin: "6px 0",
+              cursor: "pointer",
+            }}
+          >
+            💰 Profit & Pricing Matrix
+          </li>
+          <li
+            onClick={() => {
               router.push("/admin/id-cards");
             }}
             style={{
@@ -1177,6 +1193,16 @@ export default function AdminPage() {
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>⚡</div>
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#e11d48", fontWeight: "800", textAlign: "center" }}>FB Auto Promoter</h3>
                   <span style={{ fontSize: "11px", color: "#be123c", textAlign: "center", marginTop: "2px", fontWeight: "600" }}>AI Banners & Posts</span>
+                </div>
+
+                {/* Profit & Pricing Matrix Box (High Priority Business Analytics) */}
+                <div 
+                  onClick={() => { router.push("/admin/profit-matrix"); }}
+                  style={{ background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)", padding: "18px 10px", borderRadius: "16px", border: "1px solid #a7f3d0", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 10px rgba(16,185,129,0.14)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>💰</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#065f46", fontWeight: "900", textAlign: "center" }}>Profit & Pricing Matrix</h3>
+                  <span style={{ fontSize: "11px", color: "#047857", textAlign: "center", marginTop: "2px", fontWeight: "700" }}>Live Profit & Margin Editor</span>
                 </div>
 
                 {/* ID Card Studio Box */}
