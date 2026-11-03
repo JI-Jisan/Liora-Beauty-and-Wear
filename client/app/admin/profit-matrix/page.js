@@ -34,6 +34,22 @@ export default function AdminProfitMatrixPage() {
   const [savedRowSuccess, setSavedRowSuccess] = useState({});
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Table container scroll state & ref for sticky header & back-to-top
+  const tableContainerRef = useRef(null);
+  const [isScrolledDown, setIsScrolledDown] = useState(false);
+
+  const handleTableScroll = () => {
+    if (tableContainerRef.current) {
+      setIsScrolledDown(tableContainerRef.current.scrollTop > 140);
+    }
+  };
+
+  const scrollToTableTop = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   // Fetch Matrix Data
   const fetchMatrix = async () => {
     setLoading(true);
@@ -560,42 +576,125 @@ export default function AdminProfitMatrixPage() {
         <div style={{ background: "#1e293b", borderRadius: "14px", border: "1px solid #334155", overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,0.3)" }}>
           {/* Table Action Bar */}
           <div style={{ padding: "14px 20px", background: "#0b1120", borderBottom: "1px solid #334155", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
-            <div style={{ fontSize: "13.5px", color: "#cbd5e1" }}>
-              Showing <strong>{products.length}</strong> of <strong>{totalCount}</strong> products in {activeMode.toUpperCase()} mode
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <div style={{ fontSize: "13.5px", color: "#cbd5e1" }}>
+                Showing <strong>{products.length}</strong> of <strong>{totalCount}</strong> products in <span style={{ color: "#38bdf8", fontWeight: "800" }}>{activeMode.toUpperCase()}</span> mode
+              </div>
+              <span style={{ fontSize: "11px", fontWeight: "700", background: "rgba(16, 185, 129, 0.15)", color: "#34d399", border: "1px solid rgba(16, 185, 129, 0.3)", padding: "2px 8px", borderRadius: "12px", display: "flex", alignItems: "center", gap: "4px" }}>
+                📌 হেডার লকড (Sticky)
+              </span>
               {Object.keys(draftEdits).length > 0 && (
-                <span style={{ marginLeft: "10px", color: "#f59e0b", fontWeight: "800", background: "rgba(245, 158, 11, 0.15)", padding: "3px 10px", borderRadius: "12px", fontSize: "12px" }}>
+                <span style={{ color: "#f59e0b", fontWeight: "800", background: "rgba(245, 158, 11, 0.15)", padding: "3px 10px", borderRadius: "12px", fontSize: "12px" }}>
                   ✏️ {Object.keys(draftEdits).length}টি প্রোডাক্টে এডিট করা হয়েছে (সেভ করতে 💾 চাপুন বা Enter দিন)
                 </span>
               )}
             </div>
 
-            <div style={{ fontSize: "12px", color: "#94a3b8" }}>
-              💡 টিপস: ইনপুট বক্সে নতুন দাম লিখে <kbd style={{ background: "#334155", padding: "2px 6px", borderRadius: "4px", color: "#ffffff" }}>Enter</kbd> চাপলে রো সাথে সাথে সেভ হয়ে যায়!
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              {isScrolledDown && (
+                <button
+                  onClick={scrollToTableTop}
+                  style={{
+                    background: "#334155",
+                    color: "#38bdf8",
+                    border: "1px solid #475569",
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px"
+                  }}
+                >
+                  ⬆️ টেবিলে শীর্ষে যান
+                </button>
+              )}
+              <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                💡 ইনপুট বক্সে দাম লিখে <kbd style={{ background: "#334155", padding: "2px 6px", borderRadius: "4px", color: "#ffffff" }}>Enter</kbd> চাপলে সেভ হয়ে যায়
+              </div>
             </div>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "13px" }}>
-              <thead>
-                <tr style={{ background: "#0f172a", borderBottom: "1px solid #334155", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
-                  <th style={{ padding: "14px 16px", minWidth: "260px" }}>Product & Brand</th>
-                  <th style={{ padding: "14px 10px", width: "105px" }}>কেনা দাম (Cost ৳)</th>
-                  <th style={{ padding: "14px 10px", width: "105px" }}>অফার সেল (৳)</th>
-                  <th style={{ padding: "14px 10px", width: "105px" }}>রেগুলার MRP (৳)</th>
-                  <th style={{ padding: "14px 10px", width: "105px" }}>ওজেরিও (৳)</th>
-                  <th style={{ padding: "14px 10px", width: "105px" }}>হোলসেল (৳)</th>
-                  <th style={{ padding: "14px 10px", width: "105px" }}>রিসেলার (৳)</th>
-                  <th style={{ padding: "14px 12px", width: "115px", background: "rgba(56, 189, 248, 0.08)" }}>কার্যকর দাম ({activeMode})</th>
-                  <th style={{ padding: "14px 12px", width: "115px" }}>নিট লাভ (৳)</th>
-                  <th style={{ padding: "14px 12px", width: "110px" }}>মার্জিন (%)</th>
-                  <th style={{ padding: "14px 10px", width: "70px" }}>স্টক</th>
-                  <th style={{ padding: "14px 14px", width: "95px", textAlign: "center" }}>অ্যাকশন</th>
+          {/* Sticky Table Scroll Container */}
+          <div
+            ref={tableContainerRef}
+            onScroll={handleTableScroll}
+            className="profit-table-scroll"
+            style={{
+              overflowX: "auto",
+              maxHeight: "75vh",
+              overflowY: "auto",
+              position: "relative",
+              borderRadius: "0 0 14px 14px",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+              scrollbarWidth: "thin",
+              scrollbarColor: "#334155 #0b1120"
+            }}
+          >
+            <style>{`
+              .profit-table-scroll::-webkit-scrollbar {
+                width: 9px;
+                height: 9px;
+              }
+              .profit-table-scroll::-webkit-scrollbar-track {
+                background: #0b1120;
+              }
+              .profit-table-scroll::-webkit-scrollbar-thumb {
+                background: #334155;
+                border-radius: 5px;
+              }
+              .profit-table-scroll::-webkit-scrollbar-thumb:hover {
+                background: #475569;
+              }
+            `}</style>
+
+            <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: 0, textAlign: "left", fontSize: "13px" }}>
+              <thead style={{ position: "sticky", top: 0, zIndex: 25 }}>
+                <tr style={{ background: "#0b1120" }}>
+                  <th style={{ position: "sticky", top: 0, left: 0, zIndex: 35, background: "#0b1120", padding: "14px 16px", minWidth: "260px", borderBottom: "2px solid #334155", boxShadow: "4px 4px 10px rgba(0, 0, 0, 0.6)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    Product & Brand
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 10px", width: "105px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    কেনা দাম (Cost ৳)
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 10px", width: "105px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    অফার সেল (৳)
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 10px", width: "105px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    রেগুলার MRP (৳)
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 10px", width: "105px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    ওজেরিও (৳)
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 10px", width: "105px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    হোলসেল (৳)
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 10px", width: "105px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    রিসেলার (৳)
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0f233f", padding: "14px 12px", width: "115px", borderBottom: "2px solid #38bdf8", color: "#38bdf8", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    কার্যকর দাম ({activeMode})
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 12px", width: "115px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    নিট লাভ (৳)
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 12px", width: "110px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    মার্জিন (%)
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 10px", width: "70px", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    স্টক
+                  </th>
+                  <th style={{ position: "sticky", top: 0, zIndex: 25, background: "#0b1120", padding: "14px 14px", width: "95px", textAlign: "center", borderBottom: "2px solid #334155", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.5)", color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "0.5px" }}>
+                    অ্যাকশন
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={12} style={{ padding: "60px", textAlign: "center", color: "#94a3b8" }}>
+                    <td colSpan={12} style={{ padding: "60px", textAlign: "center", color: "#94a3b8", borderBottom: "1px solid #233149" }}>
                       <div style={{ display: "inline-block", width: "36px", height: "36px", border: "3px solid rgba(56, 189, 248, 0.2)", borderTopColor: "#38bdf8", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
                       <p style={{ marginTop: "12px", fontSize: "14px" }}>লাইভ প্রফিট ম্যাট্রিক্স লোড হচ্ছে...</p>
                       <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
@@ -603,7 +702,7 @@ export default function AdminProfitMatrixPage() {
                   </tr>
                 ) : products.length === 0 ? (
                   <tr>
-                    <td colSpan={12} style={{ padding: "60px", textAlign: "center", color: "#94a3b8" }}>
+                    <td colSpan={12} style={{ padding: "60px", textAlign: "center", color: "#94a3b8", borderBottom: "1px solid #233149" }}>
                       কোনো প্রোডাক্ট খুঁজে পাওয়া যায়নি। ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।
                     </td>
                   </tr>
@@ -619,25 +718,36 @@ export default function AdminProfitMatrixPage() {
                     const isLoss = rowRecalc.unitProfit <= 0 && rowRecalc.purchasePrice > 0;
                     const isHigh = rowRecalc.profitMarginPct >= 35;
 
+                    const rowBg = isFlashSaved
+                      ? "rgba(16, 185, 129, 0.18)"
+                      : hasDraftChanges
+                      ? "#292012"
+                      : isLoss
+                      ? "#2b1419"
+                      : idx % 2 === 0
+                      ? "#1e293b"
+                      : "#182234";
+
                     return (
                       <tr
                         key={p._id}
                         style={{
-                          borderBottom: "1px solid #1e293b",
-                          background: isFlashSaved
-                            ? "rgba(16, 185, 129, 0.15)"
-                            : hasDraftChanges
-                            ? "rgba(245, 158, 11, 0.08)"
-                            : isLoss
-                            ? "rgba(239, 68, 68, 0.08)"
-                            : idx % 2 === 0
-                            ? "#1e293b"
-                            : "#182234",
+                          background: rowBg,
                           transition: "background 0.2s ease",
                         }}
                       >
-                        {/* 1. Product Thumbnail & Identity */}
-                        <td style={{ padding: "12px 16px" }}>
+                        {/* 1. Product Thumbnail & Identity (Sticky Left Column) */}
+                        <td
+                          style={{
+                            position: "sticky",
+                            left: 0,
+                            zIndex: 10,
+                            padding: "12px 16px",
+                            borderBottom: "1px solid #233149",
+                            background: rowBg,
+                            boxShadow: "4px 0 8px rgba(0,0,0,0.4)",
+                          }}
+                        >
                           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                             {p.image ? (
                               <img
@@ -671,7 +781,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 2. Buying Price (purchasePrice) */}
-                        <td style={{ padding: "8px 10px" }}>
+                        <td style={{ padding: "8px 10px", borderBottom: "1px solid #233149" }}>
                           <input
                             type="number"
                             min="0"
@@ -697,7 +807,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 3. Offer Sell Price (offerPrice) */}
-                        <td style={{ padding: "8px 10px" }}>
+                        <td style={{ padding: "8px 10px", borderBottom: "1px solid #233149" }}>
                           <input
                             type="number"
                             min="0"
@@ -722,7 +832,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 4. Regular MRP (originalPrice) */}
-                        <td style={{ padding: "8px 10px" }}>
+                        <td style={{ padding: "8px 10px", borderBottom: "1px solid #233149" }}>
                           <input
                             type="number"
                             min="0"
@@ -746,7 +856,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 5. Ogerio Price (ogerioPrice) */}
-                        <td style={{ padding: "8px 10px" }}>
+                        <td style={{ padding: "8px 10px", borderBottom: "1px solid #233149" }}>
                           <input
                             type="number"
                             min="0"
@@ -771,7 +881,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 6. Wholesale Price (wholesalePrice) */}
-                        <td style={{ padding: "8px 10px" }}>
+                        <td style={{ padding: "8px 10px", borderBottom: "1px solid #233149" }}>
                           <input
                             type="number"
                             min="0"
@@ -796,7 +906,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 7. Reseller Price (resellerPrice) */}
-                        <td style={{ padding: "8px 10px" }}>
+                        <td style={{ padding: "8px 10px", borderBottom: "1px solid #233149" }}>
                           <input
                             type="number"
                             min="0"
@@ -821,7 +931,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 8. Effective Selling Price for Active Mode */}
-                        <td style={{ padding: "12px 12px", background: "rgba(56, 189, 248, 0.08)", fontWeight: "800", color: "#38bdf8", fontSize: "14px" }}>
+                        <td style={{ padding: "12px 12px", borderBottom: "1px solid #233149", background: "rgba(56, 189, 248, 0.08)", fontWeight: "800", color: "#38bdf8", fontSize: "14px" }}>
                           ৳{rowRecalc.effectiveSellingPrice.toLocaleString("en-IN")}
                           {activeMode === "diu15" && (
                             <span style={{ display: "block", fontSize: "10.5px", color: "#f43f5e", fontWeight: "600" }}>
@@ -836,7 +946,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 9. Net Unit Profit (৳) */}
-                        <td style={{ padding: "12px 12px" }}>
+                        <td style={{ padding: "12px 12px", borderBottom: "1px solid #233149" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                             <span
                               style={{
@@ -854,7 +964,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 10. Margin Percentage Badge */}
-                        <td style={{ padding: "12px 12px" }}>
+                        <td style={{ padding: "12px 12px", borderBottom: "1px solid #233149" }}>
                           <span
                             style={{
                               display: "inline-block",
@@ -893,7 +1003,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 11. Stock Qty */}
-                        <td style={{ padding: "12px 10px" }}>
+                        <td style={{ padding: "12px 10px", borderBottom: "1px solid #233149" }}>
                           <span
                             style={{
                               fontSize: "12px",
@@ -906,7 +1016,7 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 12. Instant Row Action */}
-                        <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                        <td style={{ padding: "12px 14px", borderBottom: "1px solid #233149", textAlign: "center" }}>
                           {isFlashSaved ? (
                             <span style={{ color: "#34d399", fontSize: "12px", fontWeight: "800" }}>✓ Saved!</span>
                           ) : (
@@ -939,6 +1049,35 @@ export default function AdminProfitMatrixPage() {
                 )}
               </tbody>
             </table>
+
+            {/* Floating Back to Top Button inside Scroll Container */}
+            {isScrolledDown && (
+              <button
+                onClick={scrollToTableTop}
+                style={{
+                  position: "sticky",
+                  bottom: "20px",
+                  float: "right",
+                  marginRight: "24px",
+                  zIndex: 30,
+                  background: "linear-gradient(135deg, #38bdf8, #2563eb)",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "22px",
+                  padding: "10px 18px",
+                  fontSize: "12.5px",
+                  fontWeight: "800",
+                  cursor: "pointer",
+                  boxShadow: "0 8px 24px rgba(37, 99, 235, 0.45)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  transition: "transform 0.15s ease",
+                }}
+              >
+                <span>⬆️</span> শীর্ষে যান (Top)
+              </button>
+            )}
           </div>
 
           {/* Pagination Controls */}
