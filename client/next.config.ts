@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   serverExternalPackages: ["firebase-admin", "adm-zip"],
   images: {
+    unoptimized: true,
     minimumCacheTTL: 2678400, // 31 days
     formats: ["image/avif", "image/webp"],
   },
