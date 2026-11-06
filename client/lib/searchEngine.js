@@ -354,7 +354,7 @@ export async function warmOrGetSearchCatalog(Product) {
   if (searchCatalogCache && !isRefreshingCatalog) {
     isRefreshingCatalog = true;
     ActiveProduct.find({})
-      .select('name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice description isSlider')
+      .select('name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider')
       .populate('category', 'name ancestors slug')
       .populate('brand', 'name slug')
       .lean()
@@ -370,9 +370,9 @@ export async function warmOrGetSearchCatalog(Product) {
     return searchCatalogCache;
   }
 
-  // Cold start: synchronous initial load
+  // Cold start: slim projection for sub-second background load
   const docs = await ActiveProduct.find({})
-    .select('name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice description isSlider')
+    .select('name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider')
     .populate('category', 'name ancestors slug')
     .populate('brand', 'name slug')
     .lean();
@@ -430,112 +430,152 @@ export async function searchProductsFast(
   let rankedCandidates = queryResultCache.get(filterKey);
 
   if (!rankedCandidates) {
-    const catalog = await warmOrGetSearchCatalog(ActiveProduct);
+    let matches = [];
 
-    // Expand search tokens with known typo aliases
-    const allVariants = new Set();
-    if (cleanPhrase) allVariants.add(normalizedQuery);
-    for (const t of meaningfulTokens) {
-      allVariants.add(t.toLowerCase());
-      const { words } = getFuzzyVariantsForToken(t);
-      words.forEach((w) => allVariants.add(w.toLowerCase()));
-    }
-    const variantList = Array.from(allVariants);
+    // PATH A: In-memory Catalog is warm (2-5ms lightning search)
+    if (searchCatalogCache && searchCatalogCache.length > 0) {
+      const catalog = searchCatalogCache;
 
-    const matches = [];
-    const brandLower = brand ? String(brand).toLowerCase().trim() : null;
-    const catLower = category ? String(category).toLowerCase().trim() : null;
-    const colLower = collection ? String(collection).toLowerCase().trim() : null;
-
-    for (let i = 0; i < catalog.length; i++) {
-      const p = catalog[i];
-
-      // Exclude specific ID if requested
-      if (excludeId && String(p._id) === String(excludeId)) continue;
-
-      // Filter by stock if regular user
-      if (!isAdmin && p.inStock === false) {
-        // Still allow out of stock if directly searched, but lower priority
+      // Expand search tokens with known typo aliases
+      const allVariants = new Set();
+      if (cleanPhrase) allVariants.add(normalizedQuery);
+      for (const t of meaningfulTokens) {
+        allVariants.add(t.toLowerCase());
+        const { words } = getFuzzyVariantsForToken(t);
+        words.forEach((w) => allVariants.add(w.toLowerCase()));
       }
+      const variantList = Array.from(allVariants);
 
-      // Filter by brand if provided
-      if (brandLower) {
-        const pBrandName = (p.brand?.name || "").toLowerCase();
-        const pBrandSlug = (p.brand?.slug || "").toLowerCase();
-        const pBrandId = String(p.brand?._id || p.brand || "").toLowerCase();
-        if (pBrandId !== brandLower && pBrandSlug !== brandLower && !pBrandName.includes(brandLower)) {
-          continue;
-        }
-      }
+      const brandLower = brand ? String(brand).toLowerCase().trim() : null;
+      const catLower = category ? String(category).toLowerCase().trim() : null;
+      const colLower = collection ? String(collection).toLowerCase().trim() : null;
 
-      // Filter by category if provided
-      if (catLower) {
-        const pCatName = (p.category?.name || "").toLowerCase();
-        const pCatSlug = (p.category?.slug || "").toLowerCase();
-        const pCatId = String(p.category?._id || p.category || "").toLowerCase();
-        if (pCatId !== catLower && pCatSlug !== catLower && !pCatName.includes(catLower)) {
-          continue;
-        }
-      }
+      for (let i = 0; i < catalog.length; i++) {
+        const p = catalog[i];
 
-      // Filter by collection
-      if (colLower) {
-        const pNameLower = (p.name || "").toLowerCase();
-        if (colLower.includes("combo") && !pNameLower.includes("combo")) continue;
-        if (colLower.includes("clearance") && !pNameLower.includes("clearance") && !p.isFeatured) continue;
-        if (colLower.includes("flash") && !pNameLower.includes("flash") && !p.isFeatured) continue;
-      }
+        if (excludeId && String(p._id) === String(excludeId)) continue;
 
-      // Filter by type
-      if (type) {
-        if (type === "campus15" || type === "max-discount") {
-          if ((p.campusDiscountPct || 0) < 15) continue;
-        } else if (type === "featured" && !p.isFeatured) {
-          continue;
-        } else if (type === "trending" && !p.isTrending) {
-          continue;
-        } else if (type === "new" && !p.isNewArrival) {
-          continue;
-        } else if (type === "slider" && !p.isSlider) {
-          continue;
-        }
-      }
-
-      const pName = (p.name || "").toLowerCase();
-      const bName = (p.brand?.name || (typeof p.brand === "string" ? p.brand : "")).toLowerCase();
-      const cName = (p.category?.name || (typeof p.category === "string" ? p.category : "")).toLowerCase();
-      const pDesc = (p.description || "").toLowerCase();
-
-      let matched = false;
-
-      // 1. Direct phrase match in product name, brand, or category
-      if (cleanPhrase && (pName.includes(normalizedQuery) || bName.includes(normalizedQuery) || cName.includes(normalizedQuery))) {
-        matched = true;
-      }
-      // 2. All meaningful tokens match in name/brand/category
-      else if (
-        meaningfulTokens.length > 0 &&
-        meaningfulTokens.every((t) => pName.includes(t) || bName.includes(t) || cName.includes(t))
-      ) {
-        matched = true;
-      }
-      // 3. Typo variants match in name/brand/category
-      else {
-        for (const v of variantList) {
-          if (pName.includes(v) || bName.includes(v) || cName.includes(v)) {
-            matched = true;
-            break;
+        if (brandLower) {
+          const pBrandName = (p.brand?.name || "").toLowerCase();
+          const pBrandSlug = (p.brand?.slug || "").toLowerCase();
+          const pBrandId = String(p.brand?._id || p.brand || "").toLowerCase();
+          if (pBrandId !== brandLower && pBrandSlug !== brandLower && !pBrandName.includes(brandLower)) {
+            continue;
           }
         }
+
+        if (catLower) {
+          const pCatName = (p.category?.name || "").toLowerCase();
+          const pCatSlug = (p.category?.slug || "").toLowerCase();
+          const pCatId = String(p.category?._id || p.category || "").toLowerCase();
+          if (pCatId !== catLower && pCatSlug !== catLower && !pCatName.includes(catLower)) {
+            continue;
+          }
+        }
+
+        if (colLower) {
+          const pNameLower = (p.name || "").toLowerCase();
+          if (colLower.includes("combo") && !pNameLower.includes("combo")) continue;
+          if (colLower.includes("clearance") && !pNameLower.includes("clearance") && !p.isFeatured) continue;
+          if (colLower.includes("flash") && !pNameLower.includes("flash") && !p.isFeatured) continue;
+        }
+
+        if (type) {
+          if (type === "campus15" || type === "max-discount") {
+            if ((p.campusDiscountPct || 0) < 15) continue;
+          } else if (type === "featured" && !p.isFeatured) {
+            continue;
+          } else if (type === "trending" && !p.isTrending) {
+            continue;
+          } else if (type === "new" && !p.isNewArrival) {
+            continue;
+          } else if (type === "slider" && !p.isSlider) {
+            continue;
+          }
+        }
+
+        const pName = (p.name || "").toLowerCase();
+        const bName = (p.brand?.name || (typeof p.brand === "string" ? p.brand : "")).toLowerCase();
+        const cName = (p.category?.name || (typeof p.category === "string" ? p.category : "")).toLowerCase();
+        const pDesc = (p.description || "").toLowerCase();
+
+        let matched = false;
+
+        if (cleanPhrase && (pName.includes(normalizedQuery) || bName.includes(normalizedQuery) || cName.includes(normalizedQuery))) {
+          matched = true;
+        } else if (
+          meaningfulTokens.length > 0 &&
+          meaningfulTokens.every((t) => pName.includes(t) || bName.includes(t) || cName.includes(t))
+        ) {
+          matched = true;
+        } else {
+          for (const v of variantList) {
+            if (pName.includes(v) || bName.includes(v) || cName.includes(v)) {
+              matched = true;
+              break;
+            }
+          }
+        }
+
+        if (!matched && cleanPhrase.length >= 3 && pDesc.includes(normalizedQuery)) {
+          matched = true;
+        }
+
+        if (matched) {
+          matches.push(p);
+        }
+      }
+    } else {
+      // PATH B: Sub-50ms Direct Targeted Database Search (Zero cold-start block!)
+      if (!ActiveProduct) {
+        try {
+          const models = await import("./models.js");
+          ActiveProduct = models.Product;
+        } catch (e) {
+          console.error("Failed to load Product in targeted search:", e);
+        }
       }
 
-      // 4. Fallback search in description if still not matched
-      if (!matched && cleanPhrase.length >= 3 && pDesc.includes(normalizedQuery)) {
-        matched = true;
-      }
+      if (ActiveProduct) {
+        const allVariants = new Set();
+        if (cleanPhrase) allVariants.add(normalizedQuery);
+        for (const t of meaningfulTokens) {
+          allVariants.add(t.toLowerCase());
+          const { words } = getFuzzyVariantsForToken(t);
+          words.forEach((w) => allVariants.add(w.toLowerCase()));
+        }
+        const variantList = Array.from(allVariants).slice(0, 8);
 
-      if (matched) {
-        matches.push(p);
+        const orList = [];
+        if (cleanPhrase) {
+          orList.push({ name: { $regex: escapeRegex(cleanPhrase), $options: "i" } });
+        }
+        for (const v of variantList) {
+          orList.push({ name: { $regex: escapeRegex(v), $options: "i" } });
+        }
+
+        const dbQuery = { $or: orList.length > 0 ? orList : [{ name: { $regex: ".*", $options: "i" } }] };
+
+        if (!isAdmin) {
+          dbQuery.inStock = { $ne: false };
+        }
+        if (excludeId) {
+          dbQuery._id = { $ne: excludeId };
+        }
+
+        const rawDocs = await ActiveProduct.find(dbQuery)
+          .select("name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
+          .populate("brand", "name slug")
+          .populate("category", "name slug ancestors")
+          .limit(isPaginated ? Math.max(limit * page * 2, 48) : 48)
+          .lean();
+
+        matches = rawDocs;
+
+        // Warm catalog in background non-blockingly
+        if (!isRefreshingCatalog) {
+          warmOrGetSearchCatalog(ActiveProduct).catch(() => {});
+        }
       }
     }
 

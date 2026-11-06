@@ -43,7 +43,7 @@ export async function POST(req) {
     // 1. If GEMINI_API_KEY is available, use Google Vision AI (True Google Lens)
     const geminiKey = process.env.GEMINI_API_KEY;
     if (geminiKey && imageBase64) {
-      const visionModels = ['gemini-3.5-flash', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite'];
+      const visionModels = ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite'];
       for (const model of visionModels) {
         if (detectedFromAI) break;
         try {
@@ -70,7 +70,7 @@ export async function POST(req) {
                   responseMimeType: "application/json"
                 }
               }),
-              signal: AbortSignal.timeout(6000)
+              signal: AbortSignal.timeout(3500)
             }
           );
 
@@ -123,7 +123,7 @@ export async function POST(req) {
       });
     }
 
-    // 4. Query Database
+    // 4. Query Database with lean projection
     await connectToDatabase();
     const { cleanPhrase, tokens } = cleanSearchTerm(bestQuery);
     const meaningfulTokens = tokens.filter(t => !SEARCH_STOP_WORDS.has(t) && t.length >= 2);
@@ -146,9 +146,10 @@ export async function POST(req) {
     let candidateProducts = [];
     if (orConditions.length > 0) {
       candidateProducts = await Product.find({ $or: orConditions })
+        .select('name image offerPrice originalPrice discountBadge inStock stockStatus brand category')
         .populate('brand', 'name slug')
         .populate('category', 'name')
-        .limit(60)
+        .limit(24)
         .lean();
     }
 

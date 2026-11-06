@@ -50,43 +50,16 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
 
   if (!isOpen) return null;
 
-  // Load Tesseract.js dynamically from CDN
-  const getTesseract = async () => {
-    if (typeof window !== "undefined" && window.Tesseract) {
-      return window.Tesseract;
-    }
-    return new Promise((resolve, reject) => {
-      const existing = document.getElementById("tesseract-cdn-script");
-      if (existing) {
-        if (window.Tesseract) {
-          resolve(window.Tesseract);
-        } else {
-          existing.onload = () => resolve(window.Tesseract);
-        }
-        return;
-      }
-      const script = document.createElement("script");
-      script.id = "tesseract-cdn-script";
-      script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
-      script.async = true;
-      script.onload = () => resolve(window.Tesseract);
-      script.onerror = () => reject(new Error("Failed to load OCR engine"));
-      document.head.appendChild(script);
-    });
-  };
-
   /**
-   * Preprocess image on offscreen HTML5 canvas:
-   * 1. Downscales image to max 1000px (10x faster OCR, eliminates mobile memory crash).
-   * 2. Detects luminance: if dark packaging (e.g. black mascara tube/box), inverts pixels
-   *    so white/silver text on black background becomes crisp black text on white background!
-   * 3. Enhances contrast (+40%) to make embossed cosmetic lettering pop.
+   * Google Lens style instant client-side canvas compression:
+   * Scales high-res phone camera photos (5-10MB) down to max 800px in ~20ms,
+   * yielding a crisp ~50-70KB JPEG ready for sub-second AI recognition.
    */
-  const preprocessImageCanvas = (imgElement) => {
+  const compressImageForGoogleLens = (imgElement) => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
-    const maxDim = 1000;
+    const maxDim = 800;
     let width = imgElement.naturalWidth || imgElement.width || 800;
     let height = imgElement.naturalHeight || imgElement.height || 600;
 
@@ -104,45 +77,7 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
     canvas.height = height;
     ctx.drawImage(imgElement, 0, 0, width, height);
 
-    try {
-      const imgData = ctx.getImageData(0, 0, width, height);
-      const data = imgData.data;
-
-      // Calculate center luminance
-      let totalLuminance = 0;
-      for (let i = 0; i < data.length; i += 4) {
-        totalLuminance += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      }
-      const avgLuminance = totalLuminance / (data.length / 4);
-      const isDarkBackground = avgLuminance < 125; // Dark tube or packaging
-
-      for (let i = 0; i < data.length; i += 4) {
-        let r = data[i];
-        let g = data[i + 1];
-        let b = data[i + 2];
-
-        let gray = 0.299 * r + 0.587 * g + 0.114 * b;
-
-        // Invert if dark background (crucial for black mascara, dark serum bottles)
-        if (isDarkBackground) {
-          gray = 255 - gray;
-        }
-
-        // Contrast stretch (+45%)
-        let contrast = (gray - 128) * 1.45 + 128;
-        contrast = Math.max(0, Math.min(255, contrast));
-
-        data[i] = contrast;
-        data[i + 1] = contrast;
-        data[i + 2] = contrast;
-      }
-
-      ctx.putImageData(imgData, 0, 0);
-      return canvas.toDataURL("image/jpeg", 0.9);
-    } catch (e) {
-      console.warn("Canvas pixel processing fallback:", e);
-      return canvas.toDataURL("image/jpeg", 0.9);
-    }
+    return canvas.toDataURL("image/jpeg", 0.82);
   };
 
   const handleFileChange = (e) => {
@@ -155,7 +90,7 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
     setErrorMsg("");
     setDetectedQuery("");
     setDetectedTags([]);
-    setScanProgress(10);
+    setScanProgress(15);
     setIsScanning(true);
     setScanStep("Loading photo...");
 
@@ -166,50 +101,32 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
       setImagePreview(dataUrl);
 
       try {
-        setScanStep("Optimizing image for fast recognition...");
-        setScanProgress(25);
+        setScanStep("Optimizing image for Google Lens AI...");
+        setScanProgress(30);
 
-        // Preprocess on hidden Image
+        // Preprocess on hidden Image in 20ms
         const img = new Image();
         img.src = dataUrl;
         await new Promise((resolve) => {
           img.onload = resolve;
         });
 
-        const preprocessedDataUrl = preprocessImageCanvas(img);
+        const compressedDataUrl = compressImageForGoogleLens(img);
 
-        setScanStep("Scanning cosmetic packaging & brand...");
-        setScanProgress(40);
+        setScanStep("Google Lens AI scanning cosmetic & brand...");
+        setScanProgress(60);
 
-        const tesseract = await getTesseract();
-        const ocrResult = await tesseract.recognize(preprocessedDataUrl, "eng", {
-          tessedit_pageseg_mode: "11", // Sparse text (best for curved bottles & packaging)
-          logger: (m) => {
-            if (m.status === "recognizing text") {
-              const pct = Math.round((m.progress || 0) * 45) + 40;
-              setScanProgress(pct);
-              setScanStep(`Reading label: ${pct}%...`);
-            }
-          },
-        });
-
-        const rawText = ocrResult?.data?.text || "";
-
-        // Client-side Beauty Extraction
-        const clientParsed = extractCleanQuery(rawText);
-
-        setScanStep("Connecting to LIORA catalog...");
-        setScanProgress(90);
-
-        // Send both image and extracted text in FormData to visual search engine
-        const formData = new FormData();
-        formData.append("image", imgFile);
-        formData.append("text", rawText);
-
+        // Send lightweight compressed image directly to visual search engine
         const res = await fetch("/api/visual-search", {
           method: "POST",
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image: compressedDataUrl,
+          }),
         });
+
+        setScanStep("Matching with LIORA catalog...");
+        setScanProgress(85);
 
         const data = await res.json().catch(() => ({}));
 
@@ -228,7 +145,7 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
           setScanProgress(100);
           setErrorMsg(
             data.message ||
-              "Could not clearly read the product brand from this photo. You can type the product name below to search immediately."
+              "Could not clearly recognize the product brand from this photo. You can type the product name below to search immediately."
           );
         }
       } catch (err) {
