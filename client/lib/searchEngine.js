@@ -537,6 +537,14 @@ export async function searchProductsFast(
       }
 
       if (ActiveProduct) {
+        let BrandModel = null;
+        let CategoryModel = null;
+        try {
+          const models = await import("./models.js");
+          BrandModel = models.Brand;
+          CategoryModel = models.Category;
+        } catch (_) {}
+
         const allVariants = new Set();
         if (cleanPhrase) allVariants.add(normalizedQuery);
         for (const t of meaningfulTokens) {
@@ -554,6 +562,47 @@ export async function searchProductsFast(
           orList.push({ name: { $regex: escapeRegex(v), $options: "i" } });
         }
 
+        // Parallel brand & category lookup (takes ~5ms)
+        const brandCatLookups = [];
+        if (cleanPhrase && cleanPhrase.length >= 3) {
+          if (BrandModel) {
+            brandCatLookups.push(
+              BrandModel.find({ name: { $regex: escapeRegex(cleanPhrase), $options: "i" } })
+                .select("_id")
+                .limit(5)
+                .lean()
+                .then((bDocs) => bDocs.map((b) => b._id))
+                .catch(() => [])
+            );
+          } else {
+            brandCatLookups.push(Promise.resolve([]));
+          }
+
+          if (CategoryModel) {
+            brandCatLookups.push(
+              CategoryModel.find({ name: { $regex: escapeRegex(cleanPhrase), $options: "i" } })
+                .select("_id")
+                .limit(5)
+                .lean()
+                .then((cDocs) => cDocs.map((c) => c._id))
+                .catch(() => [])
+            );
+          } else {
+            brandCatLookups.push(Promise.resolve([]));
+          }
+        } else {
+          brandCatLookups.push(Promise.resolve([]), Promise.resolve([]));
+        }
+
+        const [matchingBrandIds, matchingCategoryIds] = await Promise.all(brandCatLookups);
+
+        if (matchingBrandIds.length > 0) {
+          orList.push({ brand: { $in: matchingBrandIds } });
+        }
+        if (matchingCategoryIds.length > 0) {
+          orList.push({ category: { $in: matchingCategoryIds } });
+        }
+
         const dbQuery = { $or: orList.length > 0 ? orList : [{ name: { $regex: ".*", $options: "i" } }] };
 
         if (!isAdmin) {
@@ -561,6 +610,25 @@ export async function searchProductsFast(
         }
         if (excludeId) {
           dbQuery._id = { $ne: excludeId };
+        }
+        if (brand) {
+          dbQuery.brand = brand;
+        }
+        if (category) {
+          dbQuery.category = category;
+        }
+        if (type) {
+          if (type === "campus15" || type === "max-discount") {
+            dbQuery.campusDiscountPct = { $gte: 15 };
+          } else if (type === "featured") {
+            dbQuery.isFeatured = true;
+          } else if (type === "trending") {
+            dbQuery.isTrending = true;
+          } else if (type === "new") {
+            dbQuery.isNewArrival = true;
+          } else if (type === "slider") {
+            dbQuery.isSlider = true;
+          }
         }
 
         const rawDocs = await ActiveProduct.find(dbQuery)
@@ -571,11 +639,6 @@ export async function searchProductsFast(
           .lean();
 
         matches = rawDocs;
-
-        // Warm catalog in background non-blockingly
-        if (!isRefreshingCatalog) {
-          warmOrGetSearchCatalog(ActiveProduct).catch(() => {});
-        }
       }
     }
 
