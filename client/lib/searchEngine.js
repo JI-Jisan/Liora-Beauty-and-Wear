@@ -1,13 +1,42 @@
 // Google-like Smart Fuzzy Search & Typo Tolerance Engine for Liora
 // Handles bracket/punctuation normalization, cosmetic/brand phonetic aliases,
-// 1-edit distance fuzzy patterns, and relevance scoring.
+// shade numbers, 1-edit distance fuzzy patterns, and relevance scoring.
 
 export function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/**
+ * Normalizes any string for search comparison:
+ * lowercase, replaces punctuation and dashes with spaces, collapses whitespace.
+ */
+export function normalize(str) {
+  if (!str) return "";
+  return String(str)
+    .toLowerCase()
+    .replace(/[-–—_.,:;!?'"()#&/\\+*~^$[\]{}<>«»]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // Common cosmetics, skincare, fashion & phonetic typo dictionary
 const BEAUTY_TYPO_ALIASES = {
+  // Brand aliases & typos
+  handayan: ["handaiyan"],
+  handiyan: ["handaiyan"],
+  handian: ["handaiyan"],
+  swissbeauty: ["swiss beauty"],
+  beautyglazed: ["beauty glazed"],
+  beautyglaze: ["beauty glazed"],
+  wetnwild: ["wet n wild", "wet & wild"],
+  wetandwild: ["wet n wild"],
+  sheglem: ["sheglam"],
+  sheglm: ["sheglam"],
+  dotandkey: ["dot & key"],
+  dotnkey: ["dot & key"],
+  theordinary: ["ordinary"],
+  ordinery: ["ordinary"],
+  ordnary: ["ordinary"],
   nivia: ["nivea"],
   nevia: ["nivea"],
   nevea: ["nivea"],
@@ -23,6 +52,24 @@ const BEAUTY_TYPO_ALIASES = {
   maybeline: ["maybelline"],
   maybelin: ["maybelline"],
   mebelline: ["maybelline"],
+  focalure: ["focallure"],
+  focallur: ["focallure"],
+  lakme: ["lakme"],
+  lakmey: ["lakme"],
+  innisfree: ["innisfree"],
+  inisfree: ["innisfree"],
+  cosrx: ["cosrx", "cos-rx"],
+  tresemme: ["tresemme"],
+  tresemey: ["tresemme"],
+  garnier: ["garnier"],
+  garniyar: ["garnier"],
+  neutrogena: ["neutrogena"],
+  nutrogena: ["neutrogena"],
+  vaslin: ["vaseline"],
+  vasline: ["vaseline"],
+  veseline: ["vaseline"],
+
+  // Product types & skincare terms
   moisturiser: ["moisturizer", "moistur"],
   moisturizer: ["moisturiser", "moistur"],
   moisturising: ["moistur"],
@@ -38,6 +85,9 @@ const BEAUTY_TYPO_ALIASES = {
   lipistik: ["lipstick"],
   lipgloss: ["lip gloss", "lipgloss"],
   lipglos: ["lip gloss", "lipgloss"],
+  liptint: ["lip tint", "liptint"],
+  lipbalm: ["lip balm", "lipbalm"],
+  lipliner: ["lip liner", "lipliner"],
   shampo: ["shampoo"],
   sampoo: ["shampoo"],
   champo: ["shampoo"],
@@ -55,12 +105,6 @@ const BEAUTY_TYPO_ALIASES = {
   parfume: ["perfume"],
   parfum: ["perfume"],
   attar: ["atar", "itr"],
-  vaslin: ["vaseline"],
-  vasline: ["vaseline"],
-  veseline: ["vaseline"],
-  theordinary: ["ordinary"],
-  ordinery: ["ordinary"],
-  ordnary: ["ordinary"],
   facewash: ["face wash", "facewash"],
   facewosh: ["face wash", "facewash"],
   cleanser: ["cleanse", "cleanser"],
@@ -85,21 +129,12 @@ const BEAUTY_TYPO_ALIASES = {
   hialuronic: ["hyaluronic"],
   salicylic: ["salicylic", "salisilic"],
   salisilic: ["salicylic"],
-  tresemme: ["tresemme"],
-  tresemey: ["tresemme"],
   dove: ["dove"],
   dov: ["dove"],
   biore: ["biore"],
   bior: ["biore"],
   simple: ["simple"],
   simpl: ["simple"],
-  neutrogena: ["neutrogena"],
-  nutrogena: ["neutrogena"],
-  garnier: ["garnier"],
-  garniyar: ["garnier"],
-  cosrx: ["cosrx", "cos-rx"],
-  innisfree: ["innisfree"],
-  inisfree: ["innisfree"],
   bodyspray: ["body spray", "bodyspray"],
   bodimists: ["body mist"],
   bodymist: ["body mist", "bodymist"],
@@ -109,34 +144,46 @@ export const SEARCH_STOP_WORDS = new Set([
   "to", "for", "in", "on", "at", "of", "a", "an", "the", "and", "or", "with", "by", "from", "is", "it", "as", "into"
 ]);
 
+// Generic cosmetics words that should carry low IDF weight
+export const COMMON_GENERIC_WORDS = new Set([
+  "lip", "lips", "lipstick", "cream", "lotion", "serum", "wash", "face", "body", "oil", "gel", "soap",
+  "hair", "skin", "care", "beauty", "matte", "gloss", "tint", "shampoo", "mask", "powder", "spray", "balm"
+]);
+
 /**
- * Normalizes and strips brackets and punctuation from search string.
+ * Normalizes and strips brackets, dashes, and punctuation from search string.
  * Keeps letters, numbers, and Bengali Unicode characters intact.
  */
 export function cleanSearchTerm(raw) {
   if (!raw || typeof raw !== "string") {
-    return { raw: "", cleanPhrase: "", tokens: [] };
+    return { raw: "", cleanPhrase: "", tokens: [], meaningfulTokens: [] };
   }
 
-  // Remove brackets: () [] {} <>
+  // Treat all brackets, hyphens, en-dashes, em-dashes and punctuation as spaces
   let s = raw.replace(/[()[\]{}<>«»]/g, " ");
-
-  // Replace common punctuation symbols with space
-  s = s.replace(/["'?!:;,+*~^$\\/#@|_.=]/g, " ");
+  s = s.replace(/[-–—_.,:;!?'"()#&/\\+*~^$[\]{}<>«»]/g, " ");
 
   // Collapse multiple spaces and trim
-  const cleanPhrase = s.replace(/\s+/g, " ").trim();
+  const cleanPhrase = s.replace(/\s+/g, " ").trim().toLowerCase();
 
-  // Extract tokens (length >= 2, or length 1 if alphanumeric)
+  // Extract tokens
   const tokens = cleanPhrase
     .split(" ")
     .map((w) => w.trim().toLowerCase())
     .filter((w) => w.length > 0);
 
+  // Extract meaningful tokens: preserve digits/numbers (e.g. 3, 03, 101, 50ml), exclude stop words
+  const meaningfulTokens = tokens.filter((t) => {
+    if (SEARCH_STOP_WORDS.has(t)) return false;
+    if (/\d/.test(t)) return true; // Keep any token containing a number!
+    return t.length >= 2;
+  });
+
   return {
     raw,
     cleanPhrase,
     tokens,
+    meaningfulTokens,
   };
 }
 
@@ -162,14 +209,12 @@ export function getFuzzyVariantsForToken(token) {
   }
 
   // 2. Generate 1-edit wildcard regex for words of length >= 4
-  // e.g. for "nivea" -> "n.vea", "ni.ea", "niv.a"
   const regexPatterns = [];
   if (lower.length >= 4) {
     for (let i = 1; i < lower.length - 1; i++) {
       const pattern = lower.slice(0, i) + "." + lower.slice(i + 1);
       regexPatterns.push(pattern);
     }
-    // Also allow missing character transposition e.g. "shapo" -> "sha.?po"
     for (let i = 1; i < lower.length; i++) {
       const pattern = lower.slice(0, i) + ".?" + lower.slice(i);
       regexPatterns.push(pattern);
@@ -178,7 +223,7 @@ export function getFuzzyVariantsForToken(token) {
 
   return {
     words: Array.from(variants),
-    patterns: regexPatterns.slice(0, 5), // Keep top 5 to keep query fast
+    patterns: regexPatterns.slice(0, 5),
   };
 }
 
@@ -203,9 +248,9 @@ export function levenshteinDistance(a, b) {
         matrix[i][j] = matrix[i - 1][j - 1];
       } else {
         matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
         );
       }
     }
@@ -216,51 +261,84 @@ export function levenshteinDistance(a, b) {
 /**
  * Scores a product against the search query for intelligent Google-like relevance ranking.
  */
-export function scoreProductRelevance(product, cleanPhrase, tokens) {
-  const name = String(product.name || "").toLowerCase();
-  const desc = String(product.description || "").toLowerCase();
-  const catName = String(product.category?.name || product.category || "").toLowerCase();
-  const brandName = String(product.brand?.name || product.brand || "").toLowerCase();
+export function scoreProductRelevance(product, cleanPhrase, tokens, meaningfulTokens = null) {
+  const normTitle = normalize(product.name);
+  const titleTokens = new Set(normTitle.split(" ").filter(Boolean));
+  const desc = normalize(product.description || "");
+  const catName = normalize(product.category?.name || product.category || "");
+  const brandName = normalize(product.brand?.name || product.brand || "");
   const lowerPhrase = cleanPhrase.toLowerCase();
+
+  const queryTokens = meaningfulTokens && meaningfulTokens.length > 0
+    ? meaningfulTokens
+    : tokens.filter((t) => !SEARCH_STOP_WORDS.has(t) && (/\d/.test(t) || t.length >= 2));
 
   let score = 0;
 
-  // 1. Exact phrase in name
-  if (name.includes(lowerPhrase)) {
-    score += 150;
-    if (name.startsWith(lowerPhrase)) {
-      score += 50;
-    }
+  // 1. Exact phrase match in Name
+  if (normTitle === lowerPhrase) {
+    score += 1500; // Perfect exact product match!
+  } else if (normTitle.startsWith(lowerPhrase + " ") || normTitle.startsWith(lowerPhrase)) {
+    score += 900;  // Title begins with the full search phrase
+  } else if (normTitle.includes(lowerPhrase)) {
+    score += 650;  // Title contains the exact search phrase
+  } else if (lowerPhrase.includes(normTitle) && normTitle.length >= 5) {
+    score += 400;  // Query includes full title
   }
 
   // 2. Brand match
-  if (brandName && lowerPhrase.includes(brandName)) {
-    score += 80;
+  const hasBrandInQuery = brandName && brandName.length >= 2 && lowerPhrase.includes(brandName);
+  if (hasBrandInQuery) {
+    score += 350; // Massively boost products from the explicitly searched brand!
   } else if (brandName && brandName.includes(lowerPhrase)) {
-    score += 60;
+    score += 150;
   }
 
   // 3. Category match
   if (catName && (lowerPhrase.includes(catName) || catName.includes(lowerPhrase))) {
-    score += 50;
+    score += 80;
   }
 
-  // 4. Token matches in Name
-  let matchedTokens = 0;
-  for (const token of tokens) {
-    if (token.length < 2) continue;
+  // 4. Token-level matching & IDF weighting
+  let matchedCount = 0;
+  let allNumericMatched = true;
 
-    if (name.includes(token)) {
-      score += 40;
-      matchedTokens++;
+  for (const token of queryTokens) {
+    const isNum = /^\d+$/.test(token);
+    const isGeneric = COMMON_GENERIC_WORDS.has(token);
+
+    if (titleTokens.has(token)) {
+      matchedCount++;
+      if (isNum) {
+        score += 250; // Exact shade/number match!
+      } else if (isGeneric) {
+        score += 25;  // Low weight for generic words (lip, cream, etc.)
+      } else {
+        score += 100; // High weight for distinct words (handaiyan, cerave, mocha)
+      }
+    } else if (normTitle.includes(token)) {
+      matchedCount++;
+      score += isNum ? 150 : (isGeneric ? 15 : 60);
     } else {
+      // Check 0-padded for numbers (e.g. 3 vs 03)
+      if (isNum) {
+        const padded = token.length === 1 ? `0${token}` : (token.startsWith("0") ? token.slice(1) : null);
+        if (padded && (titleTokens.has(padded) || normTitle.includes(padded))) {
+          matchedCount++;
+          score += 200;
+          continue;
+        } else {
+          allNumericMatched = false;
+        }
+      }
+
       // Check typo variants
       const { words } = getFuzzyVariantsForToken(token);
       let foundVariant = false;
       for (const w of words) {
-        if (name.includes(w)) {
-          score += 35;
-          matchedTokens++;
+        if (normTitle.includes(w) || titleTokens.has(w)) {
+          score += isGeneric ? 20 : 70;
+          matchedCount++;
           foundVariant = true;
           break;
         }
@@ -268,17 +346,23 @@ export function scoreProductRelevance(product, cleanPhrase, tokens) {
 
       // Check Levenshtein on words in title
       if (!foundVariant && token.length >= 4) {
-        const titleWords = name.split(/\s+/);
-        for (const tw of titleWords) {
+        for (const tw of titleTokens) {
           if (tw.length >= 3 && Math.abs(tw.length - token.length) <= 2) {
             const dist = levenshteinDistance(token, tw);
             if (dist <= 2) {
-              score += Math.max(10, 30 - dist * 10);
-              matchedTokens++;
+              score += Math.max(15, 50 - dist * 15);
+              matchedCount++;
+              foundVariant = true;
               break;
             }
           }
         }
+      }
+
+      // Check brand match for token
+      if (!foundVariant && brandName && brandName.includes(token)) {
+        score += 60;
+        matchedCount++;
       }
     }
 
@@ -288,14 +372,28 @@ export function scoreProductRelevance(product, cleanPhrase, tokens) {
     }
   }
 
-  // Bonus if all query tokens matched
-  if (tokens.length > 0 && matchedTokens === tokens.length) {
-    score += 50;
+  // 5. Query Coverage Ratio
+  if (queryTokens.length > 0) {
+    const ratio = matchedCount / queryTokens.length;
+    if (ratio === 1) {
+      score += 400; // ALL tokens matched!
+    } else if (ratio >= 0.75) {
+      score += 150;
+    } else if (ratio >= 0.5) {
+      score += 50;
+    }
   }
 
-  // 5. Stock status bonus (available products rank higher)
+  // 6. Shade number penalty
+  // If the query explicitly asked for a number (e.g. 3), but product has a DIFFERENT number
+  const qNumbers = queryTokens.filter((t) => /^\d+$/.test(t));
+  if (qNumbers.length > 0 && !allNumericMatched) {
+    score -= 100;
+  }
+
+  // 7. Stock status bonus (in-stock items rank higher)
   if (product.inStock) {
-    score += 10;
+    score += 25;
   }
   if (product.isFeatured) {
     score += 5;
@@ -418,13 +516,13 @@ export async function searchProductsFast(
   const parsed = cleanSearchTerm(rawSearch);
   const cleanPhrase = parsed.cleanPhrase;
   const searchTokens = parsed.tokens;
-  const meaningfulTokens = searchTokens.filter((t) => !SEARCH_STOP_WORDS.has(t) && t.length >= 2);
+  const meaningfulTokens = parsed.meaningfulTokens;
 
   if (!cleanPhrase && meaningfulTokens.length === 0) {
     return { products: [], total: 0, totalPages: 1, currentPage: page, limit };
   }
 
-  const normalizedQuery = cleanPhrase.toLowerCase();
+  const normalizedQuery = cleanPhrase;
   const filterKey = `${normalizedQuery}__${isAdmin ? "adm" : "usr"}__${brand || ""}__${category || ""}__${type || ""}__${collection || ""}`;
 
   let rankedCandidates = queryResultCache.get(filterKey);
@@ -494,31 +592,29 @@ export async function searchProductsFast(
           }
         }
 
-        const pName = (p.name || "").toLowerCase();
-        const bName = (p.brand?.name || (typeof p.brand === "string" ? p.brand : "")).toLowerCase();
-        const cName = (p.category?.name || (typeof p.category === "string" ? p.category : "")).toLowerCase();
-        const pDesc = (p.description || "").toLowerCase();
+        const normPName = normalize(p.name);
+        const bName = normalize(p.brand?.name || (typeof p.brand === "string" ? p.brand : ""));
+        const cName = normalize(p.category?.name || (typeof p.category === "string" ? p.category : ""));
 
         let matched = false;
 
-        if (cleanPhrase && (pName.includes(normalizedQuery) || bName.includes(normalizedQuery) || cName.includes(normalizedQuery))) {
+        // 1. Exact phrase match
+        if (cleanPhrase && (normPName.includes(normalizedQuery) || bName.includes(normalizedQuery) || cName.includes(normalizedQuery))) {
           matched = true;
         } else if (
           meaningfulTokens.length > 0 &&
-          meaningfulTokens.every((t) => pName.includes(t) || bName.includes(t) || cName.includes(t))
+          meaningfulTokens.every((t) => normPName.includes(t) || bName.includes(t) || cName.includes(t))
         ) {
+          // 2. All tokens matched
           matched = true;
         } else {
+          // 3. Variant match
           for (const v of variantList) {
-            if (pName.includes(v) || bName.includes(v) || cName.includes(v)) {
+            if (normPName.includes(v) || bName.includes(v) || cName.includes(v)) {
               matched = true;
               break;
             }
           }
-        }
-
-        if (!matched && cleanPhrase.length >= 3 && pDesc.includes(normalizedQuery)) {
-          matched = true;
         }
 
         if (matched) {
@@ -545,106 +641,125 @@ export async function searchProductsFast(
           CategoryModel = models.Category;
         } catch (_) {}
 
-        const allVariants = new Set();
-        if (cleanPhrase) allVariants.add(normalizedQuery);
-        for (const t of meaningfulTokens) {
-          allVariants.add(t.toLowerCase());
-          const { words } = getFuzzyVariantsForToken(t);
-          words.forEach((w) => allVariants.add(w.toLowerCase()));
-        }
-        const variantList = Array.from(allVariants).slice(0, 8);
-
-        const orList = [];
-        if (cleanPhrase) {
-          orList.push({ name: { $regex: escapeRegex(cleanPhrase), $options: "i" } });
-        }
-        for (const v of variantList) {
-          orList.push({ name: { $regex: escapeRegex(v), $options: "i" } });
-        }
-
-        // Parallel brand & category lookup (takes ~5ms)
-        const brandCatLookups = [];
-        if (cleanPhrase && cleanPhrase.length >= 3) {
-          if (BrandModel) {
-            brandCatLookups.push(
-              BrandModel.find({ name: { $regex: escapeRegex(cleanPhrase), $options: "i" } })
-                .select("_id")
-                .limit(5)
-                .lean()
-                .then((bDocs) => bDocs.map((b) => b._id))
-                .catch(() => [])
-            );
-          } else {
-            brandCatLookups.push(Promise.resolve([]));
-          }
-
-          if (CategoryModel) {
-            brandCatLookups.push(
-              CategoryModel.find({ name: { $regex: escapeRegex(cleanPhrase), $options: "i" } })
-                .select("_id")
-                .limit(5)
-                .lean()
-                .then((cDocs) => cDocs.map((c) => c._id))
-                .catch(() => [])
-            );
-          } else {
-            brandCatLookups.push(Promise.resolve([]));
-          }
-        } else {
-          brandCatLookups.push(Promise.resolve([]), Promise.resolve([]));
-        }
-
-        const [matchingBrandIds, matchingCategoryIds] = await Promise.all(brandCatLookups);
-
-        if (matchingBrandIds.length > 0) {
-          orList.push({ brand: { $in: matchingBrandIds } });
-        }
-        if (matchingCategoryIds.length > 0) {
-          orList.push({ category: { $in: matchingCategoryIds } });
-        }
-
-        const dbQuery = { $or: orList.length > 0 ? orList : [{ name: { $regex: ".*", $options: "i" } }] };
-
-        if (!isAdmin) {
-          dbQuery.inStock = { $ne: false };
-        }
-        if (excludeId) {
-          dbQuery._id = { $ne: excludeId };
-        }
-        if (brand) {
-          dbQuery.brand = brand;
-        }
-        if (category) {
-          dbQuery.category = category;
-        }
+        // Multi-tier candidate query:
+        // Tier 1: Search products containing ALL meaningful tokens in name
+        const baseFilter = {};
+        if (!isAdmin) baseFilter.inStock = { $ne: false };
+        if (excludeId) baseFilter._id = { $ne: excludeId };
+        if (brand) baseFilter.brand = brand;
+        if (category) baseFilter.category = category;
         if (type) {
-          if (type === "campus15" || type === "max-discount") {
-            dbQuery.campusDiscountPct = { $gte: 15 };
-          } else if (type === "featured") {
-            dbQuery.isFeatured = true;
-          } else if (type === "trending") {
-            dbQuery.isTrending = true;
-          } else if (type === "new") {
-            dbQuery.isNewArrival = true;
-          } else if (type === "slider") {
-            dbQuery.isSlider = true;
+          if (type === "campus15" || type === "max-discount") baseFilter.campusDiscountPct = { $gte: 15 };
+          else if (type === "featured") baseFilter.isFeatured = true;
+          else if (type === "trending") baseFilter.isTrending = true;
+          else if (type === "new") baseFilter.isNewArrival = true;
+          else if (type === "slider") baseFilter.isSlider = true;
+        }
+
+        const candidateMap = new Map();
+
+        // 1. Try exact phrase regex or all tokens AND
+        if (meaningfulTokens.length > 0) {
+          const andConditions = meaningfulTokens.map((t) => ({
+            name: { $regex: escapeRegex(t), $options: "i" }
+          }));
+
+          const tier1Docs = await ActiveProduct.find({
+            ...baseFilter,
+            $and: andConditions,
+          })
+            .select("name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
+            .populate("brand", "name slug")
+            .populate("category", "name slug ancestors")
+            .limit(60)
+            .lean();
+
+          for (const d of tier1Docs) {
+            candidateMap.set(String(d._id), d);
           }
         }
 
-        const rawDocs = await ActiveProduct.find(dbQuery)
-          .select("name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
-          .populate("brand", "name slug")
-          .populate("category", "name slug ancestors")
-          .limit(isPaginated ? Math.max(limit * page * 2, 48) : 48)
-          .lean();
+        // 2. If fewer than 24 candidates, also search for non-numeric text tokens
+        const textTokens = meaningfulTokens.filter((t) => !/^\d+$/.test(t));
+        if (candidateMap.size < 24 && textTokens.length > 0 && textTokens.length < meaningfulTokens.length) {
+          const textConditions = textTokens.map((t) => ({
+            name: { $regex: escapeRegex(t), $options: "i" }
+          }));
 
-        matches = rawDocs;
+          const tier2Docs = await ActiveProduct.find({
+            ...baseFilter,
+            $and: textConditions,
+          })
+            .select("name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
+            .populate("brand", "name slug")
+            .populate("category", "name slug ancestors")
+            .limit(60)
+            .lean();
+
+          for (const d of tier2Docs) {
+            candidateMap.set(String(d._id), d);
+          }
+        }
+
+        // 3. If still fewer than 24, search by brand name or token variants
+        if (candidateMap.size < 24) {
+          const allVariants = new Set();
+          if (cleanPhrase) allVariants.add(normalizedQuery);
+          for (const t of meaningfulTokens) {
+            allVariants.add(t.toLowerCase());
+            const { words } = getFuzzyVariantsForToken(t);
+            words.forEach((w) => allVariants.add(w.toLowerCase()));
+          }
+          const variantList = Array.from(allVariants).slice(0, 10);
+
+          const orList = [];
+          if (cleanPhrase) {
+            orList.push({ name: { $regex: escapeRegex(cleanPhrase), $options: "i" } });
+          }
+          for (const v of variantList) {
+            orList.push({ name: { $regex: escapeRegex(v), $options: "i" } });
+          }
+
+          // Brand lookups
+          if (cleanPhrase && cleanPhrase.length >= 3 && BrandModel) {
+            try {
+              const bDocs = await BrandModel.find({ name: { $regex: escapeRegex(cleanPhrase), $options: "i" } })
+                .select("_id")
+                .limit(5)
+                .lean();
+              if (bDocs.length > 0) {
+                orList.push({ brand: { $in: bDocs.map((b) => b._id) } });
+              }
+            } catch (_) {}
+          }
+
+          if (orList.length > 0) {
+            const tier3Docs = await ActiveProduct.find({
+              ...baseFilter,
+              $or: orList,
+            })
+              .select("name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
+              .populate("brand", "name slug")
+              .populate("category", "name slug ancestors")
+              .limit(100)
+              .lean();
+
+            for (const d of tier3Docs) {
+              candidateMap.set(String(d._id), d);
+            }
+          }
+        }
+
+        matches = Array.from(candidateMap.values());
+
+        // Kick off catalog background warmup for subsequent sub-5ms searches
+        warmOrGetSearchCatalog(ActiveProduct).catch(() => {});
       }
     }
 
-    // Rank candidates by relevance
+    // Rank candidates by Google-like relevance score
     for (let i = 0; i < matches.length; i++) {
-      matches[i]._score = scoreProductRelevance(matches[i], cleanPhrase, searchTokens);
+      matches[i]._score = scoreProductRelevance(matches[i], cleanPhrase, searchTokens, meaningfulTokens);
     }
     matches.sort((a, b) => (b._score || 0) - (a._score || 0));
 

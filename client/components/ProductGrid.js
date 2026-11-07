@@ -251,12 +251,15 @@ function ProductGridContent({
           : Array.isArray(data)
           ? data
           : [];
-        const sortedList = [...rawList].sort((a, b) => {
-          const campA = Number(a.campusDiscountPct) || 0;
-          const campB = Number(b.campusDiscountPct) || 0;
-          if (campB !== campA) return campB - campA;
-          return 0;
-        });
+        const isSearch = Boolean(debouncedSearch && debouncedSearch.trim());
+        const sortedList = isSearch
+          ? rawList
+          : [...rawList].sort((a, b) => {
+              const campA = Number(a.campusDiscountPct) || 0;
+              const campB = Number(b.campusDiscountPct) || 0;
+              if (campB !== campA) return campB - campA;
+              return 0;
+            });
         setProducts(sortedList);
         setTotalPages(data?.totalPages || 1);
         setTotalProducts(data?.total || rawList.length);
@@ -288,10 +291,10 @@ function ProductGridContent({
   }, [activeCategory, activeBrand, type, collection, debouncedSearch, currentPage, PAGE_SIZE, activeCoupon]);
 
   useEffect(() => {
-    if (activeCoupon) {
+    if (activeCoupon && (!debouncedSearch || !debouncedSearch.trim())) {
       setProducts((prev) => [...prev].sort((a, b) => (Number(b.campusDiscountPct) || 0) - (Number(a.campusDiscountPct) || 0)));
     }
-  }, [activeCoupon]);
+  }, [activeCoupon, debouncedSearch]);
 
   const filteredProducts = products;
 
