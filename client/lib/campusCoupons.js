@@ -1,3 +1,5 @@
+import { calculateSafeCampusPrice } from "@/lib/campusPricingHelper";
+
 export const VALID_CAMPUS_COUPONS = {
   // --- UNIVERSAL CAMPUS PRIVILEGES ---
   "CAMPUS15": {
@@ -494,39 +496,17 @@ export function getProductCampusPricing(product, coupon) {
   const mrp = Number(product.originalPrice || product.offerPrice || regularPrice);
   if (regularPrice <= 0) return null;
 
-  const ogerioPrice = Number(product.ogerioPrice || 0);
-
-  // 1. Use product's database campusDiscountPct if defined
-  let discountPct = product.campusDiscountPct !== undefined && product.campusDiscountPct !== null
-    ? Number(product.campusDiscountPct)
-    : -1;
-
-  // 2. Intelligent fallback if not yet populated or cached
-  if (discountPct < 0) {
-    if (mrp > regularPrice && (mrp - regularPrice) / mrp >= 0.15) {
-      discountPct = 8;
-    } else {
-      discountPct = 5;
-    }
-  }
-
-  // Cap at coupon max (15%)
-  discountPct = Math.min(coupon.maxDiscount || 15, Math.max(0, discountPct));
-
-  let campusPrice = Math.max(1, Math.round(regularPrice * (1 - discountPct / 100)));
-
-  // Safety rule 1: Campus price must NEVER drop below Ogerio's price.
-  if (ogerioPrice > 0 && campusPrice < ogerioPrice) {
-    campusPrice = Math.min(regularPrice, ogerioPrice);
-    discountPct = regularPrice > campusPrice ? Math.round(((regularPrice - campusPrice) / regularPrice) * 100) : 0;
-  }
-
-  // Safety rule 2: Campus price must NEVER drop below purchase cost (কেনা দাম). Zero loss guarantee!
   const baseCost = Number(product.purchasePrice || product.costAtSale || 0);
-  if (baseCost > 0 && campusPrice < baseCost) {
-    campusPrice = Math.min(regularPrice, baseCost);
-    discountPct = regularPrice > campusPrice ? Math.round(((regularPrice - campusPrice) / regularPrice) * 100) : 0;
-  }
+  const minProfitPct = coupon.minProfitPct !== undefined ? Number(coupon.minProfitPct) : 12;
+
+  // Desired discount percentage
+  let desiredPct = product.campusDiscountPct !== undefined && product.campusDiscountPct !== null
+    ? Number(product.campusDiscountPct)
+    : (coupon.maxDiscount || 15);
+
+  const safeResult = calculateSafeCampusPrice(regularPrice, baseCost, desiredPct, minProfitPct);
+  const campusPrice = safeResult.price;
+  const discountPct = safeResult.discountPct;
 
   const savedAmount = Math.max(0, regularPrice - campusPrice);
   const savedFromMrp = Math.max(savedAmount, mrp - campusPrice);
@@ -542,6 +522,6 @@ export function getProductCampusPricing(product, coupon) {
     savedFromMrp,
     savedFromMrpPct,
     badgeText: discountPct > 0 ? `🎓 ${coupon.short} -${discountPct}% OFF` : `🎓 ${coupon.short} Privilege`,
-    shortName: coupon.short
+    shortName: coupon.short,
   };
 }

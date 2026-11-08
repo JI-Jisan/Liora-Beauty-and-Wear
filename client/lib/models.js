@@ -517,3 +517,25 @@ ResellerLedgerSchema.index({ createdAt: -1 });
 export const ResellerLedger =
   mongoose.models.ResellerLedger || mongoose.model("ResellerLedger", ResellerLedgerSchema);
 
+// ---------- CampusCoupon (বিশ্ববিদ্যালয় ও ক্যাম্পাস স্পেশাল কুপন) ----------
+const CampusCouponSchema = new mongoose.Schema(
+  {
+    code: { type: String, required: true, unique: true, uppercase: true, trim: true, index: true },
+    universityName: { type: String, required: true, trim: true },
+    shortName: { type: String, required: true, trim: true },
+    tagColor: { type: String, default: "#e11d48" },
+    maxDiscount: { type: Number, default: 15, min: 1, max: 30 },
+    minProfitPct: { type: Number, default: 12, min: 5, max: 40 },
+    welcomeTitle: { type: String, default: "" },
+    welcomeSubtitle: { type: String, default: "" },
+    isActive: { type: Boolean, default: true, index: true },
+    usageCount: { type: Number, default: 0 },
+    createdBy: { type: String, default: "admin" }
+  },
+  { timestamps: true }
+);
+
+export const CampusCoupon =
+  mongoose.models.CampusCoupon || mongoose.model("CampusCoupon", CampusCouponSchema);
+
+

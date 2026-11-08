@@ -20,9 +20,9 @@ export default function CampusCouponBar() {
     setIsSubmitting(true);
     setFeedback(null);
 
-    setTimeout(() => {
-      const res = applyCampusCoupon(cleanCode);
-      if (res.success) {
+    setTimeout(async () => {
+      const res = await applyCampusCoupon(cleanCode);
+      if (res?.success) {
         setFeedback({ type: "success", message: res.message });
         setInputCode("");
         setTimeout(() => {

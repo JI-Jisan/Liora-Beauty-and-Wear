@@ -16,6 +16,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { buildTree, flattenWithPath } from "@/lib/categoryTree";
 import { useAuth } from "@/components/AuthProvider";
 import BannerManager from "@/components/admin/BannerManager";
+import CampusCouponManager from "@/components/admin/CampusCouponManager";
 
 // Helper to get selected category ID and all its descendant category IDs
 function getCategoryAndDescendantIds(selectedCatId, allCategories = []) {
@@ -956,6 +957,25 @@ export default function AdminPage() {
             💰 Profit & Pricing Matrix
           </li>
           <li
+            className={activeTab === "campus-coupons" ? "active-tab" : ""}
+            onClick={() => {
+              setActiveTab("campus-coupons");
+              setIsSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            style={{
+              background: activeTab === "campus-coupons" ? undefined : "linear-gradient(135deg, #f43f5e, #be123c)",
+              color: "#ffffff",
+              fontWeight: "900",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(244, 63, 94, 0.3)",
+              margin: "6px 0",
+              cursor: "pointer",
+            }}
+          >
+            🎓 University Coupons
+          </li>
+          <li
             onClick={() => {
               router.push("/admin/id-cards");
             }}
@@ -1213,6 +1233,16 @@ export default function AdminPage() {
                   <div style={{ fontSize: "28px", marginBottom: "8px" }}>🪪</div>
                   <h3 style={{ margin: "0", fontSize: "14px", color: "#be185d", fontWeight: "800", textAlign: "center" }}>ID Card Studio</h3>
                   <span style={{ fontSize: "11px", color: "#9d174d", textAlign: "center", marginTop: "2px", fontWeight: "600" }}>Canva-Style Cards</span>
+                </div>
+
+                {/* University Coupons Box */}
+                <div 
+                  onClick={() => { setActiveTab("campus-coupons"); window.scrollTo(0,0); }}
+                  style={{ background: "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)", padding: "18px 10px", borderRadius: "16px", border: "1px solid #fecdd3", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 10px rgba(225,29,72,0.14)" }}
+                >
+                  <div style={{ fontSize: "28px", marginBottom: "8px" }}>🎓</div>
+                  <h3 style={{ margin: "0", fontSize: "14px", color: "#9f1239", fontWeight: "900", textAlign: "center" }}>University Coupons</h3>
+                  <span style={{ fontSize: "11px", color: "#be123c", textAlign: "center", marginTop: "2px", fontWeight: "700" }}>Campus Privileges & Engine</span>
                 </div>
 
 
@@ -2780,6 +2810,15 @@ export default function AdminPage() {
             <div className="jt-admin-panel jt-admin-panel-wide admin-card">
               <ErrorBoundary>
                 <AdminUserManager />
+              </ErrorBoundary>
+            </div>
+          )}
+
+          {/* University Campus Coupons Tab */}
+          {activeTab === "campus-coupons" && (
+            <div className="jt-admin-panel jt-admin-panel-wide admin-card">
+              <ErrorBoundary>
+                <CampusCouponManager />
               </ErrorBoundary>
             </div>
           )}

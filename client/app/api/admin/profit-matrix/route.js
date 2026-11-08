@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/lib/db";
 import { Product, Category, Brand } from "@/lib/models";
 import { requireAdmin } from "@/lib/adminGuard";
+import { calculateSafeCampusPrice } from "@/lib/campusPricingHelper";
 
 export const runtime = "nodejs";
 
@@ -99,13 +100,13 @@ export async function GET(req) {
       let modeNote = "Regular Web Offer";
 
       if (mode === "diu15") {
-        const discountAmt = Math.round(offerPrice * (campusDiscountPct / 100));
-        effectiveSellingPrice = Math.max(0, offerPrice - discountAmt);
-        modeNote = `DIU15 (-${campusDiscountPct}%)`;
+        const safeRes = calculateSafeCampusPrice(offerPrice, purchasePrice, campusDiscountPct, 12);
+        effectiveSellingPrice = safeRes.price;
+        modeNote = `DIU15 (-${safeRes.discountPct}%)`;
       } else if (mode === "student15") {
-        const discountAmt = Math.round(offerPrice * 0.15);
-        effectiveSellingPrice = Math.max(0, offerPrice - discountAmt);
-        modeNote = "Student15 (-15%)";
+        const safeRes = calculateSafeCampusPrice(offerPrice, purchasePrice, 15, 12);
+        effectiveSellingPrice = safeRes.price;
+        modeNote = `Student15 (-${safeRes.discountPct}%)`;
       } else if (mode === "wholesale") {
         effectiveSellingPrice = wholesalePrice;
         modeNote = `Wholesale (Min ${wholesaleMinQty} pcs)`;

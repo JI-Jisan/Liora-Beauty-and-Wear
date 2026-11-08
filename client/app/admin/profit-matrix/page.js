@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { API_BASE_URL, getAuthHeaders } from "@/lib/api";
+import { calculateSafeCampusPrice } from "@/lib/campusPricingHelper";
 
 export default function AdminProfitMatrixPage() {
   const [loading, setLoading] = useState(true);
@@ -192,10 +193,15 @@ export default function AdminProfitMatrixPage() {
     const campusDiscountPct = draft.campusDiscountPct !== undefined ? Number(draft.campusDiscountPct) : Number(p.campusDiscountPct) || 15;
 
     let effectiveSellingPrice = offerPrice;
+    let effectiveDiscountPct = 0;
     if (mode === "diu15") {
-      effectiveSellingPrice = Math.max(0, offerPrice - Math.round(offerPrice * (campusDiscountPct / 100)));
+      const safe = calculateSafeCampusPrice(offerPrice, purchasePrice, campusDiscountPct, 12);
+      effectiveSellingPrice = safe.price;
+      effectiveDiscountPct = safe.discountPct;
     } else if (mode === "student15") {
-      effectiveSellingPrice = Math.max(0, offerPrice - Math.round(offerPrice * 0.15));
+      const safe = calculateSafeCampusPrice(offerPrice, purchasePrice, 15, 12);
+      effectiveSellingPrice = safe.price;
+      effectiveDiscountPct = safe.discountPct;
     } else if (mode === "wholesale") {
       effectiveSellingPrice = wholesalePrice;
     } else if (mode === "reseller") {
@@ -221,7 +227,9 @@ export default function AdminProfitMatrixPage() {
       wholesalePrice,
       resellerPrice,
       ogerioPrice,
+      campusDiscountPct,
       effectiveSellingPrice,
+      effectiveDiscountPct,
       unitProfit,
       profitMarginPct,
       ogerioDiff,
@@ -941,11 +949,45 @@ export default function AdminProfitMatrixPage() {
                         </td>
 
                         {/* 8. Effective Selling Price for Active Mode */}
-                        <td style={{ padding: "12px 12px", borderBottom: "1px solid #233149", background: "rgba(56, 189, 248, 0.08)", fontWeight: "800", color: "#38bdf8", fontSize: "14px" }}>
-                          ৳{rowRecalc.effectiveSellingPrice.toLocaleString("en-IN")}
+                        <td style={{ padding: "10px 10px", borderBottom: "1px solid #233149", background: "rgba(56, 189, 248, 0.08)", fontWeight: "800", color: "#38bdf8", fontSize: "14px" }}>
+                          <div>৳{rowRecalc.effectiveSellingPrice.toLocaleString("en-IN")}</div>
                           {activeMode === "diu15" && (
+                            <div style={{ marginTop: "6px", display: "flex", alignItems: "center", gap: "4px" }}>
+                              <span style={{ fontSize: "10px", color: "#f43f5e", fontWeight: "700" }}>DIU ছাড়:</span>
+                              <input
+                                type="number"
+                                min="0"
+                                max="15"
+                                value={draft.campusDiscountPct !== undefined ? draft.campusDiscountPct : (p.campusDiscountPct !== undefined ? p.campusDiscountPct : 15)}
+                                onChange={(e) => handleCellChange(p._id, "campusDiscountPct", e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") handleSaveRow(p);
+                                }}
+                                title="ক্যাম্পাস ছাড় % (০ থেকে ১৫)"
+                                style={{
+                                  width: "48px",
+                                  background: draft.campusDiscountPct !== undefined ? "#3b2d12" : "#0f172a",
+                                  border: `1px solid ${draft.campusDiscountPct !== undefined ? "#f59e0b" : "#f43f5e"}`,
+                                  color: "#fda4af",
+                                  padding: "3px 4px",
+                                  borderRadius: "5px",
+                                  fontSize: "11px",
+                                  fontWeight: "800",
+                                  textAlign: "center",
+                                  outline: "none"
+                                }}
+                              />
+                              <span style={{ fontSize: "10px", color: "#fda4af", fontWeight: "700" }}>%</span>
+                            </div>
+                          )}
+                          {activeMode === "diu15" && rowRecalc.effectiveDiscountPct !== undefined && (
+                            <span style={{ display: "block", fontSize: "10px", color: "#10b981", fontWeight: "600", marginTop: "2px" }}>
+                              কার্যকর ছাড়: -{rowRecalc.effectiveDiscountPct}%
+                            </span>
+                          )}
+                          {activeMode === "student15" && (
                             <span style={{ display: "block", fontSize: "10.5px", color: "#f43f5e", fontWeight: "600" }}>
-                              DIU15 (-{p.campusDiscountPct || 15}%)
+                              Student15 (-{rowRecalc.effectiveDiscountPct || 15}%)
                             </span>
                           )}
                           {activeMode === "ogerio" && rowRecalc.ogerioDiff !== null && (
