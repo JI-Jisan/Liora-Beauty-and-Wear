@@ -819,8 +819,8 @@ export default function AdminProfitMatrixPage() {
                             style={{
                               width: "100%",
                               background: draft.offerPrice !== undefined ? "#3b2d12" : "#0f172a",
-                              border: `1px solid ${draft.offerPrice !== undefined ? "#f59e0b" : "#475569"}`,
-                              color: "#38bdf8",
+                              border: `1px solid ${draft.offerPrice !== undefined ? "#f59e0b" : p.is1111Applied ? "#f43f5e" : "#475569"}`,
+                              color: p.is1111Applied ? "#fda4af" : "#38bdf8",
                               padding: "6px 8px",
                               borderRadius: "6px",
                               fontWeight: "800",
@@ -829,6 +829,16 @@ export default function AdminProfitMatrixPage() {
                               textAlign: "right"
                             }}
                           />
+                          {p.pre1111OfferPrice && (
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "3px", fontSize: "10.5px" }}>
+                              <span style={{ background: "#881337", color: "#fecdd3", padding: "1px 4px", borderRadius: "3px", fontWeight: "800", fontSize: "9px" }}>
+                                11.11
+                              </span>
+                              <span style={{ color: "#94a3b8", textDecoration: "line-through" }}>
+                                ৳{p.pre1111OfferPrice}
+                              </span>
+                            </div>
+                          )}
                         </td>
 
                         {/* 4. Regular MRP (originalPrice) */}

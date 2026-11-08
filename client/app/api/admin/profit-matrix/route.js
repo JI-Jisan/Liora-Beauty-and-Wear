@@ -156,6 +156,8 @@ export async function GET(req) {
         purchasePrice,
         originalPrice,
         offerPrice,
+        pre1111OfferPrice: p.pre1111OfferPrice || null,
+        is1111Applied: Boolean(p.is1111Applied),
         ogerioPrice,
         wholesalePrice,
         wholesaleMinQty,
