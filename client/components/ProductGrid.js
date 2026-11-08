@@ -497,10 +497,10 @@ function ProductGridContent({
                           <span style={{
                             fontSize: 11,
                             fontWeight: 600,
-                            color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                            color: product.stockStatus === "Out of Stock" || product.inStock === false ? "#ef4444" : "#0284c7",
                             marginLeft: "auto"
                           }}>
-                            {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                            {product.stockStatus === "Out of Stock" || product.inStock === false ? "Stock out" : "In stock"}
                           </span>
                         </div>
 
@@ -543,10 +543,10 @@ function ProductGridContent({
                           <span style={{
                             fontSize: 11,
                             fontWeight: 600,
-                            color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                            color: product.stockStatus === "Out of Stock" || product.inStock === false ? "#ef4444" : "#0284c7",
                             marginLeft: "auto"
                           }}>
-                            {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                            {product.stockStatus === "Out of Stock" || product.inStock === false ? "Stock out" : "In stock"}
                           </span>
                         </div>
 
@@ -587,10 +587,10 @@ function ProductGridContent({
                         <span style={{
                           fontSize: 11,
                           fontWeight: 600,
-                          color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                          color: product.stockStatus === "Out of Stock" || product.inStock === false ? "#ef4444" : "#0284c7",
                           marginLeft: "auto"
                         }}>
-                          {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                          {product.stockStatus === "Out of Stock" || product.inStock === false ? "Stock out" : "In stock"}
                         </span>
                       </div>
 
@@ -626,10 +626,10 @@ function ProductGridContent({
                         <span style={{
                           fontSize: 11,
                           fontWeight: 600,
-                          color: product.stockStatus === "Out of Stock" ? "#ef4444" : "#0284c7",
+                          color: product.stockStatus === "Out of Stock" || product.inStock === false ? "#ef4444" : "#0284c7",
                           marginLeft: "auto"
                         }}>
-                          {product.stockStatus === "Out of Stock" ? "Stock out" : "In stock"}
+                          {product.stockStatus === "Out of Stock" || product.inStock === false ? "Stock out" : "In stock"}
                         </span>
                       </div>
 
@@ -649,9 +649,9 @@ function ProductGridContent({
                 <button
                   type="button"
                   onClick={(e) => handleAddToCart(product, e)}
-                  disabled={product.stockStatus === "Out of Stock"}
+                  disabled={product.stockStatus === "Out of Stock" || product.inStock === false}
                   className={`jt-add-to-cart-btn ${
-                    product.stockStatus === "Out of Stock" ? "disabled" : ""
+                    product.stockStatus === "Out of Stock" || product.inStock === false ? "disabled" : ""
                   }`}
                   style={{
                     width: "100%",
@@ -678,7 +678,7 @@ function ProductGridContent({
                       : {}),
                   }}
                 >
-                  {product.stockStatus === "Out of Stock"
+                  {product.stockStatus === "Out of Stock" || product.inStock === false
                     ? "Out of Stock"
                     : addedId === product._id
                     ? isWholesale

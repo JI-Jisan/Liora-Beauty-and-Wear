@@ -452,7 +452,7 @@ export async function warmOrGetSearchCatalog(Product) {
   if (searchCatalogCache && !isRefreshingCatalog) {
     isRefreshingCatalog = true;
     ActiveProduct.find({})
-      .select('name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider')
+      .select('name offerPrice originalPrice image images brand category inStock stockQuantity stockStatus isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider')
       .populate('category', 'name ancestors slug')
       .populate('brand', 'name slug')
       .lean()
@@ -470,7 +470,7 @@ export async function warmOrGetSearchCatalog(Product) {
 
   // Cold start: slim projection for sub-second background load
   const docs = await ActiveProduct.find({})
-    .select('name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider')
+    .select('name offerPrice originalPrice image images brand category inStock stockQuantity stockStatus isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider')
     .populate('category', 'name ancestors slug')
     .populate('brand', 'name slug')
     .lean();
@@ -644,7 +644,6 @@ export async function searchProductsFast(
         // Multi-tier candidate query:
         // Tier 1: Search products containing ALL meaningful tokens in name
         const baseFilter = {};
-        if (!isAdmin) baseFilter.inStock = { $ne: false };
         if (excludeId) baseFilter._id = { $ne: excludeId };
         if (brand) baseFilter.brand = brand;
         if (category) baseFilter.category = category;
@@ -668,7 +667,7 @@ export async function searchProductsFast(
             ...baseFilter,
             $and: andConditions,
           })
-            .select("name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
+            .select("name offerPrice originalPrice image images brand category inStock stockQuantity stockStatus isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
             .populate("brand", "name slug")
             .populate("category", "name slug ancestors")
             .limit(60)
@@ -690,7 +689,7 @@ export async function searchProductsFast(
             ...baseFilter,
             $and: textConditions,
           })
-            .select("name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
+            .select("name offerPrice originalPrice image images brand category inStock stockQuantity stockStatus isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
             .populate("brand", "name slug")
             .populate("category", "name slug ancestors")
             .limit(60)
@@ -738,7 +737,7 @@ export async function searchProductsFast(
               ...baseFilter,
               $or: orList,
             })
-              .select("name offerPrice originalPrice image images brand category inStock stockQuantity isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
+              .select("name offerPrice originalPrice image images brand category inStock stockQuantity stockStatus isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
               .populate("brand", "name slug")
               .populate("category", "name slug ancestors")
               .limit(100)
@@ -747,6 +746,27 @@ export async function searchProductsFast(
             for (const d of tier3Docs) {
               candidateMap.set(String(d._id), d);
             }
+          }
+        }
+
+        // 4. Fallback: If still fewer than 24, search by individual text tokens with $or
+        if (candidateMap.size < 24 && textTokens.length > 0) {
+          const orTextConditions = textTokens.map((t) => ({
+            name: { $regex: escapeRegex(t), $options: "i" }
+          }));
+
+          const tier4Docs = await ActiveProduct.find({
+            ...baseFilter,
+            $or: orTextConditions,
+          })
+            .select("name offerPrice originalPrice image images brand category inStock stockQuantity stockStatus isFeatured isTrending isNewArrival campusDiscountPct rating reviewCount wholesalePrice resellerPrice isSlider")
+            .populate("brand", "name slug")
+            .populate("category", "name slug ancestors")
+            .limit(100)
+            .lean();
+
+          for (const d of tier4Docs) {
+            candidateMap.set(String(d._id), d);
           }
         }
 
