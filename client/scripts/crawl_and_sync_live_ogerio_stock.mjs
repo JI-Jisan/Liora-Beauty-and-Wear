@@ -4,8 +4,8 @@ import fs from 'fs';
 import path from 'path';
 
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const TOTAL_PAGES = 322;
-const CONCURRENCY = 6;
+const TOTAL_PAGES = 326;
+const CONCURRENCY = 8;
 
 const URI =
   process.env.MONGO_URI ||
@@ -111,10 +111,12 @@ async function main() {
               const title = a ? a.innerText.trim() : '';
               const url = a ? a.href : '';
               const stockEl = c.querySelector('.product-stock');
+              const cardText = c.innerText.toLowerCase();
               const isOutOfStock = stockEl
                 ? stockEl.className.includes('outofstock') ||
-                  stockEl.innerText.toLowerCase().includes('out')
-                : false;
+                  stockEl.innerText.toLowerCase().includes('out') ||
+                  cardText.includes('out of stock')
+                : cardText.includes('out of stock');
               const priceEl = c.querySelector('.product-price');
               const priceText = priceEl ? priceEl.innerText.replace(/[^\d]/g, '') : '';
               return {

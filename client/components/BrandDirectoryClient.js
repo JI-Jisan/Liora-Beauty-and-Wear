@@ -562,3 +562,4 @@ export default function BrandDirectoryClient({ initialBrands = [] }) {
     </div>
   );
 }
+
