@@ -198,12 +198,12 @@ export async function GET(req) {
           .populate("brand", "name slug")
           .sort(
             type === "campus15" || type === "max-discount"
-              ? { campusDiscountPct: -1, isFeatured: -1, isTrending: -1, createdAt: -1 }
+              ? { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, isTrending: -1, createdAt: -1 }
               : type === "featured"
-              ? { campusDiscountPct: -1, isFeatured: -1, offerPrice: -1, createdAt: -1 }
+              ? { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, offerPrice: -1, createdAt: -1 }
               : type && type !== "all"
-              ? { campusDiscountPct: -1, createdAt: -1 }
-              : { inStock: -1, campusDiscountPct: -1, isFeatured: -1, createdAt: -1 }
+              ? { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, createdAt: -1 }
+              : { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, createdAt: -1 }
           )
           .skip(isPaginated ? skip : 0)
           .limit(limit)

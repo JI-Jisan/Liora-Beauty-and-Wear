@@ -13,6 +13,7 @@ export default function BrandProductsPage({ params }) {
   const slug = (unwrappedParams?.slug || "").trim();
   const { addToCart } = useCart();
   const [searchTerm, setSearchTerm] = useState("");
+  const [sidebarBrandSearch, setSidebarBrandSearch] = useState("");
 
   const [brandInfo, setBrandInfo] = useState(null);
   const [allBrands, setAllBrands] = useState([]);
@@ -47,17 +48,24 @@ export default function BrandProductsPage({ params }) {
       .catch((err) => console.error("Error fetching brands list:", err));
   }, [slug]);
 
-  // 2. Fetch products for this brand to populate count & top showcase cards
+  // 2. Fetch products for this brand to populate count & top showcase cards (IN-STOCK FIRST)
   useEffect(() => {
     setLoadingShowcase(true);
     fetch(`${API_BASE_URL}/api/products?brand=${encodeURIComponent(slug)}&paginate=1&limit=12`)
       .then((r) => r.json())
       .then((data) => {
+        const sortStockFirst = (list) =>
+          [...list].sort((a, b) => {
+            const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
+            const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
+            return stockB - stockA;
+          });
+
         if (data && Array.isArray(data.products)) {
-          setShowcaseProducts(data.products);
+          setShowcaseProducts(sortStockFirst(data.products));
           setTotalCount(data.total || data.products.length);
         } else if (Array.isArray(data)) {
-          setShowcaseProducts(data);
+          setShowcaseProducts(sortStockFirst(data));
           setTotalCount(data.length);
         }
       })
@@ -65,22 +73,27 @@ export default function BrandProductsPage({ params }) {
       .finally(() => setLoadingShowcase(false));
   }, [slug]);
 
-  // Slices for the 3 tabs
+  // Slices for the 3 tabs - in-stock products prioritized
   const tabCards = useMemo(() => {
     if (!showcaseProducts || showcaseProducts.length === 0) return [];
+    const inStockOnly = showcaseProducts.filter(
+      (p) => p.inStock !== false && (p.stockQuantity === undefined || p.stockQuantity > 0)
+    );
+    const pool = inStockOnly.length >= 4 ? inStockOnly : showcaseProducts;
+
     if (activeTab === "popular") {
-      const sorted = [...showcaseProducts].sort(
+      const sorted = [...pool].sort(
         (a, b) => (b.reviewCount || 0) - (a.reviewCount || 0)
       );
       return sorted.slice(0, 4);
     }
     if (activeTab === "newFinds") {
-      return showcaseProducts.slice(4, 8).length >= 2
-        ? showcaseProducts.slice(4, 8)
-        : showcaseProducts.slice(0, 4);
+      return pool.slice(4, 8).length >= 2
+        ? pool.slice(4, 8)
+        : pool.slice(0, 4);
     }
     // highlights default:
-    return showcaseProducts.slice(0, 4);
+    return pool.slice(0, 4);
   }, [showcaseProducts, activeTab]);
 
   const handleRefreshShowcase = () => {
@@ -510,17 +523,68 @@ export default function BrandProductsPage({ params }) {
           }}
           className="jt-brand-sidebar-desktop"
         >
-          <h3
-            style={{
-              fontSize: "17px",
-              fontWeight: 800,
-              color: "#0f172a",
-              margin: "0 0 12px",
-              letterSpacing: "-0.2px",
-            }}
-          >
-            More brands
-          </h3>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+            <h3
+              style={{
+                fontSize: "17px",
+                fontWeight: 800,
+                color: "#0f172a",
+                margin: 0,
+                letterSpacing: "-0.2px",
+              }}
+            >
+              More brands
+            </h3>
+            <Link
+              href="/brands"
+              style={{
+                fontSize: "12px",
+                fontWeight: 700,
+                color: "#e11d48",
+                textDecoration: "none",
+              }}
+            >
+              All brands →
+            </Link>
+          </div>
+
+          <div style={{ marginBottom: "10px", position: "relative" }}>
+            <input
+              type="text"
+              placeholder="Filter brands..."
+              value={sidebarBrandSearch}
+              onChange={(e) => setSidebarBrandSearch(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "6px 24px 6px 10px",
+                fontSize: "12px",
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px",
+                outline: "none",
+                background: "#ffffff",
+                boxSizing: "border-box",
+              }}
+            />
+            {sidebarBrandSearch && (
+              <button
+                type="button"
+                onClick={() => setSidebarBrandSearch("")}
+                style={{
+                  position: "absolute",
+                  right: "6px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  fontSize: "11px",
+                  color: "#94a3b8",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
             <Link
@@ -540,7 +604,9 @@ export default function BrandProductsPage({ params }) {
               All products
             </Link>
 
-            {allBrands.map((b) => {
+            {allBrands
+              .filter((b) => !sidebarBrandSearch.trim() || (b.name || "").toLowerCase().includes(sidebarBrandSearch.toLowerCase()))
+              .map((b) => {
               const isCurrent =
                 b.slug?.toLowerCase() === slug.toLowerCase() ||
                 b.name?.toLowerCase() === slug.toLowerCase();

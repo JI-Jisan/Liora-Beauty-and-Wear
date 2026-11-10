@@ -255,6 +255,10 @@ function ProductGridContent({
         const sortedList = isSearch
           ? rawList
           : [...rawList].sort((a, b) => {
+              const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
+              const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
+              if (stockB !== stockA) return stockB - stockA;
+
               const campA = Number(a.campusDiscountPct) || 0;
               const campB = Number(b.campusDiscountPct) || 0;
               if (campB !== campA) return campB - campA;
@@ -292,7 +296,12 @@ function ProductGridContent({
 
   useEffect(() => {
     if (activeCoupon && (!debouncedSearch || !debouncedSearch.trim())) {
-      setProducts((prev) => [...prev].sort((a, b) => (Number(b.campusDiscountPct) || 0) - (Number(a.campusDiscountPct) || 0)));
+      setProducts((prev) => [...prev].sort((a, b) => {
+        const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
+        const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
+        if (stockB !== stockA) return stockB - stockA;
+        return (Number(b.campusDiscountPct) || 0) - (Number(a.campusDiscountPct) || 0);
+      }));
     }
   }, [activeCoupon, debouncedSearch]);
 
