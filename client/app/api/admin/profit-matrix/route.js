@@ -22,6 +22,7 @@ export async function GET(req) {
     const brand = searchParams.get("brand") || "all";
     const stockStatus = searchParams.get("stockStatus") || "all";
     const marginStatus = searchParams.get("marginStatus") || "all";
+    const maxMargin = searchParams.get("maxMargin");
     const mode = searchParams.get("mode") || "retail"; // 'retail' | 'diu15' | 'student15' | 'wholesale' | 'reseller' | 'ogerio'
     const sortBy = searchParams.get("sortBy") || "profit_desc";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
@@ -181,9 +182,20 @@ export async function GET(req) {
       };
     });
 
-    // 4. Apply Margin Health Filter (if requested)
+    // 4. Apply Margin Health & Custom Max Margin Filters
     if (marginStatus && marginStatus !== "all") {
-      enriched = enriched.filter((p) => p.marginHealth === marginStatus);
+      if (marginStatus === "under_10") {
+        enriched = enriched.filter((p) => p.purchasePrice > 0 && p.profitMarginPct < 10);
+      } else if (marginStatus === "under_5") {
+        enriched = enriched.filter((p) => p.purchasePrice > 0 && p.profitMarginPct <= 5);
+      } else {
+        enriched = enriched.filter((p) => p.marginHealth === marginStatus);
+      }
+    }
+
+    if (maxMargin !== null && maxMargin !== "" && !isNaN(Number(maxMargin))) {
+      const maxVal = parseFloat(maxMargin);
+      enriched = enriched.filter((p) => p.purchasePrice > 0 && p.profitMarginPct <= maxVal);
     }
 
     // 5. Storewide Summary KPIs (calculated over all matching products)
@@ -191,6 +203,7 @@ export async function GET(req) {
     let totalProjectedRevenue = 0;
     let totalProjectedProfit = 0;
     let lossCount = 0;
+    let under10Count = 0;
     let lowMarginCount = 0;
     let healthyMarginCount = 0;
     let highMarginCount = 0;
@@ -201,6 +214,8 @@ export async function GET(req) {
       totalInventoryCost += p.purchasePrice * qty;
       totalProjectedRevenue += p.effectiveSellingPrice * qty;
       totalProjectedProfit += p.unitProfit * qty;
+
+      if (p.purchasePrice > 0 && p.profitMarginPct < 10) under10Count++;
 
       if (p.marginHealth === "loss") lossCount++;
       else if (p.marginHealth === "low") lowMarginCount++;
@@ -250,6 +265,7 @@ export async function GET(req) {
         totalProjectedProfit: Math.round(totalProjectedProfit),
         avgProfitMargin,
         lossCount,
+        under10Count,
         lowMarginCount,
         healthyMarginCount,
         highMarginCount,

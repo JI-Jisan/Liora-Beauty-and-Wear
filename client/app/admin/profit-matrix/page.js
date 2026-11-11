@@ -19,7 +19,8 @@ export default function AdminProfitMatrixPage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedBrand, setSelectedBrand] = useState("all");
-  const [selectedMargin, setSelectedMargin] = useState("all"); // 'all' | 'loss' | 'low' | 'healthy' | 'high' | 'no_cost'
+  const [selectedMargin, setSelectedMargin] = useState("all"); // 'all' | 'under_10' | 'under_5' | 'loss' | 'low' | 'healthy' | 'high' | 'no_cost'
+  const [customMargin, setCustomMargin] = useState(""); // User typed e.g. '5' or '10'
   const [selectedStock, setSelectedStock] = useState("all"); // 'all' | 'in_stock' | 'low_stock' | 'out_of_stock'
   const [sortBy, setSortBy] = useState("profit_desc"); // 'profit_desc' | 'profit_asc' | 'margin_desc' | 'margin_asc' | 'price_desc' | 'name_asc'
 
@@ -68,6 +69,10 @@ export default function AdminProfitMatrixPage() {
         limit: String(limit),
       });
 
+      if (customMargin !== "" && !isNaN(Number(customMargin))) {
+        params.append("maxMargin", customMargin);
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/admin/profit-matrix?${params.toString()}`, {
         headers: getAuthHeaders(),
       });
@@ -101,7 +106,7 @@ export default function AdminProfitMatrixPage() {
 
   useEffect(() => {
     fetchMatrix();
-  }, [activeMode, selectedCategory, selectedBrand, selectedMargin, selectedStock, sortBy, page]);
+  }, [activeMode, selectedCategory, selectedBrand, selectedMargin, customMargin, selectedStock, sortBy, page]);
 
   // Debounced search
   useEffect(() => {
@@ -392,6 +397,41 @@ export default function AdminProfitMatrixPage() {
                 {summary.lossCount > 0 ? "জরুরিভাবে দাম সংশোধন করুন!" : "সব প্রোডাক্টে লাভজনক প্রাইসিং সক্রিয়"}
               </div>
             </div>
+
+            {/* Critical Alarm: Under 10% Profit Floor */}
+            <div
+              onClick={() => {
+                setSelectedMargin(selectedMargin === "under_10" ? "all" : "under_10");
+                setPage(1);
+              }}
+              style={{
+                background: summary.under10Count > 0 ? "linear-gradient(135deg, rgba(239, 68, 68, 0.22), #1f1315)" : "linear-gradient(135deg, rgba(16, 185, 129, 0.1), #0f172a)",
+                border: summary.under10Count > 0 ? "2px solid #ef4444" : "1px solid rgba(16, 185, 129, 0.35)",
+                borderRadius: "12px",
+                padding: "16px 20px",
+                boxShadow: summary.under10Count > 0 ? "0 4px 20px rgba(239, 68, 68, 0.3)" : "0 4px 12px rgba(0,0,0,0.2)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              title="ক্লিক করে ১০% এর নিচের প্রোডাক্ট ফিল্টার করুন"
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontSize: "12px", fontWeight: "800", color: summary.under10Count > 0 ? "#fca5a5" : "#34d399", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  🚨 ১০% এর নিচে প্রফিট অ্যালার্ম
+                </div>
+                {summary.under10Count > 0 && (
+                  <span style={{ fontSize: "10px", fontWeight: "900", background: "#ef4444", color: "#ffffff", padding: "2px 7px", borderRadius: "10px", letterSpacing: "0.5px" }}>
+                    ALARM
+                  </span>
+                )}
+              </div>
+              <div style={{ fontSize: "24px", fontWeight: "900", color: summary.under10Count > 0 ? "#ef4444" : "#10b981", marginTop: "6px" }}>
+                {summary.under10Count || 0} টি প্রোডাক্ট
+              </div>
+              <div style={{ fontSize: "12px", color: summary.under10Count > 0 ? "#fca5a5" : "#a7f3d0", marginTop: "4px" }}>
+                {summary.under10Count > 0 ? "⚠️ ফিল্টার দেখতে ক্লিক করুন" : "✅ কোনো প্রোডাক্টেই ১০% এর নিচে প্রফিট নেই"}
+              </div>
+            </div>
           </div>
         )}
 
@@ -531,15 +571,58 @@ export default function AdminProfitMatrixPage() {
                   setSelectedMargin(e.target.value);
                   setPage(1);
                 }}
-                style={{ background: "#1e293b", color: selectedMargin === "loss" ? "#f87171" : "#ffffff", border: `1px solid ${selectedMargin === "loss" ? "#ef4444" : "#334155"}`, padding: "9px 14px", borderRadius: "8px", fontSize: "13px", fontWeight: "800", cursor: "pointer", outline: "none" }}
+                style={{ background: "#1e293b", color: selectedMargin === "under_10" || selectedMargin === "loss" ? "#f87171" : "#ffffff", border: `1px solid ${selectedMargin === "under_10" || selectedMargin === "loss" ? "#ef4444" : "#334155"}`, padding: "9px 14px", borderRadius: "8px", fontSize: "13px", fontWeight: "800", cursor: "pointer", outline: "none" }}
               >
                 <option value="all">🎯 All Profit Margins</option>
+                <option value="under_10">🚨 Under 10% Profit Margin (Alarm)</option>
+                <option value="under_5">⚠️ Under 5% Margin</option>
                 <option value="loss">🔴 Loss / Zero Margin (&lt;= 0%)</option>
                 <option value="low">🟡 Low Margin (1% – 15%)</option>
                 <option value="healthy">🟢 Healthy Margin (15% – 35%)</option>
                 <option value="high">💎 High Profit (&gt; 35%)</option>
                 <option value="no_cost">⚠️ Missing Cost (৳0)</option>
               </select>
+            </div>
+
+            {/* Custom Max Profit Margin % Input */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", background: "#1e293b", padding: "4px 10px", borderRadius: "8px", border: customMargin ? "1px solid #38bdf8" : "1px solid #334155" }}>
+              <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: "700" }}>🎯 Max %:</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                placeholder="e.g. 5 বা 10"
+                value={customMargin}
+                onChange={(e) => {
+                  setCustomMargin(e.target.value);
+                  setPage(1);
+                }}
+                style={{
+                  width: "80px",
+                  background: "#0f172a",
+                  border: "1px solid #334155",
+                  color: "#ffffff",
+                  padding: "5px 8px",
+                  borderRadius: "6px",
+                  fontSize: "12.5px",
+                  fontWeight: "700",
+                  outline: "none",
+                  textAlign: "center"
+                }}
+                title="লিখুন কত পার্সেন্ট বা তার নিচের প্রফিট দেখতে চান (যেমন ৫ বা ১০)"
+              />
+              {customMargin && (
+                <button
+                  onClick={() => {
+                    setCustomMargin("");
+                    setPage(1);
+                  }}
+                  style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: "12px", fontWeight: "800" }}
+                  title="ফিল্টার রিসেট"
+                >
+                  ✕
+                </button>
+              )}
             </div>
 
             {/* Stock Filter */}
@@ -724,6 +807,7 @@ export default function AdminProfitMatrixPage() {
 
                     // Row highlights
                     const isLoss = rowRecalc.unitProfit <= 0 && rowRecalc.purchasePrice > 0;
+                    const isUnder10 = rowRecalc.purchasePrice > 0 && rowRecalc.profitMarginPct < 10;
                     const isHigh = rowRecalc.profitMarginPct >= 35;
 
                     const rowBg = isFlashSaved
@@ -732,6 +816,8 @@ export default function AdminProfitMatrixPage() {
                       ? "#292012"
                       : isLoss
                       ? "#2b1419"
+                      : isUnder10
+                      ? "rgba(239, 68, 68, 0.12)"
                       : idx % 2 === 0
                       ? "#1e293b"
                       : "#182234";
@@ -1024,23 +1110,23 @@ export default function AdminProfitMatrixPage() {
                               borderRadius: "6px",
                               fontSize: "12px",
                               fontWeight: "800",
-                              background: isLoss
-                                ? "rgba(239, 68, 68, 0.2)"
+                              background: isLoss || isUnder10
+                                ? "rgba(239, 68, 68, 0.25)"
                                 : isHigh
                                 ? "rgba(168, 85, 247, 0.2)"
                                 : rowRecalc.profitMarginPct < 15
                                 ? "rgba(245, 158, 11, 0.2)"
                                 : "rgba(16, 185, 129, 0.2)",
-                              color: isLoss
-                                ? "#ef4444"
+                              color: isLoss || isUnder10
+                                ? "#f87171"
                                 : isHigh
                                 ? "#c084fc"
                                 : rowRecalc.profitMarginPct < 15
                                 ? "#fbbf24"
                                 : "#34d399",
                               border: `1px solid ${
-                                isLoss
-                                  ? "rgba(239, 68, 68, 0.4)"
+                                isLoss || isUnder10
+                                  ? "rgba(239, 68, 68, 0.5)"
                                   : isHigh
                                   ? "rgba(168, 85, 247, 0.4)"
                                   : rowRecalc.profitMarginPct < 15
@@ -1049,9 +1135,16 @@ export default function AdminProfitMatrixPage() {
                               }`,
                             }}
                           >
-                            {isLoss ? "🔴 " : isHigh ? "💎 " : rowRecalc.profitMarginPct < 15 ? "🟡 " : "🟢 "}
+                            {isLoss ? "🔴 " : isUnder10 ? "🚨 " : isHigh ? "💎 " : rowRecalc.profitMarginPct < 15 ? "🟡 " : "🟢 "}
                             {rowRecalc.profitMarginPct}%
                           </span>
+                          {isUnder10 && !isLoss && (
+                            <div style={{ marginTop: "4px" }}>
+                              <span style={{ fontSize: "9.5px", fontWeight: "900", background: "#ef4444", color: "#ffffff", padding: "1px 5px", borderRadius: "3px", display: "inline-block", letterSpacing: "0.3px" }}>
+                                🚨 ALARM &lt;10%
+                              </span>
+                            </div>
+                          )}
                         </td>
 
                         {/* 11. Stock Qty */}
