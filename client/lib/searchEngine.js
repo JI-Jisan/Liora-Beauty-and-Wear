@@ -511,6 +511,9 @@ export async function searchProductsFast(
     type = null,
     collection = null,
     excludeId = null,
+    minPrice = null,
+    maxPrice = null,
+    sortBy = null,
   } = options;
 
   const parsed = cleanSearchTerm(rawSearch);
@@ -523,7 +526,7 @@ export async function searchProductsFast(
   }
 
   const normalizedQuery = cleanPhrase;
-  const filterKey = `${normalizedQuery}__${isAdmin ? "adm" : "usr"}__${brand || ""}__${category || ""}__${type || ""}__${collection || ""}`;
+  const filterKey = `${normalizedQuery}__${isAdmin ? "adm" : "usr"}__${brand || ""}__${category || ""}__${type || ""}__${collection || ""}__${minPrice ?? ""}__${maxPrice ?? ""}__${sortBy || ""}`;
 
   let rankedCandidates = queryResultCache.get(filterKey);
 
@@ -592,6 +595,15 @@ export async function searchProductsFast(
           }
         }
 
+        if (minPrice !== null && !isNaN(minPrice)) {
+          const pPrice = Number(p.offerPrice || p.price || 0);
+          if (pPrice < minPrice) continue;
+        }
+        if (maxPrice !== null && !isNaN(maxPrice)) {
+          const pPrice = Number(p.offerPrice || p.price || 0);
+          if (pPrice > maxPrice) continue;
+        }
+
         const normPName = normalize(p.name);
         const bName = normalize(p.brand?.name || (typeof p.brand === "string" ? p.brand : ""));
         const cName = normalize(p.category?.name || (typeof p.category === "string" ? p.category : ""));
@@ -653,6 +665,12 @@ export async function searchProductsFast(
           else if (type === "trending") baseFilter.isTrending = true;
           else if (type === "new") baseFilter.isNewArrival = true;
           else if (type === "slider") baseFilter.isSlider = true;
+        }
+        if (minPrice !== null && !isNaN(minPrice)) {
+          baseFilter.offerPrice = { ...(baseFilter.offerPrice || {}), $gte: minPrice };
+        }
+        if (maxPrice !== null && !isNaN(maxPrice)) {
+          baseFilter.offerPrice = { ...(baseFilter.offerPrice || {}), $lte: maxPrice };
         }
 
         const candidateMap = new Map();
@@ -777,11 +795,27 @@ export async function searchProductsFast(
       }
     }
 
-    // Rank candidates by Google-like relevance score
-    for (let i = 0; i < matches.length; i++) {
-      matches[i]._score = scoreProductRelevance(matches[i], cleanPhrase, searchTokens, meaningfulTokens);
+    if (sortBy === "price_asc") {
+      matches.sort((a, b) => {
+        const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
+        const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
+        if (stockB !== stockA) return stockB - stockA;
+        return (Number(a.offerPrice) || 0) - (Number(b.offerPrice) || 0);
+      });
+    } else if (sortBy === "price_desc") {
+      matches.sort((a, b) => {
+        const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
+        const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
+        if (stockB !== stockA) return stockB - stockA;
+        return (Number(b.offerPrice) || 0) - (Number(a.offerPrice) || 0);
+      });
+    } else {
+      // Rank candidates by Google-like relevance score
+      for (let i = 0; i < matches.length; i++) {
+        matches[i]._score = scoreProductRelevance(matches[i], cleanPhrase, searchTokens, meaningfulTokens);
+      }
+      matches.sort((a, b) => (b._score || 0) - (a._score || 0));
     }
-    matches.sort((a, b) => (b._score || 0) - (a._score || 0));
 
     rankedCandidates = matches;
 

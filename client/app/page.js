@@ -14,6 +14,7 @@ import CustomerLove from "../components/CustomerLove";
 import DualMiniBanners from "../components/DualMiniBanners";
 import MiddleStripBanner from "../components/MiddleStripBanner";
 import CampusCouponBar from "../components/CampusCouponBar";
+import ShopByBudget from "../components/ShopByBudget";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { API_BASE_URL } from "@/lib/api";
@@ -117,6 +118,9 @@ export default function HomePage() {
 
       {/* 3. FEATURED CIRCLE CATEGORIES SLIDER */}
       <FeaturedCategories />
+
+      {/* 3.5 💳 SHOP BY BUDGET (UNDER 499, 500-999, 1000-1999, 2000+) */}
+      <ShopByBudget />
 
       {/* 4. ⚡ FLASH SALE DEALS WITH LIVE COUNTDOWN TIMER */}
       <FlashSaleLive onAddToCart={addToCart} />

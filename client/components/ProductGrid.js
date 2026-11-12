@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import CategoryBar from "./CategoryBar";
+import PriceFilterBar from "./PriceFilterBar";
 import ProductWatermark from "./ProductWatermark";
 import { API_BASE_URL, getImageUrl } from "@/lib/api";
 import { cld } from "@/lib/cloudinary";
@@ -102,6 +103,7 @@ function ProductGridContent({
   category: propCategory = "",
   collection = "",
   showCategoryBar = false,
+  showPriceFilter = null,
   limit: propLimit = 24,
   showPagination = true,
 }) {
@@ -201,6 +203,60 @@ function ProductGridContent({
   const activeCategory = propCategory || urlCategoryParam || selectedCategoryState;
   const activeBrand = brand || (searchParams ? searchParams.get("brand") || "" : "");
 
+  // Price & Sort filter state synced with URL
+  const urlMinPrice = searchParams ? searchParams.get("minPrice") : null;
+  const urlMaxPrice = searchParams ? searchParams.get("maxPrice") : null;
+  const urlSortBy = searchParams ? searchParams.get("sortBy") || searchParams.get("sort") || "" : "";
+
+  const [minPrice, setMinPrice] = useState(urlMinPrice !== null && urlMinPrice !== "" ? Number(urlMinPrice) : null);
+  const [maxPrice, setMaxPrice] = useState(urlMaxPrice !== null && urlMaxPrice !== "" ? Number(urlMaxPrice) : null);
+  const [sortBy, setSortBy] = useState(urlSortBy);
+
+  useEffect(() => {
+    const qMin = searchParams ? searchParams.get("minPrice") : null;
+    const qMax = searchParams ? searchParams.get("maxPrice") : null;
+    const qSort = searchParams ? searchParams.get("sortBy") || searchParams.get("sort") || "" : "";
+    setMinPrice(qMin !== null && qMin !== "" ? Number(qMin) : null);
+    setMaxPrice(qMax !== null && qMax !== "" ? Number(qMax) : null);
+    setSortBy(qSort);
+  }, [searchParams]);
+
+  const handlePriceChange = (newMin, newMax) => {
+    setMinPrice(newMin);
+    setMaxPrice(newMax);
+    setCurrentPage(1);
+    if (typeof window !== "undefined") {
+      const currentParams = new URLSearchParams(window.location.search);
+      if (newMin !== null && newMin !== undefined) {
+        currentParams.set("minPrice", String(newMin));
+      } else {
+        currentParams.delete("minPrice");
+      }
+      if (newMax !== null && newMax !== undefined) {
+        currentParams.set("maxPrice", String(newMax));
+      } else {
+        currentParams.delete("maxPrice");
+      }
+      currentParams.set("page", "1");
+      router.push(`?${currentParams.toString()}`, { scroll: false });
+    }
+  };
+
+  const handleSortChange = (newSort) => {
+    setSortBy(newSort);
+    setCurrentPage(1);
+    if (typeof window !== "undefined") {
+      const currentParams = new URLSearchParams(window.location.search);
+      if (newSort) {
+        currentParams.set("sortBy", newSort);
+      } else {
+        currentParams.delete("sortBy");
+      }
+      currentParams.set("page", "1");
+      router.push(`?${currentParams.toString()}`, { scroll: false });
+    }
+  };
+
   const handleSelectCategory = (cat) => {
     setSelectedCategoryState(cat);
     setCurrentPage(1);
@@ -215,7 +271,7 @@ function ProductGridContent({
     return () => clearTimeout(timer);
   }, [activeSearchTerm]);
 
-  const filterKey = `${activeCategory}_${activeBrand}_${debouncedSearch}_${type}_${collection}`;
+  const filterKey = `${activeCategory}_${activeBrand}_${debouncedSearch}_${type}_${collection}_${minPrice}_${maxPrice}_${sortBy}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (prevFilterKey !== filterKey) {
     setPrevFilterKey(filterKey);
@@ -236,6 +292,9 @@ function ProductGridContent({
     if (collection) qs.set('collection', collection);
     if (type && type !== "all") qs.set('type', type);
     if (debouncedSearch && debouncedSearch.trim()) qs.set('search', debouncedSearch.trim());
+    if (minPrice !== null && minPrice !== undefined) qs.set('minPrice', String(minPrice));
+    if (maxPrice !== null && maxPrice !== undefined) qs.set('maxPrice', String(maxPrice));
+    if (sortBy) qs.set('sortBy', sortBy);
     
     // Use pagination for main catalog or when type is all
     qs.set('paginate', '1');
@@ -252,18 +311,33 @@ function ProductGridContent({
           ? data
           : [];
         const isSearch = Boolean(debouncedSearch && debouncedSearch.trim());
-        const sortedList = isSearch
-          ? rawList
-          : [...rawList].sort((a, b) => {
-              const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
-              const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
-              if (stockB !== stockA) return stockB - stockA;
+        let sortedList = rawList;
+        if (sortBy === "price_asc") {
+          sortedList = [...rawList].sort((a, b) => {
+            const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
+            const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
+            if (stockB !== stockA) return stockB - stockA;
+            return (Number(a.offerPrice) || 0) - (Number(b.offerPrice) || 0);
+          });
+        } else if (sortBy === "price_desc") {
+          sortedList = [...rawList].sort((a, b) => {
+            const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
+            const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
+            if (stockB !== stockA) return stockB - stockA;
+            return (Number(b.offerPrice) || 0) - (Number(a.offerPrice) || 0);
+          });
+        } else if (!isSearch) {
+          sortedList = [...rawList].sort((a, b) => {
+            const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
+            const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
+            if (stockB !== stockA) return stockB - stockA;
 
-              const campA = Number(a.campusDiscountPct) || 0;
-              const campB = Number(b.campusDiscountPct) || 0;
-              if (campB !== campA) return campB - campA;
-              return 0;
-            });
+            const campA = Number(a.campusDiscountPct) || 0;
+            const campB = Number(b.campusDiscountPct) || 0;
+            if (campB !== campA) return campB - campA;
+            return 0;
+          });
+        }
         setProducts(sortedList);
         setTotalPages(data?.totalPages || 1);
         setTotalProducts(data?.total || rawList.length);
@@ -292,10 +366,10 @@ function ProductGridContent({
     return () => {
       isMounted = false;
     };
-  }, [activeCategory, activeBrand, type, collection, debouncedSearch, currentPage, PAGE_SIZE, activeCoupon]);
+  }, [activeCategory, activeBrand, type, collection, debouncedSearch, minPrice, maxPrice, sortBy, currentPage, PAGE_SIZE, activeCoupon]);
 
   useEffect(() => {
-    if (activeCoupon && (!debouncedSearch || !debouncedSearch.trim())) {
+    if (activeCoupon && !sortBy && (!debouncedSearch || !debouncedSearch.trim())) {
       setProducts((prev) => [...prev].sort((a, b) => {
         const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
         const stockB = b.inStock !== false && (b.stockQuantity === undefined || b.stockQuantity > 0) ? 1 : 0;
@@ -303,7 +377,7 @@ function ProductGridContent({
         return (Number(b.campusDiscountPct) || 0) - (Number(a.campusDiscountPct) || 0);
       }));
     }
-  }, [activeCoupon, debouncedSearch]);
+  }, [activeCoupon, debouncedSearch, sortBy]);
 
   const filteredProducts = products;
 
@@ -319,6 +393,19 @@ function ProductGridContent({
           selectedCategory={activeCategory}
           onSelectCategory={handleSelectCategory}
         />
+      )}
+
+      {(showPriceFilter ?? (type === "all")) && (
+        <div style={{ padding: "0 14px", width: "100%", boxSizing: "border-box" }}>
+          <PriceFilterBar
+            activeMinPrice={minPrice}
+            activeMaxPrice={maxPrice}
+            activeSort={sortBy}
+            totalProducts={totalProducts}
+            onPriceChange={handlePriceChange}
+            onSortChange={handleSortChange}
+          />
+        </div>
       )}
 
       {Boolean(title || badge) && (

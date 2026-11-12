@@ -33,6 +33,18 @@ export async function GET(req) {
     const category = searchParams.get("category");
     const type = searchParams.get("type");
     const brand = searchParams.get("brand");
+    const minPriceParam = searchParams.get("minPrice");
+    const maxPriceParam = searchParams.get("maxPrice");
+    const minPrice = minPriceParam !== null && minPriceParam !== "" && !isNaN(Number(minPriceParam)) ? Number(minPriceParam) : null;
+    const maxPrice = maxPriceParam !== null && maxPriceParam !== "" && !isNaN(Number(maxPriceParam)) ? Number(maxPriceParam) : null;
+    const sortBy = searchParams.get("sortBy") || searchParams.get("sort") || "";
+
+    if (minPrice !== null) {
+      query.offerPrice = { ...(query.offerPrice || {}), $gte: minPrice };
+    }
+    if (maxPrice !== null) {
+      query.offerPrice = { ...(query.offerPrice || {}), $lte: maxPrice };
+    }
 
     if (brand) {
       const isId = /^[0-9a-fA-F]{24}$/.test(brand);
@@ -187,24 +199,34 @@ export async function GET(req) {
         type,
         collection,
         excludeId: exclude,
+        minPrice,
+        maxPrice,
+        sortBy,
       });
       products = searchRes.products;
       total = searchRes.total;
     } else {
+      let sortCriteria = { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, createdAt: -1 };
+      if (sortBy === "price_asc") {
+        sortCriteria = { inStock: -1, stockQuantity: -1, offerPrice: 1, createdAt: -1 };
+      } else if (sortBy === "price_desc") {
+        sortCriteria = { inStock: -1, stockQuantity: -1, offerPrice: -1, createdAt: -1 };
+      } else if (sortBy === "newest") {
+        sortCriteria = { inStock: -1, stockQuantity: -1, createdAt: -1 };
+      } else if (type === "campus15" || type === "max-discount") {
+        sortCriteria = { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, isTrending: -1, createdAt: -1 };
+      } else if (type === "featured") {
+        sortCriteria = { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, offerPrice: -1, createdAt: -1 };
+      } else if (type && type !== "all") {
+        sortCriteria = { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, createdAt: -1 };
+      }
+
       [products, total] = await Promise.all([
         Product.find(query)
           .select(isAdmin ? "" : "-purchasePrice")
           .populate("category", "name")
           .populate("brand", "name slug")
-          .sort(
-            type === "campus15" || type === "max-discount"
-              ? { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, isTrending: -1, createdAt: -1 }
-              : type === "featured"
-              ? { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, offerPrice: -1, createdAt: -1 }
-              : type && type !== "all"
-              ? { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, createdAt: -1 }
-              : { inStock: -1, stockQuantity: -1, campusDiscountPct: -1, isFeatured: -1, createdAt: -1 }
-          )
+          .sort(sortCriteria)
           .skip(isPaginated ? skip : 0)
           .limit(limit)
           .lean(),
