@@ -131,10 +131,14 @@ async function handleAuth(req) {
     }
 
     const assignedRole = customer.role || "user";
+    const isSuspended = customer.status === "suspended";
+    effectiveRole = isSuspended ? "user" : assignedRole;
 
     return NextResponse.json({
       success: true,
-      role: assignedRole,
+      role: effectiveRole,
+      assignedRole,
+      isSuspended,
       isAdmin: false,
       user: {
         uid: decodedToken.uid,
@@ -143,6 +147,8 @@ async function handleAuth(req) {
         phone: customer.phone || "",
         address: customer.address || "",
         role: assignedRole,
+        effectiveRole,
+        isSuspended,
         businessName: customer.businessName || "",
         resellerStoreName: customer.resellerStoreName || "",
         resellerStorePhone: customer.resellerStorePhone || "",

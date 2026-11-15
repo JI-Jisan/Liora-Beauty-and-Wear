@@ -22,6 +22,10 @@ export async function GET(req) {
       return NextResponse.json({ message: "অ্যাকাউন্ট পাওয়া যায়নি" }, { status: 404 });
     }
 
+    if (customer.status === "suspended") {
+      return NextResponse.json({ message: "আপনার রিসেলার অ্যাকাউন্টটি স্থগিত (Suspended) রয়েছে", isSuspended: true }, { status: 403 });
+    }
+
     if (customer.role !== "reseller" && customer.role !== "team_leader" && customer.role !== "admin") {
       return NextResponse.json({ message: "আপনি রিসেলার অ্যাকাউন্টে অনুমোদিত নন" }, { status: 403 });
     }

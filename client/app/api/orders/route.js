@@ -128,14 +128,24 @@ export async function POST(req) {
     }
 
     const requestedType = String(body.orderType || "").toLowerCase();
+    const isSuspended = customerDoc?.status === "suspended";
+
+    if (isSuspended && (requestedType === "reseller" || requestedType === "wholesale")) {
+      return NextResponse.json({
+        message: "আপনার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত (Suspended) রয়েছে। অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন।"
+      }, { status: 403 });
+    }
+
     const isWholesaleReq =
-      requestedType === "wholesale" ||
-      body.isWholesale === true ||
-      (customerDoc?.role === "wholesale" && requestedType !== "retail");
+      !isSuspended &&
+      (requestedType === "wholesale" ||
+        body.isWholesale === true ||
+        (customerDoc?.role === "wholesale" && requestedType !== "retail"));
     const isResellerReq =
-      requestedType === "reseller" ||
-      body.isReseller === true ||
-      ((customerDoc?.role === "reseller" || customerDoc?.role === "team_leader") && requestedType !== "retail");
+      !isSuspended &&
+      (requestedType === "reseller" ||
+        body.isReseller === true ||
+        ((customerDoc?.role === "reseller" || customerDoc?.role === "team_leader") && requestedType !== "retail"));
 
     const orderType = isWholesaleReq ? "wholesale" : isResellerReq ? "reseller" : "retail";
     const itemMaxLimit = orderType === "wholesale" ? 1000 : MAX_QTY_PER_ITEM;

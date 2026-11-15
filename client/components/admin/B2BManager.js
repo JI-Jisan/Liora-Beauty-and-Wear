@@ -9,7 +9,9 @@ export default function B2BManager() {
     wholesaleCount: 0,
     resellerCount: 0,
     customerCount: 0,
+    activeCount: 0,
     pendingCount: 0,
+    suspendedCount: 0,
     totalWalletLiability: 0,
   });
   const [recentLedger, setRecentLedger] = useState([]);
@@ -20,6 +22,7 @@ export default function B2BManager() {
   // Filters & Subtabs
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'active' | 'pending' | 'suspended'
   const [activeSubTab, setActiveSubTab] = useState("members"); // 'members' | 'squads' | 'brandMargins' | 'ledger'
 
   // Team Leader & Brand Margin States
@@ -95,7 +98,9 @@ export default function B2BManager() {
         wholesaleCount: 0,
         resellerCount: 0,
         customerCount: 0,
+        activeCount: 0,
         pendingCount: 0,
+        suspendedCount: 0,
         totalWalletLiability: 0,
       });
       setRecentLedger(data.recentLedger || []);
@@ -201,6 +206,17 @@ export default function B2BManager() {
   // Filtered Users
   const filteredUsers = useMemo(() => {
     let list = [...users];
+
+    // Status Filter (active | pending | suspended)
+    if (statusFilter === "active") {
+      list = list.filter((u) => u.status === "active" || (!u.status && u.status !== "suspended" && u.status !== "pending"));
+    } else if (statusFilter === "pending") {
+      list = list.filter((u) => u.status === "pending");
+    } else if (statusFilter === "suspended") {
+      list = list.filter((u) => u.status === "suspended");
+    }
+
+    // Role Filter
     if (roleFilter === "admin") {
       list = list.filter((u) => u.role === "admin");
     } else if (roleFilter === "wholesale") {
@@ -227,7 +243,47 @@ export default function B2BManager() {
       );
     }
     return list;
-  }, [users, roleFilter, search]);
+  }, [users, statusFilter, roleFilter, search]);
+
+  const handleUpdateStatus = async (user, targetStatus) => {
+    const actionLabel =
+      targetStatus === "suspended"
+        ? "সাসপেন্ড (Suspend)"
+        : targetStatus === "active"
+        ? "এক্টিভ (Active)"
+        : targetStatus;
+    const confirmMsg =
+      targetStatus === "suspended"
+        ? `আপনি কি নিশ্চিত যে ${user.name || user.email} কে সাসপেন্ড (Suspend) করতে চান? সাসপেন্ড করলে সে কোনো রিসেলার বা হোলসেলার মূল্য/ডিসকাউন্ট দেখতে বা অর্ডার করতে পারবে না।`
+        : `আপনি কি ${user.name || user.email} কে এক্টিভ (Active) করতে চান?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+      const res = await fetch("/api/admin/b2b-users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAdminToken()}`,
+        },
+        body: JSON.stringify({
+          id: user._id,
+          status: targetStatus,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update status");
+      setSuccess(`${user.name || user.email} কে সফলভাবে ${actionLabel} করা হয়েছে!`);
+      loadData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleOpenDetails = (user) => {
     setSelectedViewUser(user);
@@ -638,52 +694,106 @@ export default function B2BManager() {
 
       {activeSubTab === "members" && (
         <>
-          {/* Controls Bar: Search & Role Filters */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {/* Controls Bar: Search & Status + Role Filters */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
+            {/* Top row: Status Filter Buttons & Search */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 11.5, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  স্ট্যাটাস ফিল্টার:
+                </span>
+                {[
+                  { key: "all", label: `🔘 All Status (${users.length})`, activeBg: "#0f172a", activeColor: "#fff" },
+                  {
+                    key: "active",
+                    label: `🟢 Active (${stats.activeCount || users.filter((u) => u.status === "active" || (!u.status && u.status !== "suspended" && u.status !== "pending")).length})`,
+                    activeBg: "#059669",
+                    activeColor: "#fff",
+                  },
+                  {
+                    key: "pending",
+                    label: `⏳ Pending (${stats.pendingCount || users.filter((u) => u.status === "pending").length})`,
+                    activeBg: "#d97706",
+                    activeColor: "#fff",
+                  },
+                  {
+                    key: "suspended",
+                    label: `🔴 Suspended (${stats.suspendedCount || users.filter((u) => u.status === "suspended").length})`,
+                    activeBg: "#e11d48",
+                    activeColor: "#fff",
+                  },
+                ].map((s) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => setStatusFilter(s.key)}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: 20,
+                      fontSize: 12,
+                      fontWeight: 800,
+                      border: statusFilter === s.key ? "none" : "1px solid #cbd5e1",
+                      cursor: "pointer",
+                      background: statusFilter === s.key ? s.activeBg : "#fff",
+                      color: statusFilter === s.key ? s.activeColor : "#475569",
+                      boxShadow: statusFilter === s.key ? "0 2px 6px rgba(0,0,0,0.15)" : "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                placeholder="🔍 Search name, email, phone, store..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "1px solid #cbd5e1",
+                  fontSize: 12.5,
+                  minWidth: 260,
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            {/* Bottom row: Role Filter Buttons */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", padding: "8px 12px", background: "#f8fafc", borderRadius: 10, border: "1px solid #e2e8f0" }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                রোল ফিল্টার:
+              </span>
               {[
-                { key: "all", label: `👥 All (${users.length})` },
+                { key: "all", label: `👥 All Roles (${users.length})` },
                 { key: "admin", label: `🛡️ Admins (${stats.adminCount || 0})` },
                 { key: "team_leader", label: `👑 Team Leaders (${teamLeaders.length})` },
                 { key: "wholesale", label: `🏬 Wholesalers (${stats.wholesaleCount || 0})` },
                 { key: "reseller", label: `🚀 Resellers (${stats.resellerCount || 0})` },
                 { key: "customer", label: `👤 Customers (${stats.customerCount || 0})` },
-                { key: "pending", label: `⏳ Pending (${stats.pendingCount || 0})` },
               ].map((tab) => (
                 <button
                   key={tab.key}
                   type="button"
                   onClick={() => setRoleFilter(tab.key)}
                   style={{
-                    padding: "6px 14px",
-                    borderRadius: 20,
-                    fontSize: 12,
+                    padding: "5px 12px",
+                    borderRadius: 16,
+                    fontSize: 11.5,
                     fontWeight: 700,
                     border: "none",
                     cursor: "pointer",
-                    background: roleFilter === tab.key ? "#e11d48" : "#f1f5f9",
+                    background: roleFilter === tab.key ? "#4f46e5" : "#e2e8f0",
                     color: roleFilter === tab.key ? "#fff" : "#475569",
+                    transition: "all 0.15s ease",
                   }}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
-
-            <input
-              type="text"
-              placeholder="🔍 Search name, email, phone, store..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                padding: "8px 14px",
-                borderRadius: 8,
-                border: "1px solid #cbd5e1",
-                fontSize: 12.5,
-                minWidth: 260,
-                outline: "none",
-              }}
-            />
           </div>
 
           {/* Members Table */}
@@ -705,13 +815,13 @@ export default function B2BManager() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={7} style={{ padding: 30, textAlign: "center", color: "#64748b" }}>
+                      <td colSpan={8} style={{ padding: 30, textAlign: "center", color: "#64748b" }}>
                         লোড হচ্ছে...
                       </td>
                     </tr>
                   ) : filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={7} style={{ padding: 30, textAlign: "center", color: "#64748b" }}>
+                      <td colSpan={8} style={{ padding: 30, textAlign: "center", color: "#64748b" }}>
                         কোনো B2B ইউজার পাওয়া যায়নি। উপরে <strong>&quot;+ Whitelist New B2B Member&quot;</strong> দিয়ে নতুন ইউজার যুক্ত করুন।
                       </td>
                     </tr>
@@ -862,15 +972,35 @@ export default function B2BManager() {
                           <span
                             style={{
                               display: "inline-block",
-                              padding: "3px 8px",
-                              borderRadius: 10,
+                              padding: "4px 10px",
+                              borderRadius: 12,
                               fontSize: 10.5,
                               fontWeight: 800,
-                              background: u.status === "active" ? "#ecfdf5" : u.status === "pending" ? "#fef3c7" : "#fee2e2",
-                              color: u.status === "active" ? "#047857" : u.status === "pending" ? "#b45309" : "#b91c1c",
+                              background:
+                                u.status === "active" || (!u.status && u.status !== "suspended" && u.status !== "pending")
+                                  ? "#ecfdf5"
+                                  : u.status === "pending"
+                                  ? "#fef3c7"
+                                  : "#fee2e2",
+                              color:
+                                u.status === "active" || (!u.status && u.status !== "suspended" && u.status !== "pending")
+                                  ? "#047857"
+                                  : u.status === "pending"
+                                  ? "#b45309"
+                                  : "#b91c1c",
+                              border:
+                                u.status === "active" || (!u.status && u.status !== "suspended" && u.status !== "pending")
+                                  ? "1px solid #a7f3d0"
+                                  : u.status === "pending"
+                                  ? "1px solid #fde68a"
+                                  : "1px solid #fecaca",
                             }}
                           >
-                            {u.status === "pending" ? "⏳ Pending" : u.status || "active"}
+                            {u.status === "pending"
+                              ? "⏳ Pending"
+                              : u.status === "suspended"
+                              ? "🔴 Suspended"
+                              : "🟢 Active"}
                           </span>
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "center" }}>
@@ -912,6 +1042,44 @@ export default function B2BManager() {
                                 }}
                               >
                                 ✓ Approve
+                              </button>
+                            )}
+                            {u.status === "suspended" && (
+                              <button
+                                type="button"
+                                title="সাসপেন্ড তুলে অ্যাকাউন্ট সচল করুন"
+                                onClick={() => handleUpdateStatus(u, "active")}
+                                style={{
+                                  background: "#ecfdf5",
+                                  border: "1px solid #6ee7b7",
+                                  color: "#047857",
+                                  padding: "4px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  fontWeight: 800,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                🟢 Activate
+                              </button>
+                            )}
+                            {u.status !== "suspended" && u.status !== "pending" && u.role !== "admin" && (
+                              <button
+                                type="button"
+                                title="অ্যাকাউন্ট সাসপেন্ড করুন (রিসেলার ডিসকাউন্ট বন্ধ থাকবে)"
+                                onClick={() => handleUpdateStatus(u, "suspended")}
+                                style={{
+                                  background: "#fff1f2",
+                                  border: "1px solid #fecdd3",
+                                  color: "#be123c",
+                                  padding: "4px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  fontWeight: 800,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                ⏸️ Suspend
                               </button>
                             )}
                             <button

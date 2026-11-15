@@ -99,10 +99,11 @@ export default function CheckoutPage() {
   }, [isAdminUser, cartItems.length]);
 
   const isReseller = useMemo(() => {
+    if (profile?.status === "suspended" || profile?.isSuspended) return false;
     return (
-      role === "reseller" ||
-      profile?.role === "reseller" ||
-      cartItems.some((i) => i.orderType === "reseller")
+      (role === "reseller" || profile?.role === "reseller") &&
+      profile?.status !== "suspended" &&
+      !profile?.isSuspended
     );
   }, [role, profile, cartItems]);
 

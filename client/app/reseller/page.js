@@ -68,7 +68,7 @@ export default function ResellerPage() {
   const [applyDone, setApplyDone] = useState(false);
   const [applyErr, setApplyErr] = useState("");
 
-  const isApproved = isReseller || isAdmin;
+  const isApproved = (isReseller || isAdmin) && profile?.status !== "suspended";
 
   // Load Reseller Wallet & Orders
   const loadWallet = async () => {
@@ -363,8 +363,21 @@ export default function ResellerPage() {
       </section>
 
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 14px" }}>
-        {/* If Logged in and Approved as Reseller */}
-        {isApproved ? (
+        {/* Suspended Notice if account is suspended */}
+        {profile?.status === "suspended" ? (
+          <div style={{ background: "#fef2f2", border: "2px solid #ef4444", borderRadius: 16, padding: "32px 24px", textAlign: "center", maxWidth: 650, margin: "30px auto", boxShadow: "0 10px 30px rgba(239, 68, 68, 0.15)" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🚫</div>
+            <h2 style={{ fontSize: 22, fontWeight: 900, color: "#991b1b", margin: "0 0 8px" }}>
+              আপনার রিসেলার অ্যাকাউন্টটি সাময়িকভাবে স্থগিত (Suspended) করা হয়েছে
+            </h2>
+            <p style={{ fontSize: 14, color: "#7f1d1d", lineHeight: 1.6, margin: "0 0 20px" }}>
+              অ্যাডমিন পর্যালোচনার কারণে আপনার রিসেলার সুবিধা ও স্পেশাল প্রাইসিং সাময়িকভাবে বন্ধ রাখা হয়েছে। পুনরায় সক্রিয় করতে অনুগ্রহ করে অ্যাডমিন বা হেল্পলাইনে যোগাযোগ করুন।
+            </p>
+            <a href="tel:01837223147" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#e11d48", color: "#fff", padding: "11px 24px", borderRadius: 10, fontWeight: 800, textDecoration: "none", fontSize: 14 }}>
+              <span>📞</span> হেল্পলাইনে কল করুন (+880 1837-223147)
+            </a>
+          </div>
+        ) : isApproved ? (
           <>
             {/* VIP Star Club & Squad Leader Status Banner */}
             <div

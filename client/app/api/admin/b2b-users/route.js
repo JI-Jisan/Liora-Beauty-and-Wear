@@ -16,6 +16,7 @@ export async function GET(req) {
     await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const filterRole = searchParams.get("role") || "all"; // 'all' | 'admin' | 'wholesale' | 'reseller' | 'customer' | 'pending'
+    const filterStatus = searchParams.get("status") || "all"; // 'all' | 'active' | 'pending' | 'suspended'
     const searchQuery = (searchParams.get("search") || "").trim().toLowerCase();
 
     // 1. Fetch Firestore admins collection and environment variable admins
@@ -163,13 +164,24 @@ export async function GET(req) {
       finalUsers = enrichedUsers.filter((u) => u.status === "pending");
     }
 
-    // Role Counts
+    // Filter by status if requested (active, pending, suspended)
+    if (filterStatus === "active") {
+      finalUsers = finalUsers.filter((u) => u.status === "active" || (!u.status && u.status !== "suspended" && u.status !== "pending"));
+    } else if (filterStatus === "pending") {
+      finalUsers = finalUsers.filter((u) => u.status === "pending");
+    } else if (filterStatus === "suspended") {
+      finalUsers = finalUsers.filter((u) => u.status === "suspended");
+    }
+
+    // Role & Status Counts
     const adminCount = enrichedUsers.filter((u) => u.role === "admin").length;
     const wholesaleCount = enrichedUsers.filter((u) => u.role === "wholesale").length;
     const resellerCount = enrichedUsers.filter((u) => u.role === "reseller").length;
     const teamLeaderRoleCount = enrichedUsers.filter((u) => u.role === "team_leader").length;
     const customerCount = enrichedUsers.filter((u) => u.role === "user" || u.role === "customer").length;
+    const activeCount = enrichedUsers.filter((u) => u.status === "active" || (!u.status && u.status !== "suspended" && u.status !== "pending")).length;
     const pendingCount = enrichedUsers.filter((u) => u.status === "pending").length;
+    const suspendedCount = enrichedUsers.filter((u) => u.status === "suspended").length;
 
     const liabilityAgg = await Customer.aggregate([
       { $match: { role: "reseller" } },
@@ -200,7 +212,9 @@ export async function GET(req) {
         wholesaleCount,
         resellerCount,
         customerCount,
+        activeCount,
         pendingCount,
+        suspendedCount,
         starResellerCount: enrichedUsers.filter((u) => u.isWeeklyStar).length,
         teamLeaderCount: teamLeaders.length,
         totalWalletLiability: liabilityAgg[0]?.totalBalance || 0,

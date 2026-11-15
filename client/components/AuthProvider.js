@@ -10,6 +10,7 @@ const AuthCtx = createContext({
   isWholesale: false,
   isReseller: false,
   isTeamLeader: false,
+  isSuspended: false,
   profile: null,
   loading: true,
   logout: async () => {},
@@ -151,15 +152,21 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const isUserSuspended = profile?.status === "suspended" || profile?.isSuspended === true;
+  const isWholesaleActive = role === "wholesale" && !isUserSuspended;
+  const isResellerActive = (role === "reseller" || role === "team_leader") && !isUserSuspended;
+  const isTeamLeaderActive = role === "team_leader" && !isUserSuspended;
+
   return (
     <AuthCtx.Provider
       value={{
         user,
-        role,
+        role: isUserSuspended && role !== "admin" ? "user" : role,
         isAdmin: role === "admin",
-        isWholesale: role === "wholesale",
-        isReseller: role === "reseller" || role === "team_leader",
-        isTeamLeader: role === "team_leader",
+        isWholesale: isWholesaleActive,
+        isReseller: isResellerActive,
+        isTeamLeader: isTeamLeaderActive,
+        isSuspended: isUserSuspended,
         profile,
         loading,
         logout,
