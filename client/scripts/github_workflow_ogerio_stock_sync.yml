@@ -1,0 +1,50 @@
+name: Ogerio Auto Stock Sync
+
+on:
+  schedule:
+    # Runs twice daily at 03:00 UTC and 15:00 UTC (9:00 AM & 9:00 PM Bangladesh Standard Time)
+    - cron: '0 3,15 * * *'
+  workflow_dispatch: # Allows 1-click manual trigger anytime from GitHub Actions tab
+
+jobs:
+  sync-stock:
+    name: Crawl Ogerio & Sync Database Stock
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: 📦 Install Dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: 🌐 Ensure Google Chrome is Ready
+        run: |
+          if ! command -v google-chrome &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y wget gnupg
+            wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+            sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+            sudo apt-get update
+            sudo apt-get install -y google-chrome-stable
+          fi
+          google-chrome --version
+
+      - name: ⚡ Execute Live Ogerio Stock Sync
+        env:
+          MONGO_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          CONCURRENCY: 4
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
+        run: |
+          node client/scripts/crawl_and_sync_live_ogerio_stock.mjs
