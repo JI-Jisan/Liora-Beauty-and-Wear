@@ -3,9 +3,9 @@ export async function generateMetadata({ params }) {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"; // লাইভ হলে আপনার আসল ডোমেইন হবে
 
   try {
-    // সার্ভার থেকে নির্দিষ্ট প্রোডাক্টের ডেটা ফেচ করা
+    // সার্ভার থেকে নির্দিষ্ট প্রোডাক্টের ডেটা ফেচ করা (এজ ক্যাশ ১ ঘণ্টা)
     const res = await fetch(`${baseUrl}/api/products/${id}`, {
-      cache: "no-store", // সবসময় লেটেস্ট ডেটা দেখাবে
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {

@@ -3,9 +3,29 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 
-const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const TOTAL_PAGES = 326;
-const CONCURRENCY = 8;
+function getChromeExecutable() {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH && fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  const possiblePaths = [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium'
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return process.platform === 'win32'
+    ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+    : '/usr/bin/google-chrome';
+}
+
+const CHROME_PATH = getChromeExecutable();
+const TOTAL_PAGES = Number(process.env.TOTAL_PAGES) || 326;
+const CONCURRENCY = Number(process.env.CONCURRENCY) || (process.platform === 'win32' ? 8 : 4);
 
 const URI =
   process.env.MONGO_URI ||
@@ -54,6 +74,8 @@ async function main() {
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
       '--disable-blink-features=AutomationControlled'
     ]
   });

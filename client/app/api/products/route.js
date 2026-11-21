@@ -238,7 +238,7 @@ export async function GET(req) {
       ? "no-store, no-cache, must-revalidate, max-age=0"
       : isSearchActive
       ? "public, s-maxage=60, stale-while-revalidate=300"
-      : "public, s-maxage=15, stale-while-revalidate=60";
+      : "public, s-maxage=60, stale-while-revalidate=300";
 
     if (isPaginated) {
       return NextResponse.json(
