@@ -10,4 +10,7 @@ echo.
 echo ========================================================
 echo   SYNC FINISHED! DATABASE HAS BEEN UPDATED.
 echo ========================================================
-pause
+if "%1" neq "--scheduled" (
+  pause
+)
+
