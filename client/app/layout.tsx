@@ -103,6 +103,11 @@ export default function RootLayout({
       <head>
         <meta name="google-site-verification" content="llyiJThwVTT8mmTN2qLuQAAcb5lO_9ejDLjHOGx8vN0" />
         <script
+          dangerouslySetInnerHTML={{
+            __html: `try{localStorage.setItem('nl-hud:public:v1','hidden');localStorage.setItem('nl-hud:owner-private:v1','hidden');}catch(e){}`,
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
         />
@@ -123,6 +128,8 @@ export default function RootLayout({
               <div className="jt-root-wrapper">
                 <LayoutChrome>{children}</LayoutChrome>
               </div>
+              <div id="nl-badge-frame" style={{ display: "none" }} aria-hidden="true" />
+              <div id="nl-hud-frame" style={{ display: "none" }} aria-hidden="true" />
             </CartProvider>
           </CampusProvider>
         </AuthProvider>

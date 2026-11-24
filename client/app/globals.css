@@ -3020,7 +3020,7 @@ button {
   position: fixed;
   right: 20px;
   bottom: 24px;
-  z-index: 9990;
+  z-index: 2147483647;
   background: #25d366;
   color: #ffffff !important;
   text-decoration: none;
@@ -3034,6 +3034,23 @@ button {
   box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   white-space: nowrap;
+}
+
+/* Hide third-party hosting badges (e.g. Netlify HUD / Badge) */
+#nl-badge-frame,
+#nl-hud-frame,
+iframe#nl-badge-frame,
+iframe#nl-hud-frame,
+iframe[title*="Netlify"],
+iframe[src*="netlify"],
+[data-netlify-site-id] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  clip-path: polygon(0 0, 0 0, 0 0, 0 0) !important;
 }
 
 .jt-whatsapp-float:hover {
