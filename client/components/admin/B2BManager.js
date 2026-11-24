@@ -40,6 +40,7 @@ export default function B2BManager() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedViewUser, setSelectedViewUser] = useState(null);
+  const [userToPay, setUserToPay] = useState(null);
 
   // Add / Edit Form State
   const [formData, setFormData] = useState({
@@ -379,6 +380,11 @@ export default function B2BManager() {
     setSelectedUser(user);
     setWalletForm({ amount: "", type: "credit", note: "" });
     setIsWalletModalOpen(true);
+  };
+
+  const handlePayResellerDirect = (user) => {
+    setUserToPay(user);
+    setActiveSubTab("payouts");
   };
 
   const handleSaveAdd = async (e) => {
@@ -970,23 +976,46 @@ export default function B2BManager() {
                             ৳{Number(u.walletBalance || 0).toLocaleString()}
                           </div>
                           {u.role === "reseller" && (
-                            <button
-                              type="button"
-                              onClick={() => handleOpenWallet(u)}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "#2563eb",
-                                fontSize: 11,
-                                fontWeight: 700,
-                                cursor: "pointer",
-                                textDecoration: "underline",
-                                padding: 0,
-                                marginTop: 2,
-                              }}
-                            >
-                              ± Adjust
-                            </button>
+                            <div style={{ display: "flex", gap: 6, justifyContent: "center", alignItems: "center", marginTop: 3 }}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenWallet(u)}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  color: "#2563eb",
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                  textDecoration: "underline",
+                                  padding: 0,
+                                }}
+                              >
+                                ± Adjust
+                              </button>
+                              {Number(u.walletBalance || 0) > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handlePayResellerDirect(u)}
+                                  style={{
+                                    background: "#be123c",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: 6,
+                                    fontSize: 10.5,
+                                    fontWeight: 800,
+                                    padding: "2px 7px",
+                                    cursor: "pointer",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 2,
+                                  }}
+                                  title="সরাসরি বিকাশ/নগদে পেমেন্ট করুন"
+                                >
+                                  💸 Pay
+                                </button>
+                              )}
+                            </div>
                           )}
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "center" }}>
@@ -1610,7 +1639,7 @@ export default function B2BManager() {
       )}
 
       {/* Payouts Management View */}
-      {activeSubTab === "payouts" && <ResellerPayoutManager />}
+      {activeSubTab === "payouts" && <ResellerPayoutManager initialUserToPay={userToPay} />}
 
       {/* Ledger View */}
       {activeSubTab === "ledger" && (

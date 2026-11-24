@@ -15,7 +15,15 @@ export async function GET(req) {
     await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const filterStatus = searchParams.get("status") || "all"; // 'all' | 'pending' | 'completed' | 'cancelled'
+    const filterPeriod = searchParams.get("period") || "all"; // 'all' | 'today' | 'this_week' | 'this_month'
     const searchQuery = (searchParams.get("search") || "").trim();
+
+    // Time calculations
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const dayOfWeek = now.getDay();
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
 
     const query = {
       type: "payout_withdrawal",
@@ -24,6 +32,14 @@ export async function GET(req) {
 
     if (filterStatus !== "all") {
       query.status = filterStatus;
+    }
+
+    if (filterPeriod === "today") {
+      query.createdAt = { $gte: startOfToday };
+    } else if (filterPeriod === "this_week") {
+      query.createdAt = { $gte: startOfWeek };
+    } else if (filterPeriod === "this_month") {
+      query.createdAt = { $gte: startOfMonth };
     }
 
     if (searchQuery) {
@@ -38,7 +54,7 @@ export async function GET(req) {
 
     const rawPayouts = await ResellerLedger.find(query)
       .sort({ createdAt: -1 })
-      .limit(200)
+      .limit(300)
       .lean();
 
     // Fetch customer details to enrich
@@ -65,49 +81,83 @@ export async function GET(req) {
       };
     });
 
-    // Calculate overall stats
-    const statsAgg = await ResellerLedger.aggregate([
-      {
-        $match: {
-          type: "payout_withdrawal",
-          isDeleted: { $ne: true },
-        },
-      },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-          totalAmount: { $sum: { $abs: "$amount" } },
-        },
-      },
-    ]);
+    // Calculate comprehensive stats (Today, Week, Month, All-Time)
+    const allCompleted = await ResellerLedger.find({
+      type: "payout_withdrawal",
+      status: "completed",
+      isDeleted: { $ne: true },
+    }).select("amount createdAt").lean();
 
-    let pendingCount = 0;
-    let pendingAmount = 0;
-    let completedCount = 0;
-    let completedAmount = 0;
-    let cancelledCount = 0;
+    let todayAmount = 0;
+    let todayCount = 0;
+    let weekAmount = 0;
+    let weekCount = 0;
+    let monthAmount = 0;
+    let monthCount = 0;
+    let totalCompletedAmount = 0;
+    let totalCompletedCount = allCompleted.length;
 
-    statsAgg.forEach((s) => {
-      if (s._id === "pending") {
-        pendingCount = s.count;
-        pendingAmount = s.totalAmount;
-      } else if (s._id === "completed") {
-        completedCount = s.count;
-        completedAmount = s.totalAmount;
-      } else if (s._id === "cancelled") {
-        cancelledCount = s.count;
+    allCompleted.forEach((item) => {
+      const amt = Math.abs(item.amount);
+      const d = new Date(item.createdAt);
+      totalCompletedAmount += amt;
+
+      if (d >= startOfToday) {
+        todayAmount += amt;
+        todayCount++;
+      }
+      if (d >= startOfWeek) {
+        weekAmount += amt;
+        weekCount++;
+      }
+      if (d >= startOfMonth) {
+        monthAmount += amt;
+        monthCount++;
       }
     });
+
+    // Pending stats
+    const pendingItems = await ResellerLedger.find({
+      type: "payout_withdrawal",
+      status: "pending",
+      isDeleted: { $ne: true },
+    }).select("amount").lean();
+
+    const pendingCount = pendingItems.length;
+    const pendingAmount = pendingItems.reduce((acc, curr) => acc + Math.abs(curr.amount), 0);
+
+    // Cancelled stats
+    const cancelledCount = await ResellerLedger.countDocuments({
+      type: "payout_withdrawal",
+      status: "cancelled",
+      isDeleted: { $ne: true },
+    });
+
+    // List of resellers with positive balance (ready to be paid directly)
+    const payableResellers = await Customer.find({
+      role: { $in: ["reseller", "team_leader"] },
+      walletBalance: { $gt: 0 },
+      status: { $ne: "suspended" },
+    })
+      .select("email name phone resellerStoreName resellerStorePhone walletBalance")
+      .sort({ walletBalance: -1 })
+      .lean();
 
     return NextResponse.json({
       success: true,
       payouts,
+      payableResellers,
       stats: {
+        todayAmount,
+        todayCount,
+        weekAmount,
+        weekCount,
+        monthAmount,
+        monthCount,
+        totalCompletedAmount,
+        totalCompletedCount,
         pendingCount,
         pendingAmount,
-        completedCount,
-        completedAmount,
         cancelledCount,
       },
     });
@@ -126,8 +176,75 @@ export async function PUT(req) {
   try {
     await connectToDatabase();
     const body = await req.json();
-    const { action, ledgerId, adminSenderAccount, transactionId, adminNote, reason } = body;
+    const {
+      action,
+      ledgerId,
+      resellerEmail,
+      amount,
+      payoutMethod,
+      payoutAccount,
+      adminSenderAccount,
+      transactionId,
+      adminNote,
+      reason,
+    } = body;
 
+    // ACTION: Direct Instant Payout without prior request
+    if (action === "direct_pay") {
+      const cleanEmail = (resellerEmail || "").toLowerCase().trim();
+      const numAmount = Number(amount);
+
+      if (!cleanEmail) {
+        return NextResponse.json({ message: "রিসেলার নির্বাচন করুন" }, { status: 400 });
+      }
+      if (!numAmount || isNaN(numAmount) || numAmount <= 0) {
+        return NextResponse.json({ message: "সঠিক টাকার পরিমাণ দিন" }, { status: 400 });
+      }
+      if (!payoutAccount || payoutAccount.trim().length < 11) {
+        return NextResponse.json({ message: "সঠিক বিকাশ/নগদ প্রাপক নম্বর দিন" }, { status: 400 });
+      }
+      if (!transactionId || !transactionId.trim()) {
+        return NextResponse.json({ message: "বিকাশ/নগদ Transaction ID (TrxID) দেওয়া আবশ্যক" }, { status: 400 });
+      }
+
+      const customer = await Customer.findOne({ email: cleanEmail });
+      if (!customer) {
+        return NextResponse.json({ message: "রিসেলার অ্যাকাউন্ট পাওয়া যায়নি" }, { status: 404 });
+      }
+
+      // Deduct from wallet balance
+      const prevBalance = customer.walletBalance || 0;
+      customer.walletBalance = Math.max(0, prevBalance - numAmount);
+      await customer.save();
+
+      const receiptNumber = `RCP-${Date.now().toString().slice(-6)}`;
+
+      const ledger = await ResellerLedger.create({
+        resellerUid: customer.firebaseUid || "",
+        resellerEmail: customer.email,
+        type: "payout_withdrawal",
+        amount: -numAmount,
+        balanceAfter: customer.walletBalance,
+        status: "completed",
+        payoutMethod: payoutMethod || "bKash",
+        payoutAccount: payoutAccount.trim(),
+        adminSenderAccount: (adminSenderAccount || "").trim(),
+        transactionId: transactionId.trim().toUpperCase(),
+        paidAt: new Date(),
+        processedBy: admin.email || "admin",
+        adminNote: adminNote || "অ্যাডমিন কর্তৃক সরাসরি পে-আউট",
+        receiptNumber,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `৳${numAmount.toLocaleString()} টাকা সফলভাবে পরিশোধ করা হয়েছে ও রিসিট ${receiptNumber} তৈরি হয়েছে!`,
+        payout: ledger,
+        customer,
+      });
+    }
+
+    // Existing actions require ledgerId
     if (!ledgerId) {
       return NextResponse.json({ message: "রেকর্ড আইডি আবশ্যক" }, { status: 400 });
     }
@@ -137,7 +254,7 @@ export async function PUT(req) {
       return NextResponse.json({ message: "পে-আউট রেকর্ড পাওয়া যায়নি" }, { status: 404 });
     }
 
-    // ACTION: Mark as Paid
+    // ACTION: Mark as Paid for requested payouts
     if (action === "mark_paid") {
       if (!transactionId || !transactionId.trim()) {
         return NextResponse.json({ message: "বিকাশ/নগদ Transaction ID (TrxID) দেওয়া আবশ্যক" }, { status: 400 });
