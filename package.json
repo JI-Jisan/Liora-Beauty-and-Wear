@@ -1,4 +1,10 @@
 {
+  "name": "liora-beauty-and-wear",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "start": "cd client && npm run start"
+  },
   "dependencies": {
     "jose": "4.15.9"
   },
