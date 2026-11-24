@@ -507,6 +507,13 @@ const ResellerLedgerSchema = new mongoose.Schema(
     },
     payoutMethod: { type: String, default: "" },
     payoutAccount: { type: String, default: "" },
+    adminSenderAccount: { type: String, default: "" }, // প্রেরক বিকাশ/নগদ নম্বর
+    transactionId: { type: String, default: "" }, // TrxID
+    paidAt: { type: Date, default: null },
+    processedBy: { type: String, default: "" },
+    receiptNumber: { type: String, default: "" },
+    adminNote: { type: String, default: "" },
+    isDeleted: { type: Boolean, default: false, index: true },
     note: { type: String, default: "" },
   },
   { timestamps: true }

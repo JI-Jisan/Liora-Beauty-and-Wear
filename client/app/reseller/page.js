@@ -904,6 +904,142 @@ export default function ResellerPage() {
                 </table>
               </div>
             </div>
+
+            {/* Payout & Ledger History Table */}
+            <div style={{ background: "#ffffff", borderRadius: 16, border: "1px solid #cbd5e1", overflow: "hidden", marginTop: 16 }}>
+              <div style={{ padding: "14px 18px", background: "#f8fafc", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#0f172a" }}>
+                    💳 ক্যাশআউট ও ওয়ালেট ট্রানজ্যাকশন হিস্ট্রি ({walletData.ledger?.length || 0})
+                  </h3>
+                  <p style={{ margin: "2px 0 0", fontSize: 11.5, color: "#64748b" }}>
+                    আপনার বিকাশ/নগদ ক্যাশআউট রিকোয়েস্টের স্ট্যাটাস, TrxID ও পেমেন্ট রসিদ
+                  </p>
+                </div>
+              </div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5, textAlign: "left" }}>
+                  <thead style={{ background: "#f1f5f9", borderBottom: "1px solid #e2e8f0" }}>
+                    <tr>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>তারিখ</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>বিবরণ</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800, textAlign: "right" }}>পরিমাণ</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>প্রাপক একাউন্ট</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800 }}>পেমেন্ট প্রমাণ (TrxID)</th>
+                      <th style={{ padding: "10px 14px", fontWeight: 800, textAlign: "center" }}>স্ট্যাটাস</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {!walletData.ledger || walletData.ledger.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} style={{ padding: 24, textAlign: "center", color: "#64748b" }}>
+                          কোনো ট্রানজ্যাকশন রেকর্ড পাওয়া যায়নি।
+                        </td>
+                      </tr>
+                    ) : (
+                      walletData.ledger.map((lg) => (
+                        <tr key={lg._id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                          <td style={{ padding: "10px 14px", color: "#64748b", whiteSpace: "nowrap" }}>
+                            {new Date(lg.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                          </td>
+                          <td style={{ padding: "10px 14px" }}>
+                            <span
+                              style={{
+                                padding: "2px 8px",
+                                borderRadius: 10,
+                                fontSize: 10.5,
+                                fontWeight: 800,
+                                background:
+                                  lg.type === "profit_credit"
+                                    ? "#dcfce7"
+                                    : lg.type === "payout_withdrawal"
+                                    ? "#fef3c7"
+                                    : "#fee2e2",
+                                color:
+                                  lg.type === "profit_credit"
+                                    ? "#15803d"
+                                    : lg.type === "payout_withdrawal"
+                                    ? "#b45309"
+                                    : "#b91c1c",
+                              }}
+                            >
+                              {lg.type === "payout_withdrawal"
+                                ? "💸 ক্যাশআউট পে-আউট"
+                                : lg.type === "profit_credit"
+                                ? "📈 প্রফিট ক্রেডিট"
+                                : "⚙️ ওয়ালেট সমন্বয়"}
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              padding: "10px 14px",
+                              textAlign: "right",
+                              fontWeight: 900,
+                              color: lg.amount >= 0 ? "#15803d" : "#be123c",
+                            }}
+                          >
+                            {lg.amount >= 0 ? `+৳${lg.amount}` : `-৳${Math.abs(lg.amount)}`}
+                          </td>
+                          <td style={{ padding: "10px 14px", fontFamily: "monospace", fontWeight: 700 }}>
+                            {lg.payoutAccount ? `${lg.payoutMethod || "bKash"}: ${lg.payoutAccount}` : "—"}
+                          </td>
+                          <td style={{ padding: "10px 14px" }}>
+                            {lg.status === "completed" && lg.transactionId ? (
+                              <div>
+                                <span style={{ fontWeight: 800, color: "#15803d", fontFamily: "monospace" }}>
+                                  TrxID: {lg.transactionId}
+                                </span>
+                                {lg.receiptNumber && (
+                                  <div style={{ fontSize: 10.5, color: "#7c3aed" }}>
+                                    রিসিট: {lg.receiptNumber}
+                                  </div>
+                                )}
+                              </div>
+                            ) : lg.status === "cancelled" ? (
+                              <span style={{ fontSize: 11, color: "#b91c1c" }}>
+                                {lg.adminNote || "বাতিল ও রিফান্ড"}
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: 11, color: "#d97706" }}>
+                                {lg.type === "payout_withdrawal" ? "প্রসেসিং হচ্ছে" : "—"}
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: "10px 14px", textAlign: "center" }}>
+                            <span
+                              style={{
+                                padding: "3px 8px",
+                                borderRadius: 8,
+                                fontSize: 10.5,
+                                fontWeight: 800,
+                                background:
+                                  lg.status === "completed"
+                                    ? "#dcfce7"
+                                    : lg.status === "pending"
+                                    ? "#fef3c7"
+                                    : "#fee2e2",
+                                color:
+                                  lg.status === "completed"
+                                    ? "#15803d"
+                                    : lg.status === "pending"
+                                    ? "#b45309"
+                                    : "#b91c1c",
+                              }}
+                            >
+                              {lg.status === "completed"
+                                ? "✓ Paid"
+                                : lg.status === "pending"
+                                ? "⏳ Pending"
+                                : "✕ Cancelled"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </>
         ) : (
           /* Application Form for Visitors */

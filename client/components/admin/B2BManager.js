@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import ResellerPayoutManager from "./ResellerPayoutManager";
 
 export default function B2BManager() {
   const [users, setUsers] = useState([]);
@@ -672,6 +673,26 @@ export default function B2BManager() {
           }}
         >
           🏷️ Brand Wholesale Margins ({brands.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSubTab("payouts")}
+          style={{
+            background: activeSubTab === "payouts" ? "#be123c" : "#fff1f2",
+            color: activeSubTab === "payouts" ? "#fff" : "#be123c",
+            border: activeSubTab === "payouts" ? "none" : "1.5px solid #fecdd3",
+            padding: "8px 16px",
+            borderRadius: 8,
+            fontSize: 12.5,
+            fontWeight: 800,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span>💳 Reseller Payouts</span>
         </button>
         <button
           type="button"
@@ -1587,6 +1608,9 @@ export default function B2BManager() {
           </div>
         </div>
       )}
+
+      {/* Payouts Management View */}
+      {activeSubTab === "payouts" && <ResellerPayoutManager />}
 
       {/* Ledger View */}
       {activeSubTab === "ledger" && (
