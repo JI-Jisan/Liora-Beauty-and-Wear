@@ -234,11 +234,13 @@ export async function GET(req) {
       ]);
     }
 
-    const cacheHeader = isAdmin
-      ? "no-store, no-cache, must-revalidate, max-age=0"
-      : isSearchActive
-      ? "public, s-maxage=60, stale-while-revalidate=300"
-      : "public, s-maxage=60, stale-while-revalidate=300";
+    const responseHeaders = {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+      "Netlify-CDN-Cache-Control": "no-store",
+      "CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    };
 
     if (isPaginated) {
       return NextResponse.json(
@@ -250,18 +252,16 @@ export async function GET(req) {
           limit,
         },
         {
-          headers: {
-            "Cache-Control": cacheHeader,
-          },
+          headers: responseHeaders,
         }
       );
     }
 
     return NextResponse.json(products, {
       headers: {
+        ...responseHeaders,
         "X-Total-Count": String(total),
         "X-Total-Pages": String(Math.ceil(total / limit) || 1),
-        "Cache-Control": cacheHeader,
       },
     });
   } catch (error) {

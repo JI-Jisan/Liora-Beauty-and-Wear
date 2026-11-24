@@ -1,4 +1,4 @@
-﻿$batPath = "C:\Users\atiku\OneDrive\Documents\Jisan Project\Liora-Beauty-and-Wear\run_ogerio_stock_sync.bat"
+$batPath = "C:\Users\atiku\OneDrive\Documents\Jisan Project\Liora-Beauty-and-Wear\run_ogerio_stock_sync.bat"
 $action = New-ScheduledTaskAction -Execute "cmd.exe" -Argument "/c `"$batPath`" --scheduled"
 $trigger1 = New-ScheduledTaskTrigger -Daily -At 9:00AM
 $trigger2 = New-ScheduledTaskTrigger -Daily -At 9:00PM

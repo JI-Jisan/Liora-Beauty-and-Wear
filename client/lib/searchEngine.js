@@ -391,7 +391,19 @@ export function scoreProductRelevance(product, cleanPhrase, tokens, meaningfulTo
     score -= 100;
   }
 
-  // 7. Stock status bonus (in-stock items rank higher)
+  const hasIntentMatch =
+    matchedCount > 0 ||
+    hasBrandInQuery ||
+    normTitle === lowerPhrase ||
+    normTitle.includes(lowerPhrase) ||
+    (normTitle.length >= 5 && lowerPhrase.includes(normTitle)) ||
+    (catName && (lowerPhrase.includes(catName) || catName.includes(lowerPhrase)));
+
+  if (!hasIntentMatch) {
+    return 0; // Pure 0 score if none of the query tokens, phrases, brands, or categories matched
+  }
+
+  // 7. Stock status bonus (in-stock items rank higher among relevant items)
   if (product.inStock) {
     score += 25;
   }
@@ -795,6 +807,13 @@ export async function searchProductsFast(
       }
     }
 
+    // Rank candidates by Google-like relevance score
+    for (let i = 0; i < matches.length; i++) {
+      matches[i]._score = scoreProductRelevance(matches[i], cleanPhrase, searchTokens, meaningfulTokens);
+    }
+    // Filter out completely irrelevant items (score <= 0)
+    matches = matches.filter((p) => (p._score || 0) > 0);
+
     if (sortBy === "price_asc") {
       matches.sort((a, b) => {
         const stockA = a.inStock !== false && (a.stockQuantity === undefined || a.stockQuantity > 0) ? 1 : 0;
@@ -810,10 +829,6 @@ export async function searchProductsFast(
         return (Number(b.offerPrice) || 0) - (Number(a.offerPrice) || 0);
       });
     } else {
-      // Rank candidates by Google-like relevance score
-      for (let i = 0; i < matches.length; i++) {
-        matches[i]._score = scoreProductRelevance(matches[i], cleanPhrase, searchTokens, meaningfulTokens);
-      }
       matches.sort((a, b) => (b._score || 0) - (a._score || 0));
     }
 

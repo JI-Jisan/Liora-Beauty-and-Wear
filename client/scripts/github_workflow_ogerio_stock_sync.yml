@@ -48,3 +48,4 @@ jobs:
           PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
         run: |
           node client/scripts/crawl_and_sync_live_ogerio_stock.mjs
+
