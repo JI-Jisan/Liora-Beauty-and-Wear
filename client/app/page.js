@@ -107,8 +107,66 @@ export default function HomePage() {
         brandSubtitle={siteSettings.brandSubtitle}
       />
 
-      {/* 1. CAMPAIGN PROMO SLIDER BANNER */}
-      <PromoBanner promoSlides={siteSettings.promoSlides} />
+      {searchTerm && searchTerm.trim() ? (
+        <section style={{ maxWidth: "1440px", margin: "20px auto 40px", padding: "0 20px", width: "100%", boxSizing: "border-box" }}>
+          <div style={{
+            background: "linear-gradient(135deg, #fff1f2 0%, #fff7f8 50%, #fdf2f4 100%)",
+            border: "1px solid #fecdd3",
+            borderRadius: "20px",
+            padding: "20px 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
+            marginBottom: "24px"
+          }}>
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#ffe4e6", color: "#e11d48", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", marginBottom: "6px" }}>
+                🔍 সার্চ ও স্ক্যান ফলাফল
+              </div>
+              <h2 style={{ fontSize: "22px", fontWeight: "800", color: "#1e293b", margin: "0 0 4px" }}>
+                ফলাফল: <span style={{ color: "#ff4d6d" }}>“{searchTerm.trim()}”</span>
+              </h2>
+              <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+                আপনার পছন্দের আসল কসমেটিক্স ও স্কিনকেয়ার পণ্যগুলো সরাসরি নিচে প্রদর্শিত হচ্ছে
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "9px 18px",
+                background: "#fff",
+                border: "1px solid #fecdd3",
+                borderRadius: "20px",
+                fontSize: "13px",
+                fontWeight: "600",
+                color: "#e11d48",
+                cursor: "pointer",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.03)"
+              }}
+            >
+              ✕ ক্লিয়ার করে হোমপেজে ফিরুন
+            </button>
+          </div>
+
+          <ProductGrid
+            searchTerm={searchTerm}
+            onAddToCart={addToCart}
+            title=""
+            subtitle=""
+            showCategoryBar={false}
+            showPagination={true}
+          />
+        </section>
+      ) : (
+        <>
+          {/* 1. CAMPAIGN PROMO SLIDER BANNER */}
+          <PromoBanner promoSlides={siteSettings.promoSlides} />
 
       {/* 🎓 CAMPUS / STUDENT COUPON UNLOCK BAR */}
       <CampusCouponBar />
@@ -229,6 +287,8 @@ export default function HomePage() {
           showPagination={true}
         />
       </section>
+        </>
+      )}
     </main>
   );
 }

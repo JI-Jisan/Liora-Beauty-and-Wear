@@ -150,9 +150,13 @@ export default function Header({
     const query = currentSearchValue.trim();
     onSearchChange?.(query);
     if (query) {
-      router.push(`/products?search=${encodeURIComponent(query)}`);
+      if (pathname !== "/" && pathname !== "/products") {
+        router.push(`/products?search=${encodeURIComponent(query)}`);
+      }
     } else {
-      router.push("/products");
+      if (pathname !== "/" && pathname !== "/products") {
+        router.push("/products");
+      }
     }
   };
 
@@ -657,7 +661,9 @@ export default function Header({
       onClose={() => setIsVisualSearchOpen(false)}
       onSearch={(q) => {
         onSearchChange?.(q);
-        router.push(`/products?search=${encodeURIComponent(q)}`);
+        if (pathname !== "/" && pathname !== "/products") {
+          router.push(`/products?search=${encodeURIComponent(q)}`);
+        }
         setIsVisualSearchOpen(false);
       }}
     />

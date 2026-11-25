@@ -3,9 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getImageUrl } from "@/lib/api";
+import { useCart } from "@/context/CartContext";
 
 export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
   const router = useRouter();
+  const { addToCart } = useCart();
   const [imagePreview, setImagePreview] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanStep, setScanStep] = useState("");
@@ -14,6 +16,7 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
   const [matchedProducts, setMatchedProducts] = useState([]);
   const [manualQuery, setManualQuery] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [addedId, setAddedId] = useState(null);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const redirectTimerRef = useRef(null);
@@ -30,6 +33,7 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
       setMatchedProducts([]);
       setManualQuery("");
       setErrorMsg("");
+      setAddedId(null);
     }
   }, [isOpen]);
 
@@ -141,6 +145,10 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
           setMatchedProducts(Array.isArray(data.products) ? data.products : []);
           setScanStep(`শনাক্ত হয়েছে: "${finalSearchTerm}"`);
           setIsScanning(false);
+          // If onSearch is provided, sync the query with parent page so the website is ready in background
+          if (typeof onSearch === "function") {
+            onSearch(finalSearchTerm);
+          }
         } else {
           setIsScanning(false);
           setErrorMsg(
@@ -157,14 +165,12 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
     reader.readAsDataURL(imgFile);
   };
 
-  const navigateToSearch = (query) => {
+  const applySearchAndClose = (query) => {
     const clean = (query || detectedQuery).trim();
-    if (!clean) return;
-    onClose?.();
-    if (typeof onSearch === "function") {
+    if (clean && typeof onSearch === "function") {
       onSearch(clean);
     }
-    router.push(`/products?search=${encodeURIComponent(clean)}`);
+    onClose?.();
   };
 
   const navigateToProduct = (productId) => {
@@ -173,27 +179,39 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
     router.push(`/products/${productId}`);
   };
 
+  const handleAddToCartClick = (p, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (typeof addToCart === "function") {
+      addToCart(p, 1, p.offerPrice);
+      setAddedId(p._id);
+      setTimeout(() => setAddedId(null), 1800);
+    }
+  };
+
   const handleManualSearchSubmit = (e) => {
     e?.preventDefault();
     const query = (manualQuery || detectedQuery).trim();
     if (!query) return;
-    navigateToSearch(query);
+    applySearchAndClose(query);
   };
 
   const handleQuickSample = (sampleTerm) => {
-    navigateToSearch(sampleTerm);
+    applySearchAndClose(sampleTerm);
   };
 
   return (
     <div className="jt-lens-modal-overlay" onClick={onClose}>
-      <div className="jt-lens-modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="jt-lens-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "680px", maxHeight: "90vh", display: "flex", flexDirection: "column" }}>
         {/* MODAL HEADER */}
         <div className="jt-lens-header">
           <div className="jt-lens-brand-title">
             <span className="jt-lens-icon-gradient">📷</span>
             <div>
               <h3>LIORA Visual Lens (ক্যামেরা স্ক্যানার)</h3>
-              <p>ছবি তুলে বা আপলোড করে যেকোনো কসমেটিক্স খুঁজুন</p>
+              <p>ছবি তুলে বা আপলোড করে সরাসরি ওয়েবসাইটে ফলাফল দেখুন</p>
             </div>
           </div>
           <button className="jt-lens-close-btn" onClick={onClose} aria-label="Close Lens">
@@ -202,7 +220,7 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
         </div>
 
         {/* MODAL BODY */}
-        <div className="jt-lens-body">
+        <div className="jt-lens-body" style={{ overflowY: "auto", flex: 1, padding: "16px 20px 24px" }}>
           {/* Hidden file inputs */}
           <input
             ref={fileInputRef}
@@ -231,7 +249,7 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
 
               <h4>পণ্য বা প্যাকেজিংয়ের ছবি তুলুন</h4>
               <p>
-                যেকোনো ক্রিম, সিরাম, লিপস্টিক বা বোতলের ছবি তুললেই সাথে সাথে আমাদের স্টোরে খুঁজে পাবেন!
+                যেকোনো ক্রিম, সিরাম, লিপস্টিক বা বোতলের ছবি তুললেই সাথে সাথে আমাদের ওয়েবসাইটে ফলাফল চলে আসবে!
               </p>
 
               <div className="jt-lens-actions-row">
@@ -277,9 +295,9 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
 
           {/* PREVIEW & SCANNING RETICLE */}
           {imagePreview && (
-            <div className="jt-lens-preview-container">
-              <div className="jt-lens-image-wrapper">
-                <img src={imagePreview} alt="Scanned product" className="jt-lens-scanned-img" />
+            <div className="jt-lens-preview-container" style={{ marginBottom: "16px" }}>
+              <div className="jt-lens-image-wrapper" style={{ maxHeight: "200px" }}>
+                <img src={imagePreview} alt="Scanned product" className="jt-lens-scanned-img" style={{ maxHeight: "200px" }} />
 
                 {/* Google Lens Animated Reticle */}
                 <div className={`jt-lens-reticle ${isScanning ? "scanning" : ""}`}>
@@ -303,16 +321,16 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
                       <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#16a34a", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "16px" }}>✓</div>
                       <div>
                         <h4 style={{ margin: "0 0 2px 0", color: "#166534", fontSize: "15px", fontWeight: "700" }}>পণ্য শনাক্ত হয়েছে: &ldquo;{detectedQuery}&rdquo;</h4>
-                        <p style={{ margin: 0, color: "#15803d", fontSize: "13px" }}>নিচে পাওয়া ম্যাচিং প্রোডাক্টগুলো দেখুন বা ফুল পেজ খুলুন</p>
+                        <p style={{ margin: 0, color: "#15803d", fontSize: "13px" }}>নিচে পাওয়া প্রোডাক্টগুলো থেকে সরাসরি কার্টে নিন অথবা ওয়েবসাইটে দেখুন</p>
                       </div>
                     </div>
-                    <div style={{ display: "flex", gap: "8px" }}>
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                       <button
                         type="button"
-                        onClick={() => navigateToSearch()}
-                        style={{ padding: "8px 16px", background: "#ff4d6d", color: "#fff", border: "none", borderRadius: "20px", fontWeight: "600", fontSize: "13px", cursor: "pointer" }}
+                        onClick={() => applySearchAndClose(detectedQuery)}
+                        style={{ padding: "8px 16px", background: "#ff4d6d", color: "#fff", border: "none", borderRadius: "20px", fontWeight: "600", fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}
                       >
-                        সব ফলাফল দেখুন →
+                        ওয়েবসাইটে দেখুন →
                       </button>
                       <button
                         type="button"
@@ -325,7 +343,7 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
                         }}
                         style={{ padding: "8px 12px", background: "#f1f5f9", color: "#475569", border: "1px solid #cbd5e1", borderRadius: "20px", fontSize: "13px", cursor: "pointer" }}
                       >
-                        🔄 পুনরায় ছবি তুলুন
+                        🔄 পুনরায় স্ক্যান
                       </button>
                     </div>
                   </div>
@@ -350,49 +368,52 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
             </div>
           )}
 
-          {/* INSTANT MATCHED PRODUCTS GRID (Shows directly in modal without waiting!) */}
+          {/* INSTANT MATCHED PRODUCTS GRID (Shows directly in modal without taking to another page!) */}
           {matchedProducts.length > 0 && (
-            <div style={{ marginTop: "18px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-                <span style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b" }}>
+            <div style={{ marginTop: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                <span style={{ fontSize: "15px", fontWeight: "700", color: "#1e293b" }}>
                   ম্যাচিং প্রোডাক্ট ({matchedProducts.length}টি পাওয়া গেছে):
                 </span>
                 <button
                   type="button"
-                  onClick={() => navigateToSearch()}
+                  onClick={() => applySearchAndClose(detectedQuery)}
                   style={{ background: "none", border: "none", color: "#ff4d6d", fontWeight: "600", fontSize: "13px", cursor: "pointer" }}
                 >
-                  সার্চ পেজে দেখুন &rarr;
+                  ওয়েবসাইটের পেজে দেখুন &rarr;
                 </button>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "10px", maxHeight: "280px", overflowY: "auto", padding: "4px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px", maxHeight: "380px", overflowY: "auto", padding: "4px" }}>
                 {matchedProducts.slice(0, 8).map((p) => {
                   const imgSrc = getImageUrl(p.image) || "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=200&auto=format&fit=crop&q=80";
+                  const isAdded = addedId === p._id;
                   return (
                     <div
                       key={p._id}
-                      onClick={() => navigateToProduct(p._id)}
                       style={{
                         background: "#fff",
-                        border: "1px solid #fed7aa",
-                        borderRadius: "10px",
-                        padding: "8px",
-                        cursor: "pointer",
+                        border: "1px solid #fecdd3",
+                        borderRadius: "14px",
+                        padding: "10px",
                         display: "flex",
                         flexDirection: "column",
                         transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                        position: "relative",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow = "0 4px 12px rgba(255, 77, 109, 0.15)";
+                        e.currentTarget.style.boxShadow = "0 6px 16px rgba(255, 77, 109, 0.15)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = "none";
                         e.currentTarget.style.boxShadow = "none";
                       }}
                     >
-                      <div style={{ width: "100%", height: "100px", borderRadius: "8px", overflow: "hidden", background: "#f8fafc", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "6px" }}>
+                      <div
+                        onClick={() => navigateToProduct(p._id)}
+                        style={{ cursor: "pointer", width: "100%", height: "130px", borderRadius: "10px", overflow: "hidden", background: "#fdf2f4", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "8px" }}
+                      >
                         <img
                           src={imgSrc}
                           alt={p.name}
@@ -402,15 +423,48 @@ export default function VisualSearchModal({ isOpen, onClose, onSearch }) {
                           }}
                         />
                       </div>
-                      <h5 style={{ margin: "0 0 4px 0", fontSize: "12px", fontWeight: "600", color: "#1e293b", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: "1.3" }}>
+
+                      <div style={{ fontSize: "11px", fontWeight: "700", color: "#e11d48", textTransform: "uppercase", marginBottom: "2px" }}>
+                        {p.brand || "Authentic"}
+                      </div>
+
+                      <h5
+                        onClick={() => navigateToProduct(p._id)}
+                        style={{ margin: "0 0 6px 0", fontSize: "13px", fontWeight: "600", color: "#1e293b", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: "1.35", cursor: "pointer" }}
+                      >
                         {p.name}
                       </h5>
-                      <div style={{ marginTop: "auto", display: "flex", alignItems: "baseline", gap: "4px" }}>
-                        <span style={{ fontSize: "13px", fontWeight: "700", color: "#ff4d6d" }}>{p.offerPrice} Tk</span>
+
+                      <div style={{ marginTop: "auto", display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "10px" }}>
+                        <span style={{ fontSize: "15px", fontWeight: "800", color: "#e11d48" }}>{p.offerPrice} Tk</span>
                         {p.originalPrice > p.offerPrice && (
-                          <span style={{ fontSize: "11px", color: "#94a3b8", textDecoration: "line-through" }}>{p.originalPrice}</span>
+                          <span style={{ fontSize: "12px", color: "#94a3b8", textDecoration: "line-through" }}>{p.originalPrice} Tk</span>
                         )}
                       </div>
+
+                      {/* DIRECT 1-CLICK ADD TO CART (No page reload!) */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleAddToCartClick(p, e)}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          borderRadius: "10px",
+                          border: "none",
+                          background: isAdded ? "#16a34a" : "linear-gradient(135deg, #ff4d6d 0%, #e11d48 100%)",
+                          color: "#fff",
+                          fontWeight: "700",
+                          fontSize: "12px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          transition: "background 0.2s ease",
+                        }}
+                      >
+                        {isAdded ? "✓ কার্টে যোগ হয়েছে!" : "🛒 কার্টে নিন"}
+                      </button>
                     </div>
                   );
                 })}
