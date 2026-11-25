@@ -945,8 +945,8 @@ export default function ResellerPage() {
                           <td style={{ padding: "10px 14px" }}>
                             <span
                               style={{
-                                padding: "2px 8px",
-                                borderRadius: 10,
+                                padding: "3px 8px",
+                                borderRadius: 8,
                                 fontSize: 10.5,
                                 fontWeight: 800,
                                 background:
@@ -954,13 +954,13 @@ export default function ResellerPage() {
                                     ? "#dcfce7"
                                     : lg.type === "payout_withdrawal"
                                     ? "#fef3c7"
-                                    : "#fee2e2",
+                                    : "#f1f5f9",
                                 color:
                                   lg.type === "profit_credit"
                                     ? "#15803d"
                                     : lg.type === "payout_withdrawal"
                                     ? "#b45309"
-                                    : "#b91c1c",
+                                    : "#475569",
                               }}
                             >
                               {lg.type === "payout_withdrawal"
@@ -981,10 +981,18 @@ export default function ResellerPage() {
                             {lg.amount >= 0 ? `+৳${lg.amount}` : `-৳${Math.abs(lg.amount)}`}
                           </td>
                           <td style={{ padding: "10px 14px", fontFamily: "monospace", fontWeight: 700 }}>
-                            {lg.payoutAccount ? `${lg.payoutMethod || "bKash"}: ${lg.payoutAccount}` : "—"}
+                            {lg.type === "profit_credit"
+                              ? "— (ওয়ালেটে জমা)"
+                              : lg.payoutAccount
+                              ? `${lg.payoutMethod || "bKash"}: ${lg.payoutAccount}`
+                              : "—"}
                           </td>
                           <td style={{ padding: "10px 14px" }}>
-                            {lg.status === "completed" && lg.transactionId ? (
+                            {lg.type === "profit_credit" ? (
+                              <span style={{ fontSize: 11, color: "#16a34a", fontWeight: 700 }}>
+                                — (অর্ডারের লাভ ব্যালেন্সে যুক্ত)
+                              </span>
+                            ) : lg.status === "completed" && lg.transactionId ? (
                               <div>
                                 <span style={{ fontWeight: 800, color: "#15803d", fontFamily: "monospace" }}>
                                   TrxID: {lg.transactionId}
@@ -1001,37 +1009,79 @@ export default function ResellerPage() {
                               </span>
                             ) : (
                               <span style={{ fontSize: 11, color: "#d97706" }}>
-                                {lg.type === "payout_withdrawal" ? "প্রসেসিং হচ্ছে" : "—"}
+                                {lg.type === "payout_withdrawal" ? "⏳ বিকাশ/নগদে পাঠানো হচ্ছে" : "—"}
                               </span>
                             )}
                           </td>
                           <td style={{ padding: "10px 14px", textAlign: "center" }}>
-                            <span
-                              style={{
-                                padding: "3px 8px",
-                                borderRadius: 8,
-                                fontSize: 10.5,
-                                fontWeight: 800,
-                                background:
-                                  lg.status === "completed"
-                                    ? "#dcfce7"
-                                    : lg.status === "pending"
-                                    ? "#fef3c7"
-                                    : "#fee2e2",
-                                color:
-                                  lg.status === "completed"
-                                    ? "#15803d"
-                                    : lg.status === "pending"
-                                    ? "#b45309"
-                                    : "#b91c1c",
-                              }}
-                            >
-                              {lg.status === "completed"
-                                ? "✓ Paid"
-                                : lg.status === "pending"
-                                ? "⏳ Pending"
-                                : "✕ Cancelled"}
-                            </span>
+                            {lg.type === "profit_credit" ? (
+                              <span
+                                style={{
+                                  padding: "3px 8px",
+                                  borderRadius: 8,
+                                  fontSize: 10.5,
+                                  fontWeight: 800,
+                                  background: "#dcfce7",
+                                  color: "#15803d",
+                                  border: "1px solid #86efac",
+                                  display: "inline-block",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                💰 ব্যালেন্সে জমা (Credited)
+                              </span>
+                            ) : lg.type === "payout_withdrawal" ? (
+                              <span
+                                style={{
+                                  padding: "3px 8px",
+                                  borderRadius: 8,
+                                  fontSize: 10.5,
+                                  fontWeight: 800,
+                                  background:
+                                    lg.status === "completed"
+                                      ? "#dcfce7"
+                                      : lg.status === "pending"
+                                      ? "#fef3c7"
+                                      : "#fee2e2",
+                                  color:
+                                    lg.status === "completed"
+                                      ? "#15803d"
+                                      : lg.status === "pending"
+                                      ? "#b45309"
+                                      : "#b91c1c",
+                                  border:
+                                    lg.status === "completed"
+                                      ? "1px solid #86efac"
+                                      : lg.status === "pending"
+                                      ? "1px solid #fde68a"
+                                      : "1px solid #fecaca",
+                                  display: "inline-block",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {lg.status === "completed"
+                                  ? "✓ পরিশোধিত (Paid)"
+                                  : lg.status === "pending"
+                                  ? "⏳ অপেক্ষমাণ (Pending)"
+                                  : "✕ বাতিলকৃত (Cancelled)"}
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  padding: "3px 8px",
+                                  borderRadius: 8,
+                                  fontSize: 10.5,
+                                  fontWeight: 800,
+                                  background: "#f1f5f9",
+                                  color: "#475569",
+                                  border: "1px solid #cbd5e1",
+                                  display: "inline-block",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                ⚙️ সমন্বয় (Adjusted)
+                              </span>
+                            )}
                           </td>
                         </tr>
                       ))

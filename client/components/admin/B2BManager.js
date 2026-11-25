@@ -1055,6 +1055,32 @@ export default function B2BManager() {
                         </td>
                         <td style={{ padding: "12px 14px", textAlign: "center" }}>
                           <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+                            {Number(u.walletBalance || 0) > 0 && (
+                              <button
+                                type="button"
+                                title="সরাসরি বিকাশ/নগদে টাকা পে করুন"
+                                onClick={() => {
+                                  setUserToPay({ ...u, _ts: Date.now() });
+                                  setActiveSubTab("payouts");
+                                }}
+                                style={{
+                                  background: "#ecfdf5",
+                                  border: "1px solid #10b981",
+                                  color: "#047857",
+                                  padding: "4px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  fontWeight: 900,
+                                  cursor: "pointer",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                  boxShadow: "0 1px 3px rgba(16, 185, 129, 0.2)",
+                                }}
+                              >
+                                💸 Pay (৳{u.walletBalance})
+                              </button>
+                            )}
                             <button
                               type="button"
                               title="সম্পূর্ণ প্রোফাইল ও ফেসবুক লিঙ্ক দেখুন"

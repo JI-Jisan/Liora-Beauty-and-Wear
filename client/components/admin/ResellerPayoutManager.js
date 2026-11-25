@@ -78,7 +78,21 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
       if (!res.ok) throw new Error(data.message || "পে-আউট ডাটা লোড ব্যর্থ");
       setPayouts(data.payouts || []);
       setPayableResellers(data.payableResellers || []);
-      if (data.stats) setStats(data.stats);
+      if (data.stats) {
+        setStats({
+          todayAmount: Number(data.stats.todayAmount || 0),
+          todayCount: Number(data.stats.todayCount || 0),
+          weekAmount: Number(data.stats.weekAmount || 0),
+          weekCount: Number(data.stats.weekCount || 0),
+          monthAmount: Number(data.stats.monthAmount || 0),
+          monthCount: Number(data.stats.monthCount || 0),
+          totalCompletedAmount: Number(data.stats.totalCompletedAmount || 0),
+          totalCompletedCount: Number(data.stats.totalCompletedCount || 0),
+          pendingCount: Number(data.stats.pendingCount || 0),
+          pendingAmount: Number(data.stats.pendingAmount || 0),
+          cancelledCount: Number(data.stats.cancelledCount || 0),
+        });
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -415,10 +429,10 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
         <div style={{ background: "#fff", border: "1.5px solid #bae6fd", borderRadius: 12, padding: "14px 18px", boxShadow: "0 2px 6px rgba(0,0,0,0.02)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11.5, fontWeight: 800, color: "#0369a1", textTransform: "uppercase" }}>📅 আজকের পেমেন্ট (Today)</span>
-            <span style={{ background: "#e0f2fe", color: "#0369a1", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>{stats.todayCount} জন</span>
+            <span style={{ background: "#e0f2fe", color: "#0369a1", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>{Number(stats?.todayCount || 0)} জন</span>
           </div>
           <div style={{ fontSize: 22, fontWeight: 900, color: "#0284c7", marginTop: 6 }}>
-            ৳{stats.todayAmount.toLocaleString()}
+            ৳{Number(stats?.todayAmount || 0).toLocaleString()}
           </div>
           <div style={{ fontSize: 11, color: "#0c4a6e", marginTop: 2 }}>আজকে পরিশোধিত মোট টাকা</div>
         </div>
@@ -427,10 +441,10 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
         <div style={{ background: "#fff", border: "1.5px solid #ddd6fe", borderRadius: 12, padding: "14px 18px", boxShadow: "0 2px 6px rgba(0,0,0,0.02)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11.5, fontWeight: 800, color: "#6d28d9", textTransform: "uppercase" }}>📅 এই সপ্তাহে (This Week)</span>
-            <span style={{ background: "#ede9fe", color: "#6d28d9", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>{stats.weekCount} জন</span>
+            <span style={{ background: "#ede9fe", color: "#6d28d9", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>{Number(stats?.weekCount || 0)} জন</span>
           </div>
           <div style={{ fontSize: 22, fontWeight: 900, color: "#7c3aed", marginTop: 6 }}>
-            ৳{stats.weekAmount.toLocaleString()}
+            ৳{Number(stats?.weekAmount || 0).toLocaleString()}
           </div>
           <div style={{ fontSize: 11, color: "#4c1d95", marginTop: 2 }}>চলতি সপ্তাহে মোট প্রদান</div>
         </div>
@@ -439,10 +453,10 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
         <div style={{ background: "#fff", border: "1.5px solid #bbf7d0", borderRadius: 12, padding: "14px 18px", boxShadow: "0 2px 6px rgba(0,0,0,0.02)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11.5, fontWeight: 800, color: "#15803d", textTransform: "uppercase" }}>📅 এই মাসে (This Month)</span>
-            <span style={{ background: "#dcfce7", color: "#15803d", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>{stats.monthCount} জন</span>
+            <span style={{ background: "#dcfce7", color: "#15803d", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>{Number(stats?.monthCount || 0)} জন</span>
           </div>
           <div style={{ fontSize: 22, fontWeight: 900, color: "#16a34a", marginTop: 6 }}>
-            ৳{stats.monthAmount.toLocaleString()}
+            ৳{Number(stats?.monthAmount || 0).toLocaleString()}
           </div>
           <div style={{ fontSize: 11, color: "#14532d", marginTop: 2 }}>চলতি মাসের মোট পে-আউট</div>
         </div>
@@ -451,10 +465,10 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
         <div style={{ background: "#fff", border: "1.5px solid #fde68a", borderRadius: 12, padding: "14px 18px", boxShadow: "0 2px 6px rgba(0,0,0,0.02)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11.5, fontWeight: 800, color: "#b45309", textTransform: "uppercase" }}>⏳ অপেক্ষমাণ রিকোয়েস্ট</span>
-            <span style={{ background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>{stats.pendingCount} টি</span>
+            <span style={{ background: "#fef3c7", color: "#b45309", padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 900 }}>{Number(stats?.pendingCount || 0)} টি</span>
           </div>
           <div style={{ fontSize: 22, fontWeight: 900, color: "#d97706", marginTop: 6 }}>
-            ৳{stats.pendingAmount.toLocaleString()}
+            ৳{Number(stats?.pendingAmount || 0).toLocaleString()}
           </div>
           <div style={{ fontSize: 11, color: "#78350f", marginTop: 2 }}>রিসেলাররা ক্যাশআউট চেয়েছে</div>
         </div>
@@ -500,10 +514,10 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
           {/* Status Tabs */}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {[
-              { id: "all", label: "🔘 সকল রেকর্ড", count: stats.totalCompletedCount + stats.pendingCount + stats.cancelledCount, color: "#0f172a", bg: "#e2e8f0" },
-              { id: "completed", label: "✅ পরিশোধিত (Paid)", count: stats.totalCompletedCount, color: "#16a34a", bg: "#dcfce7" },
-              { id: "pending", label: "⏳ অপেক্ষমাণ (Pending)", count: stats.pendingCount, color: "#d97706", bg: "#fef3c7" },
-              { id: "cancelled", label: "❌ বাতিলকৃত (Cancelled)", count: stats.cancelledCount, color: "#64748b", bg: "#f1f5f9" },
+              { id: "all", label: "🔘 সকল রেকর্ড", count: Number(stats?.totalCompletedCount || 0) + Number(stats?.pendingCount || 0) + Number(stats?.cancelledCount || 0), color: "#0f172a", bg: "#e2e8f0" },
+              { id: "completed", label: "✅ পরিশোধিত (Paid)", count: Number(stats?.totalCompletedCount || 0), color: "#16a34a", bg: "#dcfce7" },
+              { id: "pending", label: "⏳ অপেক্ষমাণ (Pending)", count: Number(stats?.pendingCount || 0), color: "#d97706", bg: "#fef3c7" },
+              { id: "cancelled", label: "❌ বাতিলকৃত (Cancelled)", count: Number(stats?.cancelledCount || 0), color: "#64748b", bg: "#f1f5f9" },
             ].map((tab) => {
               const active = statusFilter === tab.id;
               return (
@@ -673,7 +687,7 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
                       {/* Amount */}
                       <td style={{ padding: "12px 14px", textAlign: "right" }}>
                         <div style={{ fontSize: 16, fontWeight: 900, color: p.status === "completed" ? "#16a34a" : "#be123c" }}>
-                          ৳{reqAmount.toLocaleString()}
+                          ৳{Number(reqAmount || 0).toLocaleString()}
                         </div>
                       </td>
 
@@ -1076,35 +1090,37 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
             <div style={{ background: "#fdf2f8", border: "1.5px solid #fbcfe8", borderRadius: 12, padding: 14, marginBottom: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                 <span style={{ fontSize: 11.5, fontWeight: 800, color: "#9d174d", textTransform: "uppercase" }}>
-                  টাকা পাঠানোর ঠিকানা ({selectedPayout.payoutMethod || "bKash"})
+                  টাকা পাঠানোর ঠিকানা ({selectedPayout?.payoutMethod || "bKash"})
                 </span>
                 <span style={{ fontSize: 16, fontWeight: 900, color: "#be123c" }}>
-                  ৳{Math.abs(selectedPayout.amount).toLocaleString()}
+                  ৳{Number(Math.abs(selectedPayout?.amount || 0)).toLocaleString()}
                 </span>
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#fff", padding: "8px 12px", borderRadius: 8, border: "1px solid #f9a8d4" }}>
                 <div>
-                  <div style={{ fontSize: 11, color: "#64748b" }}>প্রাপক নম্বর ({selectedPayout.payoutMethod}):</div>
+                  <div style={{ fontSize: 11, color: "#64748b" }}>প্রাপক নম্বর ({selectedPayout?.payoutMethod || "bKash"}):</div>
                   <div style={{ fontSize: 15, fontWeight: 900, color: "#0f172a", fontFamily: "monospace" }}>
-                    {selectedPayout.payoutAccount}
+                    {selectedPayout?.payoutAccount || "—"}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(selectedPayout.payoutAccount, "modal_acc")}
-                  style={{
-                    background: copiedId === "modal_acc" ? "#16a34a" : "#ec4899",
-                    color: "#fff",
-                    border: "none",
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    fontSize: 11,
-                    fontWeight: 800,
-                    cursor: "pointer",
-                  }}
-                >
-                  {copiedId === "modal_acc" ? "✓ Copied" : "📋 Copy Number"}
-                </button>
+                {selectedPayout?.payoutAccount && (
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(selectedPayout.payoutAccount, "modal_acc")}
+                    style={{
+                      background: copiedId === "modal_acc" ? "#16a34a" : "#ec4899",
+                      color: "#fff",
+                      border: "none",
+                      padding: "6px 12px",
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {copiedId === "modal_acc" ? "✓ Copied" : "📋 Copy Number"}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -1298,13 +1314,13 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
                 <div>
                   <div style={{ fontSize: 10.5, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase" }}>পেমেন্ট বিবরণ (Disbursement):</div>
                   <div style={{ color: "#0f172a", fontSize: 11, marginTop: 2 }}>
-                    তারিখ: <b>{new Date(receiptData.paidAt || receiptData.createdAt || Date.now()).toLocaleString()}</b>
+                    তারিখ: <b>{new Date(receiptData?.paidAt || receiptData?.createdAt || Date.now()).toLocaleString()}</b>
                   </div>
                   <div style={{ color: "#0f172a", fontSize: 11 }}>
-                    মেথড: <b>{receiptData.payoutMethod || "bKash"}</b>
+                    মেথড: <b>{receiptData?.payoutMethod || "bKash"}</b>
                   </div>
                   <div style={{ color: "#0f172a", fontSize: 11 }}>
-                    প্রাপক নম্বর: <b>{receiptData.payoutAccount}</b>
+                    প্রাপক নম্বর: <b>{receiptData?.payoutAccount || "—"}</b>
                   </div>
                 </div>
               </div>
@@ -1313,7 +1329,7 @@ export default function ResellerPayoutManager({ onDirectPayTrigger, initialUserT
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #f1f5f9", paddingBottom: 8, marginBottom: 8 }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: "#334155" }}>পরিশোধকৃত টাকার পরিমাণ (Net Paid):</span>
                   <span style={{ fontSize: 20, fontWeight: 900, color: "#16a34a" }}>
-                    ৳{Math.abs(receiptData.amount).toLocaleString()}
+                    ৳{Number(Math.abs(receiptData?.amount || 0)).toLocaleString()}
                   </span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>
