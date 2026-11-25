@@ -143,8 +143,7 @@ export async function POST(req) {
         isTextless: true,
         message: 'Could not clearly recognize the product from this photo. You can type the product name below to search immediately.',
         products: [],
-        detectedTags: [],
-        debugError: lastAiError
+        detectedTags: []
       }, {
         headers: {
           "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
