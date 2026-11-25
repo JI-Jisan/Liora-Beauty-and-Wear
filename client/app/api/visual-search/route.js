@@ -40,11 +40,18 @@ export async function POST(req) {
       extractedText = body.text || '';
       barcode = body.barcode || '';
       if (body.image) {
-        imageBase64 = body.image.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
+        const mimeMatch = String(body.image).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/i);
+        if (mimeMatch) {
+          imageMime = mimeMatch[1];
+        }
+        imageBase64 = String(body.image)
+          .replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/i, '')
+          .replace(/\s+/g, '');
       }
     }
 
     let detectedFromAI = null;
+    let lastAiError = null;
 
     // 1. If GEMINI_API_KEY is available and image is present, use Google Vision AI (Google Lens)
     const geminiKey =
@@ -93,8 +100,12 @@ export async function POST(req) {
                 // fallback if not pure json
               }
             }
+          } else {
+            const errBody = await aiRes.text();
+            lastAiError = `${model} ${aiRes.status}: ${errBody}`;
           }
         } catch (aiErr) {
+          lastAiError = `${model} exception: ${aiErr.message}`;
           console.warn(`Gemini vision API error on ${model}:`, aiErr.message);
         }
       }
@@ -128,7 +139,8 @@ export async function POST(req) {
         isTextless: true,
         message: 'Could not clearly recognize the product from this photo. You can type the product name below to search immediately.',
         products: [],
-        detectedTags: []
+        detectedTags: [],
+        debugError: lastAiError
       }, {
         headers: {
           "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
