@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
-import { Product, Brand } from '@/lib/models';
-import { cleanSearchTerm, scoreProductRelevance, SEARCH_STOP_WORDS } from '@/lib/searchEngine';
+import { Product } from '@/lib/models';
+import { searchProductsFast } from '@/lib/searchEngine';
 import { extractCleanQuery } from '@/lib/beautyVision';
 
 export const runtime = "nodejs";
@@ -15,6 +15,7 @@ export async function POST(req) {
     let extractedText = '';
     let imageBase64 = '';
     let imageMime = 'image/jpeg';
+    let barcode = '';
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
@@ -22,10 +23,14 @@ export async function POST(req) {
       if (textParam && typeof textParam === 'string') {
         extractedText = textParam.trim();
       }
+      const barcodeParam = formData.get('barcode');
+      if (barcodeParam && typeof barcodeParam === 'string') {
+        barcode = barcodeParam.trim();
+      }
       const file = formData.get('image');
       if (file && typeof file === 'object' && typeof file.arrayBuffer === 'function') {
         const buffer = Buffer.from(await file.arrayBuffer());
-        if (buffer.length > 0 && buffer.length < 5 * 1024 * 1024) {
+        if (buffer.length > 0 && buffer.length < 10 * 1024 * 1024) {
           imageBase64 = buffer.toString('base64');
           imageMime = file.type || 'image/jpeg';
         }
@@ -33,6 +38,7 @@ export async function POST(req) {
     } else {
       const body = await req.json().catch(() => ({}));
       extractedText = body.text || '';
+      barcode = body.barcode || '';
       if (body.image) {
         imageBase64 = body.image.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
       }
@@ -40,10 +46,10 @@ export async function POST(req) {
 
     let detectedFromAI = null;
 
-    // 1. If GEMINI_API_KEY is available, use Google Vision AI (True Google Lens)
+    // 1. If GEMINI_API_KEY is available and image is present, use Google Vision AI (Google Lens)
     const geminiKey = process.env.GEMINI_API_KEY;
     if (geminiKey && imageBase64) {
-      const visionModels = ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.1-flash-lite'];
+      const visionModels = ['gemini-3.5-flash-lite', 'gemini-flash-lite-latest'];
       for (const model of visionModels) {
         if (detectedFromAI) break;
         try {
@@ -56,7 +62,7 @@ export async function POST(req) {
                 contents: [{
                   parts: [
                     {
-                      text: "You are the Google Lens vision engine for LIORA Beauty & Wear cosmetics store in Bangladesh. Analyze this product image carefully. Identify the exact brand, product name, shade, or cosmetic type (for example 'Swiss Beauty More Than Glitter Lipstick' or 'IMAGIC Mascara Giant Brush' or 'COSRX Snail Mucin' or 'My Skin Saffron Face Wash'). Return strictly valid JSON: {\"brand\": \"...\", \"product\": \"...\", \"searchQuery\": \"...\"}"
+                      text: "You are the Google Lens vision engine for LIORA Beauty & Wear cosmetics store in Bangladesh. Analyze this product image carefully. Identify the exact brand, product name, shade, or cosmetic type. Return strictly valid JSON: {\"brand\": \"...\", \"product\": \"...\", \"searchQuery\": \"...\"}"
                     },
                     {
                       inlineData: {
@@ -70,7 +76,7 @@ export async function POST(req) {
                   responseMimeType: "application/json"
                 }
               }),
-              signal: AbortSignal.timeout(3500)
+              signal: AbortSignal.timeout(6000)
             }
           );
 
@@ -93,74 +99,54 @@ export async function POST(req) {
     }
 
     // Determine query
-    let bestQuery = detectedFromAI?.searchQuery || detectedFromAI?.product || '';
+    let bestQuery = barcode || detectedFromAI?.searchQuery || detectedFromAI?.product || '';
     let detectedBrand = detectedFromAI?.brand || '';
     let keywords = [];
 
-    // 2. If AI vision wasn't available or didn't return a query, use Beauty Vision OCR
+    // 2. If AI vision wasn't available or didn't return a query, use Beauty Vision OCR / Text
     if (!bestQuery) {
       if (extractedText && extractedText.trim()) {
         const parsed = extractCleanQuery(extractedText);
-        // Only use parsed query if it actually recognized a known brand or beauty keyword
         if (parsed.brand || parsed.heroes.length > 0 || parsed.types.length > 0) {
           bestQuery = parsed.query;
           detectedBrand = parsed.brand;
           keywords = parsed.keywords;
+        } else {
+          bestQuery = extractedText.trim();
         }
       }
     } else {
       keywords = [detectedBrand, bestQuery].filter(Boolean);
     }
 
-    // 3. If still no valid brand or product detected (e.g. textless image without AI key)
+    // 3. If still no valid brand or product detected
     if (!bestQuery || bestQuery.trim().length < 2) {
       return NextResponse.json({
         success: false,
         isTextless: true,
-        message: 'Could not clearly recognize the product brand on this image. You can type the product name below to find it immediately.',
+        message: 'Could not clearly recognize the product from this photo. You can type the product name below to search immediately.',
         products: [],
         detectedTags: []
+      }, {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          "Netlify-CDN-Cache-Control": "no-store",
+        }
       });
     }
 
-    // 4. Query Database with lean projection
+    // 4. Ultra-fast In-Memory Search using searchProductsFast (Google-like relevance ranking)
     await connectToDatabase();
-    const { cleanPhrase, tokens } = cleanSearchTerm(bestQuery);
-    const meaningfulTokens = tokens.filter(t => !SEARCH_STOP_WORDS.has(t) && t.length >= 2);
+    let searchRes = await searchProductsFast(Product, bestQuery, { limit: 16 });
+    let topResults = searchRes.products || [];
 
-    const orConditions = [];
-    if (cleanPhrase) {
-      orConditions.push({ name: { $regex: cleanPhrase, $options: 'i' } });
+    // Fallback search by brand if specific long query had zero matches
+    if (topResults.length === 0 && detectedBrand) {
+      const brandRes = await searchProductsFast(Product, detectedBrand, { limit: 16 });
+      if (brandRes.products && brandRes.products.length > 0) {
+        topResults = brandRes.products;
+      }
     }
-    if (meaningfulTokens.length >= 2) {
-      const combinedRegex = meaningfulTokens.map(t => `(?=.*${t})`).join('');
-      orConditions.push({ name: { $regex: new RegExp(combinedRegex, 'i') } });
-    }
-    if (detectedBrand) {
-      orConditions.push({ name: { $regex: detectedBrand, $options: 'i' } });
-    }
-    if (meaningfulTokens.length > 0) {
-      orConditions.push({ name: { $regex: meaningfulTokens.slice(0, 4).join('|'), $options: 'i' } });
-    }
-
-    let candidateProducts = [];
-    if (orConditions.length > 0) {
-      candidateProducts = await Product.find({ $or: orConditions })
-        .select('name image offerPrice originalPrice discountBadge inStock stockStatus brand category')
-        .populate('brand', 'name slug')
-        .populate('category', 'name')
-        .limit(24)
-        .lean();
-    }
-
-    // Rank candidates
-    const scored = candidateProducts.map(prod => ({
-      ...prod,
-      matchScore: scoreProductRelevance(prod, cleanPhrase, meaningfulTokens)
-    }));
-
-    scored.sort((a, b) => b.matchScore - a.matchScore);
-    const topResults = scored.slice(0, 16);
 
     const redirectUrl = `/products?search=${encodeURIComponent(bestQuery)}`;
 
@@ -169,28 +155,39 @@ export async function POST(req) {
       bestQuery,
       redirectUrl,
       brand: detectedBrand,
-      keywords: keywords.length > 0 ? keywords : meaningfulTokens.slice(0, 4),
+      keywords: keywords.length > 0 ? keywords : [bestQuery],
       totalMatches: topResults.length,
       aiVision: !!detectedFromAI,
       products: topResults.map(p => ({
         _id: p._id,
         name: p.name,
-        image: p.image || '',
+        image: p.image || (Array.isArray(p.images) && p.images[0]) || '',
         offerPrice: p.offerPrice || p.originalPrice || 0,
         originalPrice: p.originalPrice || p.offerPrice || 0,
         discountBadge: p.discountBadge || '',
         inStock: p.inStock,
         stockStatus: p.stockStatus || 'In Stock',
-        brand: p.brand ? p.brand.name : '',
-        category: p.category ? p.category.name : '',
-        matchScore: p.matchScore
+        brand: p.brand?.name || (typeof p.brand === 'string' ? p.brand : ''),
+        category: p.category?.name || (typeof p.category === 'string' ? p.category : ''),
+        matchScore: p._score || 100
       }))
+    }, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Netlify-CDN-Cache-Control": "no-store",
+      }
     });
   } catch (error) {
     console.error('Visual Search API Error:', error);
     return NextResponse.json(
       { success: false, message: 'Visual search failed', error: error.message },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          "Netlify-CDN-Cache-Control": "no-store",
+        }
+      }
     );
   }
 }
