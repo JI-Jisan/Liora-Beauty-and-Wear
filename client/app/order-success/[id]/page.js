@@ -94,6 +94,57 @@ export default function OrderSuccessPage() {
                 </div>
               </div>
 
+              {/* 🚚 Live Steadfast Tracking Box */}
+              {order.courierDetails?.trackingCode && (
+                <div
+                  style={{
+                    marginTop: "16px",
+                    marginBottom: "20px",
+                    padding: "14px 18px",
+                    background: "#ecfdf5",
+                    border: "1.5px solid #a7f3d0",
+                    borderRadius: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: "10px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span style={{ fontSize: "24px" }}>🚚</span>
+                    <div>
+                      <div style={{ fontSize: "11px", fontWeight: "800", color: "#047857", textTransform: "uppercase" }}>
+                        Steadfast Courier পার্সেল ট্র্যাকিং
+                      </div>
+                      <div style={{ fontSize: "16px", fontWeight: "900", color: "#065f46", fontFamily: "monospace" }}>
+                        {order.courierDetails.trackingCode}
+                      </div>
+                    </div>
+                  </div>
+                  <a
+                    href={`https://steadfast.com.bd/t/${order.courierDetails.trackingCode}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+                      color: "#ffffff",
+                      padding: "8px 18px",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      fontWeight: "800",
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      boxShadow: "0 2px 6px rgba(5, 150, 105, 0.25)",
+                    }}
+                  >
+                    লাইভ পার্সেল ট্র্যাক করুন ↗
+                  </a>
+                </div>
+              )}
+
               <div className="jt-success-grid">
                 {/* Customer Details Box */}
                 <div className="jt-success-card">

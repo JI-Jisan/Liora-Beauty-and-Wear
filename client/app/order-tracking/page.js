@@ -132,6 +132,56 @@ export default function OrderTrackingPage() {
                       </div>
                     </div>
 
+                    {/* 🚚 Live Steadfast Courier Tracking Box */}
+                    {order.courierDetails?.trackingCode && (
+                      <div
+                        style={{
+                          marginTop: "16px",
+                          padding: "12px 16px",
+                          background: "#ecfdf5",
+                          border: "1.5px solid #a7f3d0",
+                          borderRadius: "10px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          flexWrap: "wrap",
+                          gap: "10px",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span style={{ fontSize: "20px" }}>🚚</span>
+                          <div>
+                            <div style={{ fontSize: "11px", fontWeight: "800", color: "#047857", textTransform: "uppercase" }}>
+                              Steadfast Courier লাইভ ট্র্যাকিং
+                            </div>
+                            <div style={{ fontSize: "15px", fontWeight: "900", color: "#065f46", fontFamily: "monospace" }}>
+                              {order.courierDetails.trackingCode}
+                            </div>
+                          </div>
+                        </div>
+                        <a
+                          href={`https://steadfast.com.bd/t/${order.courierDetails.trackingCode}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+                            color: "#ffffff",
+                            padding: "8px 16px",
+                            borderRadius: "8px",
+                            fontSize: "12.5px",
+                            fontWeight: "800",
+                            textDecoration: "none",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            boxShadow: "0 2px 6px rgba(5, 150, 105, 0.25)",
+                          }}
+                        >
+                          লাইভ পার্সেল ট্র্যাক করুন ↗
+                        </a>
+                      </div>
+                    )}
+
                     {/* Order Information Breakdown */}
                     <div className="jt-tracking-card-body">
                       <div className="jt-tracking-info-col">

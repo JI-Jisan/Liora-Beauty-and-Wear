@@ -84,6 +84,99 @@ export default function AdminOrders({ onOrderUpdated }) {
   const [productSearchResults, setProductSearchResults] = useState([]);
   const [searchingProducts, setSearchingProducts] = useState(false);
 
+  // 🚚 Steadfast Courier Integration States
+  const [steadfastBalance, setSteadfastBalance] = useState(null);
+  const [loadingSteadfastBalance, setLoadingSteadfastBalance] = useState(false);
+  const [sendingSteadfastId, setSendingSteadfastId] = useState(null);
+  const [steadfastModalOrder, setSteadfastModalOrder] = useState(null);
+  const [steadfastForm, setSteadfastForm] = useState({ codAmount: "", note: "" });
+
+  const fetchSteadfastBalance = async () => {
+    try {
+      setLoadingSteadfastBalance(true);
+      const res = await fetch("/api/admin/courier/steadfast/balance", {
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSteadfastBalance(data.currentBalance);
+      }
+    } catch (err) {
+      console.debug("Steadfast balance fetch skipped:", err);
+    } finally {
+      setLoadingSteadfastBalance(false);
+    }
+  };
+
+  const handleOpenSteadfastModal = (order) => {
+    let cod = order.total;
+    if (order.orderType === "reseller" && order.resellerDetails?.customerCodAmount > 0) {
+      cod = order.resellerDetails.customerCodAmount;
+    }
+    setSteadfastModalOrder(order);
+    setSteadfastForm({
+      codAmount: String(cod || 0),
+      note: order.note || "LIORA Authentic Beauty & Wear",
+    });
+  };
+
+  const handleConfirmSteadfastSend = async (e) => {
+    e?.preventDefault();
+    if (!steadfastModalOrder) return;
+    const orderId = steadfastModalOrder._id;
+
+    try {
+      setSendingSteadfastId(orderId);
+      setMessage("");
+
+      const res = await fetch("/api/admin/courier/steadfast/send", {
+        method: "POST",
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId,
+          overrideCod: Number(steadfastForm.codAmount),
+          note: steadfastForm.note,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Steadfast পার্সেল বুকিং ব্যর্থ হয়েছে");
+      }
+
+      setOrders((prev) =>
+        prev.map((ord) =>
+          ord._id === orderId
+            ? {
+                ...ord,
+                status: ord.status === "Pending" || ord.status === "Confirmed" ? "Shipped" : ord.status,
+                courierDetails: {
+                  courierName: "Steadfast",
+                  consignmentId: data.consignmentId,
+                  trackingCode: data.trackingCode,
+                  courierStatus: data.status,
+                  codAmount: Number(steadfastForm.codAmount),
+                  dispatchedAt: new Date(),
+                },
+              }
+            : ord
+        )
+      );
+
+      setMessage(`🎉 অর্ডার #${steadfastModalOrder.orderNumber || orderId} সরাসরি Steadfast-এ বুকিং সম্পন্ন! ট্র্যাকিং কোড: ${data.trackingCode}`);
+      setSteadfastModalOrder(null);
+      fetchSteadfastBalance();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Steadfast বুকিং ব্যর্থ");
+    } finally {
+      setSendingSteadfastId(null);
+    }
+  };
+
   const fetchOrders = async (isBackground = false) => {
     try {
       if (!isBackground) setLoading(true);
@@ -127,6 +220,7 @@ export default function AdminOrders({ onOrderUpdated }) {
 
   useEffect(() => {
     fetchOrders(false);
+    fetchSteadfastBalance();
 
     // 20 seconds background polling for live order updates
     const timer = setInterval(() => {
@@ -588,6 +682,14 @@ export default function AdminOrders({ onOrderUpdated }) {
     ).length;
   }, [orders]);
 
+  const steadfastPendingCount = useMemo(() => {
+    return orders.filter(
+      (o) =>
+        (o.status === "Confirmed" || o.status === "Pending") &&
+        !o.courierDetails?.trackingCode
+    ).length;
+  }, [orders]);
+
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const matchesStatus =
@@ -596,6 +698,9 @@ export default function AdminOrders({ onOrderUpdated }) {
           : filterStatus === "Flagged"
           ? (order.isFlagged || (order.pendingOrdersCount && order.pendingOrdersCount > 0)) &&
             order.status === "Pending"
+          : filterStatus === "SteadfastPending"
+          ? (order.status === "Confirmed" || order.status === "Pending") &&
+            !order.courierDetails?.trackingCode
           : order.status === filterStatus;
 
       const keyword = (searchTerm || "").trim().toLowerCase();
@@ -666,6 +771,38 @@ export default function AdminOrders({ onOrderUpdated }) {
           >
             {soundEnabled ? "🔊 Sound ON" : "🔇 Sound OFF"}
           </button>
+          {/* 🚚 Live Steadfast Courier Balance Badge */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "9px 14px",
+              borderRadius: "8px",
+              background: "#ecfdf5",
+              border: "1.5px solid #a7f3d0",
+              color: "#047857",
+              fontSize: "12.5px",
+              fontWeight: "800",
+              whiteSpace: "nowrap",
+            }}
+            title="Steadfast কুরিয়ার বর্তমান অ্যাকাউন্ট ব্যালেন্স"
+          >
+            <span>🚚 Steadfast:</span>
+            <span style={{ fontSize: "14px", fontWeight: "900", color: "#065f46" }}>
+              ৳{steadfastBalance !== null ? Number(steadfastBalance).toLocaleString() : "..."}
+            </span>
+            <button
+              type="button"
+              onClick={fetchSteadfastBalance}
+              disabled={loadingSteadfastBalance}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "12px", padding: 0 }}
+              title="ব্যালেন্স রিফ্রেশ করুন"
+            >
+              {loadingSteadfastBalance ? "⏳" : "🔄"}
+            </button>
+          </div>
+
           <button
             type="button"
             onClick={() => fetchOrders(false)}
@@ -738,6 +875,27 @@ export default function AdminOrders({ onOrderUpdated }) {
               </button>
             );
           })}
+          {steadfastPendingCount > 0 && (
+            <button
+              type="button"
+              className={`jt-tab ${filterStatus === "SteadfastPending" ? "active" : ""}`}
+              onClick={() => setFilterStatus("SteadfastPending")}
+              style={{
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+                padding: "6px 14px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: "700",
+                cursor: "pointer",
+                background: filterStatus === "SteadfastPending" ? "#047857" : "#ecfdf5",
+                color: filterStatus === "SteadfastPending" ? "#ffffff" : "#047857",
+                border: "1px solid #a7f3d0",
+              }}
+            >
+              🚚 কুরিয়ার বুকিং বাকি ({steadfastPendingCount})
+            </button>
+          )}
           {flaggedCount > 0 && (
             <button
               type="button"
@@ -1171,6 +1329,75 @@ export default function AdminOrders({ onOrderUpdated }) {
                       title="অর্ডারটি সরাসরি Confirmed করুন"
                     >
                       {updatingId === order._id ? "Updating..." : "✅ Confirm"}
+                    </button>
+                  )}
+
+                  {/* 🚚 Steadfast Courier 1-Click Booking or Tracking Badge */}
+                  {order.courierDetails?.trackingCode ? (
+                    <div
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        background: "#ecfdf5",
+                        border: "1.5px solid #6ee7b7",
+                        padding: "5px 10px",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <span style={{ fontSize: "14px" }}>🚚</span>
+                      <div>
+                        <div style={{ fontSize: "10px", color: "#047857", fontWeight: "800", textTransform: "uppercase" }}>
+                          Steadfast
+                        </div>
+                        <div style={{ fontSize: "12px", fontWeight: "900", color: "#065f46", fontFamily: "monospace" }}>
+                          {order.courierDetails.trackingCode}
+                        </div>
+                      </div>
+                      <a
+                        href={`https://steadfast.com.bd/t/${order.courierDetails.trackingCode}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          background: "#059669",
+                          color: "#ffffff",
+                          padding: "4px 8px",
+                          borderRadius: "6px",
+                          fontSize: "11px",
+                          fontWeight: "800",
+                          textDecoration: "none",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "3px",
+                          marginLeft: "4px",
+                        }}
+                        title="Steadfast লাইভ ট্র্যাকিং পেজ দেখুন"
+                      >
+                        🔍 ট্র্যাক ↗
+                      </a>
+                    </div>
+                  ) : order.status !== "Cancelled" && (
+                    <button
+                      type="button"
+                      disabled={sendingSteadfastId === order._id}
+                      onClick={() => handleOpenSteadfastModal(order)}
+                      style={{
+                        background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+                        color: "#ffffff",
+                        border: "none",
+                        padding: "8px 14px",
+                        borderRadius: "6px",
+                        fontWeight: "800",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "12px",
+                        boxShadow: "0 2px 6px rgba(5, 150, 105, 0.25)",
+                      }}
+                      title="সরাসরি Steadfast কুরিয়ারে বুক করুন (কপি-পেস্ট ছাড়া)"
+                    >
+                      {sendingSteadfastId === order._id ? "বুকিং হচ্ছে..." : "🚚 Steadfast-এ পাঠান"}
                     </button>
                   )}
 
@@ -1787,6 +2014,177 @@ export default function AdminOrders({ onOrderUpdated }) {
                 {savingEdit ? "সেভ হচ্ছে..." : "💾 Save Changes & Update Invoice"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🚚 STEADFAST ONE-CLICK DISPATCH MODAL */}
+      {steadfastModalOrder && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(4px)",
+            zIndex: 99999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+          onClick={() => setSteadfastModalOrder(null)}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              borderRadius: "16px",
+              maxWidth: "520px",
+              width: "100%",
+              padding: "24px",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.15)",
+              border: "1.5px solid #a7f3d0",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", borderBottom: "1px solid #f1f5f9", paddingBottom: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "24px" }}>🚚</span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "17px", fontWeight: "900", color: "#065f46" }}>
+                    Steadfast Courier পার্সেল বুকিং
+                  </h3>
+                  <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#64748b" }}>
+                    অর্ডার #{steadfastModalOrder.orderNumber || steadfastModalOrder._id}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSteadfastModalOrder(null)}
+                style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#94a3b8" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmSteadfastSend}>
+              {/* Recipient Details Preview Card */}
+              <div style={{ background: "#f8fafc", borderRadius: "12px", padding: "14px", border: "1px solid #e2e8f0", marginBottom: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "8px", fontSize: "13px" }}>
+                  <div>
+                    <span style={{ color: "#64748b", fontWeight: "700" }}>👤 গ্রাহক নাম: </span>
+                    <strong style={{ color: "#0f172a" }}>{steadfastModalOrder.customerName}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b", fontWeight: "700" }}>📞 মোবাইল নম্বর: </span>
+                    <strong style={{ color: "#0f172a", fontFamily: "monospace", fontSize: "14px" }}>{steadfastModalOrder.phone}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b", fontWeight: "700" }}>📍 ডেলিভারি ঠিকানা: </span>
+                    <span style={{ color: "#334155" }}>
+                      {[
+                        steadfastModalOrder.address,
+                        steadfastModalOrder.thana ? `থানা: ${steadfastModalOrder.thana}` : "",
+                        steadfastModalOrder.district ? `জেলা: ${steadfastModalOrder.district}` : "",
+                      ].filter(Boolean).join(", ")}
+                    </span>
+                  </div>
+                  {steadfastModalOrder.orderType === "reseller" && (
+                    <div style={{ background: "#fdf2f8", padding: "4px 8px", borderRadius: "6px", color: "#be185d", fontSize: "12px", fontWeight: "800", marginTop: "4px" }}>
+                      🏪 রিসেলার ড্রপশিপ অর্ডার (রিসেলার: {steadfastModalOrder.resellerDetails?.storeName || steadfastModalOrder.resellerDetails?.resellerName})
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* COD Amount Input */}
+              <div style={{ marginBottom: "14px" }}>
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: "800", color: "#334155", marginBottom: "4px" }}>
+                  💵 ক্যাশ অন ডেলিভারি (COD Amount - Tk):
+                </label>
+                <input
+                  type="number"
+                  value={steadfastForm.codAmount}
+                  onChange={(e) => setSteadfastForm({ ...steadfastForm, codAmount: e.target.value })}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #cbd5e1",
+                    fontSize: "15px",
+                    fontWeight: "900",
+                    color: "#0f172a",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <span style={{ fontSize: "11px", color: "#64748b" }}>
+                  * গ্রাহকের কাছ থেকে কুরিয়ার যে টাকা আদায় করবে
+                </span>
+              </div>
+
+              {/* Delivery Note Input */}
+              <div style={{ marginBottom: "18px" }}>
+                <label style={{ display: "block", fontSize: "12.5px", fontWeight: "800", color: "#334155", marginBottom: "4px" }}>
+                  📝 ডেলিভারি নোট (Steadfast রাইডারের জন্য):
+                </label>
+                <input
+                  type="text"
+                  value={steadfastForm.note}
+                  onChange={(e) => setSteadfastForm({ ...steadfastForm, note: e.target.value })}
+                  placeholder="যেমন: LIORA Authentic Products - চেক করে দিন"
+                  style={{
+                    width: "100%",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    border: "1.5px solid #cbd5e1",
+                    fontSize: "13px",
+                    color: "#0f172a",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  onClick={() => setSteadfastModalOrder(null)}
+                  style={{
+                    padding: "10px 18px",
+                    borderRadius: "8px",
+                    border: "1px solid #cbd5e1",
+                    background: "#f8fafc",
+                    color: "#475569",
+                    fontWeight: "700",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                  }}
+                >
+                  বাতিল
+                </button>
+                <button
+                  type="submit"
+                  disabled={sendingSteadfastId === steadfastModalOrder._id}
+                  style={{
+                    padding: "10px 22px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+                    color: "#ffffff",
+                    fontWeight: "900",
+                    fontSize: "13.5px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    boxShadow: "0 4px 12px rgba(5, 150, 105, 0.3)",
+                  }}
+                >
+                  {sendingSteadfastId === steadfastModalOrder._id ? "বুকিং হচ্ছে..." : "🚀 নিশ্চিত করুন ও Steadfast-এ পাঠান"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

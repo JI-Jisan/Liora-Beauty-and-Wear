@@ -317,6 +317,16 @@ const OrderSchema = new mongoose.Schema(
       totalItemsQty: { type: Number, default: 0 },
       wholesaleSavings: { type: Number, default: 0 },
     },
+    // কুরিয়ার ডেলিভারি ও ট্র্যাকিং তথ্য (Steadfast ইত্যাদি)
+    courierDetails: {
+      courierName: { type: String, default: "Steadfast" },
+      consignmentId: { type: String, default: "" },
+      trackingCode: { type: String, default: "" },
+      courierStatus: { type: String, default: "" },
+      codAmount: { type: Number, default: 0 },
+      dispatchedAt: { type: Date, default: null },
+      lastSyncedAt: { type: Date, default: null },
+    },
   },
   { timestamps: true }
 );
@@ -418,6 +428,10 @@ const SiteSettingsSchema = new mongoose.Schema(
     fbPageAccessToken: { type: String, default: "" },
     fbAppId: { type: String, default: "974777838976699" },
     fbAppSecret: { type: String, default: "832fb1c79860a989e060efb7be11a45b" },
+
+    // Steadfast Courier Settings
+    steadfastApiKey: { type: String, default: "0koyfbb8k8ajlzftqcyy6if7q7gtlf7v" },
+    steadfastSecretKey: { type: String, default: "ynq1gmj0kewqtrhy7wyubeeb" },
   },
   { timestamps: true }
 );
