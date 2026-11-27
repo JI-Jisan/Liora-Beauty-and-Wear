@@ -2,6 +2,7 @@ import puppeteer from "puppeteer-core";
 import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
+import { syncPendingOrdersWithProductPrices } from "./sync_pending_orders_prices.mjs";
 
 const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const MONGO_URI = "mongodb://jisan_trends:liora889@ac-2e905xv-shard-00-00.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-01.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-02.6nzddbx.mongodb.net:27017/jisantrends?ssl=true&replicaSet=atlas-12gikm-shard-0&authSource=admin&retryWrites=true&w=majority";
@@ -306,6 +307,10 @@ async function main() {
     console.log(`  রেগুলার খুচরা (offerPrice): ৳${p.offerPrice}`);
     console.log(`  স্টক স্ট্যাটাস: ${p.inStock ? "In Stock" : "Out of Stock"}`);
   }
+
+  // Automatically refresh pending orders
+  console.log("\nRefreshing pending orders with updated wholesale prices...");
+  await syncPendingOrdersWithProductPrices(db);
 
   const totalTime = Math.round((Date.now() - startTime) / 1000);
   console.log(`\n==================================================================`);

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { syncPendingOrdersWithProductPrices } from "./sync_pending_orders_prices.mjs";
 
 const MONGO_URI = "mongodb://jisan_trends:liora889@ac-2e905xv-shard-00-00.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-01.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-02.6nzddbx.mongodb.net:27017/jisantrends?ssl=true&replicaSet=atlas-12gikm-shard-0&authSource=admin&retryWrites=true&w=majority";
 
@@ -169,6 +170,10 @@ async function main() {
     $expr: { $lt: ["$offerPrice", "$purchasePrice"] }
   });
   console.log(`\n🚨 AUDIT CHECK: Products where offerPrice < purchasePrice = ${upsideDown} (Must be 0!)`);
+
+  // Automatically sync any pending orders so they match fresh product prices
+  console.log("\nRefreshing pending orders with updated product prices...");
+  await syncPendingOrdersWithProductPrices(db);
 
   const totalTime = Math.round((Date.now() - startTime) / 1000);
   console.log(`✨ COMPLETED IN ${totalTime}s!`);
