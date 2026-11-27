@@ -21,13 +21,21 @@ export function getWholesalePrice(p) {
   const regularMrp = Number(p.originalPrice || p.offerPrice || 0);
   const explicitWs = Number(p.wholesalePrice || 0);
 
+  // Safety Sanity Check: If explicit wholesale is corrupted / ridiculously low
+  // (e.g. <= 100 Tk while retail >= 150 Tk, or lower than 50% of retail offer),
+  // reject it so business never suffers catastrophic underpricing loss!
+  const isCorruptedLowPrice =
+    explicitWs > 0 &&
+    retailOffer >= 150 &&
+    (explicitWs <= 100 || explicitWs < retailOffer * 0.5);
+
   // 1. If product has an explicit wholesale price that is lower than retailOffer, use it directly!
-  if (explicitWs > 0 && retailOffer > 0 && explicitWs < retailOffer) {
+  if (!isCorruptedLowPrice && explicitWs > 0 && retailOffer > 0 && explicitWs < retailOffer) {
     return explicitWs;
   }
 
   // 2. If wholesalePrice is valid and lower than regular MRP (when no offerPrice)
-  if (explicitWs > 0 && regularMrp > 0 && explicitWs < regularMrp && retailOffer <= 0) {
+  if (!isCorruptedLowPrice && explicitWs > 0 && regularMrp > 0 && explicitWs < regularMrp && retailOffer <= 0) {
     return explicitWs;
   }
 
