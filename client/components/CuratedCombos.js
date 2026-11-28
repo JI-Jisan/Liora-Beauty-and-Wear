@@ -104,13 +104,13 @@ export default function CuratedCombos({ onAddToCart }) {
             <span className="jt-combos-gift-icon">🎁</span>
             <div>
               <div className="jt-combos-tag-wrap">
-                <span className="jt-combos-tag">VALUE PACKS & SAVINGS</span>
+                <span className="jt-combos-tag">❄️ আসল শীতের কম্বো (WINTER GLOW COMBOS)</span>
               </div>
               <h2 className="jt-combos-title">
-                Curated <span className="jt-combos-highlight">Combos & Budget Bundles</span>
+                শীতের ৩-ধাপের আসল কম্বো — <span className="jt-combos-highlight">সাশ্রয় ৫০০+ টাকা পর্যন্ত!</span>
               </h2>
               <p className="jt-combos-subtitle">
-                একাধিক স্কিনকেয়ার প্রোডাক্ট একসাথে কিনুন এবং বাঁচান সর্বোচ্চ ৫০০+ টাকা পর্যন্ত!
+                ক্লিনজার + ডিপ ময়েশ্চারাইজার + সানস্ক্রিন — আলাদা না কিনে একসাথে কম্বোতে কিনুন সেরা বাজেটে
               </p>
             </div>
           </div>

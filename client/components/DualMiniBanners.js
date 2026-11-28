@@ -5,14 +5,14 @@ import Link from "next/link";
 export default function DualMiniBanners() {
   const miniBanners = [
     {
-      id: "mini-1111-mega-glam",
-      title: "11.11 Mega Glam - Lip & Eye Essentials Up to 65% OFF",
+      id: "mini-asol-mega-glam",
+      title: "আসল গ্লাম — Lip & Eye Essentials Up to 65% OFF",
       image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650523/liora_store/banners/xeccuyphskavxkotm1rv.webp",
       link: "/products?category=Lipsticks",
     },
     {
-      id: "mini-1111-glass-skin",
-      title: "11.11 Glass Skin Fest - Authentic K-Beauty Skincare Up to 50% OFF",
+      id: "mini-asol-glass-skin",
+      title: "আসল গ্লাস স্কিন ফেস্ট — Authentic K-Beauty Skincare Up to 50% OFF",
       image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650523/liora_store/banners/ymyco2upsy8vns0kwpp5.webp",
       link: "/products?category=K-Beauty",
     },

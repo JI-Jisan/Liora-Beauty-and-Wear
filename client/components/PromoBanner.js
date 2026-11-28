@@ -6,26 +6,26 @@ import { getImageUrl } from "@/lib/api";
 
 const DEFAULT_CAMPAIGN_BANNERS = [
   {
-    id: "banner-1111-swiss-beauty-pro",
-    title: "Swiss Beauty 11.11 Mega Sale - Up to 70% OFF",
+    id: "banner-asol-swiss-beauty-pro",
+    title: "Swiss Beauty আসল উৎসব স্পেশাল — Up to 70% OFF",
     image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650036/liora_store/banners/qii0c7gsgixdcqx5gj7g.webp",
     link: "/brands/swiss-beauty",
   },
   {
-    id: "banner-1111-beauty-glazed-pro",
-    title: "Beauty Glazed 11.11 Color Mania - Up to 65% OFF",
+    id: "banner-asol-beauty-glazed-pro",
+    title: "Beauty Glazed আসল কালার ম্যানিয়া — Up to 65% OFF",
     image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650037/liora_store/banners/p1fonohzgobksm55r101.webp",
     link: "/brands/beauty-glazed",
   },
   {
-    id: "banner-1111-k-beauty-fest",
-    title: "11.11 K-Beauty Festival - Korean Glass Skin Up to 50% OFF",
+    id: "banner-asol-k-beauty-fest",
+    title: "কোরিয়ান গ্লাস স্কিন আসল উৎসব — Up to 50% OFF",
     image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647405/liora_store/banners/embskiwgane2zn7wjwaz.webp",
     link: "/products?category=K-Beauty",
   },
   {
-    id: "banner-1111-beauty-saga",
-    title: "11.11 Beauty Saga - Tresemme & Hair Care Up to 45% OFF",
+    id: "banner-asol-beauty-saga",
+    title: "হেয়ার কেয়ার আসল সেভিং ডিল — Tresemme & Hair Care Up to 45% OFF",
     image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647404/liora_store/banners/rhyy1m9sbuhbmhdywstn.webp",
     link: "/products?category=Hair+Care",
   },
@@ -81,8 +81,8 @@ export default function PromoBanner({ promoSlides = [] }) {
 
   // Safeguard index
   useEffect(() => {
-    if (currentSlide >= total) {
-      setCurrentSlide(0);
+    if (currentSlide >= total && total > 0) {
+      setTimeout(() => setCurrentSlide(0), 0);
     }
   }, [total, currentSlide]);
 
