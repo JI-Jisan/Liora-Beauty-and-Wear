@@ -69,7 +69,7 @@ export default function MiddleStripBanner() {
                 fontWeight: "700",
               }}
             >
-              🚚 Free Delivery Above ৳1999
+              🚚 ফ্রি ডেলিভারি: ঢাকায় ৳১৯৯৯ | সারাদেশে ৳২৯৯৯
             </span>
           </div>
 

@@ -88,6 +88,45 @@ export default function CartDrawer({
           </button>
         </div>
 
+        {cartItems.length > 0 && (
+          <div
+            style={{
+              padding: "10px 14px",
+              background: subtotal >= 2999 ? "#ecfdf5" : subtotal >= 1999 ? "#f0fdf4" : "#fff1f2",
+              borderBottom: "1px solid #fecdd3",
+              flexShrink: 0,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 800, color: subtotal >= 1999 ? "#047857" : "#be123c" }}>
+                {subtotal >= 2999
+                  ? "🎉 অভিনন্দন! সারাদেশে ফ্রি ডেলিভারি আনলক!"
+                  : subtotal >= 1999
+                  ? `🎉 ঢাকায় ফ্রি ডেলিভারি আনলক! (সারাদেশে আর ৳${2999 - subtotal})`
+                  : `🚚 ঢাকায় ফ্রি ডেলিভারির জন্য আর ৳${1999 - subtotal} যোগ করুন!`}
+              </span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b" }}>
+                {subtotal >= 2999 ? "100%" : `${Math.min(100, Math.round((subtotal / 2999) * 100))}%`}
+              </span>
+            </div>
+            <div style={{ width: "100%", height: 5, background: "#e2e8f0", borderRadius: 999, overflow: "hidden" }}>
+              <div
+                style={{
+                  width: `${Math.min(100, (subtotal / 2999) * 100)}%`,
+                  height: "100%",
+                  background: subtotal >= 1999 ? "linear-gradient(90deg, #10b981, #059669)" : "linear-gradient(90deg, #f43f5e, #e11d48)",
+                  borderRadius: 999,
+                  transition: "width 0.4s ease",
+                }}
+              />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#64748b", marginTop: 3 }}>
+              <span>ঢাকা: ৳১৯৯৯ (ফ্রি)</span>
+              <span>ঢাকার বাইরে: ৳২৯৯৯ (ফ্রি)</span>
+            </div>
+          </div>
+        )}
+
         {cartItems.length === 0 ? (
           <div className="jt-empty-cart-view" style={{ flex: 1 }}>
             <p className="jt-empty-cart">Your cart is empty</p>

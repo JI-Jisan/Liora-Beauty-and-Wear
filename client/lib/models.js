@@ -421,7 +421,9 @@ const SiteSettingsSchema = new mongoose.Schema(
     // ডেলিভারি সংক্রান্ত একমাত্র সত্য উৎস
     deliveryInside: { type: Number, default: 70 },
     deliveryOutside: { type: Number, default: 130 },
-    freeDeliveryThreshold: { type: Number, default: 0 }, // 0 = ফ্রি ডেলিভারি বন্ধ
+    freeDeliveryThreshold: { type: Number, default: 1999 }, // বেস ফ্রি ডেলিভারি
+    freeDeliveryThresholdDhaka: { type: Number, default: 1999 }, // ঢাকায় ১৯৯৯+ টাকায় ফ্রি ডেলিভারি
+    freeDeliveryThresholdOutside: { type: Number, default: 2999 }, // ঢাকার বাইরে ২৯৯৯+ টাকায় ফ্রি ডেলিভারি
 
     // Facebook Auto-Pilot Settings
     fbPageId: { type: String, default: "61593176967507" },

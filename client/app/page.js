@@ -41,7 +41,7 @@ export default function HomePage() {
     heroText:
       "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
     offerText:
-      "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1999 Tk   ✨ 100% Authentic Products",
+      "💖 LIORA আসল উৎসব লাইভ   🚚 ফ্রি ডেলিভারি: ঢাকায় ৳১৯৯৯ | সারাদেশে ৳২৯৯৯   ✨ ১০০% অথেনটিক স্কিনকেয়ার   🛡️ সারা বাংলাদেশে ক্যাশ অন ডেলিভারি",
     promoSlides: [],
 
     flashTitle: "Limited Time Special Offer",
@@ -191,7 +191,7 @@ export default function HomePage() {
           title={
             activeCoupon
               ? `🔥 ${activeCoupon.campus} স্পেশাল ছাড়ের ডিল (${activeCoupon.short} Deals)`
-              : "🔥 11.11 মেগা বিউটি অফার (11.11 Mega Deals)"
+              : "🔥 আসল উৎসব স্পেশাল ডিল (Asol Utsob Deals)"
           }
           subtitle={
             activeCoupon
@@ -201,7 +201,7 @@ export default function HomePage() {
           badge={
             activeCoupon
               ? `🎓 ${activeCoupon.short} স্পেশাল ১৫% ছাড়`
-              : "🔥 11.11 MEGA OFFER"
+              : "🔥 ASOL UTSOB SPECIAL"
           }
           badgeBg={activeCoupon?.tagColor || "linear-gradient(135deg, #e11d48 0%, #be123c 100%)"}
           limit={8}

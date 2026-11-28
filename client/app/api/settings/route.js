@@ -10,7 +10,12 @@ const DEFAULT_SETTINGS = {
     "Shop 100% authentic cosmetics, luxury perfumes, skincare, and fashion wear in one place.",
   heroImage: "",
   offerText:
-    "💖 Welcome to LIORA Beauty & Wear   🚚 Cash on Delivery Available   🎁 Free delivery on orders above 1999 Tk   ✨ 100% Authentic Products",
+    "💖 LIORA আসল উৎসব লাইভ   🚚 ফ্রি ডেলিভারি: ঢাকায় ৳১৯৯৯ | সারাদেশে ৳২৯৯৯   ✨ ১০০% অথেনটিক স্কিনকেয়ার   🛡️ ক্যাশ অন ডেলিভারি",
+  deliveryInside: 70,
+  deliveryOutside: 130,
+  freeDeliveryThreshold: 1999,
+  freeDeliveryThresholdDhaka: 1999,
+  freeDeliveryThresholdOutside: 2999,
   promoSlides: [
     {
       id: "banner-1111-swiss-beauty-pro",

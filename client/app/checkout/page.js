@@ -52,7 +52,9 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [rates, setRates] = useState({
-    freeDeliveryThreshold: 0,
+    freeDeliveryThreshold: 1999,
+    freeDeliveryThresholdDhaka: 1999,
+    freeDeliveryThresholdOutside: 2999,
   });
 
   // Admin Custom Controls State
@@ -192,7 +194,9 @@ export default function CheckoutPage() {
       .then((d) => {
         if (!d) return;
         setRates({
-          freeDeliveryThreshold: Number(d.freeDeliveryThreshold ?? 0),
+          freeDeliveryThreshold: Number(d.freeDeliveryThreshold ?? 1999),
+          freeDeliveryThresholdDhaka: Number(d.freeDeliveryThresholdDhaka ?? 1999),
+          freeDeliveryThresholdOutside: Number(d.freeDeliveryThresholdOutside ?? 2999),
         });
       })
       .catch(() => {});
@@ -269,10 +273,10 @@ export default function CheckoutPage() {
 
   const isUrgent = isInsideDhaka && deliveryType === "urgent";
   const baseCharge = isUrgent ? 250 : isInsideDhaka ? 70 : 130;
-  const freeApplied =
-    !isUrgent &&
-    rates.freeDeliveryThreshold > 0 &&
-    subtotal >= rates.freeDeliveryThreshold;
+  const currentThreshold = isInsideDhaka
+    ? Number(rates.freeDeliveryThresholdDhaka || 1999)
+    : Number(rates.freeDeliveryThresholdOutside || 2999);
+  const freeApplied = !isUrgent && subtotal >= currentThreshold;
 
   const defaultDeliveryCharge = freeApplied ? 0 : baseCharge;
 
@@ -1228,9 +1232,14 @@ export default function CheckoutPage() {
                     </>
                   )}
 
-                  {rates.freeDeliveryThreshold > 0 && !freeApplied && !isUrgent && !isAdminUser && !isReseller && (
-                    <p style={{ fontSize: "13px", color: "#059669" }}>
-                      আর {rates.freeDeliveryThreshold - subtotal} Tk কিনলেই ডেলিভারি ফ্রি!
+                  {currentThreshold > 0 && !freeApplied && !isUrgent && !isAdminUser && !isReseller && (
+                    <p style={{ fontSize: "13px", color: "#047857", background: "#f0fdf4", padding: "8px 12px", borderRadius: "8px", border: "1px solid #bbf7d0", margin: "8px 0" }}>
+                      🚚 আর মাত্র <strong>৳{currentThreshold - subtotal}</strong> টাকার পণ্য কিনলেই {isInsideDhaka ? "ঢাকায়" : "সারাদেশে"} <strong>ফ্রি ডেলিভারি</strong>!
+                    </p>
+                  )}
+                  {freeApplied && !isUrgent && !isAdminUser && (
+                    <p style={{ fontSize: "13px", color: "#15803d", background: "#dcfce7", padding: "8px 12px", borderRadius: "8px", border: "1px solid #86efac", margin: "8px 0" }}>
+                      🎉 অভিনন্দন! আপনি {isInsideDhaka ? "ঢাকায়" : "সারাদেশে"} <strong>ফ্রি ডেলিভারি</strong> পাচ্ছেন! (চার্জ ৳০)
                     </p>
                   )}
 

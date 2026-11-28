@@ -297,9 +297,11 @@ export async function POST(req) {
 
     // ---- ডেলিভারি চার্জ নির্ধারণ (অ্যাডমিন কাস্টম ডেলিভারি ফি সাপোর্টসহ) ----
     const settings = (await SiteSettings.findOne().lean()) || {};
-    const baseCharge = isUrgent ? 250 : (isDhaka ? 70 : 130);
-    const threshold = Number(settings.freeDeliveryThreshold ?? 0);
-    const defaultDeliveryCharge = (!isUrgent && threshold > 0 && subtotal >= threshold) ? 0 : baseCharge;
+    const baseCharge = isUrgent ? 250 : (isDhaka ? (Number(settings.deliveryInside) || 70) : (Number(settings.deliveryOutside) || 130));
+    const thresholdDhaka = Number(settings.freeDeliveryThresholdDhaka ?? 1999);
+    const thresholdOutside = Number(settings.freeDeliveryThresholdOutside ?? 2999);
+    const threshold = isDhaka ? thresholdDhaka : thresholdOutside;
+    const defaultDeliveryCharge = (!isUrgent && subtotal >= threshold) ? 0 : baseCharge;
 
     const deliveryCharge = (admin && body.deliveryCharge !== undefined && body.deliveryCharge !== null && !isNaN(Number(body.deliveryCharge)))
       ? Math.max(0, Number(body.deliveryCharge))

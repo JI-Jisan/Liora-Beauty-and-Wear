@@ -159,13 +159,13 @@ export default function FlashSaleLive({ onAddToCart }) {
             <div>
               <div className="jt-flash-badge-row" style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
                 <span className="jt-flash-tag" style={{ background: "linear-gradient(135deg, #e11d48, #be123c)", color: "#fff", fontWeight: 800 }}>
-                  11.11 MEGA FLASH DEALS
+                  ⚡ আসল ডিল (ASOL FLASH DEALS)
                 </span>
                 <span style={{ fontSize: "11px", fontWeight: 700, color: "#be123c", background: "#ffe4e6", padding: "2px 8px", borderRadius: "12px" }}>
-                  সরাসরি মেগা ছাড়
+                  সীমিত সময়ের স্পেশাল ছাড়
                 </span>
               </div>
-              <h3 className="jt-flash-title">11.11 মেগা ফ্ল্যাশ ডিল — সময় শেষ হওয়ার আগেই লুফে নিন!</h3>
+              <h3 className="jt-flash-title">আজকের আসল ডিল — সময় শেষ হওয়ার আগেই লুফে নিন!</h3>
             </div>
           </div>
 

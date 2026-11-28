@@ -29,8 +29,12 @@ export default function Header({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const sp = new URLSearchParams(window.location.search);
-      setFilterParam(sp.get("filter") || "");
-      setSearchParam(sp.get("search") || "");
+      const f = sp.get("filter") || "";
+      const s = sp.get("search") || "";
+      setTimeout(() => {
+        setFilterParam(f);
+        setSearchParam(s);
+      }, 0);
     }
   }, [pathname]);
 
@@ -88,8 +92,10 @@ export default function Header({
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-      setLiveSearchResults([]);
-      setIsSearchingLive(false);
+      setTimeout(() => {
+        setLiveSearchResults([]);
+        setIsSearchingLive(false);
+      }, 0);
       return;
     }
 
@@ -372,13 +378,15 @@ export default function Header({
               </>
             ) : (
               <>
-                <span style={{ fontWeight: 800, color: "#fef08a" }}>🔥 11.11 MEGA SHOPPING FESTIVAL LIVE</span>
+                <span style={{ fontWeight: 800, color: "#fef08a" }}>🎉 LIORA আসল উৎসব লাইভ</span>
                 <span className="jt-announcement-divider">•</span>
-                <span>✨ সুইস বিউটি, বিউটি গ্লেজড ও কোরিয়ান স্কিনকেয়ারে সর্বোচ্চ ৭০% সরাসরি ছাড়</span>
+                <span>✨ নকল নয়, শুধু আসলের উৎসব! অথেনটিক স্কিনকেয়ারে আকর্ষণীয় ছাড়</span>
                 <span className="jt-announcement-divider">•</span>
-                <span>🚚 সারা বাংলাদেশে ক্যাশ অন ডেলিভারি (Cash on Delivery)</span>
+                <span>🚚 ফ্রি ডেলিভারি: ঢাকায় ৳১৯৯৯ | সারাদেশে ৳২৯৯৯</span>
                 <span className="jt-announcement-divider">•</span>
-                <span>🛡️ ১০০% ইন-স্টক অথেনটিক প্রোডাক্ট গ্যারান্টি</span>
+                <span>💵 সারা বাংলাদেশে ক্যাশ অন ডেলিভারি (COD)</span>
+                <span className="jt-announcement-divider">•</span>
+                <span>🛡️ ১০০% আসল আমদানিকৃত প্রোডাক্ট গ্যারান্টি</span>
               </>
             )}
           </div>
