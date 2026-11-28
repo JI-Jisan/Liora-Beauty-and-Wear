@@ -3,6 +3,17 @@ import { syncPendingOrdersWithProductPrices } from "./sync_pending_orders_prices
 
 const MONGO_URI = "mongodb://jisan_trends:liora889@ac-2e905xv-shard-00-00.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-01.6nzddbx.mongodb.net:27017,ac-2e905xv-shard-00-02.6nzddbx.mongodb.net:27017/jisantrends?ssl=true&replicaSet=atlas-12gikm-shard-0&authSource=admin&retryWrites=true&w=majority";
 
+function getRetailMarkup(p) {
+  const price = Number(p) || 0;
+  if (price <= 100) return 5;
+  if (price <= 200) return 10;
+  if (price <= 500) return 20;
+  if (price <= 1000) return 30;
+  if (price <= 1500) return 50;
+  if (price <= 2000) return 100;
+  return 200;
+}
+
 function calculateDynamicWholesalePrice(cost, ogerioSelling, ogerioMRP) {
   cost = Number(cost) || 0;
   ogerioSelling = Number(ogerioSelling) || cost;
@@ -19,18 +30,15 @@ function calculateDynamicWholesalePrice(cost, ogerioSelling, ogerioMRP) {
   // 1. Super tight margin (gap <= 15% against MRP or gap <= 10% against Selling)
   // E.g. Kodomo (cost 565, MRP 627)
   if (gapAgainstMRP <= 15 || gapAgainstSelling <= 10) {
-    // Take 5% to 6% survival profit (minimum 25-35 Tk)
-    const profit = Math.max(25, Math.round(cost * 0.053));
-    wholesalePrice = Math.min(cost + profit, Math.max(cost, ogerioMRP - 25));
+    const profit = Math.max(20, Math.round(cost * 0.053));
+    wholesalePrice = Math.min(cost + profit, Math.max(cost + 10, ogerioMRP - 15));
   }
   // 2. Medium margin (gap 15% to 35% against MRP)
   // E.g. Simple Face Wash (cost 570, Selling 680, MRP 750)
   else if (gapAgainstMRP <= 35) {
-    // 11% to 12% profit
     let target = Math.round(cost * 1.114);
-    // Ensure it is cheaper than Ogerio selling price if possible
     if (ogerioSelling > cost) {
-      const capBelowOgerio = Math.max(Math.round(cost * 1.06), ogerioSelling - 30);
+      const capBelowOgerio = Math.max(Math.round(cost * 1.05), ogerioSelling - 25);
       target = Math.min(target, capBelowOgerio);
     }
     wholesalePrice = target;
@@ -39,9 +47,7 @@ function calculateDynamicWholesalePrice(cost, ogerioSelling, ogerioMRP) {
   // E.g. Vaseline Cocoa Oil (cost 1060, Selling 1250, MRP 1550)
   // E.g. Dove Hair Mask (cost 785, Selling 850, MRP 1000)
   else if (gapAgainstMRP <= 70) {
-    // 12% to 15% profit
     let target = Math.round(cost * 1.123);
-    // Cap below Ogerio selling price if available
     if (ogerioSelling > cost) {
       const capBelowOgerio = Math.max(Math.round(cost * 1.05), ogerioSelling - 20);
       target = Math.min(target, capBelowOgerio);
@@ -52,20 +58,16 @@ function calculateDynamicWholesalePrice(cost, ogerioSelling, ogerioMRP) {
   // E.g. SADOER Black Mask (cost 130, MRP 350)
   // E.g. Beauty Glazed Lip Oil (cost 110, Selling 150, MRP 450)
   else {
-    // 25% to 30% profit
-    let target = Math.round(cost * 1.28);
-    // Ensure it stays below Ogerio selling price by at least 10% if Ogerio is discounting heavily
+    let target = Math.round(cost * 1.25);
     if (ogerioSelling > cost) {
-      const capBelowOgerio = Math.max(Math.round(cost * 1.15), Math.round(ogerioSelling * 0.90));
+      const capBelowOgerio = Math.max(Math.round(cost * 1.12), Math.round(ogerioSelling * 0.90));
       target = Math.min(target, capBelowOgerio);
     }
     wholesalePrice = target;
   }
 
   // Safety boundaries:
-  // Never below cost
-  if (wholesalePrice < cost) wholesalePrice = cost;
-  // Round to nearest 5 for clean currency (or nice integer)
+  if (wholesalePrice <= cost) wholesalePrice = cost + 10;
   if (wholesalePrice > 100) {
     wholesalePrice = Math.round(wholesalePrice / 5) * 5;
   }
@@ -99,11 +101,29 @@ async function main() {
 
     const newWholesalePrice = calculateDynamicWholesalePrice(cost, ogerioSelling, ogerioMRP);
 
-    // Reseller Price: midway between wholesale and retail offer
-    const newResellerPrice = Math.min(
-      offerPrice - 10,
-      Math.max(newWholesalePrice + 5, Math.round(newWholesalePrice + (offerPrice - newWholesalePrice) * 0.22))
-    );
+    // Retail offer price calculation with ladder guard
+    let newOfferPrice = ogerioSelling + getRetailMarkup(ogerioSelling);
+    // Hard rule: offerPrice MUST be at least 10% higher than wholesalePrice!
+    if (newOfferPrice < Math.round(newWholesalePrice * 1.10)) {
+      newOfferPrice = Math.max(newOfferPrice, Math.round(newWholesalePrice * 1.10), newWholesalePrice + 20);
+    }
+
+    // Original MRP: at least equal to offerPrice
+    let newOriginalPrice = Math.max(newOfferPrice, ogerioMRP);
+
+    // Discount badge
+    const discountBadge = newOriginalPrice > newOfferPrice
+      ? String(Math.round(((newOriginalPrice - newOfferPrice) / newOriginalPrice) * 100))
+      : "";
+
+    // Reseller Price: strictly between wholesale and retail offer
+    let newResellerPrice = Math.round(newWholesalePrice + (newOfferPrice - newWholesalePrice) * 0.35);
+    if (newResellerPrice <= newWholesalePrice) {
+      newResellerPrice = newWholesalePrice + Math.max(5, Math.round((newOfferPrice - newWholesalePrice) / 2));
+    }
+    if (newResellerPrice >= newOfferPrice) {
+      newResellerPrice = newOfferPrice - 5;
+    }
 
     bulkOps.push({
       updateOne: {
@@ -112,6 +132,9 @@ async function main() {
           $set: {
             wholesalePrice: newWholesalePrice,
             resellerPrice: newResellerPrice,
+            offerPrice: newOfferPrice,
+            originalPrice: newOriginalPrice,
+            discountBadge: discountBadge,
             updatedAt: new Date()
           }
         }
