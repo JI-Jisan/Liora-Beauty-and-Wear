@@ -478,6 +478,23 @@ export async function PUT(req) {
       return NextResponse.json({ message: "ইউজার পাওয়া যায়নি" }, { status: 404 });
     }
 
+    // 4. Reject Application (বাতিল / বাদ দেওয়া)
+    if (body.action === "reject_application" || body.rejectApplication) {
+      customer.role = "user";
+      customer.status = "active";
+      customer.appliedRole = "";
+      customer.appliedAt = null;
+      const rejectNote = `[${new Date().toLocaleDateString('en-GB')}] Application dismissed / rejected by admin.`;
+      customer.note = customer.note ? `${customer.note}\n${rejectNote}` : rejectNote;
+      await customer.save();
+
+      return NextResponse.json({
+        success: true,
+        message: `${customer.name || customer.email}-এর আবেদন বাতিল (বাদ দেওয়া) হয়েছে এবং সাধারণ কাস্টমার করা হয়েছে!`,
+        user: customer,
+      });
+    }
+
     const cleanEmail = (customer.email || "").toLowerCase().trim();
 
     if (role !== undefined) {
@@ -569,6 +586,7 @@ export async function DELETE(req) {
     await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
+    const mode = searchParams.get("mode"); // 'delete' | 'reject' | undefined (reset)
 
     if (!id) {
       return NextResponse.json({ message: "ইউজার আইডি প্রয়োজন" }, { status: 400 });
@@ -580,7 +598,30 @@ export async function DELETE(req) {
     }
 
     const cleanEmail = (customer.email || "").toLowerCase().trim();
+
+    // Mode: Permanent Delete (for spam / test users)
+    if (mode === "delete") {
+      const hasOrders = await Order.exists({ customerEmail: cleanEmail, isDeleted: { $ne: true } });
+      if (hasOrders) {
+        return NextResponse.json(
+          { message: "এই ইউজারের অর্ডার রেকর্ড থাকায় সম্পূর্ণ ডিলিট করা সম্ভব নয়। আবেদন বাতিল (Reject) করতে পারেন।" },
+          { status: 400 }
+        );
+      }
+      await Customer.findByIdAndDelete(id);
+      return NextResponse.json({
+        success: true,
+        message: `${cleanEmail} অ্যাকাউন্টটি সফলভাবে ডাটাবেজ থেকে মুছে ফেলা (Delete) হয়েছে!`,
+      });
+    }
+
+    // Default / Reset: Reset role, clear pending status and clear appliedRole
     customer.role = "user";
+    customer.status = "active";
+    customer.appliedRole = "";
+    customer.appliedAt = null;
+    const resetNote = `[${new Date().toLocaleDateString('en-GB')}] Reset / application dismissed by admin.`;
+    customer.note = customer.note ? `${customer.note}\n${resetNote}` : resetNote;
     await customer.save();
 
     // If was admin, remove from Firestore admins
@@ -595,7 +636,7 @@ export async function DELETE(req) {
 
     return NextResponse.json({
       success: true,
-      message: `${customer.email}-এর রোল পরিবর্তন করে সাধারণ কাস্টমার (Customer) করা হয়েছে।`,
+      message: `${customer.email}-এর আবেদন বাতিল করে সাধারণ কাস্টমার (Customer) করা হয়েছে।`,
     });
   } catch (err) {
     console.error("DELETE /api/admin/b2b-users error:", err);

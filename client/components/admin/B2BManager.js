@@ -517,6 +517,67 @@ export default function B2BManager() {
     }
   };
 
+  const handleRejectApplication = async (user) => {
+    if (!confirm(`আপনি কি নিশ্চিতভাবে ${user.name || user.email}-এর পেন্ডিং আবেদনটি বাতিল (বাদ) দিতে চান?\n\nবাতিল করলে এটি পেন্ডিং তালিকা থেকে সরে যাবে এবং ইউজারটি সাধারণ কাস্টমার হিসেবে থাকবে।`)) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+      const res = await fetch("/api/admin/b2b-users", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAdminToken()}`,
+        },
+        body: JSON.stringify({
+          id: user._id,
+          action: "reject_application",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to reject application");
+      setSuccess(data.message || `${user.name || user.email}-এর আবেদন বাতিল করা হয়েছে!`);
+      if (selectedViewUser?._id === user._id) {
+        setIsDetailsModalOpen(false);
+      }
+      loadData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    if (!confirm(`⚠️ সাবধান: আপনি কি নিশ্চিতভাবে ${user.name || user.email} ইউজারটিকে সম্পূর্ণ ডাটাবেজ থেকে মুছে ফেলতে চান?`)) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+      const res = await fetch(`/api/admin/b2b-users?id=${user._id}&mode=delete`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getAdminToken()}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to delete user");
+      setSuccess(data.message);
+      if (selectedViewUser?._id === user._id) {
+        setIsDetailsModalOpen(false);
+      }
+      loadData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div style={{ padding: "8px 0" }}>
       {/* Header Title */}
@@ -1102,23 +1163,42 @@ export default function B2BManager() {
                               👁️ Details
                             </button>
                             {u.status === "pending" && (
-                              <button
-                                type="button"
-                                title="১-ক্লিকে অনুমোদন করুন"
-                                onClick={() => handleQuickApprove(u, u.appliedRole || u.role || "reseller")}
-                                style={{
-                                  background: "#ecfdf5",
-                                  border: "1px solid #6ee7b7",
-                                  color: "#047857",
-                                  padding: "4px 8px",
-                                  borderRadius: 6,
-                                  fontSize: 11,
-                                  fontWeight: 800,
-                                  cursor: "pointer",
-                                }}
-                              >
-                                ✓ Approve
-                              </button>
+                              <>
+                                <button
+                                  type="button"
+                                  title="১-ক্লিকে অনুমোদন করুন"
+                                  onClick={() => handleQuickApprove(u, u.appliedRole || u.role || "reseller")}
+                                  style={{
+                                    background: "#ecfdf5",
+                                    border: "1px solid #6ee7b7",
+                                    color: "#047857",
+                                    padding: "4px 8px",
+                                    borderRadius: 6,
+                                    fontSize: 11,
+                                    fontWeight: 800,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  ✓ Approve
+                                </button>
+                                <button
+                                  type="button"
+                                  title="আবেদন বাতিল / বাদ দিন (সাধারণ কাস্টমারে রূপান্তর)"
+                                  onClick={() => handleRejectApplication(u)}
+                                  style={{
+                                    background: "#fff1f2",
+                                    border: "1px solid #fecdd3",
+                                    color: "#be123c",
+                                    padding: "4px 8px",
+                                    borderRadius: 6,
+                                    fontSize: 11,
+                                    fontWeight: 800,
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  ✕ Reject
+                                </button>
+                              </>
                             )}
                             {u.status === "suspended" && (
                               <button
@@ -1191,6 +1271,25 @@ export default function B2BManager() {
                                 }}
                               >
                                 ↺ Reset
+                              </button>
+                            )}
+                            {Number(u.orderCount || 0) === 0 && u.role !== "admin" && (
+                              <button
+                                type="button"
+                                title="টেস্ট বা স্প্যাম একাউন্ট সম্পূর্ণ মুছে ফেলুন"
+                                onClick={() => handleDeleteUser(u)}
+                                style={{
+                                  background: "#fef2f2",
+                                  border: "1px solid #fca5a5",
+                                  color: "#b91c1c",
+                                  padding: "4px 8px",
+                                  borderRadius: 6,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                🗑️ Delete
                               </button>
                             )}
                           </div>
@@ -2588,7 +2687,43 @@ export default function B2BManager() {
                     >
                       🏬 Approve as Wholesaler
                     </button>
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => handleRejectApplication(selectedViewUser)}
+                      style={{
+                        background: "#fff1f2",
+                        color: "#be123c",
+                        border: "1px solid #fecdd3",
+                        padding: "9px 18px",
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 800,
+                        cursor: saving ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      ✕ Reject Application (বাদ দিন)
+                    </button>
                   </>
+                )}
+                {Number(selectedViewUser.orderCount || 0) === 0 && selectedViewUser.role !== "admin" && (
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => handleDeleteUser(selectedViewUser)}
+                    style={{
+                      background: "#fee2e2",
+                      color: "#991b1b",
+                      border: "1px solid #fca5a5",
+                      padding: "9px 18px",
+                      borderRadius: 8,
+                      fontSize: 13,
+                      fontWeight: 800,
+                      cursor: saving ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    🗑️ Delete Account
+                  </button>
                 )}
 
                 <button
