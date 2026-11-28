@@ -6,28 +6,72 @@ import { getImageUrl } from "@/lib/api";
 
 const DEFAULT_CAMPAIGN_BANNERS = [
   {
-    id: "banner-asol-swiss-beauty-pro",
-    title: "Swiss Beauty আসল উৎসব স্পেশাল — Up to 70% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650036/liora_store/banners/qii0c7gsgixdcqx5gj7g.webp",
-    link: "/brands/swiss-beauty",
+    id: "banner-asol-utsob-master",
+    isNative: true,
+    badge: "✨ LIORA OFFICIAL CAMPAIGN • আসল উৎসব",
+    title: "LIORA আসল উৎসব",
+    tagline: "নকল নয়, শুধু আসলের উৎসব!",
+    subtitle: "CeraVe, COSRX, The Ordinary, Anua সহ বিশ্বখ্যাত ব্র্যান্ডের আসল স্কিনকেয়ারে আকর্ষণীয় ছাড়",
+    bgGradient: "linear-gradient(135deg, #2b030d 0%, #4c0519 35%, #881337 70%, #be123c 100%)",
+    freeDeliveryText: "🚚 ফ্রি ডেলিভারি: ঢাকায় ৳১,৯৯৯ | সারাদেশে ৳২,৯৯৯",
+    codText: "💵 সারা বাংলাদেশে ক্যাশ অন ডেলিভারি (COD)",
+    buttonText: "আসল অফার দেখুন ➜",
+    link: "/products",
+    icon: "🌸",
+    sideTitle: "১০০% আসল পণ্য",
+    sideSubtitle: "আমদানি: কোরিয়া • ইউকে • ইউএসএ",
+    sidePill: "🛡️ নকল নয়, শুধু আসলের নিশ্চয়তা",
   },
   {
-    id: "banner-asol-beauty-glazed-pro",
-    title: "Beauty Glazed আসল কালার ম্যানিয়া — Up to 65% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793650037/liora_store/banners/p1fonohzgobksm55r101.webp",
-    link: "/brands/beauty-glazed",
+    id: "banner-asol-winter-combo",
+    isNative: true,
+    badge: "❄️ WINTER GLOW SPECIAL",
+    title: "শীতের ৩-ধাপের আসল কম্বো",
+    tagline: "সাশ্রয় করুন ৫০০+ টাকা পর্যন্ত!",
+    subtitle: "ক্লিনজার + ডিপ ময়েশ্চারাইজার + সানস্ক্রিন — এক কম্বোতে শীতের পূর্ণ যত্ন",
+    bgGradient: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #312e81 70%, #4338ca 100%)",
+    freeDeliveryText: "🚚 কম্বো অর্ডারে বিশেষ ডেলিভারি সুবিধা",
+    codText: "✨ শীতের পারফেক্ট গ্লো কেয়ার",
+    buttonText: "শীতের কম্বো কিনুন ➜",
+    link: "/combo",
+    icon: "🎁",
+    sideTitle: "৩-ধাপের কম্বো সেট",
+    sideSubtitle: "ক্লিনজার + ক্রিম + সানস্ক্রিন",
+    sidePill: "💰 সাশ্রয় ৫০০+ টাকা পর্যন্ত",
   },
   {
-    id: "banner-asol-k-beauty-fest",
-    title: "কোরিয়ান গ্লাস স্কিন আসল উৎসব — Up to 50% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647405/liora_store/banners/embskiwgane2zn7wjwaz.webp",
+    id: "banner-asol-budget-under499",
+    isNative: true,
+    badge: "👛 পকেট ফ্রেন্ডলি আসল স্কিনকেয়ার",
+    title: "৪৯৯ টাকার নিচে আসল বাজেট শপ",
+    tagline: "কম বাজেটেও ১০০% আসল স্কিনকেয়ার",
+    subtitle: "লিপবাম, শিট মাস্ক, মিনি ট্রাভেল কেয়ার ও ট্রেন্ডিং মেকআপ কালেকশন",
+    bgGradient: "linear-gradient(135deg, #022c22 0%, #064e3b 35%, #047857 70%, #059669 100%)",
+    freeDeliveryText: "⚡ প্রথম অর্ডারেও নিশ্চিন্ত কেনাকাটা",
+    codText: "💵 ক্যাশ অন ডেলিভারি সুবিধা",
+    buttonText: "বাজেট কালেকশন ➜",
+    link: "/products?maxPrice=499&budget=under-499",
+    icon: "🛍️",
+    sideTitle: "৳৪৯৯ এর নিচে আসল",
+    sideSubtitle: "বাজেট ফ্রেন্ডলি খাঁটি কেয়ার",
+    sidePill: "🎉 সাশ্রয়ী বিউটি শপিং",
+  },
+  {
+    id: "banner-asol-kbeauty-glow",
+    isNative: true,
+    badge: "🌸 100% ORIGINAL K-BEAUTY",
+    title: "কোরিয়ান গ্লাস স্কিন আসল ফেস্ট",
+    tagline: "শতভাগ অরিজিনাল K-Beauty কেয়ার",
+    subtitle: "ভাইরাল স্নেল মিউসিন, রাইস টোনার ও সান সিরামে আকর্ষণীয় ছাড়",
+    bgGradient: "linear-gradient(135deg, #2e0854 0%, #4a044e 35%, #701a75 70%, #a21caf 100%)",
+    freeDeliveryText: "🚚 ফ্রি ডেলিভারি: ঢাকায় ৳১৯৯৯ | সারাদেশে ৳২৯৯৯",
+    codText: "✨ সরাসরি কোরিয়ান অথেনটিক ফর্মুলা",
+    buttonText: "K-Beauty ব্রাউজ করুন ➜",
     link: "/products?category=K-Beauty",
-  },
-  {
-    id: "banner-asol-beauty-saga",
-    title: "হেয়ার কেয়ার আসল সেভিং ডিল — Tresemme & Hair Care Up to 45% OFF",
-    image: "https://res.cloudinary.com/dlgubaefs/image/upload/v1793647404/liora_store/banners/rhyy1m9sbuhbmhdywstn.webp",
-    link: "/products?category=Hair+Care",
+    icon: "✨",
+    sideTitle: "কোরিয়ান গ্লাস স্কিন",
+    sideSubtitle: "COSRX • Beauty of Joseon • Anua",
+    sidePill: "🌟 শতভাগ অরিজিনাল",
   },
 ];
 
@@ -37,14 +81,14 @@ export default function PromoBanner({ promoSlides = [] }) {
   const touchEndX = useRef(0);
 
   // Compile active banners:
-  // Strictly use active campaign banners (custom admin slides or default 11.11 campaign slides)
+  // Strictly use active campaign banners (custom admin slides or default Asol Utsob campaign slides)
   const banners = useMemo(() => {
     if (Array.isArray(promoSlides) && promoSlides.length > 0) {
       const validSlides = promoSlides
-        .filter((s) => s && s.image && typeof s.image === "string" && s.image.trim())
+        .filter((s) => s && s.image && typeof s.image === "string" && s.image.trim() && !s.image.includes("1111") && !String(s.title || "").includes("11.11") && !String(s.id || "").includes("1111"))
         .map((s, idx) => ({
           id: s._id || s.id || `admin-banner-${idx}`,
-          title: s.title || "LIORA 11.11 Mega Campaign",
+          title: s.title || "LIORA Campaign",
           image: getImageUrl(s.image),
           link: s.buttonLink || s.link || "/products",
         }));
@@ -54,7 +98,7 @@ export default function PromoBanner({ promoSlides = [] }) {
       }
     }
 
-    // Default to 11.11 real-product studio campaign banners
+    // Default to LIORA আসল উৎসব native studio campaign banners
     return DEFAULT_CAMPAIGN_BANNERS;
   }, [promoSlides]);
 
@@ -183,30 +227,181 @@ export default function PromoBanner({ promoSlides = [] }) {
                 position: "relative",
               }}
             >
-              <Link
-                href={banner.link || "/products"}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  height: "100%",
-                  textDecoration: "none",
-                }}
-              >
-                <img
-                  src={banner.image}
-                  alt={banner.title || "LIORA Promotion Banner"}
+              {banner.isNative ? (
+                <div
                   style={{
                     width: "100%",
                     height: "100%",
-                    objectFit: "contain",
-                    backgroundColor: "#110307",
-                    display: "block",
-                    userSelect: "none",
+                    background: banner.bgGradient || "linear-gradient(135deg, #2b030d 0%, #4c0519 35%, #881337 70%, #be123c 100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "clamp(14px, 3.5vw, 32px) clamp(16px, 5vw, 44px)",
+                    boxSizing: "border-box",
+                    position: "relative",
+                    overflow: "hidden",
+                    color: "#ffffff",
                   }}
-                  loading={index === 0 ? "eager" : "lazy"}
-                  draggable={false}
-                />
-              </Link>
+                >
+                  {/* Background Ambient Glows & Patterns */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-25%",
+                      right: "5%",
+                      width: "360px",
+                      height: "360px",
+                      background: "radial-gradient(circle, rgba(251, 113, 133, 0.22) 0%, rgba(0,0,0,0) 70%)",
+                      borderRadius: "50%",
+                      pointerEvents: "none",
+                    }}
+                  />
+
+                  {/* Left Content Area */}
+                  <div style={{ maxWidth: "620px", zIndex: 2, display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255, 255, 255, 0.15)", backdropFilter: "blur(8px)", border: "1px solid rgba(255, 255, 255, 0.25)", padding: "3px 12px", borderRadius: "999px", width: "fit-content" }}>
+                      <span style={{ fontSize: "11px", fontWeight: "800", color: "#fef08a", letterSpacing: "0.5px" }}>
+                        {banner.badge || "✨ LIORA OFFICIAL CAMPAIGN"}
+                      </span>
+                    </div>
+
+                    <h2
+                      style={{
+                        margin: 0,
+                        fontSize: "clamp(20px, 4vw, 36px)",
+                        fontWeight: "900",
+                        lineHeight: 1.15,
+                        color: "#ffffff",
+                        letterSpacing: "-0.5px",
+                        textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+                      }}
+                    >
+                      {banner.title}
+                    </h2>
+
+                    <div
+                      style={{
+                        fontSize: "clamp(14px, 2.6vw, 20px)",
+                        fontWeight: "800",
+                        color: "#fecdd3",
+                        letterSpacing: "-0.2px",
+                      }}
+                    >
+                      {banner.tagline}
+                    </div>
+
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: "clamp(11.5px, 1.8vw, 13.5px)",
+                        color: "rgba(255, 255, 255, 0.88)",
+                        lineHeight: 1.4,
+                        maxWidth: "500px",
+                      }}
+                    >
+                      {banner.subtitle}
+                    </p>
+
+                    {/* Delivery & Trust Badges */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "4px" }}>
+                      {banner.freeDeliveryText && (
+                        <span style={{ background: "rgba(0, 0, 0, 0.28)", border: "1px solid rgba(255, 255, 255, 0.25)", padding: "3px 9px", borderRadius: "6px", fontSize: "10.5px", fontWeight: "700", color: "#86efac" }}>
+                          {banner.freeDeliveryText}
+                        </span>
+                      )}
+                      {banner.codText && (
+                        <span style={{ background: "rgba(0, 0, 0, 0.28)", border: "1px solid rgba(255, 255, 255, 0.25)", padding: "3px 9px", borderRadius: "6px", fontSize: "10.5px", fontWeight: "700", color: "#fed7aa" }}>
+                          {banner.codText}
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ marginTop: "6px" }}>
+                      <Link
+                        href={banner.link || "/products"}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          background: "#ffffff",
+                          color: "#881337",
+                          padding: "8px 20px",
+                          borderRadius: "10px",
+                          fontSize: "13px",
+                          fontWeight: "900",
+                          textDecoration: "none",
+                          boxShadow: "0 4px 14px rgba(0, 0, 0, 0.25)",
+                        }}
+                      >
+                        {banner.buttonText || "অফার দেখুন ➜"}
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Right Showcase Graphic */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 2,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "rgba(255, 255, 255, 0.12)",
+                        border: "1.5px solid rgba(255, 255, 255, 0.25)",
+                        borderRadius: "16px",
+                        padding: "clamp(12px, 2.5vw, 20px)",
+                        backdropFilter: "blur(10px)",
+                        textAlign: "center",
+                        minWidth: "140px",
+                        maxWidth: "240px",
+                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25)",
+                      }}
+                    >
+                      <div style={{ fontSize: "clamp(32px, 5vw, 48px)", marginBottom: "4px" }}>
+                        {banner.icon || "✨"}
+                      </div>
+                      <strong style={{ display: "block", fontSize: "clamp(13px, 1.8vw, 16px)", color: "#ffffff", fontWeight: "900" }}>
+                        {banner.sideTitle || "১০০% অথেনটিক"}
+                      </strong>
+                      <span style={{ display: "block", fontSize: "11px", color: "#fecdd3", marginTop: "2px" }}>
+                        {banner.sideSubtitle || "কোরিয়া • ইউকে • ইউএসএ"}
+                      </span>
+                      <div style={{ marginTop: "8px", paddingTop: "6px", borderTop: "1px dashed rgba(255,255,255,0.25)", fontSize: "10px", color: "#fde047", fontWeight: "800" }}>
+                        {banner.sidePill || "নকল নয়, শুধু আসল"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  href={banner.link || "/products"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    textDecoration: "none",
+                  }}
+                >
+                  <img
+                    src={banner.image}
+                    alt={banner.title || "LIORA Promotion Banner"}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      backgroundColor: "#110307",
+                      display: "block",
+                      userSelect: "none",
+                    }}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    draggable={false}
+                  />
+                </Link>
+              )}
             </div>
           ))}
         </div>
